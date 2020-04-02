@@ -1,0 +1,4 @@
+#!/bin/bash
+
+python manage.py makemigrations && python manage.py migrate
+kill -1 `ps aux |grep gunicorn |grep omp | awk '{ print $2 }'`

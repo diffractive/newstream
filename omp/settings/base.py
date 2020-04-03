@@ -27,10 +27,12 @@ INSTALLED_APPS = [
     'home',
     'search',
     'site_settings',
+    'donations',
 
     'wagtail.contrib.forms',
     'wagtail.contrib.redirects',
     'wagtail.contrib.settings',
+    'wagtail.contrib.modeladmin',
     'wagtail.embeds',
     'wagtail.sites',
     'wagtail.users',
@@ -43,6 +45,7 @@ INSTALLED_APPS = [
 
     'modelcluster',
     'taggit',
+    'wagtailautocomplete',
 
     'django.contrib.admin',
     'django.contrib.auth',

@@ -40,3 +40,7 @@ urlpatterns = urlpatterns + [
     # of your site, rather than the site root:
     #    url(r"^pages/", include(wagtail_urls)),
 ]
+
+# urlpatterns for the donation module
+from donations.urls import donation_urlpatterns
+urlpatterns = urlpatterns + donation_urlpatterns

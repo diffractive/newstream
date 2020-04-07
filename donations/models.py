@@ -5,9 +5,20 @@ from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 from wagtail.contrib.forms.models import AbstractFormField
 
+GATEWAY_2C2P = '2C2P'
+GATEWAY_PAYPAL = 'PayPal'
+GATEWAY_STRIPE = 'Stripe'
+
+STATUS_COMPLETE = 'complete'
+STATUS_PENDING = 'pending'
+STATUS_REFUNDED = 'refunded'
+STATUS_REVOKED = 'revoked'
+STATUS_FAILED = 'failed'
+STATUS_CANCELLED = 'cancelled'
+
 
 class PaymentGateway(models.Model):
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, unique=True)
     list_order = models.IntegerField(default=0)
 
     panels = [
@@ -34,6 +45,9 @@ class AmountStep(models.Model):
         FieldPanel('step'),
     ]
 
+    class Meta:
+        unique_together = ['form', 'step']
+
 
 class DonationForm(ClusterableModel):
     AMOUNT_TYPE_CHOICES = [
@@ -41,7 +55,7 @@ class DonationForm(ClusterableModel):
         ('stepped', 'Fixed Steps'),
         ('custom', 'Custom Amount'),
     ]
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     is_recurring = models.BooleanField(default=False)
     amount_type = models.CharField(max_length=20, choices=AMOUNT_TYPE_CHOICES, verbose_name='Donation Amount Type')
@@ -68,30 +82,20 @@ class DonationForm(ClusterableModel):
     def __str__(self):
         return self.title
 
+    def isAmountFixed(self):
+        return self.amount_type == 'fixed'
 
-class CustomFormFields(models.Model):
-    field_key = models.CharField(max_length=255)
-    field_label = models.CharField(max_length=255)
-    field_type = models.CharField(max_length=20)
-    field_options = models.TextField(blank=True)
-    list_order = models.IntegerField(default=0)
+    def isAmountStepped(self):
+        return self.amount_type == 'stepped'
 
-    panels = [
-        FieldPanel('field_label')
-    ]
-
-    class Meta:
-        ordering = ['list_order']
-
-    def __str__(self):
-        return self.field_label
+    def isAmountCustom(self):
+        return self.amount_type == 'custom'
 
 
 class Donor(models.Model):
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     email = models.CharField(max_length=255)
-    contact_number = models.CharField(max_length=255)
     opt_in_mailing_list = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -101,25 +105,25 @@ class Donor(models.Model):
         FieldPanel('first_name'),
         FieldPanel('last_name'),
         FieldPanel('email'),
-        FieldPanel('contact_number'),
         FieldPanel('opt_in_mailing_list'),
     ]
 
     class Meta:
         ordering = ['-created_at']
+        unique_together = ['first_name', 'last_name', 'email']
 
     def __str__(self):
-        return ' '.join([self.title, self.first_name, self.last_name])
+        return ' '.join([self.first_name, self.last_name])
 
 
-class Donation(models.Model):
+class Donation(ClusterableModel):
     PAYMENT_STATUS_CHOICES = [
-        ('complete', 'Complete'),
-        ('pending', 'Pending'),
-        ('refunded', 'Refunded'),
-        ('revoked', 'Revoked'),
-        ('failed', 'Failed'),
-        ('cacnelled', 'Cancelled'),
+        (STATUS_COMPLETE, STATUS_COMPLETE.capitalize()),
+        (STATUS_PENDING, STATUS_PENDING.capitalize()),
+        (STATUS_REFUNDED, STATUS_REFUNDED.capitalize()),
+        (STATUS_REVOKED, STATUS_REVOKED.capitalize()),
+        (STATUS_FAILED, STATUS_FAILED.capitalize()),
+        (STATUS_CANCELLED, STATUS_CANCELLED.capitalize()),
     ]
     donor = models.ForeignKey(
         'Donor',
@@ -133,7 +137,7 @@ class Donation(models.Model):
         'PaymentGateway',
         on_delete=models.CASCADE,
     )
-    order_number = models.CharField(max_length=255)
+    order_number = models.CharField(max_length=255, unique=True)
     donation_amount = models.FloatField()
     is_recurring = models.BooleanField(default=False)
     currency = models.CharField(max_length=20)
@@ -143,16 +147,20 @@ class Donation(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     deleted = models.BooleanField(default=False)
 
+    panels = [
+        InlinePanel('metas', label='Donation Meta', heading='Donation Meta Data', help_text='Meta data about this donation is recorded here')
+    ]
     class Meta:
         ordering = ['-created_at']
 
     def __str__(self):
-        return '#'+self.id+' - '+self.donor
+        return '#'+str(self.id)+' - '+str(self.donor)
 
 
 class DonationMeta(models.Model):
-    donation = models.ForeignKey(
+    donation = ParentalKey(
         'Donation',
+        related_name='metas',
         on_delete=models.CASCADE,
     )
     field_key = models.CharField(max_length=255)

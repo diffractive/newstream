@@ -1,5 +1,4 @@
 #!/bin/bash
 
 python manage.py makemigrations && python manage.py migrate
-./stopgunicorn
-./startgunicorn
+sudo supervisorctl restart omp

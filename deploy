@@ -31,7 +31,7 @@ if [ $ismigrate = 'true' ]; then
 fi
 if [ $gitdeploy = 'true' ]; then
     # git pull on remote and migrate
-    cmd="$ssh 'cd /srv/www/omp && git reset --hard && git pull && ${source} && ${migrate} && ${restart_gunicorn}'"
+    cmd="$ssh 'cd /srv/www/omp && rm \$(git ls-files -o -X .gitignore) && git reset --hard && git pull && ${source} && ${migrate} && ${restart_gunicorn}'"
 fi
 
 echo $cmd

@@ -24,11 +24,11 @@ class DonationAdmin(ModelAdmin):
     menu_order = 100
     add_to_settings_menu = False
     exclude_from_explorer = False
-    list_display = ('gateway', 'donation_amount',
-                    'is_recurring', 'donor', 'created_at',)
-    list_filter = ('is_recurring', 'created_at',)
+    list_display = ('donation_amount', 'gateway',
+                    'donor', 'is_recurring', 'payment_status', 'created_at',)
+    list_filter = ('is_recurring', 'payment_status', 'created_at',)
     search_fields = ('order_number', 'donation_amount',
-                     'is_recurring', 'donor', 'created_at',)
+                     'payment_status', 'is_recurring', 'donor', 'created_at',)
     # inspect_view_enabled = True
     # inspect_view_fields = ['order_number']
 

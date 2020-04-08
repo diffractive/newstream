@@ -2,8 +2,11 @@ from django.shortcuts import render
 from django.db import IntegrityError
 from .models import *
 from .forms import *
+from .functions import *
+from .payment_gateways.gateway_factory import PaymentGatewayFactory
 from pprint import pprint
-import secrets, re
+import secrets
+import re
 
 
 def onetime_form(request):
@@ -29,20 +32,15 @@ def onetime_form(request):
                 )[0]
 
             # create pending donation
-            payment_gateway = PaymentGateway.objects.get(pk=form.cleaned_data['payment_gateway'])
-            if payment_gateway.title == GATEWAY_2C2P:
-                order_id = secrets.token_hex(10)
-            elif payment_gateway.title == GATEWAY_PAYPAL:
-                order_id = secrets.token_hex(16)
-            elif payment_gateway.title == GATEWAY_STRIPE:
-                order_id = secrets.token_hex(16)
-            else:
-                order_id = secrets.token_hex(16)
+            payment_gateway = PaymentGateway.objects.get(
+                pk=form.cleaned_data['payment_gateway'])
+            order_id = gen_order_id(gateway=payment_gateway)
             donation_metas = []
             for key, val in request.POST.items():
                 more_field_key = re.match("^omp_more_([a-z_]+)$", key)
                 if more_field_key:
-                    donation_metas.append(DonationMeta(field_key=more_field_key.group(1), field_value=val))
+                    donation_metas.append(DonationMeta(
+                        field_key=more_field_key.group(1), field_value=val))
             donation = Donation(
                 order_number=order_id,
                 donor=donor,
@@ -50,7 +48,7 @@ def onetime_form(request):
                 gateway=payment_gateway,
                 is_recurring=form.cleaned_data['is_recurring'],
                 donation_amount=form.cleaned_data['donation_amount'],
-                currency='HARDCODE', # todo: find a way to save currency values
+                currency='HARDCODE',  # todo: find a way to save currency values
                 is_create_account=form.cleaned_data['is_create_account'],
                 payment_status=STATUS_PENDING,
                 metas=donation_metas
@@ -63,8 +61,10 @@ def onetime_form(request):
                 form.add_error(None, 'Server error, please retry.')
                 return render(request, 'donations/onetime_form.html', {'form': form})
 
-            # todo: redirect to payment_gateway
-            return render(request, 'donations/thankyou.html')
+            # redirect to payment_gateway
+            gatewayManager = PaymentGatewayFactory.initGateway(
+                request, payment_gateway)
+            return gatewayManager.redirect_to_gateway_url()
         else:
             pprint(form.errors)
     else:

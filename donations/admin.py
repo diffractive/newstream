@@ -4,6 +4,8 @@ from wagtail.contrib.modeladmin.options import (
 from .models import Donor, Donation, PaymentGateway, DonationForm
 
 # Register your models here.
+
+
 class DonorAdmin(ModelAdmin):
     model = Donor
     menu_label = 'Donors'
@@ -14,6 +16,7 @@ class DonorAdmin(ModelAdmin):
     list_display = ('first_name', 'last_name', 'email',)
     search_fields = ('first_name', 'last_name', 'email',)
 
+
 class DonationAdmin(ModelAdmin):
     model = Donation
     menu_label = 'Donations'
@@ -21,9 +24,14 @@ class DonationAdmin(ModelAdmin):
     menu_order = 100
     add_to_settings_menu = False
     exclude_from_explorer = False
-    list_display = ('gateway', 'donation_amount', 'is_recurring', 'donor', 'created_at',)
+    list_display = ('gateway', 'donation_amount',
+                    'is_recurring', 'donor', 'created_at',)
     list_filter = ('is_recurring', 'created_at',)
-    search_fields = ('order_number', 'donation_amount', 'is_recurring', 'donor', 'created_at',)
+    search_fields = ('order_number', 'donation_amount',
+                     'is_recurring', 'donor', 'created_at',)
+    # inspect_view_enabled = True
+    # inspect_view_fields = ['order_number']
+
 
 class PaymentGatewayAdmin(ModelAdmin):
     model = PaymentGateway
@@ -35,6 +43,7 @@ class PaymentGatewayAdmin(ModelAdmin):
     list_display = ('title',)
     search_fields = ('title',)
 
+
 class DonationFormAdmin(ModelAdmin):
     model = DonationForm
     menu_label = 'Donation Forms'
@@ -42,13 +51,15 @@ class DonationFormAdmin(ModelAdmin):
     menu_order = 300
     add_to_settings_menu = False
     exclude_from_explorer = False
-    list_display = ('title','description','is_recurring')
-    search_fields = ('title','description')
+    list_display = ('title', 'description', 'is_recurring')
+    search_fields = ('title', 'description')
+
 
 class DonationGroup(ModelAdminGroup):
     menu_label = 'Donations'
     menu_icon = 'folder-open-inverse'
     menu_order = 200
     items = (DonorAdmin, DonationAdmin, PaymentGatewayAdmin, DonationFormAdmin)
+
 
 modeladmin_register(DonationGroup)

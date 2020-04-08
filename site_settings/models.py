@@ -4,14 +4,30 @@ from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel
 from wagtail.contrib.settings.models import BaseSetting, register_setting
 #from wagtail.admin.edit_handlers import TabbedInterface, ObjectList
 
+
+@register_setting
+class GeneralSettings(BaseSetting):
+    """Top level settings for this omp app"""
+
+    test_mode = models.BooleanField(default=True)
+
+    panels = [
+        FieldPanel('test_mode')
+    ]
+
+
 @register_setting
 class Settings2C2P(BaseSetting):
     """Settings for the 2c2p api."""
 
-    merchant_id = models.CharField(max_length=255, blank=True, null=True, help_text="Merchant ID")
-    secret_key = models.CharField(max_length=255, blank=True, null=True, help_text="Secret Key")
-    currency_code = models.CharField(max_length=255, blank=True, null=True, help_text="Currency Code")
-    log_filename = models.CharField(max_length=255, blank=True, null=True, help_text="Log Filename")
+    merchant_id = models.CharField(
+        max_length=255, blank=True, null=True, help_text="Merchant ID")
+    secret_key = models.CharField(
+        max_length=255, blank=True, null=True, help_text="Secret Key")
+    currency_code = models.CharField(
+        max_length=255, blank=True, null=True, help_text="Currency Code")
+    log_filename = models.CharField(
+        max_length=255, blank=True, null=True, help_text="Log Filename")
 
     panels = [
         MultiFieldPanel([
@@ -24,4 +40,3 @@ class Settings2C2P(BaseSetting):
 
     class Meta:
         verbose_name = '2C2P Settings'
-

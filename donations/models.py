@@ -32,13 +32,24 @@ class PaymentGateway(models.Model):
     def __str__(self):
         return self.title
 
+    def is_2c2p(self):
+        return self.title == GATEWAY_2C2P
+
+    def is_paypal(self):
+        return self.title == GATEWAY_PAYPAL
+
+    def is_stripe(self):
+        return self.title == GATEWAY_STRIPE
+
 
 class MoreFormField(AbstractFormField):
-    form = ParentalKey('DonationForm', on_delete=models.CASCADE, related_name='more_form_fields')
+    form = ParentalKey('DonationForm', on_delete=models.CASCADE,
+                       related_name='more_form_fields')
 
 
 class AmountStep(models.Model):
-    form = ParentalKey('DonationForm', on_delete=models.CASCADE, related_name='amount_steps')
+    form = ParentalKey('DonationForm', on_delete=models.CASCADE,
+                       related_name='amount_steps')
     step = models.FloatField(default=0)
 
     panels = [
@@ -58,8 +69,10 @@ class DonationForm(ClusterableModel):
     title = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
     is_recurring = models.BooleanField(default=False)
-    amount_type = models.CharField(max_length=20, choices=AMOUNT_TYPE_CHOICES, verbose_name='Donation Amount Type')
-    fixed_amount = models.FloatField(blank=True, null=True, verbose_name='Define Fixed Donation Amount', help_text='Define fixed donation amount if you chose "Fixed Amount" for your Amount Type')
+    amount_type = models.CharField(
+        max_length=20, choices=AMOUNT_TYPE_CHOICES, verbose_name='Donation Amount Type')
+    fixed_amount = models.FloatField(blank=True, null=True, verbose_name='Define Fixed Donation Amount',
+                                     help_text='Define fixed donation amount if you chose "Fixed Amount" for your Amount Type')
     allowed_gateways = models.ManyToManyField('PaymentGateway')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -70,8 +83,10 @@ class DonationForm(ClusterableModel):
         FieldPanel('description'),
         FieldPanel('is_recurring'),
         FieldPanel('amount_type'),
-        FieldPanel('fixed_amount', help_text='Define your fixed donation amount if you chose "Fixed Amount" for your Amount Type.'),
-        InlinePanel('amount_steps', label='Fixed Amount Steps', heading='Define Fixed Donation Amount Steps', help_text='Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type.'),
+        FieldPanel(
+            'fixed_amount', help_text='Define your fixed donation amount if you chose "Fixed Amount" for your Amount Type.'),
+        InlinePanel('amount_steps', label='Fixed Amount Steps', heading='Define Fixed Donation Amount Steps',
+                    help_text='Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type.'),
         AutocompletePanel('allowed_gateways'),
         InlinePanel('more_form_fields', label='More Form Fields'),
     ]
@@ -142,14 +157,23 @@ class Donation(ClusterableModel):
     is_recurring = models.BooleanField(default=False)
     currency = models.CharField(max_length=20)
     is_create_account = models.BooleanField(default=False)
-    payment_status = models.CharField(max_length=255, choices=PAYMENT_STATUS_CHOICES)
+    payment_status = models.CharField(
+        max_length=255, choices=PAYMENT_STATUS_CHOICES)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted = models.BooleanField(default=False)
 
     panels = [
-        InlinePanel('metas', label='Donation Meta', heading='Donation Meta Data', help_text='Meta data about this donation is recorded here')
+        FieldPanel('order_number'),
+        FieldPanel('donation_amount'),
+        FieldPanel('is_recurring'),
+        FieldPanel('currency'),
+        FieldPanel('is_create_account'),
+        FieldPanel('payment_status'),
+        InlinePanel('metas', label='Donation Meta', heading='Donation Meta Data',
+                    help_text='Meta data about this donation is recorded here'),
     ]
+
     class Meta:
         ordering = ['-created_at']
 

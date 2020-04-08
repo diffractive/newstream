@@ -1,0 +1,34 @@
+#!/bin/bash
+
+migrate='false'
+gitdeploy='false'
+
+print_usage() {
+    printf "%s\n" "Usage: ./deploy [-h] [-m] [-g]" "-h is for help" "if -m is specified, migration will be carried out at remote django before restarting gunicorn" "-g is for git deploy"
+}
+
+while getopts 'mh' flag; do
+    case "${flag}" in
+        m) migrate='true' ;;
+        g) gitdeploy='true' ;;
+        h) print_usage
+           exit 1 ;;
+    esac
+done
+
+rsync="rsync -av --exclude '.git' ./ diff-1:/srv/www/omp/"
+ssh='ssh diff-1'
+source='cd /srv/www/omp && source venv/bin/activate'
+migrate='./migrate'
+restart_gunicorn='./stopgunicorn && ./startgunicorn'
+
+cmd="$rsync && $ssh '${source} && ${restart-gunicorn}'"
+if [ $migrate -eq 'true' ]; then
+    # migrate script also restarts gunicorn
+    cmd="$rsync && $ssh '${source} && ${migrate}'"
+fi
+if [ $gitdeploy -eq 'true' ]; then
+    # git pull on remote and migrate
+    cmd="$ssh 'cd /srv/www/omp && git pull && source venv/bin/activate && ${migrate}'"
+
+eval $cmd

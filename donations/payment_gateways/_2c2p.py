@@ -1,6 +1,6 @@
 from donations.payment_gateways.core import PaymentGatewayManager
-from donations.functions import get2C2PSettings, getFullReverseUrl
-from donations.models import DonationMeta, STATUS_COMPLETE, STATUS_FAILED
+from donations.functions import get2C2PSettings, getFullReverseUrl, getNextDateFromRecurringInterval, gen_order_prefix_2c2p
+from donations.models import DonationMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING
 from urllib.parse import urlencode
 import hmac
 import hashlib
@@ -32,21 +32,41 @@ class Gateway_2C2P(PaymentGatewayManager):
         data = {}
         data['version'] = '8.5'
         data['merchant_id'] = self.settings.merchant_id
-        # todo: need backend input
-        data['payment_description'] = 'Test Onetime Payment'
         data['order_id'] = self.donation.order_number
         data['currency'] = self.settings.currency_code
-        print(self.donation.donation_amount, flush=True)
         data['amount'] = self.format_payment_amount(
             self.donation.donation_amount)
         data['result_url_1'] = getFullReverseUrl(
             self.request, 'donations:verify-gateway-response')
         data['user_defined_1'] = str(self.donation.id)
 
+        if self.donation.is_recurring:
+            data['payment_description'] = 'Test Recurring Payment'
+            data['request_3ds'] = 'Y'
+            data['recurring'] = 'Y'
+            data['order_prefix'] = gen_order_prefix_2c2p()
+            data['recurring_amount'] = self.format_payment_amount(
+                self.donation.donation_amount)
+            data['allow_accumulate'] = 'N'
+            # data['max_accumulate_amount'] = '000000020000'
+            # todo: to be changed to monthly here, need a mechanism to ensure card is charged exactly monthly
+            data['recurring_interval'] = 1
+            # todo: to be changed to 0 for endless loop until cancel
+            data['recurring_count'] = 10
+            # todo: to be changed to monthly here, need a mechanism to ensure card is charged exactly monthly
+            # todo: create a simple
+            data['charge_next_date'] = getNextDateFromRecurringInterval(
+                data['recurring_interval'], '%d%m%Y')
+            data['charge_on_date'] = ''
+            data['payment_option'] = 'A'
+        else:
+            # todo: payment description need backend input
+            data['payment_description'] = 'Test Onetime Payment'
+
         params = ''
         for key in self.getRequestParamOrder():
             if key in data:
-                params += data[key]
+                params += str(data[key])
 
         # python 3.6 code
         data['hash_value'] = hmac.new(
@@ -58,7 +78,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             donation=self.donation, field_key='hash_value', field_value=data['hash_value'])
         dmeta.save()
 
-        return render(self.request, 'donations/onetime_2c2p_form.html', {'action': self.base_gateway_redirect_url, 'data': data})
+        return render(self.request, 'donations/redirection_2c2p_form.html', {'action': self.base_gateway_redirect_url, 'data': data})
 
     def verify_gateway_response(self):
         data = {}
@@ -77,13 +97,22 @@ class Gateway_2C2P(PaymentGatewayManager):
             bytes(checkHashStr, 'utf-8'), hashlib.sha256).hexdigest()
         if hash_value.lower() == checkHash.lower():
             hashCheckResult = True
-            # change donation payment_status to complete
+            # change donation payment_status to complete, update recurring_status
             self.donation.payment_status = STATUS_COMPLETE
+            if self.donation.is_recurring:
+                self.donation.recurring_status = STATUS_ONGOING
+            else:
+                self.donation.recurring_status = STATUS_NONRECURRING
             self.donation.save()
             # add checkHash to donation metas for checking purposes
             dmeta = DonationMeta(
                 donation=self.donation, field_key='checkHash', field_value=checkHash)
             dmeta.save()
+            # add recurring_unique_id to donation metas for hooking up future recurring payments
+            if 'recurring_unique_id' in data:
+                dmeta = DonationMeta(
+                    donation=self.donation, field_key='recurring_unique_id', field_value=data['recurring_unique_id'])
+                dmeta.save()
         else:
             hashCheckResult = False
             # change donation payment_status to failed
@@ -97,10 +126,8 @@ class Gateway_2C2P(PaymentGatewayManager):
         decnum = self.getDecimalPlacesFromCurrency(self.settings.currency_code)
         new_amount = str(int(float(amount) * 10**decnum)
                          ) if decnum > 0 else str(int(amount))
-        print(new_amount, flush=True)
         # 2c2p amount param has to be formatted into 12 digit format with leading zero.
         formatted = "{:0>12}".format(new_amount)
-        print(formatted, flush=True)
         return formatted
 
     def getDecimalPlacesFromCurrency(self, cc):

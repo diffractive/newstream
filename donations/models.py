@@ -9,12 +9,14 @@ GATEWAY_2C2P = '2C2P'
 GATEWAY_PAYPAL = 'PayPal'
 GATEWAY_STRIPE = 'Stripe'
 
+STATUS_ONGOING = 'on-going'
 STATUS_COMPLETE = 'complete'
 STATUS_PENDING = 'pending'
 STATUS_REFUNDED = 'refunded'
 STATUS_REVOKED = 'revoked'
 STATUS_FAILED = 'failed'
 STATUS_CANCELLED = 'cancelled'
+STATUS_NONRECURRING = 'non-recurring'
 
 
 class PaymentGateway(models.Model):
@@ -151,6 +153,11 @@ class Donation(ClusterableModel):
         (STATUS_FAILED, STATUS_FAILED.capitalize()),
         (STATUS_CANCELLED, STATUS_CANCELLED.capitalize()),
     ]
+    RECURRING_STATUS_CHOICES = [
+        (STATUS_ONGOING, STATUS_ONGOING.capitalize()),
+        (STATUS_CANCELLED, STATUS_CANCELLED.capitalize()),
+        (STATUS_NONRECURRING, STATUS_NONRECURRING.capitalize()),
+    ]
     donor = models.ForeignKey(
         'Donor',
         on_delete=models.CASCADE,
@@ -170,6 +177,8 @@ class Donation(ClusterableModel):
     is_create_account = models.BooleanField(default=False)
     payment_status = models.CharField(
         max_length=255, choices=PAYMENT_STATUS_CHOICES)
+    recurring_status = models.CharField(
+        max_length=255, choices=RECURRING_STATUS_CHOICES, default=STATUS_NONRECURRING)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted = models.BooleanField(default=False)
@@ -181,6 +190,7 @@ class Donation(ClusterableModel):
         FieldPanel('currency'),
         FieldPanel('is_create_account'),
         FieldPanel('payment_status'),
+        FieldPanel('recurring_status'),
         InlinePanel('metas', label='Donation Meta', heading='Donation Meta Data',
                     help_text='Meta data about this donation is recorded here'),
     ]
@@ -196,6 +206,9 @@ class Donation(ClusterableModel):
 
     def isCreateAccount(self):
         return 'Yes' if self.is_create_account else 'No'
+
+    def isOnGoing(self):
+        return 'Yes' if self.recurring_status == STATUS_ONGOING else 'No'
 
 
 class DonationMeta(models.Model):

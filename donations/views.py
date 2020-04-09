@@ -29,11 +29,14 @@ def thank_you(request):
                   context)
 
 
-def onetime_form(request):
-    form_blueprint = DonationForm.objects.filter(is_recurring__exact=False)[0]
+def process_donation_submission(request, is_recurring):
+    form_template = 'donations/recurring_form.html' if is_recurring else 'donations/onetime_form.html'
+    form_blueprint = DonationForm.objects.filter(
+        is_recurring__exact=is_recurring)[0]
     if request.method == 'POST':
         form = DonationWebForm(request.POST, blueprint=form_blueprint)
         if form.is_valid():
+            # todo: create account workflow
             # create a donor
             donor = Donor(
                 first_name=form.cleaned_data['first_name'],
@@ -79,7 +82,7 @@ def onetime_form(request):
                 # Should rarely happen, but in case some bugs or order id repeats itself
                 print(str(e))
                 form.add_error(None, 'Server error, please retry.')
-                return render(request, 'donations/onetime_form.html', {'form': form})
+                return render(request, form_template, {'form': form})
 
             # redirect to payment_gateway
             gatewayManager = PaymentGatewayFactory.initGateway(
@@ -89,10 +92,14 @@ def onetime_form(request):
             pprint(form.errors)
     else:
         form = DonationWebForm(blueprint=form_blueprint)
-        form.is_recurring = False
+        form.is_recurring = True
 
-    return render(request, 'donations/onetime_form.html', {'form': form})
+    return render(request, form_template, {'form': form})
+
+
+def onetime_form(request):
+    return process_donation_submission(request, False)
 
 
 def recurring_form(request):
-    return 'HI'
+    return process_donation_submission(request, True)

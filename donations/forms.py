@@ -19,7 +19,7 @@ class DonationWebForm(forms.Form):
         form = blueprint
 
         # set is_recurring value and construct is_create_account field
-        self.fields["is_recurring"].widget.attrs['value'] = form.is_recurring
+        self.fields["is_recurring"].widget.attrs['value'] = 'True' if form.is_recurring else 'False'
         if form.is_recurring:
             self.fields["is_create_account"] = forms.BooleanField(widget=forms.HiddenInput(
             ), label='Create Account?', required=False, initial=form.is_recurring)

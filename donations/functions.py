@@ -3,6 +3,9 @@ from site_settings.models import GeneralSettings, Settings2C2P
 import secrets
 import re
 from django.urls import reverse
+from django.contrib.auth.models import User
+from datetime import datetime, timedelta
+from pytz import timezone
 
 
 def raiseObjectNone(message=''):
@@ -34,3 +37,25 @@ def gen_order_id(gateway=None):
     else:
         order_id = secrets.token_hex(16)
     return order_id
+
+
+def gen_order_prefix_2c2p():
+    return 'P' + secrets.token_hex(7)
+
+
+def getSuperUserTimezone():
+    """ 
+    For the calculation of correct datetimes for payment gateways on when exactly to charge recurring payments 
+    Assumption: the superuser has set the correct local timezone which matches with the payment gateway's timezone setting
+    """
+    su = User.objects.filter(is_superuser=1)[0]
+    if not su:
+        raiseObjectNone('Superuser not found')
+    return su.wagtail_userprofile.get_current_time_zone()
+
+
+def getNextDateFromRecurringInterval(days, format):
+    tz = timezone(getSuperUserTimezone())
+    loc_dt = datetime.now(tz)
+    new_dt = loc_dt + timedelta(days=days)
+    return new_dt.strftime(format)

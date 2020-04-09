@@ -1,7 +1,13 @@
-from django.urls import path
+from django.conf.urls import url
 from . import views
 
-donation_urlpatterns = [
-    path('onetime-donation', views.onetime_form, name='onetime-donation'),
-    path('recurring-donation', views.recurring_form, name='recurring-donation'),
+app_name = 'donations'
+urlpatterns = [
+    url(r'^onetime-donation', views.onetime_form,
+        name='onetime-donation'),
+    url(r'^recurring-donation', views.recurring_form,
+        name='recurring-donation'),
+    url(r'^verify-gateway-response', views.verify_gateway_response,
+        name='verify-gateway-response'),
+    url(r'^thank-you', views.thank_you, name='thank-you'),
 ]

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}omp-onetime-donation-2c2p-page{% endblock %}
+
+{% block content %}
+
+<h1>Redirecting to 2C2P!</h1>
+
+<form method='POST' action='{{ action }}' id='2c2pform'>
+    {# Include the hidden data fields #}
+    {% for key, val in data.items %}
+    <input type="hidden" name="{{ key }}" value="{{ val }}">
+    {% endfor %}
+    <input name="submit-btn" id="submit-btn" type="submit" value="Submit">
+</form>
+<script type="text/javascript">
+    document.getElementById("2c2pform").submit();
+</script>
+{% endblock content %}

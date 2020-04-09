@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.db import IntegrityError
+from django.http import HttpResponse
 from .models import *
 from .forms import *
 from .functions import *
@@ -7,6 +8,25 @@ from .payment_gateways.gateway_factory import PaymentGatewayFactory
 from pprint import pprint
 import secrets
 import re
+
+
+def verify_gateway_response(request):
+    gatewayManager = PaymentGatewayFactory.initGatewayByVerification(request)
+    isVerified = gatewayManager.verify_gateway_response()
+    return HttpResponse(status=200) if isVerified else HttpResponse(status=400)
+
+
+def thank_you(request):
+    gatewayManager = PaymentGatewayFactory.initGatewayByVerification(request)
+    if gatewayManager:
+        isVerified = gatewayManager.verify_gateway_response()
+        context = {'isVerified': isVerified,
+                   'donation': gatewayManager.donation}
+    else:
+        isVerified = False
+        context = {'isVerified': isVerified}
+    return render(request, 'donations/thankyou.html',
+                  context)
 
 
 def onetime_form(request):
@@ -63,7 +83,7 @@ def onetime_form(request):
 
             # redirect to payment_gateway
             gatewayManager = PaymentGatewayFactory.initGateway(
-                request, payment_gateway)
+                request, donation)
             return gatewayManager.redirect_to_gateway_url()
         else:
             pprint(form.errors)

@@ -130,6 +130,17 @@ class Donor(models.Model):
     def __str__(self):
         return ' '.join([self.first_name, self.last_name])
 
+    @property
+    def fullname(self):
+        return ' '.join([self.first_name, self.last_name])
+
+    @fullname.setter
+    def fullname(self, val):
+        pass
+
+    def optInMailing(self):
+        return 'Yes' if self.opt_in_mailing_list else 'No'
+
 
 class Donation(ClusterableModel):
     PAYMENT_STATUS_CHOICES = [
@@ -179,6 +190,12 @@ class Donation(ClusterableModel):
 
     def __str__(self):
         return '#'+str(self.id)+' - '+str(self.donor)
+
+    def isRecurring(self):
+        return 'Yes' if self.is_recurring else 'No'
+
+    def isCreateAccount(self):
+        return 'Yes' if self.is_create_account else 'No'
 
 
 class DonationMeta(models.Model):

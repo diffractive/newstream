@@ -1,7 +1,8 @@
 from pprint import pprint
-from site_settings.models import GeneralSettings
+from site_settings.models import GeneralSettings, Settings2C2P
 import secrets
 import re
+from django.urls import reverse
 
 
 def raiseObjectNone(message=''):
@@ -11,6 +12,14 @@ def raiseObjectNone(message=''):
 def isTestMode(request):
     generalSettings = GeneralSettings.for_site(request.site)
     return generalSettings.test_mode
+
+
+def get2C2PSettings(request):
+    return Settings2C2P.for_site(request.site)
+
+
+def getFullReverseUrl(request, urlname):
+    return request.scheme + '://' + request.get_host() + reverse(urlname)
 
 
 def gen_order_id(gateway=None):

@@ -4,13 +4,12 @@ ismigrate='false'
 gitdeploy='false'
 
 print_usage() {
-    printf "%s\n" "Usage: ./deploy [-h] [-m] [-g]" "zero flags = rsync and restart" "-h is for help" "-m is for migration at remote django before restarting gunicorn" "-g is for git deploy"
+    printf "%s\n" "Usage: ./deploy [-h] [-m]" "zero flags = rsync and restart" "-h is for help" "-m is for migration at remote django before restarting gunicorn"
 }
 
-while getopts 'mgh' flag; do
+while getopts 'mh' flag; do
     case "${flag}" in
         m) ismigrate='true' ;;
-        g) gitdeploy='true' ;;
         h) print_usage
            exit 1 ;;
     esac
@@ -28,10 +27,6 @@ cmd="$rsync && $ssh '${source} && ${restart_gunicorn}'"
 if [ $ismigrate = 'true' ]; then
     # migrate script also restarts gunicorn
     cmd="$rsync && $ssh '${source} && ${migrate} && ${restart_gunicorn}'"
-fi
-if [ $gitdeploy = 'true' ]; then
-    # git pull on remote and migrate
-    cmd="$ssh 'cd /srv/www/omp && rm -f \$(git ls-files -o -X .gitignore) && git reset --hard && git pull && ${source} && ${migrate} && ${restart_gunicorn}'"
 fi
 
 echo $cmd

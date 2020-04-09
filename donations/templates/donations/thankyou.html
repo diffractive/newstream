@@ -1,10 +1,45 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static donation_tags %}
 
 {% block body_class %}omp-thankyou-page{% endblock %}
 
 {% block content %}
 
+{% if isVerified %}
 <h1>Well Thank you for your payment!</h1>
+<table>
+    <tr>
+        <td>Donor</td>
+        <td>{{ donation.donor.fullname }}</td>
+    </tr>
+    <tr>
+        <td>Order Number</td>
+        <td>{{ donation.order_number }}</td>
+    </tr>
+    <tr>
+        <td>Is Monthly Payment?</td>
+        <td>{{ donation.isRecurring }}</td>
+    </tr>
+    <tr>
+        <td>Currency</td>
+        <td>{{ donation.currency }}</td>
+    </tr>
+    <tr>
+        <td>Creates Account?</td>
+        <td>{{ donation.isCreateAccount }}</td>
+    </tr>
+    <tr>
+        <td>Opt in Mailing List?</td>
+        <td>{{ donation.donor.optInMailing }}</td>
+    </tr>
+    <tr>
+        <td>Payment Status</td>
+        <td>{{ donation.payment_status }}</td>
+    </tr>
+</table>
+{% else %}
+<h1>This payment is invalid! System will consider this payment as failed!</h1>
+{% endif %}
 
+<a href="{{ request|domain }}">Back to Home</a>
 {% endblock content %}

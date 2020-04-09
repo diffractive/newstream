@@ -11,3 +11,6 @@ class Gateway_Paypal(PaymentGatewayManager):
 
     def build_redirect_url_params(self):
         return ''
+
+    def verify_gateway_response(self):
+        pass

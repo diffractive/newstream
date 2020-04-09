@@ -5,31 +5,38 @@ from abc import ABC, abstractmethod
 
 class PaymentGatewayManager(ABC):
 
-    def __init__(self, request, gateway):
+    def __init__(self, request, donation):
         # stores the request object from django
         self.request = request
-        # stores the PaymentGateway object in omp
-        if not gateway:
+        # stores the donation object
+        if not donation:
             raiseObjectNone(
-                'PaymentGateway object cannot be none while initializing BasePaymentGateway class')
-        self.gateway = gateway
+                'Donation object cannot be none while initializing BasePaymentGateway class')
+        self.donation = donation
         # stores whether current app is in test mode or not
         self.testing_mode = isTestMode(self.request)
 
     @abstractmethod
     def base_live_redirect_url(self):
         """ Override to return the base of live(production) redirect url for this payment gateway """
-        pass
+        return ''
 
     @abstractmethod
     def base_testmode_redirect_url(self):
         """ Override to return the base of testmode(staging) redirect url for this payment gateway """
-        pass
+        return ''
 
     @abstractmethod
     def build_redirect_url_params(self):
         """ Override to build the query string containing the important post data, to be appended to the redirect url """
-        pass
+        return ''
+
+    @abstractmethod
+    def verify_gateway_response(self):
+        """ Override to verify the response from this payment gateway after payments, returns boolean 
+        todo: send email receipt and email verification to donor
+        """
+        return False
 
     def get_built_redirect_url(self):
         return self.base_gateway_redirect_url() + '?' + self.build_redirect_url_params()

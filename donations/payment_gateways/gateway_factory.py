@@ -27,7 +27,7 @@ class PaymentGatewayFactory(object):
     def initGatewayByVerification(request):
         """ Instantiate the specific type of payment gateway manager with current request (expected to be a form of verification response from gateway server) """
         # case one: recurring renewals from 2C2P
-        if 'recurring_unique_id' in request.POST:
+        if 'recurring_unique_id' in request.POST and request.POST['recurring_unique_id'] != '':
             # Find the parent donation
             pDonationSet = Donation.objects.filter(
                 parent_donation__isnull=True, metas__field_key='recurring_unique_id', metas__field_value=request.POST['recurring_unique_id']).distinct()
@@ -61,7 +61,7 @@ class PaymentGatewayFactory(object):
                 return Gateway_2C2P(request, donation)
 
         # case two: standard payment response from 2C2P(either onetime or recurring payment's initial donation)
-        if 'user_defined_1' in request.POST:
+        if 'user_defined_1' in request.POST and request.POST['user_defined_1'] != '':
             donation = Donation.objects.get(
                 pk=int(request.POST['user_defined_1']))
             if not donation:

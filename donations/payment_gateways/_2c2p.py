@@ -97,7 +97,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             bytes(checkHashStr, 'utf-8'), hashlib.sha256).hexdigest()
         if hash_value.lower() == checkHash.lower():
             hashCheckResult = True
-            if not self.request.path.find('thank-you'):
+            if self.request.path.find('thank-you') == -1:
                 # change donation payment_status to 2c2p's payment_status, update recurring_status
                 if data['payment_status'] == '000':
                     self.donation.payment_status = STATUS_COMPLETE
@@ -120,7 +120,7 @@ class Gateway_2C2P(PaymentGatewayManager):
                     donation=self.donation, field_key='checkHash', field_value=checkHash)
                 dmeta.save()
                 # add recurring_unique_id to donation metas for hooking up future recurring payments
-                if 'recurring_unique_id' in data:
+                if 'recurring_unique_id' in data and data['recurring_unique_id'] != '':
                     dmeta = DonationMeta(
                         donation=self.donation, field_key='recurring_unique_id', field_value=data['recurring_unique_id'])
                     dmeta.save()

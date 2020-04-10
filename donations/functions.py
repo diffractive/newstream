@@ -4,12 +4,13 @@ import secrets
 import re
 from django.urls import reverse
 from django.contrib.auth.models import User
+from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime, timedelta
 from pytz import timezone
 
 
 def raiseObjectNone(message=''):
-    raise django.core.exceptions.ObjectDoesNotExist(message)
+    raise ObjectDoesNotExist(message)
 
 
 def isTestMode(request):
@@ -44,8 +45,8 @@ def gen_order_prefix_2c2p():
 
 
 def getSuperUserTimezone():
-    """ 
-    For the calculation of correct datetimes for payment gateways on when exactly to charge recurring payments 
+    """
+    For the calculation of correct datetimes for payment gateways on when exactly to charge recurring payments
     Assumption: the superuser has set the correct local timezone which matches with the payment gateway's timezone setting
     """
     su = User.objects.filter(is_superuser=1)[0]

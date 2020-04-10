@@ -170,6 +170,8 @@ class Donation(ClusterableModel):
         'PaymentGateway',
         on_delete=models.CASCADE,
     )
+    parent_donation = models.ForeignKey(
+        'self', on_delete=models.CASCADE, blank=True, null=True)
     order_number = models.CharField(max_length=255, unique=True)
     donation_amount = models.FloatField()
     is_recurring = models.BooleanField(default=False)
@@ -178,7 +180,7 @@ class Donation(ClusterableModel):
     payment_status = models.CharField(
         max_length=255, choices=PAYMENT_STATUS_CHOICES)
     recurring_status = models.CharField(
-        max_length=255, choices=RECURRING_STATUS_CHOICES, default=STATUS_NONRECURRING)
+        max_length=255, choices=RECURRING_STATUS_CHOICES, default=STATUS_NONRECURRING, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted = models.BooleanField(default=False)

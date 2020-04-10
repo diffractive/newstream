@@ -1,6 +1,6 @@
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.functions import get2C2PSettings, getFullReverseUrl, getNextDateFromRecurringInterval, gen_order_prefix_2c2p
-from donations.models import DonationMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING
+from donations.models import DonationMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
 from urllib.parse import urlencode
 import hmac
 import hashlib
@@ -97,22 +97,33 @@ class Gateway_2C2P(PaymentGatewayManager):
             bytes(checkHashStr, 'utf-8'), hashlib.sha256).hexdigest()
         if hash_value.lower() == checkHash.lower():
             hashCheckResult = True
-            # change donation payment_status to complete, update recurring_status
-            self.donation.payment_status = STATUS_COMPLETE
-            if self.donation.is_recurring:
-                self.donation.recurring_status = STATUS_ONGOING
-            else:
-                self.donation.recurring_status = STATUS_NONRECURRING
-            self.donation.save()
-            # add checkHash to donation metas for checking purposes
-            dmeta = DonationMeta(
-                donation=self.donation, field_key='checkHash', field_value=checkHash)
-            dmeta.save()
-            # add recurring_unique_id to donation metas for hooking up future recurring payments
-            if 'recurring_unique_id' in data:
+            if not self.request.path.find('thank-you'):
+                # change donation payment_status to 2c2p's payment_status, update recurring_status
+                if data['payment_status'] == '000':
+                    self.donation.payment_status = STATUS_COMPLETE
+                elif data['payment_status'] == '002':
+                    self.donation.payment_status = STATUS_REVOKED
+                elif data['payment_status'] == '003':
+                    self.donation.payment_status = STATUS_CANCELLED
+                elif data['payment_status'] == '999':
+                    self.donation.payment_status = STATUS_FAILED
+                else:
+                    self.donation.payment_status = STATUS_PENDING
+
+                if self.donation.is_recurring:
+                    self.donation.recurring_status = STATUS_ONGOING
+                else:
+                    self.donation.recurring_status = STATUS_NONRECURRING
+                self.donation.save()
+                # add checkHash to donation metas for checking purposes
                 dmeta = DonationMeta(
-                    donation=self.donation, field_key='recurring_unique_id', field_value=data['recurring_unique_id'])
+                    donation=self.donation, field_key='checkHash', field_value=checkHash)
                 dmeta.save()
+                # add recurring_unique_id to donation metas for hooking up future recurring payments
+                if 'recurring_unique_id' in data:
+                    dmeta = DonationMeta(
+                        donation=self.donation, field_key='recurring_unique_id', field_value=data['recurring_unique_id'])
+                    dmeta.save()
         else:
             hashCheckResult = False
             # change donation payment_status to failed

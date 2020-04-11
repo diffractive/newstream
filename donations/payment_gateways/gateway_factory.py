@@ -3,6 +3,7 @@ from donations.payment_gateways.core import PaymentGatewayManager
 from donations.payment_gateways._2c2p import Gateway_2C2P
 from donations.payment_gateways.paypal import Gateway_Paypal
 from donations.models import Donation, STATUS_PENDING
+from django.db.models import Q
 # todo: Add Stripe's payment gateway import
 
 
@@ -28,14 +29,12 @@ class PaymentGatewayFactory(object):
         """ Instantiate the specific type of payment gateway manager with current request (expected to be a form of verification response from gateway server) """
         # case one: recurring renewals from 2C2P
         if 'recurring_unique_id' in request.POST and request.POST['recurring_unique_id'] != '':
-            # Find the parent donation
-            pDonationSet = Donation.objects.filter(
-                parent_donation__isnull=True, metas__field_key='recurring_unique_id', metas__field_value=request.POST['recurring_unique_id']).distinct()
-            if not pDonationSet:
-                raiseObjectNone('Recurring unique id: {} has no initial donation found'.format(
-                    request.POST['recurring_unique_id']))
-            else:
-                pDonation = pDonationSet[0]
+            # First distinguish between initial and renewal payment responses
+            # The parent donation should have both the matching recurring_unique_id and order_prefix, thus producing two records exactly
+            DonationSet = Donation.objects.filter((Q(metas__field_key='recurring_unique_id', metas__field_value=request.POST['recurring_unique_id']) | Q(
+                metas__field_key='order_prefix', metas__field_value=request.POST['order_id'][:-5])) & Q(parent_donation__isnull=True) & Q(id=int(request.POST['user_defined_1'])))
+            if len(DonationSet) == 2:
+                pDonation = DonationSet[0]
 
                 # Create new donation record from pDonation
                 donation = Donation(

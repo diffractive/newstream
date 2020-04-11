@@ -59,6 +59,11 @@ class Gateway_2C2P(PaymentGatewayManager):
                 data['recurring_interval'], '%d%m%Y')
             data['charge_on_date'] = ''
             data['payment_option'] = 'A'
+
+            # append order_prefix to donation metas for distinguishment
+            dmeta = DonationMeta(
+                donation=self.donation, field_key='order_prefix', field_value=data['order_prefix'])
+            dmeta.save()
         else:
             # todo: payment description need backend input
             data['payment_description'] = 'Test Onetime Payment'
@@ -87,6 +92,8 @@ class Gateway_2C2P(PaymentGatewayManager):
                 data[key] = self.request.POST[key]
                 print(
                     'Donation #{} - Received response {} = {}'.format(self.donation.id, key, data[key]), flush=True)
+        print('Test POST substring: {}'.format(
+            self.request.POST['order_id'][:-5]), flush=True)
         hash_value = self.request.POST['hash_value']
         checkHashStr = ''
         for key in self.getResponseParamOrder():
@@ -97,6 +104,11 @@ class Gateway_2C2P(PaymentGatewayManager):
             bytes(checkHashStr, 'utf-8'), hashlib.sha256).hexdigest()
         if hash_value.lower() == checkHash.lower():
             hashCheckResult = True
+            print(self.request.path, flush=True)
+            print('Have thank-you? ' +
+                  str(self.request.path.find('thank-you')), flush=True)
+            print('Have verify-gateway-response? ' +
+                  str(self.request.path.find('verify-gateway-response')), flush=True)
             if self.request.path.find('thank-you') == -1:
                 # change donation payment_status to 2c2p's payment_status, update recurring_status
                 if data['payment_status'] == '000':

@@ -1,9 +1,17 @@
-from django.contrib import admin
+from .models import Donor, Donation, PaymentGateway, DonationForm
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
-from .models import Donor, Donation, PaymentGateway, DonationForm
+from django.contrib import admin
+from wagtail.contrib.modeladmin.views import InspectView
 
-# Register your models here.
+
+class DonationInspectView(InspectView):
+    def get_context_data(self, **kwargs):
+        context = {
+            'boy': 'Young Durin'
+        }
+        context.update(kwargs)
+        return super().get_context_data(**context)
 
 
 class DonorAdmin(ModelAdmin):
@@ -29,8 +37,8 @@ class DonationAdmin(ModelAdmin):
     list_filter = ('is_recurring', 'payment_status', 'created_at',)
     search_fields = ('order_number', 'donation_amount',
                      'payment_status', 'is_recurring', 'donor', 'created_at',)
-    # inspect_view_enabled = True
-    # inspect_view_fields = ['order_number']
+    inspect_view_enabled = True
+    inspect_view_class = DonationInspectView
 
 
 class PaymentGatewayAdmin(ModelAdmin):

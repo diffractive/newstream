@@ -6,7 +6,7 @@
 {% block content %}
 
 {% if isVerified %}
-<h1>Well Thank you for your payment!</h1>
+<h1>Well Thank you for your donation!</h1>
 <table>
     <tr>
         <td>Donor</td>
@@ -17,7 +17,7 @@
         <td>{{ donation.order_number }}</td>
     </tr>
     <tr>
-        <td>Is Monthly Payment?</td>
+        <td>Is Monthly Donation?</td>
         <td>{{ donation.isRecurring }}</td>
     </tr>
     <tr>

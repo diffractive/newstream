@@ -1,17 +1,34 @@
-from .models import Donor, Donation, PaymentGateway, DonationForm
+from .models import Donor, Donation, PaymentGateway, DonationForm, DonationMeta
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
 from django.contrib import admin
 from wagtail.contrib.modeladmin.views import InspectView
+from .functions import raiseObjectNone
+from .payment_gateways._2c2p import Gateway_2C2P
 
 
 class DonationInspectView(InspectView):
     def get_context_data(self, **kwargs):
-        context = {
-            'boy': 'Young Durin'
-        }
-        context.update(kwargs)
-        return super().get_context_data(**context)
+        model = self.instance
+        if not model:
+            raiseObjectNone(
+                'No reference to Donation instance in overridden DonationInspectView')
+
+        # 2C2P specific, recurring payment inquiry
+        if model.is_recurring:
+            metaSet = DonationMeta.objects.filter(
+                donation=model, field_key='recurring_unique_id')
+            if len(metaSet) == 1:
+                ruid = metaSet[0].field_value
+                # make RPP Maintenance Request
+                response = Gateway_2C2P.RPPInquiryRequest(ruid)
+                context = {
+                    'rpp_response': response
+                }
+                context.update(kwargs)
+                return super().get_context_data(**context)
+
+        return super().get_context_data(**kwargs)
 
 
 class DonorAdmin(ModelAdmin):

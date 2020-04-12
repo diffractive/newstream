@@ -1,4 +1,4 @@
-from donations.functions import raiseObjectNone
+from donations.functions import raiseObjectNone, get2C2PSettings
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.payment_gateways._2c2p import Gateway_2C2P
 from donations.payment_gateways.paypal import Gateway_Paypal
@@ -36,6 +36,7 @@ class PaymentGatewayFactory(object):
             if len(DonationSet) == 2:
                 pDonation = DonationSet[0]
 
+                settings = get2C2PSettings(request)
                 # Create new donation record from pDonation
                 donation = Donation(
                     order_number=request.POST['order_id'],
@@ -43,8 +44,8 @@ class PaymentGatewayFactory(object):
                     form=pDonation.form,
                     gateway=pDonation.gateway,
                     is_recurring=True,
-                    # todo: need to actually convert from POST['amount'] to db format, since future renewals might be updated
-                    donation_amount=pDonation.donation_amount,
+                    donation_amount=Gateway_2C2P.extract_payment_amount(
+                        settings.currency_code, request.POST['amount']),
                     currency=pDonation.currency,
                     is_create_account=pDonation.is_create_account,
                     payment_status=STATUS_PENDING,
@@ -69,4 +70,4 @@ class PaymentGatewayFactory(object):
             else:
                 return Gateway_2C2P(request, donation)
 
-        # todo: add paypal and stripe's verification listener logic
+        # todo: Add Stripe's and PayPal's verification listener logic

@@ -60,3 +60,20 @@ def getNextDateFromRecurringInterval(days, format):
     loc_dt = datetime.now(tz)
     new_dt = loc_dt + timedelta(days=days)
     return new_dt.strftime(format)
+
+
+def getRecurringDateNextMonth(format):
+    try:
+        tz = timezone(getSuperUserTimezone())
+        loc_dt = datetime.now(tz)
+        nextmonthdate = loc_dt.replace(month=loc_dt.month+1)
+    except ValueError:
+        if loc_dt.month == 12:
+            nextmonthdate = loc_dt.replace(year=loc_dt.year+1, month=1)
+        else:
+            """
+            next month is too short to have "same date", recur at start of the next-next month
+            just like how paypal solve this: https://developer.paypal.com/docs/paypal-payments-standard/integration-guide/subscription-billing-cycles/
+            """
+            nextmonthdate = loc_dt.replace(month=loc_dt.month+2, day=1)
+    return nextmonthdate.strftime(format)

@@ -1,5 +1,5 @@
 from donations.payment_gateways.core import PaymentGatewayManager
-from donations.functions import get2C2PSettings, getFullReverseUrl, getNextDateFromRecurringInterval, gen_order_prefix_2c2p
+from donations.functions import get2C2PSettings, getFullReverseUrl, getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p
 from donations.models import DonationMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
 from urllib.parse import urlencode
 import hmac
@@ -48,16 +48,16 @@ class Gateway_2C2P(PaymentGatewayManager):
             data['recurring_amount'] = self.format_payment_amount(
                 self.donation.donation_amount)
             data['allow_accumulate'] = 'N'
+            # max accumulate_amount should also be unnecessary if we do not allow it
             # data['max_accumulate_amount'] = '000000020000'
-            # todo: to be changed to monthly here, need a mechanism to ensure card is charged exactly monthly
-            data['recurring_interval'] = 1
+            # recurring_interval should be unnecessary if we charge on specified date each month (charge_on_date)
+            # data['recurring_interval'] = 1
             # todo: to be changed to 0 for endless loop until cancel
             data['recurring_count'] = 10
-            # todo: to be changed to monthly here, need a mechanism to ensure card is charged exactly monthly
-            # todo: create a simple
-            data['charge_next_date'] = getNextDateFromRecurringInterval(
-                data['recurring_interval'], '%d%m%Y')
-            data['charge_on_date'] = ''
+            # charge_next_date is optional if have charge_on_date set
+            # data['charge_next_date'] = getNextDateFromRecurringInterval(
+            #     data['recurring_interval'], '%d%m%Y')
+            data['charge_on_date'] = getRecurringDateNextMonth('%d%m')
             data['payment_option'] = 'A'
 
             # append order_prefix to donation metas for distinguishment

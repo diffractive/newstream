@@ -1,18 +1,25 @@
+import html
 from django.db import models
 
 from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel
 from wagtail.contrib.settings.models import BaseSetting, register_setting
 #from wagtail.admin.edit_handlers import TabbedInterface, ObjectList
 
+from donations.includes.currency_dictionary import currency_dict
+
 
 @register_setting
-class GeneralSettings(BaseSetting):
+class GlobalSettings(BaseSetting):
     """Top level settings for this omp app"""
-
+    # todo: make supported currencies for each payment gateway
+    # todo: check against being-in-use gateways' supported currencies with this setting
     test_mode = models.BooleanField(default=True)
+    currency = models.CharField(default='USD', max_length=10, choices=[(key, html.unescape(
+        val['admin_label'])) for key, val in currency_dict.items()])
 
     panels = [
-        FieldPanel('test_mode')
+        FieldPanel('test_mode'),
+        FieldPanel('currency'),
     ]
 
 
@@ -24,8 +31,6 @@ class Settings2C2P(BaseSetting):
         max_length=255, blank=True, null=True, help_text="Merchant ID")
     secret_key = models.CharField(
         max_length=255, blank=True, null=True, help_text="Secret Key")
-    currency_code = models.CharField(
-        max_length=255, blank=True, null=True, help_text="Currency Code")
     log_filename = models.CharField(
         max_length=255, blank=True, null=True, help_text="Log Filename")
 
@@ -33,7 +38,6 @@ class Settings2C2P(BaseSetting):
         MultiFieldPanel([
             FieldPanel("merchant_id"),
             FieldPanel("secret_key"),
-            FieldPanel("currency_code"),
             FieldPanel("log_filename"),
         ], heading="2C2P API Test Settings")
     ]

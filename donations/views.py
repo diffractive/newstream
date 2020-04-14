@@ -30,6 +30,7 @@ def thank_you(request):
 
 
 def process_donation_submission(request, is_recurring):
+    # todo: need to display the currency symbol in template
     form_template = 'donations/recurring_form.html' if is_recurring else 'donations/onetime_form.html'
     form_blueprint = DonationForm.objects.filter(
         is_recurring__exact=is_recurring)[0]
@@ -71,7 +72,7 @@ def process_donation_submission(request, is_recurring):
                 gateway=payment_gateway,
                 is_recurring=form.cleaned_data['is_recurring'],
                 donation_amount=form.cleaned_data['donation_amount'],
-                currency='HARDCODE',  # todo: find a way to save currency values
+                currency=getGlobalSettings(request).currency,
                 is_create_account=form.cleaned_data['is_create_account'],
                 payment_status=STATUS_PENDING,
                 metas=donation_metas

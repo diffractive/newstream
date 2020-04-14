@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from donations.payment_gateways.core import PaymentGatewayManager
-from donations.functions import raiseObjectNone, get2C2PSettings, getFullReverseUrl, getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p
+from donations.functions import raiseObjectNone, getGlobalSettings, get2C2PSettings, getFullReverseUrl, getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
 from donations.models import DonationMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
 from urllib.parse import urlencode
 import hmac
@@ -17,6 +17,8 @@ class Gateway_2C2P(PaymentGatewayManager):
         super().__init__(request, donation)
         # set 2c2p settings object
         self.settings = get2C2PSettings(request)
+        # set global settings object
+        self.global_settings = getGlobalSettings(request)
 
     def base_live_redirect_url(self):
         # todo: 2c2p live redirect api url to be confirmed
@@ -34,7 +36,8 @@ class Gateway_2C2P(PaymentGatewayManager):
         data['version'] = REDIRECT_API_VERSION
         data['merchant_id'] = self.settings.merchant_id
         data['order_id'] = self.donation.order_number
-        data['currency'] = self.settings.currency_code
+        data['currency'] = getCurrencyDictAt(
+            self.donation.currency)['code']
         data['amount'] = self.format_payment_amount(
             self.donation.donation_amount)
         data['result_url_1'] = getFullReverseUrl(
@@ -143,8 +146,9 @@ class Gateway_2C2P(PaymentGatewayManager):
         return hashCheckResult
 
     def format_payment_amount(self, amount):
-        decnum = Gateway_2C2P.getDecimalPlacesFromCurrency(
-            self.settings.currency_code)
+        """ when submitting a new payment, use the donation's currency to format the donation amount """
+        decnum = getCurrencyDictAt(self.donation.currency)[
+            'setting']['number_decimals']
         new_amount = str(int(float(amount) * 10**decnum)
                          ) if decnum > 0 else str(int(amount))
         # 2c2p amount param has to be formatted into 12 digit format with leading zero.
@@ -153,54 +157,18 @@ class Gateway_2C2P(PaymentGatewayManager):
 
     @staticmethod
     def extract_payment_amount(currency_code, amount):
+        """ When extracting payment amount from 2C2P response, use the response's currency data instead of the global currency settings in case that the global currency settings has already been changed """
         result = re.match('0*([1-9][0-9]*)', amount)
         if len(result.groups()) == 1:
             term = result.groups()[0]
         else:
             raiseObjectNone(
                 'No valid amount extracted from the amount string in the 2C2P response')
-        decPlaces = Gateway_2C2P.getDecimalPlacesFromCurrency(currency_code)
+        decPlaces = getCurrencyFromCode(currency_code)[
+            'setting']['number_decimals']
         majorAmount = int(term[:-decPlaces])
         minorAmount = float('0.{}'.format(term[-decPlaces:]))
         return majorAmount+minorAmount
-
-    @staticmethod
-    def getDecimalPlacesFromCurrency(cc):
-        # double checked this list as correct
-        # 2c2p amount param rule: Minor unit appended to the last digit depending on number of Minor unit specified in ISO 4217.
-        # https://en.wikipedia.org/wiki/ISO_4217#Active_codes
-        specialCurrencyDecimals = {
-            '048': 3,
-            '108': 0,
-            '990': 4,
-            '152': 0,
-            '262': 0,
-            '324': 0,
-            '368': 3,
-            '352': 0,
-            '400': 3,
-            '392': 0,
-            '174': 0,
-            '410': 0,
-            '414': 3,
-            '434': 3,
-            '512': 3,
-            '600': 0,
-            '646': 0,
-            '788': 3,
-            '800': 0,
-            '940': 0,
-            '927': 4,
-            '704': 0,
-            '548': 0,
-            '950': 0,
-            '952': 0,
-            '953': 0
-        }
-        if cc not in specialCurrencyDecimals:
-            return 2
-        else:
-            return specialCurrencyDecimals[cc]
 
     @staticmethod
     def getRequestParamOrder():

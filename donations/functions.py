@@ -1,5 +1,5 @@
 from pprint import pprint
-from site_settings.models import GeneralSettings, Settings2C2P
+from site_settings.models import GlobalSettings, Settings2C2P
 import secrets
 import re
 from django.urls import reverse
@@ -7,6 +7,24 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime, timedelta
 from pytz import timezone
+from .includes.currency_dictionary import currency_dict
+
+
+def getCurrencyDict():
+    return currency_dict
+
+
+def getCurrencyDictAt(key):
+    if key in currency_dict:
+        return currency_dict[key]
+    return None
+
+
+def getCurrencyFromCode(code):
+    for key, val in currency_dict.items():
+        if val['code'] == str(code):
+            return currency_dict[key]
+    return None
 
 
 def raiseObjectNone(message=''):
@@ -14,12 +32,16 @@ def raiseObjectNone(message=''):
 
 
 def isTestMode(request):
-    generalSettings = GeneralSettings.for_site(request.site)
-    return generalSettings.test_mode
+    globalSettings = GlobalSettings.for_site(request.site)
+    return globalSettings.test_mode
 
 
 def get2C2PSettings(request):
     return Settings2C2P.for_site(request.site)
+
+
+def getGlobalSettings(request):
+    return GlobalSettings.for_site(request.site)
 
 
 def getFullReverseUrl(request, urlname):

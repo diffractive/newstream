@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 from modelcluster.fields import ParentalKey
@@ -110,6 +111,8 @@ class DonationForm(ClusterableModel):
 
 
 class Donor(models.Model):
+    linked_user = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     email = models.CharField(max_length=255)

@@ -13946,6 +13946,15 @@ video {
   transition-duration: 1000ms;
 }
 
+.newstream-nav {
+  display: flex;
+  justify-content: center;
+}
+
+.newstream-nav h2 {
+  display: inline-block;
+}
+
 .brand-p {
   color: #ff00ff;
 }

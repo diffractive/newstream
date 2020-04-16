@@ -20,6 +20,7 @@ urlpatterns = [
     url(r'^search/$', search_views.search, name='search'),
 
     url(r'^donations/', include('donations.urls')),
+    url(r'^donations/', include('django.contrib.auth.urls')),
 
 ]
 

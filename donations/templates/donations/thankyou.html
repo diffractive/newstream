@@ -5,7 +5,7 @@
 
 {% block content %}
 
-{% if isVerified %}
+{% if isValid %}
 <h1>Well Thank you for your donation!</h1>
 <table>
     <tr>
@@ -42,7 +42,7 @@
     </tr>
 </table>
 {% else %}
-<h1>This payment is invalid! System will consider this payment as failed!</h1>
+<h1>{{ error_message }}</h1>
 {% endif %}
 
 <a href="{{ request|domain }}">Back to Home</a>

@@ -1,6 +1,9 @@
 from django.shortcuts import render
 from django.db import IntegrityError
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
+from django.shortcuts import redirect
 from .models import *
 from .forms import *
 from .functions import *
@@ -12,21 +15,40 @@ import re
 
 def verify_gateway_response(request):
     gatewayManager = PaymentGatewayFactory.initGatewayByVerification(request)
-    isVerified = gatewayManager.verify_gateway_response()
-    return HttpResponse(status=200) if isVerified else HttpResponse(status=400)
+    if gatewayManager:
+        isVerified = gatewayManager.verify_gateway_response()
+        if isVerified:
+            return HttpResponse(status=200)
+        else:
+            return HttpResponse(status=409)
+    else:
+        return HttpResponse(status=400)
 
 
-def thank_you(request):
+def return_from_gateway(request):
     gatewayManager = PaymentGatewayFactory.initGatewayByVerification(request)
     if gatewayManager:
         isVerified = gatewayManager.verify_gateway_response()
-        context = {'isVerified': isVerified,
-                   'donation': gatewayManager.donation}
+        if isVerified:
+            request.session['thankyou-donation-id'] = gatewayManager.donation.id
+        else:
+            request.session['thankyou-error'] = "Results returned from gateway is invalid."
     else:
-        isVerified = False
-        context = {'isVerified': isVerified}
-    return render(request, 'donations/thankyou.html',
-                  context)
+        request.session['thankyou-error'] = "Could not determine payment gateway from request"
+    return redirect('donations:thank-you')
+
+
+def thank_you(request):
+    if 'thankyou-donation-id' in request.session:
+        donation = Donation.objects.get(
+            pk=request.session['thankyou-donation-id'])
+        # logs donor in if is_create_account
+        if donation.donor.linked_user:
+            login(request, donation.donor.linked_user)
+        return render(request, 'donations/thankyou.html', {'isValid': True, 'donation': donation})
+    if 'thankyou-error' in request.session:
+        return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': request.session['thankyou-error']})
+    return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': 'No Payment Data is received.'})
 
 
 def process_donation_submission(request, is_recurring):
@@ -38,6 +60,8 @@ def process_donation_submission(request, is_recurring):
         form = DonationWebForm(request.POST, blueprint=form_blueprint)
         if form.is_valid():
             # todo: create account workflow
+            if 'is_create_account' in form.cleaned_data:
+                print(form.cleaned_data['is_create_account'], flush=True)
             # create a donor
             donor = Donor(
                 first_name=form.cleaned_data['first_name'],
@@ -54,6 +78,20 @@ def process_donation_submission(request, is_recurring):
                     last_name=form.cleaned_data['last_name'],
                     email=form.cleaned_data['email']
                 )[0]
+
+            # check if need to create account
+            if form.cleaned_data['is_create_account']:
+                try:
+                    # use email as the username
+                    generated_pwd = secrets.token_hex(10)
+                    donor_user = User.objects.create_user(
+                        username=donor.email, password=generated_pwd)
+                except Exception as e:
+                    # very likely duplicate username (this email has previously been registered as user)
+                    donor_user = User.objects.filter(username=donor.email)[0]
+                # link donor to user
+                donor.linked_user = donor_user
+                donor.save()
 
             # create pending donation
             payment_gateway = PaymentGateway.objects.get(

@@ -15,7 +15,7 @@ while getopts 'mh' flag; do
     esac
 done
 
-rsync="rsync -av --exclude '.git' ./ diff-1:/srv/www/omp/"
+rsync="rsync -av --exclude '.git' --exclude 'node_modules' ./ diff-1:/srv/www/omp/"
 ssh='ssh diff-1'
 source='cd /srv/www/omp && source ~/.profile && source venv/bin/activate && export LC_ALL="en_US.UTF-8"'
 migrate='python manage.py makemigrations && python manage.py migrate'

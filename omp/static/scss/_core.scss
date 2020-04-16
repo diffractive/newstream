@@ -1,1 +1,10 @@
 $brandColor: #ff00ff;
+
+.newstream-nav {
+    display: flex;
+    justify-content: center;
+
+    h2 {
+        display: inline-block;
+    }
+}

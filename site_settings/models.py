@@ -1,15 +1,31 @@
 import html
 from django.db import models
 
-from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel
+from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel
 from wagtail.contrib.settings.models import BaseSetting, register_setting
-#from wagtail.admin.edit_handlers import TabbedInterface, ObjectList
+from modelcluster.models import ClusterableModel
+from modelcluster.fields import ParentalKey
 
 from donations.includes.currency_dictionary import currency_dict
 
 
+class AdminEmails(models.Model):
+    title = models.CharField(max_length=255)
+    email = models.EmailField()
+    setting_parent = ParentalKey(
+        'GlobalSettings', on_delete=models.CASCADE, related_name='admin_emails')
+
+    panels = [
+        FieldPanel('title'),
+        FieldPanel('email'),
+    ]
+
+    def __str__(self):
+        return self.title+" "+'({})'.format(self.email)
+
+
 @register_setting
-class GlobalSettings(BaseSetting):
+class GlobalSettings(BaseSetting, ClusterableModel):
     """Top level settings for this omp app"""
     # todo: make supported currencies for each payment gateway
     # todo: check against being-in-use gateways' supported currencies with this setting
@@ -20,6 +36,8 @@ class GlobalSettings(BaseSetting):
     panels = [
         FieldPanel('test_mode'),
         FieldPanel('currency'),
+        InlinePanel('admin_emails', label="Admin Email", heading="List of Admins' Emails",
+                    help_text='Email notifications such as new donations will be sent to this list.'),
     ]
 
 

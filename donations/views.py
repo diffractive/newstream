@@ -2,8 +2,10 @@ from django.shortcuts import render
 from django.db import IntegrityError
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import redirect
+from django.contrib.auth.views import PasswordResetView
 from .models import *
 from .forms import *
 from .functions import *
@@ -11,6 +13,10 @@ from .payment_gateways.gateway_factory import PaymentGatewayFactory
 from pprint import pprint
 import secrets
 import re
+
+
+class CustomPasswordResetView(PasswordResetView):
+    from_email = getSuperUserEmail()
 
 
 def verify_gateway_response(request):
@@ -59,9 +65,6 @@ def process_donation_submission(request, is_recurring):
     if request.method == 'POST':
         form = DonationWebForm(request.POST, blueprint=form_blueprint)
         if form.is_valid():
-            # todo: create account workflow
-            if 'is_create_account' in form.cleaned_data:
-                print(form.cleaned_data['is_create_account'], flush=True)
             # create a donor
             donor = Donor(
                 first_name=form.cleaned_data['first_name'],
@@ -85,13 +88,23 @@ def process_donation_submission(request, is_recurring):
                     # use email as the username
                     generated_pwd = secrets.token_hex(10)
                     donor_user = User.objects.create_user(
-                        username=donor.email, password=generated_pwd)
+                        username=donor.email, email=donor.email, password=generated_pwd)
                 except Exception as e:
+                    print("Cannot Create new Django user: "+str(e), flush=True)
                     # very likely duplicate username (this email has previously been registered as user)
-                    donor_user = User.objects.filter(username=donor.email)[0]
+                    donor_user = User.objects.get(username=donor.email)
                 # link donor to user
                 donor.linked_user = donor_user
                 donor.save()
+            else:
+                try:
+                    donor_user = User.objects.get(username=donor.email)
+                except Exception as e:
+                    print("No previous accounts registered for " +
+                          donor.email+". "+str(e), flush=True)
+                else:
+                    donor.linked_user = donor_user
+                    donor.save()
 
             # create pending donation
             payment_gateway = PaymentGateway.objects.get(
@@ -142,3 +155,10 @@ def onetime_form(request):
 
 def recurring_form(request):
     return process_donation_submission(request, True)
+
+
+@login_required
+def manage_donations(request):
+    donations = Donation.objects.filter(
+        donor__linked_user=request.user).order_by('-created_at')
+    return render(request, 'donations/manage-donations.html', {'donations': donations})

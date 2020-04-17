@@ -10,17 +10,37 @@ from search import views as search_views
 
 from wagtailautocomplete.urls.admin import urlpatterns as autocomplete_admin_urls
 
+from donations.views import CustomPasswordResetView
+from django.contrib.auth import views
+from django.urls import path
+
 urlpatterns = [
-    url(r'^django-admin/', admin.site.urls),
+    path('django-admin/', admin.site.urls),
 
-    url(r'^admin/autocomplete/', include(autocomplete_admin_urls)),
-    url(r'^admin/', include(wagtailadmin_urls)),
-    url(r'^documents/', include(wagtaildocs_urls)),
+    path('admin/autocomplete/', include(autocomplete_admin_urls)),
+    path('admin/', include(wagtailadmin_urls)),
+    path('documents/', include(wagtaildocs_urls)),
 
-    url(r'^search/$', search_views.search, name='search'),
+    path('search/', search_views.search, name='search'),
 
-    url(r'^donations/', include('donations.urls')),
-    url(r'^donations/', include('django.contrib.auth.urls')),
+    path('donations/', include('donations.urls')),
+
+    path('login/', views.LoginView.as_view(), name='login'),
+    path('logout/', views.LogoutView.as_view(), name='logout'),
+
+    path('password_change/', views.PasswordChangeView.as_view(),
+         name='password_change'),
+    path('password_change/done/', views.PasswordChangeDoneView.as_view(),
+         name='password_change_done'),
+
+    path('password_reset/',
+         CustomPasswordResetView.as_view(), name='password_reset'),
+    path('password_reset/done/', views.PasswordResetDoneView.as_view(),
+         name='password_reset_done'),
+    path('reset/<uidb64>/<token>/', views.PasswordResetConfirmView.as_view(),
+         name='password_reset_confirm'),
+    path('reset/done/', views.PasswordResetCompleteView.as_view(),
+         name='password_reset_complete'),
 
 ]
 

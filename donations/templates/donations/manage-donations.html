@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% load static donation_tags %}
+
+{% block body_class %}manage-donations-page{% endblock %}
+
+{% block content %}
+
+<h1>Manage Your Donations</h1>
+
+<table class="table-auto">
+    <thead>
+        <tr>
+            <th class="px-4 py-2">Order Number</th>
+            <th class="px-4 py-2">Donation Amount</th>
+            <th class="px-4 py-2">Is Recurring</th>
+            <th class="px-4 py-2">Payment Gateway</th>
+            <th class="px-4 py-2">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% if donations %}
+        {% for donation in donations %}
+        <tr>
+            <td class="border px-4 py-2">{{ donation.order_number }}</td>
+            <td class="border px-4 py-2">{{ donation.donation_amount }}</td>
+            <td class="border px-4 py-2">{{ donation.is_recurring }}</td>
+            <td class="border px-4 py-2">{{ donation.gateway.title }}</td>
+            <td class="border px-4 py-2"></td>
+        </tr>
+        {% endfor %}
+        {% else %}
+        <tr>
+            <td colspan="5">No Donation History.</td>
+        </tr>
+        {% endif %}
+    </tbody>
+</table>
+<br>
+<a href="{{ request|domain }}">Back to Home</a>
+{% endblock content %}

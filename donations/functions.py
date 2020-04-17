@@ -71,10 +71,18 @@ def getSuperUserTimezone():
     For the calculation of correct datetimes for payment gateways on when exactly to charge recurring payments
     Assumption: the superuser has set the correct local timezone which matches with the payment gateway's timezone setting
     """
-    su = User.objects.filter(is_superuser=1)[0]
+    su = User.objects.get(is_superuser=1)
     if not su:
         raiseObjectNone('Superuser not found')
     return su.wagtail_userprofile.get_current_time_zone()
+
+
+def getSuperUserEmail():
+    """ For sending out password reset emails """
+    su = User.objects.get(is_superuser=1)
+    if not su:
+        raiseObjectNone('Superuser not found')
+    return su.email
 
 
 def getNextDateFromRecurringInterval(days, format):

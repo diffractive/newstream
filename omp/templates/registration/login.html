@@ -35,7 +35,7 @@
                     <input type="hidden" name="next" value="{{ next }}" />
                 </div>
                 <div class="form-group">
-                    <a href="javascript:alert('Please contact your site administrator.')" class="ForgetPwd">Forget
+                    <a href="{% url 'password_reset' %}" class="ForgetPwd">Forget
                         Password?</a>
                 </div>
             </form>

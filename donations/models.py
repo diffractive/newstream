@@ -115,7 +115,7 @@ class Donor(models.Model):
         User, on_delete=models.SET_NULL, null=True, blank=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    email = models.CharField(max_length=255)
+    email = models.EmailField()
     opt_in_mailing_list = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

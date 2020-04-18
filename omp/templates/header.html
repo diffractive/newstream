@@ -1,7 +1,7 @@
 <div class='newstream-nav py-4'>
     <h2 class="px-2">NewStream</h2>
     {% if user.is_authenticated %}
-    <span class="px-2">Hi, {{ user.username }}</span>
+    <span class="px-2">Hi, {{ user.email }}</span>
     <a href="{% url 'donations:manage-donations'%}" class="px-2">Manage Donations</a>
     <a href="{% url 'logout'%}?next={{request.path}}" class="px-2">Logout</a>
     {% else %}

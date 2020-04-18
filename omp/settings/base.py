@@ -19,6 +19,9 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 # django needs this to redirects user correctly when he stumbles upon a logn_required route
 LOGIN_URL = "/login"
 
+# Custom User Model
+AUTH_USER_MODEL = 'custom_user.User'
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
 
@@ -48,6 +51,8 @@ INSTALLED_APPS = [
     'modelcluster',
     'taggit',
     'wagtailautocomplete',
+    'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
+    'custom_user.apps.CustomUserConfig',
 
     'django.contrib.admin',
     'django.contrib.auth',

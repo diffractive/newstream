@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.conf import settings
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 from modelcluster.fields import ParentalKey
@@ -18,13 +18,6 @@ STATUS_REVOKED = 'revoked'
 STATUS_FAILED = 'failed'
 STATUS_CANCELLED = 'cancelled'
 STATUS_NONRECURRING = 'non-recurring'
-
-
-class Extras(models.Model):
-    """ Extra fields stored for the default Django User model """
-    user = models.OneToOneField(
-        User, on_delete=models.CASCADE)
-    is_email_verified = models.BooleanField(default=False)
 
 
 class PaymentGateway(models.Model):
@@ -119,7 +112,7 @@ class DonationForm(ClusterableModel):
 
 class Donor(models.Model):
     linked_user = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, blank=True)
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     email = models.EmailField()

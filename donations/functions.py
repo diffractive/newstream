@@ -3,11 +3,12 @@ from site_settings.models import GlobalSettings, Settings2C2P
 import secrets
 import re
 from django.urls import reverse
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime, timedelta
 from pytz import timezone
 from .includes.currency_dictionary import currency_dict
+User = get_user_model()
 
 
 def getCurrencyDict():

@@ -1,6 +1,6 @@
 from django.shortcuts import render
 from django.db import IntegrityError
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
@@ -13,10 +13,13 @@ from .payment_gateways.gateway_factory import PaymentGatewayFactory
 from pprint import pprint
 import secrets
 import re
+User = get_user_model()
 
 
 class CustomPasswordResetView(PasswordResetView):
-    from_email = getSuperUserEmail()
+    def __init__(self, *args, **kwargs):
+        self.from_email = getSuperUserEmail()
+        super().__init__(*args, **kwargs)
 
 
 def verify_gateway_response(request):

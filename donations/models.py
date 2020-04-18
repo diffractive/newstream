@@ -20,6 +20,13 @@ STATUS_CANCELLED = 'cancelled'
 STATUS_NONRECURRING = 'non-recurring'
 
 
+class Extras(models.Model):
+    """ Extra fields stored for the default Django User model """
+    user = models.OneToOneField(
+        User, on_delete=models.CASCADE)
+    is_email_verified = models.BooleanField(default=False)
+
+
 class PaymentGateway(models.Model):
     title = models.CharField(max_length=255, unique=True)
     list_order = models.IntegerField(default=0)

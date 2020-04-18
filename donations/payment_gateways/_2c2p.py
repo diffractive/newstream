@@ -17,8 +17,6 @@ class Gateway_2C2P(PaymentGatewayManager):
         super().__init__(request, donation)
         # set 2c2p settings object
         self.settings = get2C2PSettings(request)
-        # set global settings object
-        self.global_settings = getGlobalSettings(request)
 
     def base_live_redirect_url(self):
         # todo: 2c2p live redirect api url to be confirmed

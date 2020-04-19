@@ -59,7 +59,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             # recurring_interval should be unnecessary if we charge on specified date each month (charge_on_date)
             # data['recurring_interval'] = 1
             # todo: to be changed to 0 for endless loop until cancel
-            data['recurring_count'] = 10
+            data['recurring_count'] = 3
             # charge_next_date is optional if have charge_on_date set
             # data['charge_next_date'] = getNextDateFromRecurringInterval(
             #     data['recurring_interval'], '%d%m%Y')
@@ -111,7 +111,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             bytes(checkHashStr, 'utf-8'), hashlib.sha256).hexdigest()
         if hash_value.lower() == checkHash.lower():
             hashCheckResult = True
-            if self.request.path.find('thank-you') == -1:
+            if self.request.path.find('return-from-gateway') == -1:
                 # change donation payment_status to 2c2p's payment_status, update recurring_status
                 if data['payment_status'] == '000':
                     self.donation.payment_status = STATUS_COMPLETE

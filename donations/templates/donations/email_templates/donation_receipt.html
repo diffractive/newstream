@@ -1,0 +1,58 @@
+{% extends "base_email.html" %}
+{% load donation_tags %}
+
+{% block title %}
+New Donation
+{% endblock %}
+
+{% block content %}
+<table cellpadding="10" cellspacing="0" style="width: 100%;">
+    <tr>
+        <th style="width: 100%;text-align: left;">
+            <h2 style="font-weight: bold;">
+                Donation Receipt
+            </h2>
+        </th>
+    </tr>
+    <tr>
+        <td style="width: 100%;">
+            <p>Dear {{ donation.donor.fullname }},</p>
+            <p>
+                Thank you for your generosity! Your support means a lot to us. Here are the details of your donation:
+            </p>
+            <table cellpadding="10">
+                <tr>
+                    <td style="font-weight: bold;">Order Number</td>
+                    <td>{{ donation.order_number }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Is Monthly Donation?</td>
+                    <td>{{ donation.isRecurring }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Currency</td>
+                    <td>{{ donation.currency }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Donation Amount</td>
+                    <td>{{ donation.donation_amount }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Creates Account?</td>
+                    <td>{{ donation.isCreateAccount }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Opt in Mailing List?</td>
+                    <td>{{ donation.donor.optInMailing }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Payment Status</td>
+                    <td>{{ donation.payment_status }}</td>
+                </tr>
+            </table>
+            <p>Thank you,</p>
+            <p>{{ request.site.site_name }}</p>
+        </td>
+    </tr>
+</table>
+{% endblock %}

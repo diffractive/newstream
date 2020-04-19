@@ -1,0 +1,63 @@
+{% extends "base_email.html" %}
+{% load donation_tags %}
+
+{% block title %}
+New Donation
+{% endblock %}
+
+{% block content %}
+<table cellpadding="10" cellspacing="0" style="width: 100%;">
+    <tr>
+        <th style="width: 100%;text-align: left;">
+            <h2 style="font-weight: bold;">
+                New Donation
+            </h2>
+        </th>
+    </tr>
+    <tr>
+        <td style="width: 100%;">
+            <p>Hi Admins,</p>
+            <p>
+                This email is to inform you that a new donation has been made on your website:<br>
+                <a href=" {{ request|domain }}" target="_blank">{{ request|domain }}</a>
+            </p>
+            <table cellpadding="10">
+                <tr>
+                    <td style="font-weight: bold;">Donor</td>
+                    <td>{{ donation.donor.fullname }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Order Number</td>
+                    <td>{{ donation.order_number }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Is Monthly Donation?</td>
+                    <td>{{ donation.isRecurring }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Currency</td>
+                    <td>{{ donation.currency }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Donation Amount</td>
+                    <td>{{ donation.donation_amount }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Creates Account?</td>
+                    <td>{{ donation.isCreateAccount }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Opt in Mailing List?</td>
+                    <td>{{ donation.donor.optInMailing }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Payment Status</td>
+                    <td>{{ donation.payment_status }}</td>
+                </tr>
+            </table>
+            <p>Thank you,</p>
+            <p>{{ request.site.site_name }}</p>
+        </td>
+    </tr>
+</table>
+{% endblock %}

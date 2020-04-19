@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.template.loader import render_to_string
 from django.db import IntegrityError
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate, login
@@ -6,10 +7,12 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.views import PasswordResetView
+from django.core.mail import send_mail
 from .models import *
 from .forms import *
 from .functions import *
 from .payment_gateways.gateway_factory import PaymentGatewayFactory
+from .templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text
 from pprint import pprint
 import secrets
 import re
@@ -27,6 +30,37 @@ def verify_gateway_response(request):
     if gatewayManager:
         isVerified = gatewayManager.verify_gateway_response()
         if isVerified:
+            # email new donation notification to admin list
+            globalSettings = getGlobalSettings(request)
+            admin_list = [
+                admin_email.email for admin_email in globalSettings.admin_emails.all()]
+            try:
+                send_mail(
+                    "New Donation",
+                    get_new_donation_text(request, gatewayManager.donation),
+                    getSuperUserEmail(),
+                    admin_list,  # requires admin list to be set in globalsettings
+                    html_message=render_to_string('donations/email_templates/new_donation.html', context={
+                        'donation': gatewayManager.donation}, request=request)
+                )
+            except Exception as e:
+                print("Cannot send emails to admins: "+str(e), flush=True)
+
+            # email thank you receipt to donor
+            try:
+                send_mail(
+                    "Donation Receipt",
+                    get_donation_receipt_text(
+                        request, gatewayManager.donation),
+                    getSuperUserEmail(),
+                    # requires admin list to be set in globalsettings
+                    [gatewayManager.donation.donor.email],
+                    html_message=render_to_string('donations/email_templates/donation_receipt.html', context={
+                        'donation': gatewayManager.donation}, request=request)
+                )
+            except Exception as e:
+                print("Cannot send receipt to donor: "+str(e), flush=True)
+
             return HttpResponse(status=200)
         else:
             return HttpResponse(status=409)
@@ -92,6 +126,7 @@ def process_donation_submission(request, is_recurring):
                     print('Server logic error: '+str(e), flush=True)
                     form.add_error(
                         None, 'Server Error, cannot find previous donor records. Please contact site administrator.')
+                    return render(request, form_template, {'form': form})
             else:
                 # Finds if there's an existing email in donors
                 try:
@@ -134,6 +169,7 @@ def process_donation_submission(request, is_recurring):
                         # Should have been checked against duplication in form validation
                         # double check again for safety
                         form.add_error(None, str(e))
+                        return render(request, form_template, {'form': form})
 
             # create pending donation
             payment_gateway = PaymentGateway.objects.get(
@@ -155,7 +191,7 @@ def process_donation_submission(request, is_recurring):
                 donation.save()
             except Exception as e:
                 # Should rarely happen, but in case some bugs or order id repeats itself
-                print(str(e))
+                print(str(e), flush=True)
                 form.add_error(None, 'Server error, please retry.')
                 return render(request, form_template, {'form': form})
 
@@ -167,7 +203,7 @@ def process_donation_submission(request, is_recurring):
             pprint(form.errors)
     else:
         form = DonationWebForm(request=request, blueprint=form_blueprint)
-        form.is_recurring = True
+        form.is_recurring = is_recurring
 
     return render(request, form_template, {'form': form})
 
@@ -184,4 +220,4 @@ def recurring_form(request):
 def manage_donations(request):
     donations = Donation.objects.filter(
         donor__linked_user=request.user).order_by('-created_at')
-    return render(request, 'donations/manage-donations.html', {'donations': donations})
+    return render(request, 'donations/manage_donations.html', {'donations': donations})

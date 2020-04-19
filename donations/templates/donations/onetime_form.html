@@ -11,15 +11,16 @@
     {% csrf_token %}
     {# Include the hidden fields #}
     {% for hidden in form.hidden_fields %}
-        {{ hidden }}
+    {{ hidden }}
     {% endfor %}
     {# Include the visible fields #}
     {% for field in form.visible_fields %}
-        <div class="fieldWrapper">
-            {{ field.errors }}
-            {{ field.label_tag }} {{ field }}
-        </div>
+    <div class="fieldWrapper">
+        {{ field.errors }}
+        {{ field.label_tag }} {{ field }}
+    </div>
     {% endfor %}
     <input type="submit" value="Submit">
 </form>
+<a href="javascript:void(0)" onclick="history.back()">Back</a>
 {% endblock content %}

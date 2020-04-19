@@ -45,9 +45,14 @@ class PaymentGateway(models.Model):
         return self.title == GATEWAY_STRIPE
 
 
-class MoreFormField(AbstractFormField):
+class DonationMetaField(AbstractFormField):
     form = ParentalKey('DonationForm', on_delete=models.CASCADE,
-                       related_name='more_form_fields')
+                       related_name='donation_meta_fields')
+
+
+class DonorMetaField(AbstractFormField):
+    form = ParentalKey('DonationForm', on_delete=models.CASCADE,
+                       related_name='donor_meta_fields')
 
 
 class AmountStep(models.Model):
@@ -91,7 +96,8 @@ class DonationForm(ClusterableModel):
         InlinePanel('amount_steps', label='Fixed Amount Steps', heading='Define Fixed Donation Amount Steps',
                     help_text='Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type.'),
         AutocompletePanel('allowed_gateways'),
-        InlinePanel('more_form_fields', label='More Form Fields'),
+        InlinePanel('donation_meta_fields', label='Donation Meta Fields'),
+        InlinePanel('donor_meta_fields', label='Donor Meta Fields'),
     ]
 
     class Meta:
@@ -110,12 +116,12 @@ class DonationForm(ClusterableModel):
         return self.amount_type == 'custom'
 
 
-class Donor(models.Model):
+class Donor(ClusterableModel):
     linked_user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
-    email = models.EmailField()
+    email = models.EmailField(unique=True)
     opt_in_mailing_list = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -126,11 +132,12 @@ class Donor(models.Model):
         FieldPanel('last_name'),
         FieldPanel('email'),
         FieldPanel('opt_in_mailing_list'),
+        InlinePanel('metas', label='Donor Meta', heading='Donor Meta Data',
+                    help_text='Meta data about this donor is recorded here'),
     ]
 
     class Meta:
         ordering = ['-created_at']
-        unique_together = ['first_name', 'last_name', 'email']
 
     def __str__(self):
         return ' '.join([self.first_name, self.last_name])
@@ -219,6 +226,25 @@ class Donation(ClusterableModel):
 class DonationMeta(models.Model):
     donation = ParentalKey(
         'Donation',
+        related_name='metas',
+        on_delete=models.CASCADE,
+    )
+    field_key = models.CharField(max_length=255)
+    field_value = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-id']
+
+    def __str__(self):
+        return self.field_key
+
+
+class DonorMeta(models.Model):
+    donor = ParentalKey(
+        'Donor',
         related_name='metas',
         on_delete=models.CASCADE,
     )

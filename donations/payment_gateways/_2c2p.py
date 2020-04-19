@@ -38,8 +38,11 @@ class Gateway_2C2P(PaymentGatewayManager):
             self.donation.currency)['code']
         data['amount'] = self.format_payment_amount(
             self.donation.donation_amount)
-        data['result_url_1'] = getFullReverseUrl(
-            self.request, 'donations:verify-gateway-response')
+        # Apr 19 Tested result_url_1/2 to have no effect at all, todo: follow up with 2C2P Sum
+        # data['result_url_1'] = getFullReverseUrl(
+        #     self.request, 'donations:return-from-gateway')
+        # data['result_url_2'] = getFullReverseUrl(
+        #     self.request, 'donations:verify-gateway-response')
         data['user_defined_1'] = str(self.donation.id)
 
         if self.donation.is_recurring:
@@ -60,6 +63,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             # charge_next_date is optional if have charge_on_date set
             # data['charge_next_date'] = getNextDateFromRecurringInterval(
             #     data['recurring_interval'], '%d%m%Y')
+            # getRecurringDateNextMonth requires the superuser to set the timezone first
             data['charge_on_date'] = getRecurringDateNextMonth('%d%m')
             # data['charge_on_date'] = getNextDateFromRecurringInterval(
             #     1, '%d%m')

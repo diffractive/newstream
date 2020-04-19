@@ -66,59 +66,79 @@ def process_donation_submission(request, is_recurring):
     form_blueprint = DonationForm.objects.filter(
         is_recurring__exact=is_recurring)[0]
     if request.method == 'POST':
-        form = DonationWebForm(request.POST, blueprint=form_blueprint)
+        form = DonationWebForm(
+            request.POST, request=request, blueprint=form_blueprint)
         if form.is_valid():
-            # create a donor
-            donor = Donor(
-                first_name=form.cleaned_data['first_name'],
-                last_name=form.cleaned_data['last_name'],
-                email=form.cleaned_data['email'],
-                opt_in_mailing_list=form.cleaned_data['opt_in_mailing_list']
-            )
-            try:
-                donor.save()
-            except IntegrityError:
-                # get previous donor in db
-                donor = Donor.objects.filter(
-                    first_name=form.cleaned_data['first_name'],
-                    last_name=form.cleaned_data['last_name'],
-                    email=form.cleaned_data['email']
-                )[0]
+            # process meta data
+            donation_metas = []
+            donor_metas = []
+            for key, val in request.POST.items():
+                donationmeta_key = re.match("^donationmeta_([a-z_]+)$", key)
+                donormeta_key = re.match("^donormeta_([a-z_]+)$", key)
+                if donationmeta_key:
+                    donation_metas.append(DonationMeta(
+                        field_key=donationmeta_key.group(1), field_value=val))
+                if donormeta_key:
+                    donor_metas.append(DonorMeta(
+                        field_key=donormeta_key.group(1), field_value=val))
 
-            # check if need to create account
-            if form.cleaned_data['is_create_account']:
+            # uses existing donor record if user logged in
+            if request.user.is_authenticated:
                 try:
-                    # use email as the username
-                    generated_pwd = secrets.token_hex(10)
-                    donor_user = User.objects.create_user(
-                        username=donor.email, email=donor.email, password=generated_pwd)
-                except Exception as e:
-                    print("Cannot Create new Django user: "+str(e), flush=True)
-                    # very likely duplicate username (this email has previously been registered as user)
-                    donor_user = User.objects.get(username=donor.email)
-                # link donor to user
-                donor.linked_user = donor_user
-                donor.save()
+                    donor = Donor.objects.get(
+                        linked_user=request.user, email=request.user.email)
+                except Donor.DoesNotExist as e:
+                    # Should rarely happens, a registered user must have a linked donor record
+                    print('Server logic error: '+str(e), flush=True)
+                    form.add_error(
+                        None, 'Server Error, cannot find previous donor records. Please contact site administrator.')
             else:
+                # Finds if there's an existing email in donors
                 try:
-                    donor_user = User.objects.get(username=donor.email)
-                except Exception as e:
-                    print("No previous accounts registered for " +
-                          donor.email+". "+str(e), flush=True)
-                else:
-                    donor.linked_user = donor_user
+                    donor = Donor.objects.get(email=form.cleaned_data['email'])
+                    # update donor metas from form inputs, has to do it by field, will lead to loss of Other Names if overwrite on the whole
+                    for dm in donor_metas:
+                        dmObj = DonorMeta.objects.get(
+                            donor=donor, field_key=dm.field_key)
+                        dmObj.field_value = dm.field_value
+                        dmObj.save()
+                    if form.cleaned_data['first_name'] != donor.first_name or form.cleaned_data['last_name'] != donor.last_name:
+                        # Save form inputs as "Other Name" at original donor record
+                        donorMeta = DonorMeta(donor=donor,
+                                              field_key="Other Name", field_value=form.cleaned_data['first_name']+" "+form.cleaned_data['last_name'])
+                        donorMeta.save()
                     donor.save()
+                except Donor.DoesNotExist as e:
+                    # creates a new donor
+                    donor = Donor(
+                        first_name=form.cleaned_data['first_name'],
+                        last_name=form.cleaned_data['last_name'],
+                        email=form.cleaned_data['email'],
+                        opt_in_mailing_list=form.cleaned_data['opt_in_mailing_list'],
+                        metas=donor_metas
+                    )
+                    donor.save()
+
+                # check if need to create account
+                if form.cleaned_data['is_create_account']:
+                    try:
+                        generated_pwd = secrets.token_hex(10)
+                        donor_user = User.objects.create_user(
+                            email=donor.email, password=generated_pwd)
+                        # link donor to user
+                        donor.linked_user = donor_user
+                        donor.save()
+                    except Exception as e:
+                        print("Cannot Create new Django user: " +
+                              str(e), flush=True)
+                        # Should have been checked against duplication in form validation
+                        # double check again for safety
+                        form.add_error(None, str(e))
 
             # create pending donation
             payment_gateway = PaymentGateway.objects.get(
                 pk=form.cleaned_data['payment_gateway'])
             order_id = gen_order_id(gateway=payment_gateway)
-            donation_metas = []
-            for key, val in request.POST.items():
-                more_field_key = re.match("^omp_more_([a-z_]+)$", key)
-                if more_field_key:
-                    donation_metas.append(DonationMeta(
-                        field_key=more_field_key.group(1), field_value=val))
             donation = Donation(
                 order_number=order_id,
                 donor=donor,
@@ -127,7 +147,7 @@ def process_donation_submission(request, is_recurring):
                 is_recurring=form.cleaned_data['is_recurring'],
                 donation_amount=form.cleaned_data['donation_amount'],
                 currency=getGlobalSettings(request).currency,
-                is_create_account=form.cleaned_data['is_create_account'],
+                is_create_account=form.cleaned_data['is_create_account'] if 'is_create_account' in form.cleaned_data else False,
                 payment_status=STATUS_PENDING,
                 metas=donation_metas
             )
@@ -146,7 +166,7 @@ def process_donation_submission(request, is_recurring):
         else:
             pprint(form.errors)
     else:
-        form = DonationWebForm(blueprint=form_blueprint)
+        form = DonationWebForm(request=request, blueprint=form_blueprint)
         form.is_recurring = True
 
     return render(request, form_template, {'form': form})

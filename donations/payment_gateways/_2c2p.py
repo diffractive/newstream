@@ -1,7 +1,8 @@
 from django.shortcuts import render
 from donations.payment_gateways.core import PaymentGatewayManager
-from donations.functions import raiseObjectNone, getGlobalSettings, get2C2PSettings, getFullReverseUrl, getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
+from donations.functions import getGlobalSettings, get2C2PSettings, getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
 from donations.models import DonationMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
+from omp.functions import raiseObjectNone, getFullReverseUrl
 from urllib.parse import urlencode
 import hmac
 import hashlib
@@ -38,7 +39,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             self.donation.currency)['code']
         data['amount'] = self.format_payment_amount(
             self.donation.donation_amount)
-        # Apr 19 Tested result_url_1/2 to have no effect at all, todo: follow up with 2C2P Sum
+        # Apr 20 Tested result_url_1/2 working (such that merchant portal no need manual setting) after follow up with 2C2P Sum (an internal 2C2P settings needs to be turned on by them)
         data['result_url_1'] = getFullReverseUrl(
             self.request, 'donations:return-from-gateway')
         data['result_url_2'] = getFullReverseUrl(

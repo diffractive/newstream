@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from .functions import raiseObjectNone
+from omp.functions import raiseObjectNone
 from wagtail.contrib.forms.forms import FormBuilder
 User = get_user_model()
 
@@ -32,6 +32,7 @@ class DonationWebForm(forms.Form):
 
         # set is_recurring value and construct is_create_account field
         self.fields["is_recurring"].widget.attrs['value'] = 'True' if form.is_recurring else 'False'
+        # if user is logged in, is_create_account field will not exist in the form
         if not request.user.is_authenticated:
             if form.is_recurring:
                 self.fields["is_create_account"] = forms.BooleanField(widget=forms.HiddenInput(

@@ -8,14 +8,20 @@ from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.contrib.auth.views import PasswordResetView
 from django.core.mail import send_mail
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
 from .models import *
 from .forms import *
 from .functions import *
+from omp.functions import getFullReverseUrl
 from .payment_gateways.gateway_factory import PaymentGatewayFactory
 from .templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text
+from omp.templates.registration.email_templates.plain_texts import get_verify_your_email_text
+from omp.functions import evTokenGenerator
 from pprint import pprint
 import secrets
 import re
+import traceback
 User = get_user_model()
 
 
@@ -31,20 +37,23 @@ def verify_gateway_response(request):
         isVerified = gatewayManager.verify_gateway_response()
         if isVerified:
             # email new donation notification to admin list
-            globalSettings = getGlobalSettings(request)
-            admin_list = [
-                admin_email.email for admin_email in globalSettings.admin_emails.all()]
-            try:
-                send_mail(
-                    "New Donation",
-                    get_new_donation_text(request, gatewayManager.donation),
-                    getSuperUserEmail(),
-                    admin_list,  # requires admin list to be set in globalsettings
-                    html_message=render_to_string('donations/email_templates/new_donation.html', context={
-                        'donation': gatewayManager.donation}, request=request)
-                )
-            except Exception as e:
-                print("Cannot send emails to admins: "+str(e), flush=True)
+            # only when the donation is brand new, not counting in recurring renewals
+            if not gatewayManager.donation.parent_donation:
+                globalSettings = getGlobalSettings(request)
+                admin_list = [
+                    admin_email.email for admin_email in globalSettings.admin_emails.all()]
+                try:
+                    send_mail(
+                        "New Donation",
+                        get_new_donation_text(
+                            request, gatewayManager.donation),
+                        getSuperUserEmail(),
+                        admin_list,  # requires admin list to be set in globalsettings
+                        html_message=render_to_string('donations/email_templates/new_donation.html', context={
+                            'donation': gatewayManager.donation}, request=request)
+                    )
+                except Exception as e:
+                    print("Cannot send emails to admins: "+str(e), flush=True)
 
             # email thank you receipt to donor
             try:
@@ -53,13 +62,37 @@ def verify_gateway_response(request):
                     get_donation_receipt_text(
                         request, gatewayManager.donation),
                     getSuperUserEmail(),
-                    # requires admin list to be set in globalsettings
                     [gatewayManager.donation.donor.email],
                     html_message=render_to_string('donations/email_templates/donation_receipt.html', context={
                         'donation': gatewayManager.donation}, request=request)
                 )
             except Exception as e:
                 print("Cannot send receipt to donor: "+str(e), flush=True)
+
+            # email verification if is_create_account
+            if gatewayManager.donation.is_create_account:
+                try:
+                    donor = gatewayManager.donation.donor
+                    user = donor.linked_user
+                    uid = urlsafe_base64_encode(force_bytes(user.pk))
+                    token = evTokenGenerator.make_token(user)
+                    fullurl = getFullReverseUrl(
+                        request, 'verify-email', kwargs={'uidb64': uid, 'token': token})
+                    ms = send_mail(
+                        "Please verify your email at "+request.site.site_name,
+                        get_verify_your_email_text(
+                            request, donor.fullname, fullurl),
+                        getSuperUserEmail(),
+                        [donor.email],
+                        html_message=render_to_string('registration/email_templates/verify_your_email.html', context={
+                            'fullname': donor.fullname, 'fullurl': fullurl}, request=request)
+                    )
+                    print("Number of email verifications sent: " +
+                          str(ms), flush=True)
+                except Exception as e:
+                    print("Cannot send verification email to donor: " +
+                          str(e), flush=True)
+                    print(traceback.format_exc(), flush=True)
 
             return HttpResponse(status=200)
         else:

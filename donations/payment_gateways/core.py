@@ -1,5 +1,6 @@
-from donations.functions import raiseObjectNone, isTestMode, getGlobalSettings
+from donations.functions import isTestMode, getGlobalSettings
 from django.shortcuts import redirect
+from omp.functions import raiseObjectNone
 from abc import ABC, abstractmethod
 
 

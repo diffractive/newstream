@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static donation_tags %}
+{% load static common_tags %}
 
 {% block body_class %}manage-donations-page{% endblock %}
 
@@ -14,7 +14,7 @@
             <th class="px-4 py-2">Donation Amount</th>
             <th class="px-4 py-2">Is Recurring</th>
             <th class="px-4 py-2">Payment Gateway</th>
-            <th class="px-4 py-2">Actions</th>
+            <th class="px-4 py-2">Actions{% if not request.user.is_email_verified %} (Locked){% endif %}</th>
         </tr>
     </thead>
     <tbody>
@@ -25,7 +25,7 @@
             <td class="border px-4 py-2">{{ donation.donation_amount }}</td>
             <td class="border px-4 py-2">{{ donation.is_recurring }}</td>
             <td class="border px-4 py-2">{{ donation.gateway.title }}</td>
-            <td class="border px-4 py-2"></td>
+            <td class="border px-4 py-2">{% if request.user.is_email_verified %}<button>Manage</button>{% endif %}</td>
         </tr>
         {% endfor %}
         {% else %}

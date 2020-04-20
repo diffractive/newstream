@@ -13,6 +13,7 @@ from wagtailautocomplete.urls.admin import urlpatterns as autocomplete_admin_url
 from donations.views import CustomPasswordResetView
 from django.contrib.auth import views
 from django.urls import path
+from .views import verify_email
 
 urlpatterns = [
     path('django-admin/', admin.site.urls),
@@ -41,6 +42,9 @@ urlpatterns = [
          name='password_reset_confirm'),
     path('reset/done/', views.PasswordResetCompleteView.as_view(),
          name='password_reset_complete'),
+    path('verify-email/<uidb64>/<token>/', verify_email,
+         name='verify-email'),
+
 
 ]
 

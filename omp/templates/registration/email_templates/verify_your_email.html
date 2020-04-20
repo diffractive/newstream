@@ -1,0 +1,29 @@
+{% extends "base_email.html" %}
+{% load common_tags %}
+
+{% block title %}
+Verify Your Email
+{% endblock %}
+
+{% block content %}
+<table cellpadding="10" cellspacing="0" style="width: 100%;">
+    <tr>
+        <th style="width: 100%;text-align: left;">
+            <h2 style="font-weight: bold;">
+                Verify Your Email Now
+            </h2>
+        </th>
+    </tr>
+    <tr>
+        <td style="width: 100%;">
+            <p>Dear {{ fullname }},</p>
+            <p>Your account has been created. Please verify your email by clicking this
+                <a href="{{ fullurl }}" target="_blank">link</a> in order to fully
+                manage
+                your donations and account.</p>
+            <p>Thank you,</p>
+            <p>{{ request.site.site_name }}</p>
+        </td>
+    </tr>
+</table>
+{% endblock %}

@@ -3,12 +3,11 @@ import secrets
 import re
 from pprint import pprint
 from site_settings.models import GlobalSettings, Settings2C2P
-from django.urls import reverse
 from django.contrib.auth import get_user_model
-from django.core.exceptions import ObjectDoesNotExist
 from datetime import datetime, timedelta
 from pytz import timezone
 from .includes.currency_dictionary import currency_dict
+from omp.functions import raiseObjectNone
 User = get_user_model()
 
 
@@ -29,10 +28,6 @@ def getCurrencyFromCode(code):
     return None
 
 
-def raiseObjectNone(message=''):
-    raise ObjectDoesNotExist(message)
-
-
 def isTestMode(request):
     globalSettings = GlobalSettings.for_site(request.site)
     return globalSettings.test_mode
@@ -44,10 +39,6 @@ def get2C2PSettings(request):
 
 def getGlobalSettings(request):
     return GlobalSettings.for_site(request.site)
-
-
-def getFullReverseUrl(request, urlname):
-    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + request.get_host() + reverse(urlname)
 
 
 def gen_order_id(gateway=None):

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static donation_tags %}
+{% load static common_tags %}
 
 {% block body_class %}omp-thankyou-page{% endblock %}
 
@@ -41,6 +41,11 @@
         <td>{{ donation.payment_status }}</td>
     </tr>
 </table>
+<br>
+{% if donation.is_create_account %}
+<p>We have just sent you a verification email, please click the link in the email to verify your email address with this
+    account.</p>
+{% endif %}
 {% else %}
 <h1>{{ error_message }}</h1>
 {% endif %}

@@ -27,3 +27,6 @@ client/node_modules
 
 ### vscode
 .vscode
+ 
+### OMP
+*.log

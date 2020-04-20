@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}omp-advanced-settings{% endblock %}
+
+{% block content %}
+{% include 'profile_settings/sidebar.html' %}
+<hr><br>
+<h1>Advanced Settings</h1>
+<br>
+<a href="{% url 'delete-account' %}">Delete My Account</a>
+<p>Note that by deleting your account, all recurring payments will be cancelled and your account will be removed from
+    our database.</p>
+{% endblock content %}

@@ -10,3 +10,11 @@ class User(BaseUser):
         if self.is_email_verified:
             return '&#x2714;'
         return '&#x2718;'
+
+    @property
+    def fullname(self):
+        return ' '.join([self.first_name, self.last_name])
+
+    @fullname.setter
+    def fullname(self, val):
+        pass

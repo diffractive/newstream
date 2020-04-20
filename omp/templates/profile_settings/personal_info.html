@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}omp-personal-info{% endblock %}
+
+{% block content %}
+{% include 'profile_settings/sidebar.html' %}
+<hr><br>
+<h1>Personal Info</h1>
+<br>
+{{ form.non_field_errors }}
+<form method='POST' action=''>
+    {% csrf_token %}
+    {# Include the hidden fields #}
+    {% for hidden in form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
+    {# Include the visible fields #}
+    {% for field in form.visible_fields %}
+    <div class="fieldWrapper">
+        {{ field.errors }}
+        {{ field.label_tag }} {{ field }}
+        {% if field.name == 'email' %}
+        <a href="{% url 'change-email-address' %}">Change Email Address</a>
+        {% if not request.user.is_email_verified %}
+        <a href="{% url 'resend-verification-email' %}">Resend Verification Email</a>
+        {% endif %}
+        {% endif %}
+    </div>
+    {% endfor %}
+    <input type="submit" value="Submit">
+</form>
+{% endblock content %}

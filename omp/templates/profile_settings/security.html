@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}omp-security{% endblock %}
+
+{% block content %}
+{% include 'profile_settings/sidebar.html' %}
+<hr><br>
+<h1>Security</h1>
+<br>
+<a href="{% url 'change-password' %}">Change Password</a>
+{% endblock content %}

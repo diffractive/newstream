@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block body_class %}omp-change-email{% endblock %}
+
+{% block content %}
+{% include 'profile_settings/sidebar.html' %}
+<hr><br>
+<h1>Change Email Address</h1>
+<br>
+{{ form.non_field_errors }}
+<form method='POST' action=''>
+    {% csrf_token %}
+    {# Include the hidden fields #}
+    {% for hidden in form.hidden_fields %}
+    {{ hidden }}
+    {% endfor %}
+    {# Include the visible fields #}
+    {% for field in form.visible_fields %}
+    <div class="fieldWrapper">
+        {{ field.errors }}
+        {{ field.label_tag }} {{ field }}
+    </div>
+    {% endfor %}
+    <input type="submit" value="Submit">
+</form>
+{% endblock content %}

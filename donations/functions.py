@@ -1,13 +1,20 @@
 import os
 import secrets
 import re
+import traceback
 from pprint import pprint
+from django.core.mail import send_mail
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.template.loader import render_to_string
 from site_settings.models import GlobalSettings, Settings2C2P
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta
 from pytz import timezone
 from .includes.currency_dictionary import currency_dict
-from omp.functions import raiseObjectNone
+from .templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text
+from omp.functions import evTokenGenerator, raiseObjectNone, getFullReverseUrl
+from omp.templates.registration.email_templates.plain_texts import get_verify_your_email_text
 User = get_user_model()
 
 
@@ -100,3 +107,59 @@ def getRecurringDateNextMonth(format):
             """
             nextmonthdate = loc_dt.replace(month=loc_dt.month+2, day=1)
     return nextmonthdate.strftime(format)
+
+
+def sendDonationNotifToAdmins(request, donation):
+    globalSettings = getGlobalSettings(request)
+    admin_list = [
+        admin_email.email for admin_email in globalSettings.admin_emails.all()]
+    try:
+        send_mail(
+            "New Donation",
+            get_new_donation_text(
+                request, donation),
+            getSuperUserEmail(),
+            admin_list,  # requires admin list to be set in globalsettings
+            html_message=render_to_string('donations/email_templates/new_donation.html', context={
+                'donation': donation}, request=request)
+        )
+    except Exception as e:
+        print("Cannot send emails to admins: "+str(e), flush=True)
+
+
+def sendDonationReceipt(request, donation):
+    try:
+        send_mail(
+            "Donation Receipt",
+            get_donation_receipt_text(
+                request, donation),
+            getSuperUserEmail(),
+            [donation.donor.email],
+            html_message=render_to_string('donations/email_templates/donation_receipt.html', context={
+                'donation': donation}, request=request)
+        )
+    except Exception as e:
+        print("Cannot send receipt to donor: "+str(e), flush=True)
+
+
+def sendVerificationEmail(request, user):
+    try:
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = evTokenGenerator.make_token(user)
+        fullurl = getFullReverseUrl(
+            request, 'verify-email', kwargs={'uidb64': uid, 'token': token})
+        ms = send_mail(
+            "Please verify your email at "+request.site.site_name,
+            get_verify_your_email_text(
+                request, user.fullname, fullurl),
+            getSuperUserEmail(),
+            [user.email],
+            html_message=render_to_string('registration/email_templates/verify_your_email.html', context={
+                'fullname': user.fullname, 'fullurl': fullurl}, request=request)
+        )
+        print("Number of email verifications sent: " +
+              str(ms), flush=True)
+    except Exception as e:
+        print("Cannot send verification email to donor: " +
+              str(e), flush=True)
+        print(traceback.format_exc(), flush=True)

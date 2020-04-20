@@ -40,6 +40,7 @@ class Gateway_2C2P(PaymentGatewayManager):
         data['amount'] = self.format_payment_amount(
             self.donation.donation_amount)
         # Apr 20 Tested result_url_1/2 working (such that merchant portal no need manual setting) after follow up with 2C2P Sum (an internal 2C2P settings needs to be turned on by them)
+        # todo: Apr 21 2C2P server is not firing back the request from the new recurring payments (need follow up with Sum again)
         data['result_url_1'] = getFullReverseUrl(
             self.request, 'donations:return-from-gateway')
         data['result_url_2'] = getFullReverseUrl(

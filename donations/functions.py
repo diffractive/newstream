@@ -1,7 +1,8 @@
-from pprint import pprint
-from site_settings.models import GlobalSettings, Settings2C2P
+import os
 import secrets
 import re
+from pprint import pprint
+from site_settings.models import GlobalSettings, Settings2C2P
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist
@@ -46,7 +47,7 @@ def getGlobalSettings(request):
 
 
 def getFullReverseUrl(request, urlname):
-    return request.scheme + '://' + request.get_host() + reverse(urlname)
+    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + request.get_host() + reverse(urlname)
 
 
 def gen_order_id(gateway=None):

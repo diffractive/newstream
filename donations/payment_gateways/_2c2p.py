@@ -39,10 +39,10 @@ class Gateway_2C2P(PaymentGatewayManager):
         data['amount'] = self.format_payment_amount(
             self.donation.donation_amount)
         # Apr 19 Tested result_url_1/2 to have no effect at all, todo: follow up with 2C2P Sum
-        # data['result_url_1'] = getFullReverseUrl(
-        #     self.request, 'donations:return-from-gateway')
-        # data['result_url_2'] = getFullReverseUrl(
-        #     self.request, 'donations:verify-gateway-response')
+        data['result_url_1'] = getFullReverseUrl(
+            self.request, 'donations:return-from-gateway')
+        data['result_url_2'] = getFullReverseUrl(
+            self.request, 'donations:verify-gateway-response')
         data['user_defined_1'] = str(self.donation.id)
 
         if self.donation.is_recurring:
@@ -99,8 +99,6 @@ class Gateway_2C2P(PaymentGatewayManager):
         for key in Gateway_2C2P.getResponseParamOrder():
             if key in self.request.POST:
                 data[key] = self.request.POST[key]
-                print(
-                    'Donation #{} - Received response {} = {}'.format(self.donation.id, key, data[key]), flush=True)
         hash_value = self.request.POST['hash_value']
         checkHashStr = ''
         for key in Gateway_2C2P.getResponseParamOrder():
@@ -111,7 +109,8 @@ class Gateway_2C2P(PaymentGatewayManager):
             bytes(checkHashStr, 'utf-8'), hashlib.sha256).hexdigest()
         if hash_value.lower() == checkHash.lower():
             hashCheckResult = True
-            if self.request.path.find('return-from-gateway') == -1:
+            if self.request.path.find('verify-gateway-response') != -1:
+                print("--Incoming from verify-gateway-response--", flush=True)
                 # change donation payment_status to 2c2p's payment_status, update recurring_status
                 if data['payment_status'] == '000':
                     self.donation.payment_status = STATUS_COMPLETE
@@ -138,6 +137,16 @@ class Gateway_2C2P(PaymentGatewayManager):
                     dmeta = DonationMeta(
                         donation=self.donation, field_key='recurring_unique_id', field_value=data['recurring_unique_id'])
                     dmeta.save()
+            elif self.request.path.find('return-from-gateway') != -1:
+                print("--Incoming from return-from-gateway--", flush=True)
+                # no need to do anything extra when return-from-gateway
+            else:
+                print("--Incoming from {}".format(self.request.path), flush=True)
+
+            # for logging response purposes
+            for key, val in data.items():
+                print(
+                    'Donation #{} - Received response {} = {}'.format(self.donation.id, key, val), flush=True)
         else:
             hashCheckResult = False
             # change donation payment_status to failed

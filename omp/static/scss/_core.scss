@@ -1,4 +1,6 @@
-$brandColor: #ff00ff;
+@import 'core_variables';
+@import 'core_fonts';
+@import 'core_layouts';
 
 .newstream-nav {
     display: flex;

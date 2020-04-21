@@ -2,21 +2,30 @@ var gulp = require('gulp');
 const { watch } = require('gulp');
 var sass = require('gulp-sass');
 var postcss = require('gulp-postcss');
+const cleanCSS = require('gulp-clean-css');
+const through2 = require('through2');
 const srcpath = 'omp/static/scss/main.scss';
 const destpath = 'omp/static/css/';
 
 function css() {
-    return gulp.src(srcpath)
-        .pipe(sass().on('error', sass.logError))
-        .pipe(postcss([
-            require('tailwindcss'),
-            require('autoprefixer'),
-        ]))
-        .pipe(gulp.dest(destpath))
+  return gulp.src(srcpath)
+    .pipe(sass().on('error', sass.logError))
+    .pipe(postcss([
+      require('tailwindcss'),
+      require('autoprefixer'),
+    ]))
+    .pipe(cleanCSS({ compatibility: 'ie8' }))
+    .pipe(through2.obj(function (file, enc, cb) {
+      let date = new Date();
+      file.stat.atime = date;
+      file.stat.mtime = date;
+      cb(null, file);
+    }))
+    .pipe(gulp.dest(destpath))
 }
 
 exports.default = css
-exports.watch = function() {
+exports.watch = function () {
   // You can use a single task
   watch(srcpath, css);
 };

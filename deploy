@@ -1,20 +1,22 @@
 #!/bin/bash
 
 ismigrate='false'
-gitdeploy='false'
+isxgulp='false'
 
 print_usage() {
-    printf "%s\n" "Usage: ./deploy [-h] [-m]" "zero flags = rsync and restart" "-h is for help" "-m is for migration at remote django before restarting gunicorn"
+    printf "%s\n" "Usage: ./deploy [-h] [-g] [-m]" "zero flags = rsync and restart" "-h is for help" "-g is for executing gulp first before deploy" "-m is for migration at remote django before restarting gunicorn"
 }
 
-while getopts 'mh' flag; do
+while getopts 'mgh' flag; do
     case "${flag}" in
         m) ismigrate='true' ;;
+        g) isxgulp='true' ;;
         h) print_usage
            exit 1 ;;
     esac
 done
 
+xgulp="npx gulp"
 rsync="rsync -av --exclude '.git' --exclude 'node_modules' ./ diff-1:/srv/www/omp/"
 ssh='ssh diff-1'
 source='cd /srv/www/omp && source ~/.profile && source venv/bin/activate && export LC_ALL="en_US.UTF-8"'
@@ -24,6 +26,9 @@ stopg='sudo supervisorctl stop omp'
 restart_gunicorn='sudo supervisorctl restart omp'
 
 cmd="$rsync && $ssh '${source} && ${restart_gunicorn}'"
+if [ $isxgulp = 'true' ]; then
+    eval $xgulp
+fi
 if [ $ismigrate = 'true' ]; then
     # migrate script also restarts gunicorn
     cmd="$rsync && $ssh '${source} && ${migrate} && ${restart_gunicorn}'"

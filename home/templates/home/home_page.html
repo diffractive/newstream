@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static wagtailcore_tags %}
 
 {% block body_class %}template-homepage{% endblock %}
 
@@ -7,7 +7,13 @@
 
 <h1>Welcome to OMP's Homepage!</h1>
 
-<h2 class='brand-p'>This is a testing H2!</h2>
+<hr>
+{% for block in page.body %}
+{% include_block block %}
+{% endfor %}
+<hr>
+
+
 
 <p><a href="{% url 'donations:onetime-donation' %}">Onetime Donation</a></p>
 <p><a href="{% url 'donations:recurring-donation' %}">Recurring Donation</a></p>

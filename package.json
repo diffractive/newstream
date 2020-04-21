@@ -22,7 +22,9 @@
   "devDependencies": {
     "autoprefixer": "^9.7.5",
     "gulp": "^4.0.2",
+    "gulp-clean-css": "^4.3.0",
     "gulp-postcss": "^8.0.0",
-    "gulp-sass": "^4.0.2"
+    "gulp-sass": "^4.0.2",
+    "through2": "^3.0.1"
   }
 }

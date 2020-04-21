@@ -1,0 +1,9 @@
+{% load wagtailcore_tags %}
+
+<div class="w-screen">
+    <div class="{{ value.width_css }}">
+        {% for block in value.content %}
+        {% include_block block %}
+        {% endfor %}
+    </div>
+</div>

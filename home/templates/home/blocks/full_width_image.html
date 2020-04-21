@@ -1,0 +1,6 @@
+{% load wagtailimages_tags %}
+{% image value.banner original as img %}
+
+<div class="full-width-img-wrapper">
+    <img src="{{ img.url }}" alt="{{ img.alt }}" class="w-screen">
+</div>

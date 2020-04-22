@@ -1,5 +1,19 @@
-<div class="w-full grid grid-cols-3 grid-gap-4">
-    <div class="{{ value.alignment_css }} p-4">{{ value.column_1 }}</div>
-    <div class="{{ value.alignment_css }} p-4">{{ value.column_2 }}</div>
-    <div class="{{ value.alignment_css }} p-4">{{ value.column_3 }}</div>
+{% load wagtailcore_tags %}
+
+<div class="w-full container-row grid grid-cols-3 grid-gap-4">
+    <div class="{{ value.alignment_css }} p-4">
+        {% for block in value.column_1 %}
+        {% include_block block %}
+        {% endfor %}
+    </div>
+    <div class="{{ value.alignment_css }} p-4">
+        {% for block in value.column_2 %}
+        {% include_block block %}
+        {% endfor %}
+    </div>
+    <div class="{{ value.alignment_css }} p-4">
+        {% for block in value.column_3 %}
+        {% include_block block %}
+        {% endfor %}
+    </div>
 </div>

@@ -1,4 +1,4 @@
-from wagtail.core.blocks import StructBlock, StreamBlock, RichTextBlock, ChoiceBlock
+from wagtail.core.blocks import StructBlock, StreamBlock, RichTextBlock, ChoiceBlock, CharBlock, URLBlock, ListBlock
 from wagtail.images.blocks import ImageChooserBlock
 
 
@@ -13,11 +13,52 @@ class FullWidthImageBlock(StructBlock):
         template = 'home/blocks/full_width_image.html'
 
 
+class LinkButtonBlock(StructBlock):
+    button_text = CharBlock()
+    button_link = URLBlock()
+    target_window = ChoiceBlock(choices=[
+        ('_blank', 'New Tab'),
+        ('_self', 'Same Tab'),
+    ])
+
+    class Meta:
+        icon = 'link'
+        label = 'Link Button'
+        template = 'home/blocks/link_button.html'
+
+
+class HeadingBlock(StructBlock):
+    heading_size = ChoiceBlock(choices=[
+        ('h1', 'H1'),
+        ('h2', 'H2'),
+        ('h3', 'H3'),
+        ('h4', 'H4'),
+        ('h5', 'H5'),
+        ('h6', 'H6'),
+    ])
+    heading_text = CharBlock()
+
+    class Meta:
+        icon = 'title'
+        template = 'home/blocks/heading_block.html'
+
+
+class ColumnContentBlock(StreamBlock):
+    heading_block = HeadingBlock()
+    text_block = RichTextBlock(template="home/blocks/text_block.html")
+    buttons_block = ListBlock(
+        LinkButtonBlock(), template="home/blocks/link_buttons_list.html")
+
+    class Meta:
+        icon = 'form'
+        label = 'Column Content'
+
+
 class ColumnBlock(StructBlock):
     alignment_css = ChoiceBlock(choices=[
-        ('richtext-center', 'center'),
-        ('richtext-start', 'left'),
-        ('richtext-end', 'right'),
+        ('column-horz-align-center', 'center'),
+        ('column-horz-align-start', 'left'),
+        ('column-horz-align-end', 'right'),
     ], label="Horizontal Alignment of Column Content")
 
     class Meta:
@@ -25,7 +66,7 @@ class ColumnBlock(StructBlock):
 
 
 class SingleColumnBlock(ColumnBlock):
-    content = RichTextBlock(blank=True)
+    content = ColumnContentBlock()
 
     class Meta:
         label = 'Single-Column Block'
@@ -33,8 +74,8 @@ class SingleColumnBlock(ColumnBlock):
 
 
 class TwoColumnBlock(ColumnBlock):
-    column_1 = RichTextBlock(blank=True)
-    column_2 = RichTextBlock(blank=True)
+    column_1 = ColumnContentBlock(label="Column 1 Content")
+    column_2 = ColumnContentBlock(label="Column 2 Content")
 
     class Meta:
         label = 'Two-Column Block'
@@ -42,9 +83,9 @@ class TwoColumnBlock(ColumnBlock):
 
 
 class ThreeColumnBlock(ColumnBlock):
-    column_1 = RichTextBlock(blank=True)
-    column_2 = RichTextBlock(blank=True)
-    column_3 = RichTextBlock(blank=True)
+    column_1 = ColumnContentBlock(label="Column 1 Content")
+    column_2 = ColumnContentBlock(label="Column 2 Content")
+    column_3 = ColumnContentBlock(label="Column 3 Content")
 
     class Meta:
         label = 'Three-Column Block'
@@ -52,24 +93,25 @@ class ThreeColumnBlock(ColumnBlock):
 
 
 class SectionContentBlock(StreamBlock):
-    single_column_block = SingleColumnBlock()
-    two_column_block = TwoColumnBlock()
-    three_column_block = ThreeColumnBlock()
+    single_column_row = SingleColumnBlock()
+    two_column_row = TwoColumnBlock()
+    three_column_row = ThreeColumnBlock()
 
     class Meta:
-        icon = 'code'
+        icon = 'form'
         label = 'Section Content'
 
 
 class FullWidthSectionBlock(StructBlock):
     width_css = ChoiceBlock(choices=[
+        ('container-tight', 'tight'),
         ('container', 'standard'),
         ('container-wide', 'wide'),
     ], icon='cog', label='Width of Inner Container')
     content = SectionContentBlock()
 
     class Meta:
-        icon = 'form'
+        icon = 'placeholder'
         label = 'Full-width Section'
         admin_text = '{label}: full-width section that can contains many more child blocks'.format(
             label=label)

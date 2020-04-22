@@ -1,1 +1,7 @@
-<div class="w-full {{ value.alignment_css }}">{{ value.content }}</div>
+{% load wagtailcore_tags %}
+
+<div class="w-full container-row {{ value.alignment_css }}">
+    {% for block in value.content %}
+    {% include_block block %}
+    {% endfor %}
+</div>

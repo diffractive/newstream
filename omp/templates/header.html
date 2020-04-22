@@ -1,15 +1,21 @@
-{% load common_tags %}
+{% load common_tags wagtailimages_tags %}
+{% image request|brand_logo max-120x120 as brand_logo %}
 
-<div class='newstream-nav py-4'>
-    <a href="{{ request|domain }}">
-        <h2 class="px-2">NewStream</h2>
+<div class='newstream-top-nav'>
+    <a href="{{ request|domain }}" class="brand-logo-link">
+        <img src="{{ brand_logo.url }}" alt="{{ brand_logo.alt }}" width="{{ brand_logo.width }}"
+            height="{{ brand_logo.height }}">
     </a>
-    {% if user.is_authenticated %}
-    <span class="px-2">Hi, {{ user.email }} {{ user.email_verification_status|safe }}</span>
-    <a href="{% url 'personal-info'%}" class="px-2">Profile Settings</a>
-    <a href="{% url 'donations:my-donations'%}" class="px-2">My Donations</a>
-    <a href="{% url 'logout'%}?next={{request.path}}" class="px-2">Logout</a>
-    {% else %}
-    <a href="{% url 'login'%}?next={{request.path}}" class="px-2">Login</a>
-    {% endif %}
+    <div class="left-nav flex items-center">
+        <a id="nav-toggle" href="#"><span></span></a>
+        <a href="/contact-us" class="menu-item ml-16">Contact</a>
+    </div>
+    <div class="right-nav flex items-center justify-end">
+        {% if user.is_authenticated %}
+        <a href="#" class="mr-16 menu-item">{{ user.fullname }}</a>
+        {% else %}
+        <a href="{% url 'login'%}?next={{request.path}}" class="mr-16 menu-item">Sign in</a>
+        {% endif %}
+        <a href="/donate" class="menu-item nav-donate-btn">Donate</a>
+    </div>
 </div>

@@ -43,7 +43,7 @@
 }
 
 .container-row {
-    margin-bottom: 2rem;
+    margin-bottom: 4rem;
 
     &:last-child {
         margin-bottom: 0rem;
@@ -59,9 +59,9 @@
 }
 
 .column-horz-align-center {
-    @apply flex flex-col items-center;
+    @apply flex flex-col items-center text-center;
     .rich-text {
-        @apply flex flex-col items-center;
+        @apply flex flex-col items-center text-center;
     }
 }
 .column-horz-align-start {
@@ -71,8 +71,8 @@
     }
 }
 .column-horz-align-end {
-    @apply flex flex-col items-end;
+    @apply flex flex-col items-end text-right;
     .rich-text {
-        @apply flex flex-col items-end;
+        @apply flex flex-col items-end text-right;
     }
 }

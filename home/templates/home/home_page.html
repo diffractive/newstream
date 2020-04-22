@@ -4,17 +4,7 @@
 {% block body_class %}template-homepage{% endblock %}
 
 {% block content %}
-
-<h1>Welcome to OMP's Homepage!</h1>
-
-<hr>
 {% for block in page.body %}
 {% include_block block %}
 {% endfor %}
-<hr>
-
-
-
-<p><a href="{% url 'donations:onetime-donation' %}">Onetime Donation</a></p>
-<p><a href="{% url 'donations:recurring-donation' %}">Recurring Donation</a></p>
 {% endblock content %}

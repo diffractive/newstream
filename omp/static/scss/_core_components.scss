@@ -1,0 +1,61 @@
+
+/* Top Navigation Bar */
+#nav-toggle{
+    position: relative;
+    padding-right: 2.5rem;
+    top: -2px;
+    span { 
+        &, &:before, &:after {
+            cursor: pointer;
+            border-radius: 1px;
+            height: 4px;
+            width: 28px;
+            @apply bg-primary;
+            position: absolute;
+            display: block;
+            content: '';
+        }
+
+        &:before {
+            top: -8px;
+        }
+        &:after {
+            bottom: -8px;
+        }
+    }
+}
+.newstream-top-nav {
+    @apply w-screen flex justify-between items-center;
+    padding: 2.5rem 4rem;
+    border-bottom: $border-grey-color 1px solid;
+    a {
+        font-family: 'Fira Sans';
+        @apply text-black;
+        &.brand-logo-link {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        &.menu-item {
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+        &.nav-donate-btn {
+            @apply bg-primary text-white;
+            padding: 0.5rem 2.5rem;
+        }
+    }
+}
+
+/* Footer */
+.newstream-footer {
+    @apply flex flex-col items-center;
+    padding: 2rem;
+    border-top: $border-grey-color 2px solid;
+    .brand-logo-link {
+        margin-bottom: 2rem;
+    }
+    .site-links {
+        color: black;
+    }
+}

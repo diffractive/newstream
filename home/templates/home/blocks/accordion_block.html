@@ -1,0 +1,19 @@
+{% load wagtailcore_tags %}
+
+<div class="column-element ns-accordion">
+    {% for block in value.items %}
+    <div class="ns-accordion-item">
+        <input type="radio" id="ns-accordion-rd-{{ forloop.counter }}" class="ns-accordion-rd" name="ns-accordion-rd">
+        <label class="ns-accordion-item-label"
+            for="ns-accordion-rd-{{ forloop.counter }}">{{ block.item_title }}</label>
+        <div class="ns-accordion-item-content">
+            {{ block.item_content }}
+        </div>
+    </div>
+    {% endfor %}
+    <div class="ns-accordion-item">
+        <div class="ns-accordion-item-footer">
+            {{ value.footer}}
+        </div>
+    </div>
+</div>

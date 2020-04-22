@@ -1,4 +1,5 @@
-{% load static wagtailuserbar %}
+{% load static wagtailuserbar common_tags wagtailimages_tags %}
+{% image request|site_icon max-32x32 as site_icon %}
 
 <!DOCTYPE html>
 <html class="no-js" lang="en">
@@ -17,6 +18,8 @@
     </title>
     <meta name="description" content="" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ site_icon.url }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ site_icon.url }}">
 
     {# Global stylesheets #}
     <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
@@ -34,6 +37,8 @@
     {% include "messages.html" %}
 
     {% block content %}{% endblock %}
+
+    {% include "footer.html" %}
 
     {# Global javascript #}
     <script type="text/javascript" src="{% static 'js/main.js' %}"></script>

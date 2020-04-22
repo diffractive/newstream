@@ -1,0 +1,24 @@
+// colors
+$primary-color: #1076e4;
+$primary-light-color: #e9f3ff;
+$primary-dark-color: #06233c;
+$border-grey-color: #E8EBED;
+
+.bg-primary {
+    background-color: $primary-color;
+}
+.bg-primary-light {
+    background-color: $primary-light-color;
+}
+.bg-primary-dark {
+    background-color: $primary-dark-color;
+}
+.text-primary {
+    color: $primary-color;
+}
+.text-primary-light {
+    color: $primary-light-color;
+}
+.text-primary-dark {
+    color: $primary-dark-color;
+}

@@ -1,8 +1,87 @@
+a {
+    @apply text-primary;
+}
+
 a.ns-btn-link {
+    @apply bg-primary-dark;
     font-family: 'Fira Sans';
     font-weight: 600;
     padding: 0.75rem 2.5rem;
     margin: 1rem;
-    background-color: black;
     color: white;
+}
+
+.ns-page-breaker {
+    background-color: $border-grey-color;
+    height: 2px;
+}
+
+/* Accordion styles */
+input.ns-accordion-rd {
+    position: absolute;
+    opacity: 0;
+    z-index: -1;
+}
+.ns-accordion {
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border-color: $border-grey-color;
+    border-width: 2px;
+    width: 100%;
+}
+.ns-accordion-item {
+    width: 100%;
+    border-top: $border-grey-color 1px solid;
+    overflow: hidden;
+    &:first-child {
+        border-top: none;
+    }
+    .rich-text {
+        text-align: left;
+    }
+    &-label {
+        display: flex;
+        justify-content: space-between;
+        padding: 1.5rem 4rem;
+        font-weight: 600;
+        cursor: pointer;
+        /* Icon */
+        &:hover {
+            background: $border-grey-color;
+        }
+        &::after {
+            content: "\276F";
+            @apply text-primary;
+            width: 1em;
+            height: 1em;
+            text-align: center;
+            transition: all .35s;
+        }
+    }
+    &-content {
+        max-height: 0;
+        display: none;
+        padding: 1rem 4rem;
+        color: black;
+        transition: all .35s;
+    }
+    &-footer {
+        display: flex;
+        justify-content: center;
+        padding: 1rem;
+        font-size: 0.8rem;
+    }
+}
+// :checked
+input.ns-accordion-rd:checked {
+  + .ns-accordion-item-label {
+    background: $border-grey-color;
+    &::after {
+      transform: rotate(90deg);
+    }
+  }
+  ~ .ns-accordion-item-content {
+    max-height: 100vh;
+    display: block;
+  }
 }

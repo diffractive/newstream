@@ -1,6 +1,7 @@
 {% load wagtailcore_tags %}
 
-<div class="w-screen">
+<div
+    class="w-screen {{ value.background_color_css }} {% if value.background_color_css == 'bg-primary-dark' or value.background_color_css == 'bg-primary' %}text-white{% endif %}">
     <div class="{{ value.width_css }}">
         {% for block in value.content %}
         {% include_block block %}

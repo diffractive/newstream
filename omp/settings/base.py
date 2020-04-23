@@ -54,6 +54,7 @@ INSTALLED_APPS = [
     'wagtailautocomplete',
     'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
     'custom_user.apps.CustomUserConfig',
+    'widget_tweaks',
 
     'django.contrib.admin',
     'django.contrib.auth',

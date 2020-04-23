@@ -86,7 +86,7 @@ def donate(request):
         raise e
     if request.method == 'POST':
         form = DonationWebForm(
-            request.POST, request=request, blueprint=form_blueprint)
+            request.POST, request=request, blueprint=form_blueprint, label_suffix='')
         if form.is_valid():
             # process meta data
             donation_metas = []
@@ -111,7 +111,7 @@ def donate(request):
                     print('Server logic error: '+str(e), flush=True)
                     form.add_error(
                         None, 'Server Error, cannot find previous donor records. Please contact site administrator.')
-                    return render(request, form_template, {'form': form})
+                    return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS, 'personal_info_fields': PERSONAL_INFO_FIELDS, 'other_fields': OTHER_FIELDS})
             else:
                 # Finds if there's an existing email in donors
                 try:
@@ -157,7 +157,7 @@ def donate(request):
                         # Should have been checked against duplication in form validation
                         # double check again for safety
                         form.add_error(None, str(e))
-                        return render(request, form_template, {'form': form})
+                        return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS, 'personal_info_fields': PERSONAL_INFO_FIELDS, 'other_fields': OTHER_FIELDS})
 
             # create pending donation
             payment_gateway = PaymentGateway.objects.get(
@@ -181,7 +181,7 @@ def donate(request):
                 # Should rarely happen, but in case some bugs or order id repeats itself
                 print(str(e), flush=True)
                 form.add_error(None, 'Server error, please retry.')
-                return render(request, form_template, {'form': form})
+                return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS, 'personal_info_fields': PERSONAL_INFO_FIELDS, 'other_fields': OTHER_FIELDS})
 
             # redirect to payment_gateway
             gatewayManager = PaymentGatewayFactory.initGateway(
@@ -190,8 +190,13 @@ def donate(request):
         else:
             pprint(form.errors)
     else:
-        form = DonationWebForm(request=request, blueprint=form_blueprint)
-    return render(request, form_template, {'form': form})
+        form = DonationWebForm(
+            request=request, blueprint=form_blueprint, label_suffix='')
+
+    # see: https://docs.djangoproject.com/en/3.0/ref/forms/api/#django.forms.Form.field_order
+    form.order_fields(
+        ['donation_amount', 'donation_frequency', 'payment_gateway'])
+    return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS, 'personal_info_fields': PERSONAL_INFO_FIELDS, 'other_fields': OTHER_FIELDS})
 
 
 @login_required

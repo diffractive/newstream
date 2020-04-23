@@ -6,6 +6,24 @@ from wagtail.contrib.forms.forms import FormBuilder
 User = get_user_model()
 
 
+# These lists are for the categorization of fields
+# Used for rendering conditions in donation_form.html
+DONATION_DETAILS_FIELDS = [
+    'payment_gateway',
+    'donation_frequency',
+    'donation_amount'
+]
+PERSONAL_INFO_FIELDS = [
+    'first_name',
+    'last_name',
+    'email'
+]
+OTHER_FIELDS = [
+    'opt_in_mailing_list',
+    'is_create_account'
+]
+
+
 class DonationWebForm(forms.Form):
     first_name = forms.CharField(label='First Name', max_length=255)
     last_name = forms.CharField(label='Last Name', max_length=255)
@@ -26,6 +44,8 @@ class DonationWebForm(forms.Form):
         if not blueprint:
             raiseObjectNone('Please provide a DonationForm blueprint')
         form = blueprint
+        # set footer_html property from blueprint
+        self.footer_html = form.footer_text
 
         # pop fields if user logged in
         if request.user.is_authenticated:
@@ -35,21 +55,10 @@ class DonationWebForm(forms.Form):
             self.fields.pop('opt_in_mailing_list')
             self.fields.pop('is_create_account')
 
-        # set is_recurring value and construct is_create_account field
-        # self.fields["is_recurring"].widget.attrs['value'] = 'True' if form.is_recurring else 'False'
-        # if user is logged in, is_create_account field will not exist in the form
-        # if not request.user.is_authenticated:
-        #     if form.is_recurring:
-        #         self.fields["is_create_account"] = forms.BooleanField(widget=forms.HiddenInput(
-        #         ), label='Create Account?', required=False, initial=form.is_recurring)
-        #     else:
-        #         self.fields["is_create_account"] = forms.BooleanField(
-        #             label='Create Account?', required=False, initial=form.is_recurring)
-
         # construct payment gateway field
         gateways = form.allowed_gateways.all()
         self.fields["payment_gateway"] = forms.ChoiceField(
-            choices=[(x.id, x.frontend_label) for x in gateways])
+            choices=[(x.id, x.frontend_label) for x in gateways], label="Payment method")
 
         # construct donor meta fields from form configuration
         if not request.user.is_authenticated:

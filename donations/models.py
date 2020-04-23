@@ -1,6 +1,6 @@
 from django.db import models
 from django.conf import settings
-from wagtail.admin.edit_handlers import FieldPanel, InlinePanel
+from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, RichTextField
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -88,6 +88,7 @@ class DonationForm(ClusterableModel):
     allowed_gateways = models.ManyToManyField('PaymentGateway')
     # todo: implement this logic at wagtail backend: there should only be one active form in use at a time
     is_active = models.BooleanField(default=False)
+    footer_text = RichTextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted = models.BooleanField(default=False)
@@ -104,6 +105,7 @@ class DonationForm(ClusterableModel):
         AutocompletePanel('allowed_gateways'),
         InlinePanel('donation_meta_fields', label='Donation Meta Fields'),
         InlinePanel('donor_meta_fields', label='Donor Meta Fields'),
+        FieldPanel('footer_text')
     ]
 
     class Meta:

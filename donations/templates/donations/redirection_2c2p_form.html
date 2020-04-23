@@ -1,13 +1,21 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static widget_tweaks %}
 
-{% block body_class %}redirection-2c2p-page{% endblock %}
+{% block body_class %}omp-redirect-2c2p-page{% endblock %}
 
 {% block content %}
 
-<h1>Redirecting to 2C2P!</h1>
+<div class="flex donation-header">
+    <div class="step-div w-40 p-6 text-right">Step 2 of 2</div>
+    <div class="step-label-div flex-1 p-6 text-left text-white">Secure Payment</div>
+</div>
 
-<form method='POST' action='{{ action }}' id='2c2pform'>
+<div class="container-tight redirect-loading-div flex flex-col justify-center items-center">
+    <img src="{% static 'img/loading-spinner.gif' %}" class="w-10 h-10 lg:w-16 lg:h-16 mb-4" alt="loading-spinner">
+    <p>Redirecting to Payment Gateway Page...</p>
+</div>
+
+<form method='POST' action='{{ action }}' id='2c2pform' class='hidden'>
     {# Include the hidden data fields #}
     {% for key, val in data.items %}
     <input type="hidden" name="{{ key }}" value="{{ val }}">
@@ -15,6 +23,8 @@
     <input name="submit-btn" id="submit-btn" type="submit" value="Submit">
 </form>
 <script type="text/javascript">
-    document.getElementById("2c2pform").submit();
+    setTimeout(() => {
+        document.getElementById("2c2pform").submit();
+    }, 1000)
 </script>
 {% endblock content %}

@@ -58,7 +58,24 @@
 
 /* Donation Sections */
 .donation-details-section {
-    border-right: $border-grey-color 2px solid;
+    @apply w-1/2;
+    padding: 1rem 3rem;
+    border-right: $border-grey-color 1px solid;
+}
+.personal-info-section {
+    @apply w-1/2;
+    padding: 1rem 3rem;
+}
+.other-fields-section {
+    max-width: 500px;
+}
+
+/* Redirection Page */
+.redirect-loading-div {
+    min-height: 20rem;
+    @screen lg {
+        min-height: 30rem;
+    }
 }
 
 /* Footer */

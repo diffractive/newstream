@@ -3,10 +3,8 @@ from . import views
 
 app_name = 'donations'
 urlpatterns = [
-    path('onetime-donation/', views.onetime_form,
-         name='onetime-donation'),
-    path('recurring-donation/', views.recurring_form,
-         name='recurring-donation'),
+    path('donate/', views.donate,
+         name='donate'),
     path('verify-gateway-response/', views.verify_gateway_response,
          name='verify-gateway-response'),
     path('return-from-gateway/', views.return_from_gateway,

@@ -27,6 +27,7 @@ urlpatterns = [
     path('donations/', include('donations.urls')),
 
     path('login/', views.LoginView.as_view(), name='login'),
+    # todo: provide template for logout view
     path('logout/', views.LogoutView.as_view(), name='logout'),
 
     path('change-password/', user_views.change_password,

@@ -12,8 +12,12 @@ class DonationWebForm(forms.Form):
     email = forms.EmailField(label='Email Address', max_length=255)
     opt_in_mailing_list = forms.BooleanField(
         label='Opt in Mailing List?', required=False)
-    is_recurring = forms.BooleanField(
-        widget=forms.HiddenInput(), required=False)
+    donation_frequency = forms.ChoiceField(choices=[
+        ('monthly', 'Monthly'),
+        ('onetime', 'One-time'),
+    ])
+    is_create_account = forms.BooleanField(
+        label='Create a member account', required=False)
 
     def __init__(self, *args, request=None, blueprint=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -29,22 +33,23 @@ class DonationWebForm(forms.Form):
             self.fields.pop('last_name')
             self.fields.pop('email')
             self.fields.pop('opt_in_mailing_list')
+            self.fields.pop('is_create_account')
 
         # set is_recurring value and construct is_create_account field
-        self.fields["is_recurring"].widget.attrs['value'] = 'True' if form.is_recurring else 'False'
+        # self.fields["is_recurring"].widget.attrs['value'] = 'True' if form.is_recurring else 'False'
         # if user is logged in, is_create_account field will not exist in the form
-        if not request.user.is_authenticated:
-            if form.is_recurring:
-                self.fields["is_create_account"] = forms.BooleanField(widget=forms.HiddenInput(
-                ), label='Create Account?', required=False, initial=form.is_recurring)
-            else:
-                self.fields["is_create_account"] = forms.BooleanField(
-                    label='Create Account?', required=False, initial=form.is_recurring)
+        # if not request.user.is_authenticated:
+        #     if form.is_recurring:
+        #         self.fields["is_create_account"] = forms.BooleanField(widget=forms.HiddenInput(
+        #         ), label='Create Account?', required=False, initial=form.is_recurring)
+        #     else:
+        #         self.fields["is_create_account"] = forms.BooleanField(
+        #             label='Create Account?', required=False, initial=form.is_recurring)
 
         # construct payment gateway field
         gateways = form.allowed_gateways.all()
         self.fields["payment_gateway"] = forms.ChoiceField(
-            choices=[(x.id, x.title) for x in gateways])
+            choices=[(x.id, x.frontend_label) for x in gateways])
 
         # construct donor meta fields from form configuration
         if not request.user.is_authenticated:

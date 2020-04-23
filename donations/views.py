@@ -74,11 +74,15 @@ def thank_you(request):
     return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': 'No Payment Data is received.'})
 
 
-def process_donation_submission(request, is_recurring):
+def donate(request):
     # todo: need to display the currency symbol in template
-    form_template = 'donations/recurring_form.html' if is_recurring else 'donations/onetime_form.html'
-    form_blueprint = DonationForm.objects.filter(
-        is_recurring__exact=is_recurring)[0]
+    form_template = 'donations/donation_form.html'
+    try:
+        form_blueprint = DonationForm.objects.get(
+            is_active__exact=True)
+    except Exception as e:
+        print("There should be exactly one active DonationForm.", flush=True)
+        raise e
     if request.method == 'POST':
         form = DonationWebForm(
             request.POST, request=request, blueprint=form_blueprint)
@@ -163,7 +167,7 @@ def process_donation_submission(request, is_recurring):
                 donor=donor,
                 form=form_blueprint,
                 gateway=payment_gateway,
-                is_recurring=form.cleaned_data['is_recurring'],
+                is_recurring=True if form.cleaned_data['donation_frequency'] == 'monthly' else False,
                 donation_amount=form.cleaned_data['donation_amount'],
                 currency=getGlobalSettings(request).currency,
                 is_create_account=form.cleaned_data['is_create_account'] if 'is_create_account' in form.cleaned_data else False,
@@ -186,17 +190,7 @@ def process_donation_submission(request, is_recurring):
             pprint(form.errors)
     else:
         form = DonationWebForm(request=request, blueprint=form_blueprint)
-        form.is_recurring = is_recurring
-
     return render(request, form_template, {'form': form})
-
-
-def onetime_form(request):
-    return process_donation_submission(request, False)
-
-
-def recurring_form(request):
-    return process_donation_submission(request, True)
 
 
 @login_required

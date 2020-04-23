@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Logged out from NewStream{% endblock %}
+
+{% block content %}
+<div class="container auth-container">
+    <div class="row">
+        <div class="col-md-6 col-centered auth-form">
+            <h3>Goodbye!</h3>
+            <p>Login back in at <a href="{% url 'login'%}?next={{request.path}}">Here</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

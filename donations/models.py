@@ -22,10 +22,12 @@ STATUS_NONRECURRING = 'non-recurring'
 
 class PaymentGateway(models.Model):
     title = models.CharField(max_length=255, unique=True)
+    frontend_label = models.CharField(max_length=255)
     list_order = models.IntegerField(default=0)
 
     panels = [
         FieldPanel('title'),
+        FieldPanel('frontend_label'),
         FieldPanel('list_order'),
     ]
 
@@ -76,12 +78,16 @@ class DonationForm(ClusterableModel):
     ]
     title = models.CharField(max_length=255, unique=True)
     description = models.TextField(blank=True)
-    is_recurring = models.BooleanField(default=False)
+    # no need to differentiate is_recurring at the form blueprint level
+    # should allow donors with the flexibility to choose one-time/monthly within the same form
+    # is_recurring = models.BooleanField(default=False)
     amount_type = models.CharField(
         max_length=20, choices=AMOUNT_TYPE_CHOICES, verbose_name='Donation Amount Type')
     fixed_amount = models.FloatField(blank=True, null=True, verbose_name='Define Fixed Donation Amount',
                                      help_text='Define fixed donation amount if you chose "Fixed Amount" for your Amount Type')
     allowed_gateways = models.ManyToManyField('PaymentGateway')
+    # todo: implement this logic at wagtail backend: there should only be one active form in use at a time
+    is_active = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted = models.BooleanField(default=False)
@@ -89,7 +95,7 @@ class DonationForm(ClusterableModel):
     panels = [
         FieldPanel('title'),
         FieldPanel('description'),
-        FieldPanel('is_recurring'),
+        FieldPanel('is_active'),
         FieldPanel('amount_type'),
         FieldPanel(
             'fixed_amount', help_text='Define your fixed donation amount if you chose "Fixed Amount" for your Amount Type.'),

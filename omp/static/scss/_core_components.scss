@@ -1,3 +1,4 @@
+/* scss items for major components on the web page */
 
 /* Top Navigation Bar */
 #nav-toggle{
@@ -27,7 +28,7 @@
 .newstream-top-nav {
     @apply w-screen flex justify-between items-center;
     padding: 2.5rem 4rem;
-    border-bottom: $border-grey-color 1px solid;
+    border-bottom: $border-grey-color 2px solid;
     a {
         font-family: 'Fira Sans';
         @apply text-black;
@@ -45,6 +46,19 @@
             padding: 0.5rem 2.5rem;
         }
     }
+}
+
+/* Donation Header */
+.donation-header {
+    border-bottom: $border-grey-color 2px solid;
+    .step-label-div {
+        @apply bg-primary-dark;
+    }
+}
+
+/* Donation Sections */
+.donation-details-section {
+    border-right: $border-grey-color 2px solid;
 }
 
 /* Footer */

@@ -36,9 +36,7 @@ class PaymentGatewayManager(ABC):
 
     @abstractmethod
     def verify_gateway_response(self):
-        """ Override to verify the response from this payment gateway after payments, returns boolean 
-        todo: send email receipt and email verification to donor
-        """
+        """ Override to verify the response from this payment gateway after payments, returns boolean """
         return False
 
     def get_built_redirect_url(self):

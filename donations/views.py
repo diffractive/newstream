@@ -76,6 +76,7 @@ def thank_you(request):
 
 def donate(request):
     # todo: need to display the currency symbol in template
+    # todo: allow custom value in fixed_steps payment option
     form_template = 'donations/donation_form.html'
     try:
         form_blueprint = DonationForm.objects.get(

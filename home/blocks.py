@@ -76,7 +76,6 @@ class PageBreaker(StructBlock):
 
 class ColumnContentBlock(StreamBlock):
     heading_block = HeadingBlock()
-    # todo: find a way to align text in richtext editor
     text_block = RichTextBlock(
         template="home/blocks/text_block.html", label="Text")
     buttons_block = ListBlock(

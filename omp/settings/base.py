@@ -18,6 +18,8 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 
 # django needs this to redirects user correctly when he stumbles upon a logn_required route
 LOGIN_URL = "/login"
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
 # Custom User Model
 AUTH_USER_MODEL = 'custom_user.User'

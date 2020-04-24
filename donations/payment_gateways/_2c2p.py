@@ -2,7 +2,7 @@ from django.shortcuts import render
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.functions import getGlobalSettings, get2C2PSettings, getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
 from donations.models import DonationMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
-from omp.functions import raiseObjectNone, getFullReverseUrl
+from omp.functions import raiseObjectNone, getFullReverseUrl, getSiteName
 from urllib.parse import urlencode
 import hmac
 import hashlib
@@ -49,7 +49,7 @@ class Gateway_2C2P(PaymentGatewayManager):
 
         if self.donation.is_recurring:
             data['payment_description'] = 'Recurring Donation for {}'.format(
-                self.request.site.site_name)
+                getSiteName(self.request))
             data['request_3ds'] = 'Y'
             data['recurring'] = 'Y'
             data['order_prefix'] = gen_order_prefix_2c2p()
@@ -77,7 +77,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             dmeta.save()
         else:
             data['payment_description'] = 'Onetime Donation for {}'.format(
-                self.request.site.site_name)
+                getSiteName(self.request))
 
         params = ''
         for key in Gateway_2C2P.getRequestParamOrder():

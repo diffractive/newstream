@@ -1,6 +1,7 @@
 import os
 from django import template
 from site_settings.models import AppearanceSettings
+from omp.functions import getSiteName
 
 register = template.Library()
 
@@ -20,3 +21,8 @@ def getBrandLogo(req):
 def getSiteIcon(req):
     settings = AppearanceSettings.for_site(req.site)
     return settings.site_icon
+
+
+@register.filter(name='site_name')
+def returnSiteName(req):
+    return getSiteName(req)

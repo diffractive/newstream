@@ -1,3 +1,6 @@
+from omp.functions import getSiteName
+
+
 def get_verify_your_email_text(request, fullname, verify_link):
     return """
         Verify Your Email Now\n
@@ -8,5 +11,5 @@ def get_verify_your_email_text(request, fullname, verify_link):
         %s
     """ % (fullname,
            verify_link,
-           request.site.site_name
+           getSiteName(request)
            )

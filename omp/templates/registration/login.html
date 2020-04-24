@@ -1,45 +1,40 @@
 {% extends "base.html" %}
+{% load common_tags widget_tweaks %}
 
-{% block title %}Login to NewStream{% endblock %}
+{% block title %}Login to {{ request|site_name }}{% endblock %}
 
 {% block content %}
-<div class="container auth-container">
-    <div class="row">
-        <div class="col-md-6 col-centered auth-form">
-            <h3>NewStream Login</h3>
-            <form method="post" action="{% url 'login' %}">
-                {% csrf_token %}
-                <div class="form-group login-feedback">
-                    {% if form.errors %}
-                    <p>Your username and password didn't match. Please try again.</p>
-                    {% endif %}
-                    {% if next %}
-                    {% if user.is_authenticated %}
-                    <p>Your account doesn't have access to this page. To proceed,
-                        please login with an account that has access.</p>
-                    {% else %}
-                    <p>Please login to see this page.</p>
-                    {% endif %}
-                    {% endif %}
+<div class="container-tight flex flex-col items-center">
+    <h1 class="mb-5">Login to {{ request|site_name }}</h1>
+    <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        <div class="flex flex-col login-container items-stretch">
+            {% if form.errors %}
+            <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 mb-4" role="alert">
+                <p class="font-bold">Login Form Error:</p>
+                <p>Your email and password do not match. Please try again.</p>
+            </div>
+            {% endif %}
+
+            <div class="mb-4">
+                <div class="label-div">{{ form.username.label_tag }}</div>
+                <div class="field-div widget_{{ form.username|widget_type }}">
+                    {{ form.username }}
                 </div>
-                <div class="form-group">
-                    <input type="text" class="form-control" placeholder="Your Username *"
-                        name="{{ form.username.html_name }}" />
+            </div>
+            <div class="mb-4">
+                <div class="label-div">{{ form.password.label_tag }}</div>
+                <div class="field-div widget_{{ form.password|widget_type }}">
+                    {{ form.password }}
                 </div>
-                <div class="form-group">
-                    <input type="password" class="form-control" placeholder="Your Password *"
-                        name="{{ form.password.html_name }}" />
-                </div>
-                <div class="form-group">
-                    <input type="submit" class="btnSubmit" value="Login" />
-                    <input type="hidden" name="next" value="{{ next }}" />
-                </div>
-                <div class="form-group">
-                    <a href="{% url 'password_reset' %}" class="ForgetPwd">Forget
-                        Password?</a>
-                </div>
-            </form>
+            </div>
+            <button class="ns-wide-btn right-arrow-btn" type="submit">Login<span class="icon"></span></button>
+            <div class="login-form-footer flex flex-col items-center">
+                <a href="{% url 'password_reset' %}" class="mb-2">Forgot
+                    Password?</a>
+                <span>Not yet a member? <a href="{% url 'donations:donate' %}">Donate and Join Now</a></span>
+            </div>
         </div>
-    </div>
+    </form>
 </div>
 {% endblock %}

@@ -47,11 +47,14 @@ class DonationWebForm(forms.Form):
         # set footer_html property from blueprint
         self.footer_html = form.footer_text
 
-        # pop fields if user logged in
+        # pop fields and set readonly if user logged in
         if request.user.is_authenticated:
-            self.fields.pop('first_name')
-            self.fields.pop('last_name')
-            self.fields.pop('email')
+            self.fields["first_name"].widget.attrs['readonly'] = True
+            self.fields["last_name"].widget.attrs['readonly'] = True
+            self.fields["email"].widget.attrs['readonly'] = True
+            self.fields["first_name"].widget.attrs['value'] = request.user.first_name
+            self.fields["last_name"].widget.attrs['value'] = request.user.last_name
+            self.fields["email"].widget.attrs['value'] = request.user.email
             self.fields.pop('opt_in_mailing_list')
             self.fields.pop('is_create_account')
 

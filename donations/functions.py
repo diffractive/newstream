@@ -13,7 +13,7 @@ from datetime import datetime, timedelta
 from pytz import timezone
 from .includes.currency_dictionary import currency_dict
 from .templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text
-from omp.functions import evTokenGenerator, raiseObjectNone, getFullReverseUrl
+from omp.functions import evTokenGenerator, raiseObjectNone, getFullReverseUrl, getSiteName
 from omp.templates.registration.email_templates.plain_texts import get_verify_your_email_text
 User = get_user_model()
 
@@ -149,7 +149,7 @@ def sendVerificationEmail(request, user):
         fullurl = getFullReverseUrl(
             request, 'verify-email', kwargs={'uidb64': uid, 'token': token})
         ms = send_mail(
-            "Please verify your email at "+request.site.site_name,
+            "Please verify your email at "+getSiteName(request),
             get_verify_your_email_text(
                 request, user.fullname, fullurl),
             getSuperUserEmail(),

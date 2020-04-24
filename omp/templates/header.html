@@ -12,7 +12,19 @@
     </div>
     <div class="right-nav flex items-center justify-end">
         {% if user.is_authenticated %}
-        <a href="#" class="mr-16 menu-item">{{ user.fullname }}</a>
+        <div class="nav-user-dropdown-div mr-16 flex items-center dropdown-div-wrapper">
+            <input type="checkbox" name="dropdown-toggle-checkbox" id="dropdown-toggle-checkbox"
+                class="dropdown-toggle-checkbox">
+            <label for="dropdown-toggle-checkbox" class="dropdown-toggle-label"></label>
+            <span class="avatar-icon"></span>
+            <span class="user-fullname">{{ user.fullname }}</span>
+            <span class="dropdown-chevron-icon"></span>
+            <div class="user-dropdown-menu flex flex-col items-stretch">
+                <a href="{% url 'personal-info' %}">Profile Settings</a>
+                <a href="{% url 'donations:my-donations' %}">My Donations</a>
+                <a href="{% url 'logout'%}?next={{request.path}}">Logout</a>
+            </div>
+        </div>
         {% else %}
         <a href="{% url 'login'%}?next={{request.path}}" class="mr-16 menu-item">Sign in</a>
         {% endif %}

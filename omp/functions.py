@@ -19,5 +19,9 @@ def getFullReverseUrl(request, urlname, kwargs=None):
     return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + request.get_host() + reverse(urlname, kwargs=kwargs)
 
 
+def getSiteName(request):
+    return request.site.site_name if request.site.site_name else '[SiteName]'
+
+
 def raiseObjectNone(message=''):
     raise ObjectDoesNotExist(message)

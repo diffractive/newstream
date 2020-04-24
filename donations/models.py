@@ -161,6 +161,9 @@ class Donor(ClusterableModel):
     def optInMailing(self):
         return 'Yes' if self.opt_in_mailing_list else 'No'
 
+    def optInMailingIcon(self):
+        return '<span class="yes-icon"></span>' if self.opt_in_mailing_list else '<span class="no-icon"></span>'
+
 
 class Donation(ClusterableModel):
     PAYMENT_STATUS_CHOICES = [
@@ -224,8 +227,19 @@ class Donation(ClusterableModel):
     def isRecurring(self):
         return 'Yes' if self.is_recurring else 'No'
 
+    @property
+    def donation_frequency(self):
+        return 'Monthly' if self.is_recurring else 'One-time'
+
+    @donation_frequency.setter
+    def donation_frequency(self, val):
+        pass
+
     def isCreateAccount(self):
         return 'Yes' if self.is_create_account else 'No'
+
+    def isCreateAccountIcon(self):
+        return '<span class="yes-icon"></span>' if self.is_create_account else '<span class="no-icon"></span>'
 
     def isOnGoing(self):
         return 'Yes' if self.recurring_status == STATUS_ONGOING else 'No'

@@ -1,3 +1,6 @@
+from omp.functions import getSiteName
+
+
 def get_new_donation_text(request, donation):
     return """
         New Donation\n
@@ -26,7 +29,7 @@ def get_new_donation_text(request, donation):
            donation.isCreateAccount(),
            donation.donor.optInMailing(),
            donation.payment_status,
-           request.site.site_name
+           getSiteName(request)
            )
 
 
@@ -55,5 +58,5 @@ def get_donation_receipt_text(request, donation):
            donation.isCreateAccount(),
            donation.donor.optInMailing(),
            donation.payment_status,
-           request.site.site_name
+           getSiteName(request)
            )

@@ -23,6 +23,9 @@ LOGOUT_REDIRECT_URL = "/"
 
 # Custom User Model
 AUTH_USER_MODEL = 'custom_user.User'
+WAGTAIL_USER_EDIT_FORM = 'custom_user.forms.CustomUserEditForm'
+WAGTAIL_USER_CREATION_FORM = 'custom_user.forms.CustomUserCreationForm'
+WAGTAIL_USER_CUSTOM_FIELDS = ['is_email_verified', 'opt_in_mailing_list']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/

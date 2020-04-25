@@ -12,6 +12,8 @@ class PersonalInfoForm(forms.Form):
                              max_length=255, required=False)
     first_name = forms.CharField(label='First Name', max_length=255)
     last_name = forms.CharField(label='Last Name', max_length=255)
+    opt_in_mailing_list = forms.BooleanField(
+        label='Opt in Mailing List?', required=False)
 
     def __init__(self, *args, request=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -23,6 +25,9 @@ class PersonalInfoForm(forms.Form):
         self.fields["last_name"].widget.attrs['value'] = request.user.last_name
         self.fields["email"].widget.attrs['value'] = request.user.email
         self.fields["email"].widget.attrs['disabled'] = True
+        self.fields["email"].label += ' ' + \
+            request.user.email_verification_status()
+        self.fields["opt_in_mailing_list"].initial = request.user.opt_in_mailing_list
 
 
 class ChangeEmailForm(forms.Form):

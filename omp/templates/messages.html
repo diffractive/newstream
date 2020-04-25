@@ -1,7 +1,11 @@
+{% load common_tags %}
+
 {% if messages %}
-<ul class="messages">
+<div class="messages container smpad-container flex flex-col">
     {% for message in messages %}
-    <li{% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
-        {% endfor %}
-</ul>
+    <div class="{% if message.tags %}{{ message.tags|alert_class }}{% endif %}">
+        <p class="font-bold p-4">{{ message }}</p>
+    </div>
+    {% endfor %}
+</div>
 {% endif %}

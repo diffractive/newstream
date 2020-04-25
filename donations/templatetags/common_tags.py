@@ -1,5 +1,6 @@
 import os
 from django import template
+from django.urls import reverse
 from site_settings.models import AppearanceSettings
 from omp.functions import getSiteName
 
@@ -26,3 +27,24 @@ def getSiteIcon(req):
 @register.filter(name='site_name')
 def returnSiteName(req):
     return getSiteName(req)
+
+
+@register.filter(name='alert_class')
+def getAlertClass(tags):
+    if 'debug' in tags or 'info' in tags:
+        return "bg-blue-100 border-l-4 border-blue-500 text-blue-700 p4"
+    elif 'success' in tags:
+        return "bg-green-100 border-l-4 border-green-500 text-green-700 p4"
+    elif 'warning' in tags:
+        return "bg-orange-100 border-l-4 border-orange-500 text-orange-700 p4"
+    elif 'error' in tags:
+        return "bg-red-100 border-l-4 border-red-500 text-red-700 p4"
+    else:
+        return "bg-blue-100 border-l-4 border-blue-500 text-blue-700 p4"
+
+
+@register.filter(name='is_active_page')
+def returnIsActivePage(request, urlname):
+    if reverse(urlname) == request.path:
+        return 'active-page'
+    return ''

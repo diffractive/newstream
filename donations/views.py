@@ -147,6 +147,7 @@ def donate(request):
                             email=donor.email, password=generated_pwd)
                         donor_user.first_name = donor.first_name
                         donor_user.last_name = donor.last_name
+                        donor_user.opt_in_mailing_list = donor.opt_in_mailing_list
                         donor_user.save()
                         # link donor to user
                         donor.linked_user = donor_user

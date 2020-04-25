@@ -7,7 +7,6 @@ a {
     font-family: 'Fira Sans';
     font-weight: 600;
     padding: 0.75rem 2.5rem;
-    margin: 1rem;
     color: white;
 }
 .ns-dark-btn {
@@ -53,6 +52,14 @@ a {
 .ns-page-breaker {
     background-color: $border-grey-color;
     height: 2px;
+}
+
+/* Messages */
+.messages {
+    transition: opacity 1s;
+    & > div:not(:last-child) {
+        margin-bottom: 1rem;
+    }
 }
 
 /* Accordion styles */

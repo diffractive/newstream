@@ -92,7 +92,7 @@
 }
 
 /* Login Container */
-.login-container {
+.login-container, .reset-pwd-container, .new-pwd-container {
     max-width: 31.25rem;
     @screen lg {
         min-width: 31.25rem;
@@ -101,7 +101,6 @@
 
 /* User dropdown menu */
 .nav-user-dropdown-div {
-    margin-right: 4rem;
     text-transform: initial;
     position: relative;
     
@@ -211,6 +210,21 @@
                 border-bottom-right-radius: 0.5rem;
             }
         }
+    }
+}
+
+/* Profile Sidebar */
+.profile-sidebar {
+    max-width: 20rem;
+    a {
+        &:not(:last-child) {
+            @apply border-gray-200 border-b;
+        }
+    }
+    a.active-page {
+        border-left: $primary-color 3px solid;
+        color: black;
+        font-weight: 600;
     }
 }
 

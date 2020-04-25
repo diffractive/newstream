@@ -4,12 +4,8 @@
 {% block title %}Logged out from {{ request|site_name }}{% endblock %}
 
 {% block content %}
-<div class="container auth-container">
-    <div class="row">
-        <div class="col-md-6 col-centered auth-form">
-            <h3>Goodbye!</h3>
-            <p>Login back in at <a href="{% url 'login'%}">Here</a></p>
-        </div>
-    </div>
+<div class="container-tight flex flex-col items-center">
+    <h1 class="mb-5">Goodbye!</h1>
+    <p class="text-center">Log back in <a href="{% url 'login'%}">Here</a></p>
 </div>
 {% endblock %}

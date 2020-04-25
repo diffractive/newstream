@@ -1,12 +1,18 @@
 {% extends "base.html" %}
+{% load common_tags %}
 
-{% block title %}Email Verified{% endblock %}
+{% block title %}Email Verification Result{% endblock %}
 
 {% block content %}
-{% if request.user.is_email_verified %}
-<h2>Your email {{ request.user.email }} has been verified.</h2>
-<p>Your username will be the same as your email.</p>
-{% else %}
-<h2>Your email verification link is invalid, please request a fresh verification link.</h2>
-{% endif %}
+<div class="container-tight flex flex-col items-center">
+    {% if request.user.is_email_verified %}
+    <h1 class="mb-5">Email Verified.</h1>
+    <p class="text-center">Your email {{ request.user.email }} has been verified. Your username is the same as your
+        email.
+    </p>
+    {% else %}
+    <h1 class="mb-5">Email verification failed.</h1>
+    <p class="text-center">Your email verification link is invalid, please request a fresh verification link.</p>
+    {% endif %}
+</div>
 {% endblock %}

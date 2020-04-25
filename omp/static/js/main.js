@@ -20,3 +20,17 @@ for (wrapper of document.getElementsByClassName("dropdown-toggle-label")) {
         }
     });
 }
+
+// Hide the messages after 3 seconds
+(() => {
+    setTimeout(() => {
+        for (msg of document.getElementsByClassName('messages')) {
+            msg.classList.add('opacity-0');
+        }
+    }, 3000);
+    setTimeout(() => {
+        for (msg of document.getElementsByClassName('messages')) {
+            msg.classList.add('hidden');
+        }
+    }, 4000); // invisible transition is 1s
+})();

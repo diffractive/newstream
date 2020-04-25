@@ -104,6 +104,7 @@ def personal_info(request):
             user = request.user
             user.first_name = form.cleaned_data['first_name']
             user.last_name = form.cleaned_data['last_name']
+            user.opt_in_mailing_list = form.cleaned_data['opt_in_mailing_list']
             user.save()
             messages.add_message(request, messages.SUCCESS,
                                  'Personal Info Updated.')

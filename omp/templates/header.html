@@ -12,7 +12,7 @@
     </div>
     <div class="right-nav flex items-center justify-end">
         {% if user.is_authenticated %}
-        <div class="nav-user-dropdown-div mr-16 flex items-center dropdown-div-wrapper">
+        <div class="nav-user-dropdown-div mr-6 flex items-center dropdown-div-wrapper">
             <input type="checkbox" name="dropdown-toggle-checkbox" id="dropdown-toggle-checkbox"
                 class="dropdown-toggle-checkbox">
             <label for="dropdown-toggle-checkbox" class="dropdown-toggle-label"></label>
@@ -22,7 +22,7 @@
             <div class="user-dropdown-menu flex flex-col items-stretch">
                 <a href="{% url 'personal-info' %}">Profile Settings</a>
                 <a href="{% url 'donations:my-donations' %}">My Donations</a>
-                <a href="{% url 'logout'%}?next={{request.path}}">Logout</a>
+                <a href="{% url 'logout'%}">Logout</a>
             </div>
         </div>
         {% else %}

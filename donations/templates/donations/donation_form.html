@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-{% load static widget_tweaks %}
+{% load static common_tags widget_tweaks %}
+
+{% block title %}Donate to {{ request|site_name }}{% endblock %}
 
 {% block body_class %}omp-onetime-donation-page{% endblock %}
 

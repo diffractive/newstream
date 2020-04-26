@@ -29,8 +29,6 @@ urlpatterns = [
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
 
-    path('change-password/', user_views.change_password,
-         name='change-password'),
 
     # password_reset* are meant for forgot password path
     path('password_reset/',
@@ -47,12 +45,14 @@ urlpatterns = [
     path('personal-info/', user_views.personal_info, name='personal-info'),
     path('resend-verification-email/', user_views.resend_verification_email,
          name='resend-verification-email'),
-    path('change-email-address/', user_views.change_email_address,
+    path('personal-info/change-email-address/', user_views.change_email_address,
          name='change-email-address'),
     path('security/', user_views.security, name='security'),
+    path('security/change-password/', user_views.change_password,
+         name='change-password'),
     path('advanced-settings/', user_views.advanced_settings,
          name='advanced-settings'),
-    path('delete-account/', user_views.delete_account,
+    path('advanced-settings/delete-account/', user_views.delete_account,
          name='delete-account'),
 
 

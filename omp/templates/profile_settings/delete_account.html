@@ -1,28 +1,38 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static widget_tweaks %}
+
+{% block title %}Delete My Password{% endblock %}
 
 {% block body_class %}omp-delete-account{% endblock %}
 
 {% block content %}
-{% include 'profile_settings/sidebar.html' %}
-<hr><br>
-<h1>Delete Your Account</h1>
-<br>
-{{ form.non_field_errors }}
-<p>Please enter exactly '{{ confirm_text }}' in the Confirmation textbox below.</p>
-<form method='POST' action=''>
-    {% csrf_token %}
-    {# Include the hidden fields #}
-    {% for hidden in form.hidden_fields %}
-    {{ hidden }}
-    {% endfor %}
-    {# Include the visible fields #}
-    {% for field in form.visible_fields %}
-    <div class="fieldWrapper">
-        {{ field.errors }}
-        {{ field.label_tag }} {{ field }}
+<div class="container grid grid-cols-1 gap-4 lg:grid-cols-3">
+    {% include 'profile_settings/sidebar.html' %}
+    <div class="settings-div w-full flex flex-col lg:col-span-2">
+        <h1 class="mb-5">Delete my account</h1>
+        <p class="mb-3">Please enter exactly '{{ confirm_text }}' in the Confirmation textbox below.</p>
+        {% if form.errors %}
+        {% for field in form %}
+        {% for error in field.errors %}
+        <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 mb-4" role="alert">
+            <p class="font-bold">Form Error - {{ field.label }}:</p>
+            <p>{{ error|escape }}</p>
+        </div>
+        {% endfor %}
+        {% endfor %}
+        {% endif %}
+        <form method='POST'>
+            {% csrf_token %}
+            {% for field in form.visible_fields %}
+            <div class="mb-4">
+                <div class="label-div">{{ field.label_tag }}</div>
+                <div class="field-div widget_{{ field|widget_type }}">
+                    {{ field }}
+                </div>
+            </div>
+            {% endfor %}
+            <button class="ns-dark-btn inline-block" type="submit">Delete My Account Now</button>
+        </form>
     </div>
-    {% endfor %}
-    <input type="submit" value="Submit">
-</form>
+</div>
 {% endblock content %}

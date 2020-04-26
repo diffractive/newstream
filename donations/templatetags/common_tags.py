@@ -45,6 +45,6 @@ def getAlertClass(tags):
 
 @register.filter(name='is_active_page')
 def returnIsActivePage(request, urlname):
-    if reverse(urlname) == request.path:
+    if urlname in request.path:
         return 'active-page'
     return ''

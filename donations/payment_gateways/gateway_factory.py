@@ -1,4 +1,3 @@
-from donations.functions import getGlobalSettings
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.payment_gateways._2c2p import Gateway_2C2P
 from donations.payment_gateways.paypal import Gateway_Paypal
@@ -37,7 +36,6 @@ class PaymentGatewayFactory(object):
             if len(DonationSet) == 2:
                 pDonation = DonationSet[0]
 
-                # global_settings = getGlobalSettings(request)
                 # Create new donation record from pDonation
                 donation = Donation(
                     order_number=request.POST['order_id'],

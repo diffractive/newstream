@@ -33,7 +33,7 @@
             {% if donations %}
             {% for donation in donations %}
             <tr>
-                <td>{{ donation.donation_amount }}</td>
+                <td>{{ donation|amount_with_currency }}</td>
                 <td>{{ donation.donation_frequency }}</td>
                 <td>{{ donation.order_number }}</td>
                 <td>{{ donation.created_at|date:'j M Y' }}</td>

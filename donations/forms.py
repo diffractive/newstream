@@ -1,7 +1,9 @@
+import html
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from omp.functions import raiseObjectNone
+from omp.functions import raiseObjectNone, getGlobalSettings
+from donations.functions import getCurrencyDictAt
 from wagtail.contrib.forms.forms import FormBuilder
 User = get_user_model()
 
@@ -36,6 +38,7 @@ class DonationWebForm(forms.Form):
     ])
     is_create_account = forms.BooleanField(
         label='Create a member account', required=False)
+    currency = forms.CharField(widget=forms.HiddenInput())
 
     def __init__(self, *args, request=None, blueprint=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -47,6 +50,8 @@ class DonationWebForm(forms.Form):
         # set footer_html property from blueprint
         self.request = request
         self.footer_html = form.footer_text
+        self.global_settings = getGlobalSettings(request)
+        self.fields["currency"].initial = self.global_settings.currency
 
         # pop fields and set readonly if user logged in
         if request.user.is_authenticated:
@@ -72,6 +77,7 @@ class DonationWebForm(forms.Form):
                 self.fields["donormeta_"+key] = val
 
         # construct donation amount field
+        currency_set = getCurrencyDictAt(self.global_settings.currency)
         if form.isAmountFixed():
             self.fields["donation_amount"] = forms.DecimalField(
                 initial=form.fixed_amount)
@@ -79,9 +85,11 @@ class DonationWebForm(forms.Form):
         elif form.isAmountStepped():
             amountSteps = form.amount_steps.all()
             self.fields["donation_amount"] = forms.ChoiceField(
-                choices=[(x.step, x.step) for x in amountSteps])
+                choices=[(x.step, html.unescape(currency_set['symbol']) + ' ' + str(x.step)) for x in amountSteps])
         elif form.isAmountCustom():
             self.fields["donation_amount"] = forms.DecimalField()
+        self.fields["donation_amount"].label = "Donation amount in " + html.unescape(
+            currency_set['admin_label'])
 
         # construct donation meta fields from form configuration
         donationmetafields = form.donation_meta_fields.all()

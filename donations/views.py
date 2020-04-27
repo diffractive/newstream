@@ -171,7 +171,7 @@ def donate(request):
                 gateway=payment_gateway,
                 is_recurring=True if form.cleaned_data['donation_frequency'] == 'monthly' else False,
                 donation_amount=form.cleaned_data['donation_amount'],
-                currency=getGlobalSettings(request).currency,
+                currency=form.cleaned_data['currency'],
                 is_create_account=form.cleaned_data['is_create_account'] if 'is_create_account' in form.cleaned_data else False,
                 payment_status=STATUS_PENDING,
                 metas=donation_metas

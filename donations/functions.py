@@ -7,7 +7,8 @@ from django.core.mail import send_mail
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
-from site_settings.models import GlobalSettings, Settings2C2P
+from site_settings.models import Settings2C2P
+from omp.functions import getGlobalSettings
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta
 from pytz import timezone
@@ -36,16 +37,12 @@ def getCurrencyFromCode(code):
 
 
 def isTestMode(request):
-    globalSettings = GlobalSettings.for_site(request.site)
+    globalSettings = getGlobalSettings(request)
     return globalSettings.test_mode
 
 
 def get2C2PSettings(request):
     return Settings2C2P.for_site(request.site)
-
-
-def getGlobalSettings(request):
-    return GlobalSettings.for_site(request.site)
 
 
 def gen_order_id(gateway=None):

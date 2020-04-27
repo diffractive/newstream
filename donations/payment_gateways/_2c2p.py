@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from donations.payment_gateways.core import PaymentGatewayManager
-from donations.functions import getGlobalSettings, get2C2PSettings, getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
+from donations.functions import get2C2PSettings, getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
 from donations.models import DonationMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
-from omp.functions import raiseObjectNone, getFullReverseUrl, getSiteName
+from omp.functions import raiseObjectNone, getFullReverseUrl, getSiteName, getGlobalSettings
 from urllib.parse import urlencode
 import hmac
 import hashlib
@@ -90,9 +90,9 @@ class Gateway_2C2P(PaymentGatewayManager):
             bytes(params, 'utf-8'), hashlib.sha256).hexdigest()
 
         # append hash_value to donation metas for checking purposes
-        dmeta = DonationMeta(
-            donation=self.donation, field_key='hash_value', field_value=data['hash_value'])
-        dmeta.save()
+        # dmeta = DonationMeta(
+        #     donation=self.donation, field_key='hash_value', field_value=data['hash_value'])
+        # dmeta.save()
 
         return render(self.request, 'donations/redirection_2c2p_form.html', {'action': self.base_gateway_redirect_url, 'data': data})
 
@@ -131,9 +131,9 @@ class Gateway_2C2P(PaymentGatewayManager):
                     self.donation.recurring_status = STATUS_NONRECURRING
                 self.donation.save()
                 # add checkHash to donation metas for checking purposes
-                dmeta = DonationMeta(
-                    donation=self.donation, field_key='checkHash', field_value=checkHash)
-                dmeta.save()
+                # dmeta = DonationMeta(
+                #     donation=self.donation, field_key='checkHash', field_value=checkHash)
+                # dmeta.save()
                 # add recurring_unique_id to donation metas for hooking up future recurring payments
                 if 'recurring_unique_id' in data and data['recurring_unique_id'] != '':
                     dmeta = DonationMeta(

@@ -30,3 +30,4 @@ client/node_modules
  
 ### OMP
 *.log
+test_pkcs7/

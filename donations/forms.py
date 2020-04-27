@@ -45,6 +45,7 @@ class DonationWebForm(forms.Form):
             raiseObjectNone('Please provide a DonationForm blueprint')
         form = blueprint
         # set footer_html property from blueprint
+        self.request = request
         self.footer_html = form.footer_text
 
         # pop fields and set readonly if user logged in
@@ -90,7 +91,9 @@ class DonationWebForm(forms.Form):
 
     def clean_email(self):
         email = self.cleaned_data['email']
-        if User.objects.filter(email=email).exists():
-            raise ValidationError(
-                "Email has already been taken. Login if you already have an account.")
+        if not self.request.user.is_authenticated:
+            # check if email input is taken by existing user accounts if it is just a guest
+            if User.objects.filter(email=email).exists():
+                raise ValidationError(
+                    "Email has already been taken. Login if you already have an account.")
         return email

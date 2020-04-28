@@ -58,6 +58,9 @@ class DonationWebForm(forms.Form):
             self.fields["first_name"].widget.attrs['readonly'] = True
             self.fields["last_name"].widget.attrs['readonly'] = True
             self.fields["email"].widget.attrs['readonly'] = True
+            self.fields["first_name"].widget.attrs['class'] = 'input_disabled'
+            self.fields["last_name"].widget.attrs['class'] = 'input_disabled'
+            self.fields["email"].widget.attrs['class'] = 'input_disabled'
             self.fields["first_name"].widget.attrs['value'] = request.user.first_name
             self.fields["last_name"].widget.attrs['value'] = request.user.last_name
             self.fields["email"].widget.attrs['value'] = request.user.email

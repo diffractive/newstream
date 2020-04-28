@@ -70,6 +70,14 @@
                 </div>
                 {% endif %}
                 {% endfor %}
+                {% if request.user.is_authenticated %}
+                <div class="mt-6">
+                    <div class="field-div mb-2 text-center">
+                        <a class="ns-btn inline-block" href="{% url 'logout' %}?next={{request.path}}">Logout</a>
+                    </div>
+                    <p class="secondary-text text-center">Log out if you do not wish to donate as this user.</p>
+                </div>
+                {% endif %}
             </div>
         </div>
         <div class="mx-auto flex flex-col mb-4 other-fields-section">

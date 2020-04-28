@@ -137,6 +137,9 @@ input.ns-accordion-rd:checked {
     font-size: 0.85rem;
     margin-bottom: 0.7rem;
 }
+.input_disabled {
+    @apply bg-gray-200;
+}
 .widget_textinput, .widget_emailinput, .widget_passwordinput {
     input {
         border: $border-grey-color 1px solid;
@@ -150,6 +153,7 @@ input.ns-accordion-rd:checked {
     position: relative;
     width: 100%;
     select {
+        background-color: white;
         padding: 0.75rem;
         width: 100%;
         height: 3.2rem;
@@ -222,7 +226,7 @@ input.ns-accordion-rd:checked {
 .member-account-notice {
     font-size: 0.85rem;
 }
-.form-footer-text {
+.form-footer-text, .secondary-text {
     @apply text-gray-600;
     font-size: 0.75rem;
 }

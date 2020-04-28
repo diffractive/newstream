@@ -162,7 +162,7 @@ class Donor(ClusterableModel):
         return 'Yes' if self.opt_in_mailing_list else 'No'
 
     def optInMailingIcon(self):
-        return '<span class="yes-icon"></span>' if self.opt_in_mailing_list else '<span class="no-icon"></span>'
+        return '<span class="yes-icon block"></span>' if self.opt_in_mailing_list else '<span class="no-icon block"></span>'
 
 
 class Donation(ClusterableModel):
@@ -239,7 +239,7 @@ class Donation(ClusterableModel):
         return 'Yes' if self.is_create_account else 'No'
 
     def isCreateAccountIcon(self):
-        return '<span class="yes-icon"></span>' if self.is_create_account else '<span class="no-icon"></span>'
+        return '<span class="yes-icon block"></span>' if self.is_create_account else '<span class="no-icon block"></span>'
 
     def isOnGoing(self):
         return 'Yes' if self.recurring_status == STATUS_ONGOING else 'No'

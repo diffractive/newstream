@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model
 from django.http import HttpResponse
 from django.contrib.auth import login, logout
@@ -10,7 +10,7 @@ from django.contrib.auth import update_session_auth_hash
 # from django.contrib.auth.forms import PasswordChangeForm
 from donations.functions import sendVerificationEmail
 from donations.models import Donor
-from omp.functions import evTokenGenerator
+from omp.functions import evTokenGenerator, generateIDSecretHash
 from omp.forms import PersonalInfoForm, ChangeEmailForm, ChangePasswordForm, DeleteAccountForm
 User = get_user_model()
 
@@ -41,6 +41,23 @@ def verify_email(request, uidb64, token):
 
         login(request, user)
     return render(request, 'registration/email_verified.html')
+
+
+def unsubscribe(request, email, hash):
+    failure = False
+    try:
+        user = User.objects.get(email=email)
+        # check hash validity
+        generated_hash = generateIDSecretHash(user.id)
+        if hash == generated_hash:
+            user.opt_in_mailing_list = False
+            user.save()
+        else:
+            failure = True
+    except Exception as e:
+        print(str(e), flush=True)
+        failure = True
+    return render(request, 'unsubscription.html', {'failure': failure, 'email': email})
 
 
 @login_required

@@ -54,7 +54,8 @@ urlpatterns = [
          name='advanced-settings'),
     path('advanced-settings/delete-account/', user_views.delete_account,
          name='delete-account'),
-
+    path('unsubscribe/<email>/<hash>/', user_views.unsubscribe,
+         name='unsubscribe'),
 
 ]
 

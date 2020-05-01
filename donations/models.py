@@ -181,15 +181,18 @@ class Donation(ClusterableModel):
     ]
     donor = models.ForeignKey(
         'Donor',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True
     )
     form = models.ForeignKey(
         'DonationForm',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True
     )
     gateway = models.ForeignKey(
         'PaymentGateway',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
+        null=True
     )
     parent_donation = models.ForeignKey(
         'self', on_delete=models.CASCADE, blank=True, null=True)

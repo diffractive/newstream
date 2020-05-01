@@ -1,0 +1,54 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n wagtailadmin_tags %}
+
+{% block titletag %}{{ view.get_meta_title }}{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+{{ view.media.css }}
+<link rel="stylesheet" href="{% versioned_static 'wagtailmodeladmin/css/breadcrumbs_page.css' %}" type="text/css" />
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+{{ view.media.js }}
+{% endblock %}
+
+{% block content %}
+
+{% block header %}
+{% include "modeladmin/includes/header_with_breadcrumb.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon tabbed=True %}
+{% endblock %}
+
+<div>
+
+    {% block content_main %}
+    <div class="nice-padding">
+
+        <p class="back"><a href="{{ view.index_url }}"
+                class="icon icon-arrow-left">{% blocktrans with view.verbose_name as model_name %}Back to
+                {{ model_name }} list{% endblocktrans %}</a></p>
+
+        {% block fields_output %}
+        <p>{{mails_sent}}/{{mails_tobe_sent}} Emails are sent.</p>
+        {% if mails_sent < mails_tobe_sent %}
+        <p>The following recipients are rejected:</p>
+        <ul>
+            {% for recipient in refused_list %}
+            <li>{{ recipient }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+        {% if mails_sent == mails_tobe_sent and mails_sent > 0 %}
+        <p>All Emails sent successfully.</p>
+        {% endif %}
+        {% endblock %}
+    </div>
+    {% endblock %}
+
+</div>
+
+{% block footer %}
+{% endblock %}
+
+{% endblock %}

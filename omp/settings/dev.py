@@ -11,10 +11,10 @@ ALLOWED_HOSTS = ['*']
 
 # EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.zoho.com'
+EMAIL_HOST = 'email-smtp.us-east-1.amazonaws.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'franky@uxcodified.com'
+EMAIL_HOST_USER = 'AKIAYPKUY36QQ2EBDYOM'
 EMAIL_HOST_PASSWORD = os.environ.get('OMPSMTP_PWD')
 
 ADMINS = [

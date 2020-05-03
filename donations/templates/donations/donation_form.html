@@ -128,8 +128,8 @@
     // attach onchange event
     document.getElementById("id_donation_frequency").addEventListener("change", setDisplayForDonationFrequency);
     // fire once on page loaded
-    window.onload = function () {
+    window.addEventListener('load', (event) => {
         setDisplayForDonationFrequency();
-    };
+    });
 </script>
 {% endblock %}

@@ -31,3 +31,5 @@ client/node_modules
 ### OMP
 *.log
 test_pkcs7/
+fixure.json
+fixture-converted.json

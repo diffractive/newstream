@@ -1,11 +1,16 @@
 from django import forms
 from django.db import models
 from django.conf import settings
+from django.forms.widgets import CheckboxSelectMultiple
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, RichTextField
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from modelcluster.models import ClusterableModel
 from wagtail.contrib.forms.models import AbstractFormField
+
+
+class CustomCheckboxMultiple(CheckboxSelectMultiple):
+    template_name = 'django/forms/widgets/custom_checkbox_select.html'
 
 
 class EmailTemplate(models.Model):
@@ -33,7 +38,7 @@ class TargetGroup(ClusterableModel):
     panels = [
         FieldPanel('title'),
         # neither help_text or heading works for users field below, switched to verbose_name above
-        FieldPanel('users', widget=forms.CheckboxSelectMultiple),
+        FieldPanel('users', widget=CustomCheckboxMultiple),
     ]
 
     def __str__(self):

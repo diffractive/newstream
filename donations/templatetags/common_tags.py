@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from site_settings.models import AppearanceSettings
 from donations.functions import getCurrencyDictAt
-from omp.functions import getSiteName
+from newstream.functions import getSiteName
 
 register = template.Library()
 

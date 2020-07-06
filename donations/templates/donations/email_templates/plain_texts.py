@@ -1,4 +1,4 @@
-from omp.functions import getSiteName
+from newstream.functions import getSiteName
 
 
 def get_new_donation_text(request, donation):

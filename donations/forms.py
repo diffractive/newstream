@@ -2,7 +2,7 @@ import html
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from omp.functions import raiseObjectNone, getGlobalSettings
+from newstream.functions import raiseObjectNone, getGlobalSettings
 from donations.functions import getCurrencyDictAt
 from wagtail.contrib.forms.forms import FormBuilder
 User = get_user_model()

@@ -1,6 +1,6 @@
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
-from omp.functions import raiseObjectNone
+from newstream.functions import raiseObjectNone
 from .models import EmailTemplate, TargetGroup, Campaign
 from .custom_classes import SendCampaignMAMixin
 

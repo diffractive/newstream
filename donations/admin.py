@@ -3,7 +3,7 @@ from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
 from django.contrib import admin
 from wagtail.contrib.modeladmin.views import InspectView
-from omp.functions import raiseObjectNone
+from newstream.functions import raiseObjectNone
 from .payment_gateways._2c2p import Gateway_2C2P
 
 

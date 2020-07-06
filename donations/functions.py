@@ -8,14 +8,14 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
 from site_settings.models import Settings2C2P
-from omp.functions import getGlobalSettings
+from newstream.functions import getGlobalSettings
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta
 from pytz import timezone
 from .includes.currency_dictionary import currency_dict
 from .templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text
-from omp.functions import evTokenGenerator, raiseObjectNone, getFullReverseUrl, getSiteName
-from omp.templates.registration.email_templates.plain_texts import get_verify_your_email_text
+from newstream.functions import evTokenGenerator, raiseObjectNone, getFullReverseUrl, getSiteName
+from newstream.templates.registration.email_templates.plain_texts import get_verify_your_email_text
 User = get_user_model()
 
 

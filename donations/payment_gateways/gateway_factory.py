@@ -1,7 +1,7 @@
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.payment_gateways._2c2p import Gateway_2C2P
 from donations.payment_gateways.paypal import Gateway_Paypal
-from omp.functions import raiseObjectNone
+from newstream.functions import raiseObjectNone
 from donations.models import Donation, STATUS_PENDING
 from django.db.models import Q
 # todo: Add Stripe's payment gateway import

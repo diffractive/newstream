@@ -1,4 +1,4 @@
-from omp.functions import getSiteName
+from newstream.functions import getSiteName
 
 
 def get_verify_your_email_text(request, fullname, verify_link):

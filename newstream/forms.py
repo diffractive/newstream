@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import PasswordChangeForm
 from django.core.exceptions import ValidationError
-from omp.functions import raiseObjectNone
+from newstream.functions import raiseObjectNone
 # from wagtail.contrib.forms.forms import FormBuilder
 User = get_user_model()
 

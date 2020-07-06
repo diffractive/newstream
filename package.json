@@ -1,5 +1,5 @@
 {
-  "name": "omp-frontend",
+  "name": "newstream",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/diffractive/omp.git"
+    "url": "git+https://github.com/diffractive/newstream.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/diffractive/omp/issues"
+    "url": "https://github.com/diffractive/newstream/issues"
   },
-  "homepage": "https://github.com/diffractive/omp#readme",
+  "homepage": "https://github.com/diffractive/newstream#readme",
   "dependencies": {
     "tailwindcss": "^1.2.0"
   },

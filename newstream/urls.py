@@ -13,7 +13,7 @@ from wagtailautocomplete.urls.admin import urlpatterns as autocomplete_admin_url
 from donations.views import CustomPasswordResetView
 from django.contrib.auth import views
 from django.urls import path
-import omp.views as user_views
+import newstream.views as user_views
 
 urlpatterns = [
     path('django-admin/', admin.site.urls),

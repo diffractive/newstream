@@ -10,8 +10,8 @@ from django.contrib.auth import update_session_auth_hash
 # from django.contrib.auth.forms import PasswordChangeForm
 from donations.functions import sendVerificationEmail
 from donations.models import Donor
-from omp.functions import evTokenGenerator, generateIDSecretHash
-from omp.forms import PersonalInfoForm, ChangeEmailForm, ChangePasswordForm, DeleteAccountForm
+from newstream.functions import evTokenGenerator, generateIDSecretHash
+from newstream.forms import PersonalInfoForm, ChangeEmailForm, ChangePasswordForm, DeleteAccountForm
 User = get_user_model()
 
 

@@ -9,7 +9,7 @@ from django.contrib.auth.views import PasswordResetView
 from .models import *
 from .forms import *
 from .functions import *
-from omp.functions import getFullReverseUrl
+from newstream.functions import getFullReverseUrl
 from .payment_gateways.gateway_factory import PaymentGatewayFactory
 from pprint import pprint
 import secrets

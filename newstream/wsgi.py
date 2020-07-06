@@ -1,5 +1,5 @@
 """
-WSGI config for omp project.
+WSGI config for newstream project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
@@ -13,6 +13,6 @@ from django.core.wsgi import get_wsgi_application
 
 os.environ['HTTPS'] = "on"
 
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "omp.settings.dev")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "newstream.settings.dev")
 
 application = get_wsgi_application()

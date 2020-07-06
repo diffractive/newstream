@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.utils.decorators import method_decorator
 from wagtail.contrib.modeladmin.views import InstanceSpecificView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper, AdminURLHelper
-from omp.functions import raiseObjectNone, generateIDSecretHash, getFullReverseUrl
+from newstream.functions import raiseObjectNone, generateIDSecretHash, getFullReverseUrl
 from .models import Campaign
 User = get_user_model()
 

@@ -1,6 +1,6 @@
 from donations.functions import isTestMode
 from django.shortcuts import redirect
-from omp.functions import raiseObjectNone, getGlobalSettings
+from newstream.functions import raiseObjectNone, getGlobalSettings
 from abc import ABC, abstractmethod
 
 

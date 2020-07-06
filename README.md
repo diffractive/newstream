@@ -1,5 +1,5 @@
 ## Location of Gunicorn omp app config
-/etc/supervisor/conf.d/omp.conf
+/etc/supervisor/conf.d/newstream.conf
 
 
 ## How to run Gunicorn:

@@ -2,7 +2,7 @@ from django.shortcuts import render
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.functions import get2C2PSettings, getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
 from donations.models import DonationMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
-from omp.functions import raiseObjectNone, getFullReverseUrl, getSiteName, getGlobalSettings
+from newstream.functions import raiseObjectNone, getFullReverseUrl, getSiteName, getGlobalSettings
 from urllib.parse import urlencode
 import hmac
 import hashlib

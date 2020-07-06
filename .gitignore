@@ -28,7 +28,7 @@ client/node_modules
 ### vscode
 .vscode
  
-### OMP
+### NEWSTREAM
 *.log
 test_pkcs7/
 fixure.json

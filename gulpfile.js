@@ -4,8 +4,8 @@ var sass = require('gulp-sass');
 var postcss = require('gulp-postcss');
 const cleanCSS = require('gulp-clean-css');
 const through2 = require('through2');
-const srcpath = 'omp/static/scss/main.scss';
-const destpath = 'omp/static/css/';
+const srcpath = 'newstream/static/scss/main.scss';
+const destpath = 'newstream/static/css/';
 
 function css() {
   return gulp.src(srcpath)

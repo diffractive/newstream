@@ -21,9 +21,9 @@ rsync="rsync -av --exclude '.git' --exclude 'node_modules' ./ diff-1:/srv/www/ne
 ssh='ssh diff-1'
 source='cd /srv/www/newstream && source ~/.profile && source venv/bin/activate && export LC_ALL="en_US.UTF-8"'
 migrate='python manage.py makemigrations && python manage.py migrate'
-startg='sudo supervisorctl start omp'
-stopg='sudo supervisorctl stop omp'
-restart_gunicorn='sudo supervisorctl restart omp'
+startg='sudo supervisorctl start newstream'
+stopg='sudo supervisorctl stop newstream'
+restart_gunicorn='sudo supervisorctl restart newstream'
 
 cmd="$rsync && $ssh '${source} && ${restart_gunicorn}'"
 if [ $isxgulp = 'true' ]; then

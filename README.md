@@ -3,4 +3,4 @@
 
 
 ## How to run Gunicorn:
-sudo supervisorctl (start/stop/restart/status) omp
+sudo supervisorctl (start/stop/restart/status) newstream

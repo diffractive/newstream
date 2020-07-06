@@ -33,3 +33,4 @@ client/node_modules
 test_pkcs7/
 fixure.json
 fixture-converted.json
+newstream/settings/dev.py

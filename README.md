@@ -1,4 +1,4 @@
-## Location of Gunicorn omp app config
+## Location of Gunicorn newstream app config
 /etc/supervisor/conf.d/newstream.conf
 
 

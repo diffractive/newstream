@@ -118,10 +118,10 @@
         donation_frequency = document.getElementById('id_donation_frequency')
         if (donation_frequency.value == 'monthly') {
             document.getElementById("id_is_create_account").checked = true;
-            document.getElementById("id_is_create_account").disabled = true;
+            //document.getElementById("id_is_create_account").disabled = true;
             document.getElementsByClassName('member-account-notice')[0].innerHTML = "Your member account is mandatorily created when you are donating monthly. This will allow you to log in and easily view and manage your donations in the future";
         } else {
-            document.getElementById("id_is_create_account").disabled = false;
+            //document.getElementById("id_is_create_account").disabled = false;
             document.getElementsByClassName('member-account-notice')[0].innerHTML = "Check this box to create an account using the email address above. This will allow you to log in and easily view and manage your donations in the future";
         }
     }

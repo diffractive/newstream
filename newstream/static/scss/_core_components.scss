@@ -48,6 +48,12 @@
     }
 }
 
+/* Signin method */
+.email-signin-div {
+    max-width: 500px;
+    min-width: 300px;
+}
+
 /* Donation Header */
 .donation-header {
     border-bottom: $border-grey-color 2px solid;
@@ -58,12 +64,11 @@
 
 /* Donation Sections */
 .donation-details-section {
-    @apply w-1/2;
+    max-width: 500px;
     padding: 1rem 3rem;
-    border-right: $border-grey-color 1px solid;
 }
 .personal-info-section {
-    @apply w-1/2;
+    max-width: 500px;
     padding: 1rem 3rem;
 }
 .other-fields-section {

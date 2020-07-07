@@ -199,8 +199,8 @@ class Donation(ClusterableModel):
     order_number = models.CharField(max_length=255, unique=True)
     donation_amount = models.FloatField()
     is_recurring = models.BooleanField(default=False)
+    is_user_first_donation = models.BooleanField(default=False)
     currency = models.CharField(max_length=20)
-    is_create_account = models.BooleanField(default=False)
     payment_status = models.CharField(
         max_length=255, choices=PAYMENT_STATUS_CHOICES)
     recurring_status = models.CharField(
@@ -214,7 +214,6 @@ class Donation(ClusterableModel):
         FieldPanel('donation_amount'),
         FieldPanel('is_recurring'),
         FieldPanel('currency'),
-        FieldPanel('is_create_account'),
         FieldPanel('payment_status'),
         FieldPanel('recurring_status'),
         InlinePanel('metas', label='Donation Meta', heading='Donation Meta Data',
@@ -237,12 +236,6 @@ class Donation(ClusterableModel):
     @donation_frequency.setter
     def donation_frequency(self, val):
         pass
-
-    def isCreateAccount(self):
-        return 'Yes' if self.is_create_account else 'No'
-
-    def isCreateAccountIcon(self):
-        return '<span class="yes-icon block"></span>' if self.is_create_account else '<span class="no-icon block"></span>'
 
     def isOnGoing(self):
         return 'Yes' if self.recurring_status == STATUS_ONGOING else 'No'

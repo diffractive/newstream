@@ -46,7 +46,6 @@ class PaymentGatewayFactory(object):
                     donation_amount=Gateway_2C2P.extract_payment_amount(
                         request.POST['currency'], request.POST['amount']),
                     currency=pDonation.currency,
-                    is_create_account=False,
                     payment_status=STATUS_PENDING,
                     parent_donation=pDonation
                 )

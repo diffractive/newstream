@@ -9,7 +9,7 @@
 <div class="container-tight flex flex-col items-center">
     {% if isValid %}
     <h1 class="mb-5">Thank you!</h1>
-    {% if donation.is_create_account %}
+    {% if isFirstTime %}
     <p class="mb-1 text-center">Your payment has been successful and you will be receiving a verification email shortly,
         click on the link in the email to verify your email.</p>
     {% else %}
@@ -37,10 +37,6 @@
             <tr>
                 <td>Donation amount</td>
                 <td>{{ donation|amount_with_currency }}</td>
-            </tr>
-            <tr>
-                <td>Account created</td>
-                <td>{{ donation.isCreateAccountIcon|safe }}</td>
             </tr>
             <tr>
                 <td>Opt in Mailing List?</td>

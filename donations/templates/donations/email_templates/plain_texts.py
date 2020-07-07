@@ -26,7 +26,6 @@ def get_new_donation_text(request, donation):
            donation.isRecurring(),
            donation.currency,
            donation.donation_amount,
-           donation.isCreateAccount(),
            donation.donor.optInMailing(),
            donation.payment_status,
            getSiteName(request)
@@ -55,7 +54,6 @@ def get_donation_receipt_text(request, donation):
            donation.isRecurring(),
            donation.currency,
            donation.donation_amount,
-           donation.isCreateAccount(),
            donation.donor.optInMailing(),
            donation.payment_status,
            getSiteName(request)

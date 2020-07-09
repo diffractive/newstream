@@ -82,16 +82,14 @@ class DonationForm(ClusterableModel):
     # should allow donors with the flexibility to choose one-time/monthly within the same form
     # is_recurring = models.BooleanField(default=False)
     amount_type = models.CharField(
-        max_length=20, choices=AMOUNT_TYPE_CHOICES, verbose_name='Donation Amount Type')
-    fixed_amount = models.FloatField(blank=True, null=True, verbose_name='Define Fixed Donation Amount',
+        max_length=20, choices=AMOUNT_TYPE_CHOICES)
+    fixed_amount = models.FloatField(blank=True, null=True,
                                      help_text='Define fixed donation amount if you chose "Fixed Amount" for your Amount Type')
     allowed_gateways = models.ManyToManyField('PaymentGateway')
     # todo: implement this logic at wagtail backend: there should only be one active form in use at a time
     is_active = models.BooleanField(default=False)
-    personal_footer_text = RichTextField(
-        blank=True, verbose_name='Footer Text(Under Personal Info Form)')
-    donation_footer_text = RichTextField(
-        blank=True, verbose_name='Footer Text(Under Donation Details Form)')
+    personal_footer_text = RichTextField(blank=True)
+    donation_footer_text = RichTextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted = models.BooleanField(default=False)
@@ -100,17 +98,17 @@ class DonationForm(ClusterableModel):
         FieldPanel('title'),
         FieldPanel('description'),
         FieldPanel('is_active'),
-        FieldPanel('amount_type'),
+        FieldPanel('amount_type', heading='Donation Amount Type'),
         FieldPanel(
-            'fixed_amount', help_text='Define your fixed donation amount if you chose "Fixed Amount" for your Amount Type.'),
+            'fixed_amount', heading='Define Fixed Donation Amount', help_text='Define your fixed donation amount if you chose "Fixed Amount" for your Amount Type.'),
         InlinePanel('amount_steps', label='Fixed Amount Steps', heading='Define Fixed Donation Amount Steps',
                     help_text='Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type.'),
         AutocompletePanel('allowed_gateways'),
         InlinePanel('donation_meta_fields', label='Donation Meta Fields'),
         InlinePanel('donor_meta_fields', label='Donor Meta Fields'),
-        FieldPanel('personal_footer_text',
+        FieldPanel('personal_footer_text', heading='Footer Text(Under Personal Info Form)',
                    help_text='Footer text to be displayed under the "Personal Info" Form (Step 1 of payment)'),
-        FieldPanel('donation_footer_text',
+        FieldPanel('donation_footer_text', heading='Footer Text(Under Donation Details Form)',
                    help_text='Footer text to be displayed under the "Donation Details" Form (Step 2 of payment)')
     ]
 

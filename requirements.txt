@@ -13,6 +13,8 @@ draftjs-exporter==2.1.7
 gunicorn==20.0.4
 html5lib==1.0.1
 idna==2.9
+importlib-metadata==1.7.0
+jsonpickle==1.4.1
 l18n==2018.5
 mysqlclient==1.4.6
 Pillow==6.2.2
@@ -28,3 +30,4 @@ wagtail==2.8.2
 wagtail-autocomplete==0.5
 webencodings==0.5.1
 Willow==1.3
+zipp==3.1.0

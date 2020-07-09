@@ -40,9 +40,8 @@ class DonationDetailsForm(forms.Form):
         if not blueprint:
             raiseObjectNone('Please provide a DonationForm blueprint')
         form = blueprint
-        # set footer_html property from blueprint
         self.request = request
-        self.footer_html = form.footer_text
+        self.footer_html = form.donation_footer_text
         self.global_settings = getGlobalSettings(request)
         self.fields["currency"].initial = self.global_settings.currency
 
@@ -87,10 +86,8 @@ class PersonalInfoForm(forms.Form):
         if not blueprint:
             raiseObjectNone('Please provide a DonationForm blueprint')
         form = blueprint
-        # set footer_html property from blueprint
-        # todo: differentiate step 1 and 2 footer_text
         self.request = request
-        self.footer_html = form.footer_text
+        self.footer_html = form.personal_footer_text
         self.global_settings = getGlobalSettings(request)
 
         # construct donor meta fields from form configuration

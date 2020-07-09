@@ -88,7 +88,10 @@ class DonationForm(ClusterableModel):
     allowed_gateways = models.ManyToManyField('PaymentGateway')
     # todo: implement this logic at wagtail backend: there should only be one active form in use at a time
     is_active = models.BooleanField(default=False)
-    footer_text = RichTextField(blank=True)
+    personal_footer_text = RichTextField(
+        blank=True, verbose_name='Footer Text(Under Personal Info Form)')
+    donation_footer_text = RichTextField(
+        blank=True, verbose_name='Footer Text(Under Donation Details Form)')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted = models.BooleanField(default=False)
@@ -105,7 +108,10 @@ class DonationForm(ClusterableModel):
         AutocompletePanel('allowed_gateways'),
         InlinePanel('donation_meta_fields', label='Donation Meta Fields'),
         InlinePanel('donor_meta_fields', label='Donor Meta Fields'),
-        FieldPanel('footer_text')
+        FieldPanel('personal_footer_text',
+                   help_text='Footer text to be displayed under the "Personal Info" Form (Step 1 of payment)'),
+        FieldPanel('donation_footer_text',
+                   help_text='Footer text to be displayed under the "Donation Details" Form (Step 2 of payment)')
     ]
 
     class Meta:

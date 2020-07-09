@@ -37,7 +37,6 @@
     </div>
 
     {# Form Area #}
-    {# todo: account for all widget types make available from dynamic meta fields and css stylize them #}
     <form method='POST' action=''>
         <div class="flex flex-row justify-center mb-4">
             {% csrf_token %}
@@ -61,6 +60,24 @@
                 {# Other Fields #}
                 {% for field in form.visible_fields %}
                 {% if field.html_name in other_fields %}
+                {% if field|widget_type == 'checkboxinput' %}
+                <div class="mb-4 widget_checkboxinput flex items-center">
+                    {{ field }} {{ field.label_tag }}
+                </div>
+                {% else %}
+                <div class="mb-4">
+                    <div class="label-div">{{ field.label_tag }}</div>
+                    <div class="field-div widget_{{ field|widget_type }}">
+                        {{ field }}
+                    </div>
+                </div>
+                {% endif %}
+                {% endif %}
+                {% endfor %}
+
+                {# Meta Fields #}
+                {% for field in form.visible_fields %}
+                {% if "donormeta_" in field.html_name %}
                 {% if field|widget_type == 'checkboxinput' %}
                 <div class="mb-4 widget_checkboxinput flex items-center">
                     {{ field }} {{ field.label_tag }}

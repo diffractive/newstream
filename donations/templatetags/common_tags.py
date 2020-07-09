@@ -5,7 +5,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 from site_settings.models import AppearanceSettings
 from donations.functions import getCurrencyDictAt
-from newstream.functions import getSiteName
+from newstream.functions import getSiteName, pickleprint
 
 register = template.Library()
 
@@ -57,3 +57,9 @@ def returnIsActivePage(request, urlname):
 def displayDonationAmountWithCurrency(donation):
     currency_set = getCurrencyDictAt(donation.currency)
     return mark_safe(html.unescape(currency_set['symbol']+" "+str(donation.donation_amount)))
+
+
+@register.filter(name='pickleprint')
+def _pickleprint(obj):
+    pickleprint(obj)
+    return ''

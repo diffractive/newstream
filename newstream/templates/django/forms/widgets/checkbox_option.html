@@ -1,0 +1,4 @@
+<div class="mb-1 widget_checkboxinput flex items-center">
+    {% include "django/forms/widgets/input.html" %}
+    <label{% if widget.attrs.id %} for="{{ widget.attrs.id }}" {% endif %}>{{ widget.label }}</label>
+</div>

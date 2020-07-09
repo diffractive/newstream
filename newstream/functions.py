@@ -1,4 +1,6 @@
 import os
+import json
+import jsonpickle
 from hashlib import blake2b
 from django.conf import settings
 from django.urls import reverse
@@ -66,3 +68,8 @@ def generateIDSecretHash(id):
     ogbytes = (str(id) + settings.SECRET_KEY).encode()
     h.update(ogbytes)
     return h.hexdigest()
+
+
+def pickleprint(obj):
+    serialized = jsonpickle.encode(obj)
+    print(json.dumps(json.loads(serialized), indent=4))

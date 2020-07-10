@@ -1,13 +1,17 @@
 import html
 from django.db import models
 
-from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel
+from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.settings.models import BaseSetting, register_setting
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
 
 from donations.includes.currency_dictionary import currency_dict
+
+
+class CustomTabbedInterface(TabbedInterface):
+    template = "wagtailadmin/edit_handlers/custom_tabbed_interface.html"
 
 
 class AdminEmails(models.Model):
@@ -87,3 +91,43 @@ class Settings2C2P(BaseSetting):
 
     class Meta:
         verbose_name = '2C2P Settings'
+
+
+@register_setting
+class TestGeneralSettings(BaseSetting):
+
+    field_1 = models.CharField(
+        max_length=255, blank=True, null=True)
+    field_2 = models.CharField(
+        max_length=255, blank=True, null=True)
+    field_3 = models.CharField(
+        max_length=255, blank=True, null=True)
+    field_4 = models.CharField(
+        max_length=255, blank=True, null=True)
+    field_5 = models.CharField(
+        max_length=255, blank=True, null=True)
+    field_6 = models.CharField(
+        max_length=255, blank=True, null=True)
+
+    general_tab_panels = [
+        FieldPanel('field_1'),
+        FieldPanel('field_2'),
+    ]
+    language_tab_panels = [
+        FieldPanel('field_3'),
+        FieldPanel('field_4'),
+    ]
+    specific_tab_panels = [
+        FieldPanel('field_5'),
+        FieldPanel('field_6'),
+    ]
+
+    edit_handler = CustomTabbedInterface([
+        TabbedInterface([
+            ObjectList(general_tab_panels, heading='General'),
+            ObjectList(language_tab_panels, heading='Languages'),
+        ], heading="First Tab"),
+        TabbedInterface([
+            ObjectList(specific_tab_panels, heading='Specifics'),
+        ], heading="Second Tab"),
+    ])

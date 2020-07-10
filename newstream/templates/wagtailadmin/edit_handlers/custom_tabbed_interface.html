@@ -1,0 +1,50 @@
+<style>
+    .tab-nav li.active a {
+        background-color: #e6e6e6;
+    }
+
+    .tab-content section.active {
+        background-color: #e6e6e6;
+    }
+
+    .tab-content .tab-nav a {
+        background-color: #189370;
+        border-color: #157b57;
+        font-size: 1.1em;
+        padding: .5em 30px;
+    }
+
+    .tab-content .tab-nav a:hover {
+        border-color: #00585a;
+    }
+
+    .tab-content .tab-nav.merged {
+        background-color: #e6e6e6;
+    }
+
+    .tab-content .tab-nav li.active a {
+        background-color: white;
+    }
+
+    .tab-content section.active .tab-content section.active {
+        background-color: white;
+    }
+</style>
+
+<script>
+    window.onload = () => {
+        (($) => {
+            $(document).on('click', '.tab-nav a', function (e) {
+                e.preventDefault();
+                var firstSubTab = $($(this).attr('href') + ' .tab-nav a').first();
+                if (firstSubTab) {
+                    setTimeout(() => firstSubTab.tab('show'), 10);
+                    // firstSubTab.tab('show'); <- this sometimes does not work
+                    window.history.replaceState(null, null, $(firstSubTab).attr('href'));
+                }
+            });
+        })(window.jQuery)
+    }
+</script>
+
+{% extends "wagtailadmin/edit_handlers/tabbed_interface.html" %}

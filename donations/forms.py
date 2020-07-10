@@ -2,7 +2,7 @@ import html
 from django import forms
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
-from newstream.functions import raiseObjectNone, getGlobalSettings
+from newstream.functions import raiseObjectNone, getSiteSettings
 from donations.functions import getCurrencyDictAt
 from wagtail.contrib.forms.forms import FormBuilder
 from .models import Donor
@@ -42,7 +42,7 @@ class DonationDetailsForm(forms.Form):
         form = blueprint
         self.request = request
         self.footer_html = form.donation_footer_text
-        self.global_settings = getGlobalSettings(request)
+        self.global_settings = getSiteSettings(request)
         self.fields["currency"].initial = self.global_settings.currency
 
         # construct payment gateway field
@@ -88,7 +88,7 @@ class PersonalInfoForm(forms.Form):
         form = blueprint
         self.request = request
         self.footer_html = form.personal_footer_text
-        self.global_settings = getGlobalSettings(request)
+        self.global_settings = getSiteSettings(request)
 
         # construct donor meta fields from form configuration
         donormetafields = form.donor_meta_fields.all()

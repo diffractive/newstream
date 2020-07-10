@@ -14,7 +14,6 @@ def get_new_donation_text(request, donation):
         Is Monthly Donation? %s\n
         Currency: %s\n
         Donation Amount: %s\n
-        Creates Account? %s\n
         Opt in Mailing List? %s\n
         Payment Status: %s\n
         \n
@@ -43,7 +42,6 @@ def get_donation_receipt_text(request, donation):
         Is Monthly Donation? %s\n
         Currency: %s\n
         Donation Amount: %s\n
-        Creates Account? %s\n
         Opt in Mailing List? %s\n
         Payment Status: %s\n
         \n

@@ -1,6 +1,6 @@
 from donations.functions import isTestMode
 from django.shortcuts import redirect
-from newstream.functions import raiseObjectNone, getGlobalSettings
+from newstream.functions import raiseObjectNone, getSiteSettings
 from abc import ABC, abstractmethod
 
 
@@ -17,7 +17,7 @@ class PaymentGatewayManager(ABC):
         # stores whether current app is in test mode or not
         self.testing_mode = isTestMode(self.request)
         # set global settings object
-        self.global_settings = getGlobalSettings(request)
+        self.global_settings = getSiteSettings(request)
 
     @abstractmethod
     def base_live_redirect_url(self):

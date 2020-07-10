@@ -10,15 +10,30 @@ from modelcluster.fields import ParentalKey
 from donations.includes.currency_dictionary import currency_dict
 
 
-class CustomTabbedInterface(TabbedInterface):
-    template = "wagtailadmin/edit_handlers/custom_tabbed_interface.html"
+class TopTabbedInterface(TabbedInterface):
+    template = "wagtailadmin/edit_handlers/top_tabbed_interface.html"
+
+
+class SubTabbedInterface(TabbedInterface):
+    template = "wagtailadmin/edit_handlers/sub_tabbed_interface.html"
+
+
+class SubObjectList(ObjectList):
+    def __init__(self, *args, **kwargs):
+        self.slug = kwargs.pop('slug', None)
+        super().__init__(*args, **kwargs)
+
+    def clone_kwargs(self):
+        kwargs = super().clone_kwargs()
+        kwargs['slug'] = self.slug
+        return kwargs
 
 
 class AdminEmails(models.Model):
     title = models.CharField(max_length=255)
     email = models.EmailField()
     setting_parent = ParentalKey(
-        'GlobalSettings', on_delete=models.CASCADE, related_name='admin_emails')
+        'SiteSettings', on_delete=models.CASCADE, related_name='admin_emails')
 
     panels = [
         FieldPanel('title'),
@@ -30,8 +45,38 @@ class AdminEmails(models.Model):
 
 
 @register_setting
-class AppearanceSettings(BaseSetting):
-    """ Customize site outlook here """
+class SiteSettings(BaseSetting, ClusterableModel):
+    general_general_panels = [
+        InlinePanel('admin_emails', label="Admin Email", heading="List of Admins' Emails",
+                    help_text='Email notifications such as new donations will be sent to this list.')
+    ]
+
+    # todo: make supported currencies for each payment gateway
+    # todo: check against being-in-use gateways' supported currencies with this setting
+    sandbox_mode = models.BooleanField(default=True)
+    currency = models.CharField(default='USD', max_length=10, choices=[(key, html.unescape(
+        val['admin_label'])) for key, val in currency_dict.items()])
+
+    gateways_general_panels = [
+        FieldPanel('sandbox_mode'),
+        FieldPanel('currency')
+    ]
+
+    _2c2p_merchant_id = models.CharField(
+        max_length=255, blank=True, null=True, help_text="Merchant ID")
+    _2c2p_secret_key = models.CharField(
+        max_length=255, blank=True, null=True, help_text="Secret Key")
+    _2c2p_log_filename = models.CharField(
+        max_length=255, blank=True, null=True, help_text="Log Filename")
+
+    gateways_2c2p_panels = [
+        MultiFieldPanel([
+            FieldPanel("_2c2p_merchant_id"),
+            FieldPanel("_2c2p_secret_key"),
+            FieldPanel("_2c2p_log_filename"),
+        ], heading="2C2P API Sandbox Settings")
+    ]
+
     brand_logo = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
@@ -47,87 +92,24 @@ class AppearanceSettings(BaseSetting):
         related_name='+'
     )
 
-    panels = [
+    appearance_general_panels = [
         ImageChooserPanel('brand_logo'),
         ImageChooserPanel('site_icon'),
     ]
 
-
-@register_setting
-class GlobalSettings(BaseSetting, ClusterableModel):
-    """Top level settings for this omp app"""
-    # todo: make supported currencies for each payment gateway
-    # todo: check against being-in-use gateways' supported currencies with this setting
-    test_mode = models.BooleanField(default=True)
-    currency = models.CharField(default='USD', max_length=10, choices=[(key, html.unescape(
-        val['admin_label'])) for key, val in currency_dict.items()])
-
-    panels = [
-        FieldPanel('test_mode'),
-        FieldPanel('currency'),
-        InlinePanel('admin_emails', label="Admin Email", heading="List of Admins' Emails",
-                    help_text='Email notifications such as new donations will be sent to this list.'),
-    ]
-
-
-@register_setting
-class Settings2C2P(BaseSetting):
-    """Settings for the 2c2p api."""
-
-    merchant_id = models.CharField(
-        max_length=255, blank=True, null=True, help_text="Merchant ID")
-    secret_key = models.CharField(
-        max_length=255, blank=True, null=True, help_text="Secret Key")
-    log_filename = models.CharField(
-        max_length=255, blank=True, null=True, help_text="Log Filename")
-
-    panels = [
-        MultiFieldPanel([
-            FieldPanel("merchant_id"),
-            FieldPanel("secret_key"),
-            FieldPanel("log_filename"),
-        ], heading="2C2P API Test Settings")
-    ]
-
-    class Meta:
-        verbose_name = '2C2P Settings'
-
-
-@register_setting
-class TestGeneralSettings(BaseSetting):
-
-    field_1 = models.CharField(
-        max_length=255, blank=True, null=True)
-    field_2 = models.CharField(
-        max_length=255, blank=True, null=True)
-    field_3 = models.CharField(
-        max_length=255, blank=True, null=True)
-    field_4 = models.CharField(
-        max_length=255, blank=True, null=True)
-    field_5 = models.CharField(
-        max_length=255, blank=True, null=True)
-    field_6 = models.CharField(
-        max_length=255, blank=True, null=True)
-
-    general_tab_panels = [
-        FieldPanel('field_1'),
-        FieldPanel('field_2'),
-    ]
-    language_tab_panels = [
-        FieldPanel('field_3'),
-        FieldPanel('field_4'),
-    ]
-    specific_tab_panels = [
-        FieldPanel('field_5'),
-        FieldPanel('field_6'),
-    ]
-
-    edit_handler = CustomTabbedInterface([
-        TabbedInterface([
-            ObjectList(general_tab_panels, heading='General'),
-            ObjectList(language_tab_panels, heading='Languages'),
-        ], heading="First Tab"),
-        TabbedInterface([
-            ObjectList(specific_tab_panels, heading='Specifics'),
-        ], heading="Second Tab"),
+    edit_handler = TopTabbedInterface([
+        SubTabbedInterface([
+            SubObjectList(general_general_panels, slug='general-general',
+                          heading='General'),
+        ], heading="General"),
+        SubTabbedInterface([
+            SubObjectList(gateways_general_panels,
+                          heading='General', slug='gateways-general'),
+            SubObjectList(gateways_2c2p_panels,
+                          heading='2C2P(Credit Card)', slug='gateways-2c2p'),
+        ], heading="Gateways"),
+        SubTabbedInterface([
+            SubObjectList(appearance_general_panels,
+                          heading='General', slug='appearance-general'),
+        ], heading="Appearance"),
     ])

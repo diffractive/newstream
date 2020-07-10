@@ -3,7 +3,7 @@ import html
 from django import template
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from site_settings.models import AppearanceSettings
+from site_settings.models import SiteSettings
 from donations.functions import getCurrencyDictAt
 from newstream.functions import getSiteName, pickleprint
 
@@ -17,13 +17,13 @@ def domain(req):
 
 @register.filter(name='brand_logo')
 def getBrandLogo(req):
-    settings = AppearanceSettings.for_site(req.site)
+    settings = SiteSettings.for_site(req.site)
     return settings.brand_logo
 
 
 @register.filter(name='site_icon')
 def getSiteIcon(req):
-    settings = AppearanceSettings.for_site(req.site)
+    settings = SiteSettings.for_site(req.site)
     return settings.site_icon
 
 

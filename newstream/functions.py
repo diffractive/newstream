@@ -7,7 +7,7 @@ from django.urls import reverse
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from site_settings.models import GlobalSettings
+from site_settings.models import SiteSettings
 
 
 class EmailVerificationTokenGenerator(PasswordResetTokenGenerator):
@@ -29,8 +29,8 @@ def getSiteName(request):
     return request.site.site_name if request.site.site_name else '[SiteName]'
 
 
-def getGlobalSettings(request):
-    return GlobalSettings.for_site(request.site)
+def getSiteSettings(request):
+    return SiteSettings.for_site(request.site)
 
 
 def raiseObjectNone(message=''):

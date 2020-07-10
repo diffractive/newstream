@@ -7,8 +7,7 @@ from django.core.mail import send_mail
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
-from site_settings.models import Settings2C2P
-from newstream.functions import getGlobalSettings
+from newstream.functions import getSiteSettings
 from django.contrib.auth import get_user_model
 from datetime import datetime, timedelta
 from pytz import timezone
@@ -17,6 +16,12 @@ from .templates.donations.email_templates.plain_texts import get_new_donation_te
 from newstream.functions import evTokenGenerator, raiseObjectNone, getFullReverseUrl, getSiteName
 from newstream.templates.registration.email_templates.plain_texts import get_verify_your_email_text
 User = get_user_model()
+
+
+class Settings2C2P:
+    def __init__(self, merchant_id, secret_key):
+        self.merchant_id = merchant_id
+        self.secret_key = secret_key
 
 
 def getCurrencyDict():
@@ -37,12 +42,13 @@ def getCurrencyFromCode(code):
 
 
 def isTestMode(request):
-    globalSettings = getGlobalSettings(request)
-    return globalSettings.test_mode
+    siteSettings = getSiteSettings(request)
+    return siteSettings.sandbox_mode
 
 
 def get2C2PSettings(request):
-    return Settings2C2P.for_site(request.site)
+    siteSettings = getSiteSettings(request)
+    return Settings2C2P(siteSettings._2c2p_merchant_id, siteSettings._2c2p_secret_key)
 
 
 def gen_order_id(gateway=None):
@@ -107,16 +113,16 @@ def getRecurringDateNextMonth(format):
 
 
 def sendDonationNotifToAdmins(request, donation):
-    globalSettings = getGlobalSettings(request)
+    siteSettings = getSiteSettings(request)
     admin_list = [
-        admin_email.email for admin_email in globalSettings.admin_emails.all()]
+        admin_email.email for admin_email in siteSettings.admin_emails.all()]
     try:
         send_mail(
             "New Donation",
             get_new_donation_text(
                 request, donation),
             getSuperUserEmail(),
-            admin_list,  # requires admin list to be set in globalsettings
+            admin_list,  # requires admin list to be set in siteSettings
             html_message=render_to_string('donations/email_templates/new_donation.html', context={
                 'donation': donation}, request=request)
         )

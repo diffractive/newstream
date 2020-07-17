@@ -76,7 +76,7 @@ class DonationForm(ClusterableModel):
         ('stepped', 'Fixed Steps'),
         ('custom', 'Custom Amount'),
     ]
-    title = models.CharField(max_length=255, unique=True)
+    title = models.CharField(max_length=191, unique=True)
     description = models.TextField(blank=True)
     # no need to differentiate is_recurring at the form blueprint level
     # should allow donors with the flexibility to choose one-time/monthly within the same form

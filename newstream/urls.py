@@ -29,6 +29,7 @@ urlpatterns = [
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
 
+    path('accounts/', include('allauth.urls')),
 
     # password_reset* are meant for forgot password path
     path('password_reset/',

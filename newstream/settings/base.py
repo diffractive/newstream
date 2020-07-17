@@ -22,11 +22,15 @@ LOGIN_URL = "/login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
+#django-allauth
+ACCOUNT_AUTHENTICATION_METHOD = "email"
+ACCOUNT_EMAIL_REQUIRED=True
+ACCOUNT_USERNAME_REQUIRED=False
+
 # Custom User Model
-AUTH_USER_MODEL = 'custom_user.User'
-WAGTAIL_USER_EDIT_FORM = 'custom_user.forms.CustomUserEditForm'
-WAGTAIL_USER_CREATION_FORM = 'custom_user.forms.CustomUserCreationForm'
-WAGTAIL_USER_CUSTOM_FIELDS = ['is_email_verified', 'opt_in_mailing_list']
+#WAGTAIL_USER_EDIT_FORM = 'custom_user.forms.CustomUserEditForm'
+#WAGTAIL_USER_CREATION_FORM = 'custom_user.forms.CustomUserCreationForm'
+#WAGTAIL_USER_CUSTOM_FIELDS = ['is_email_verified', 'opt_in_mailing_list']
 
 
 # Quick-start development settings - unsuitable for production
@@ -60,9 +64,13 @@ INSTALLED_APPS = [
     'modelcluster',
     'taggit',
     'wagtailautocomplete',
-    'django_use_email_as_username.apps.DjangoUseEmailAsUsernameConfig',
-    'custom_user.apps.CustomUserConfig',
     'widget_tweaks',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    #'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.google',
+    #'allauth.socialaccount.providers.twitter',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -70,6 +78,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
 ]
 
 MIDDLEWARE = [
@@ -176,3 +185,24 @@ WAGTAIL_SITE_NAME = "Newstream"
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
 BASE_URL = 'http://example.com'
+
+AUTHENTICATION_BACKENDS = [
+    # Needed to login by username in Django admin, regardless of `allauth`
+    'django.contrib.auth.backends.ModelBackend',
+    # `allauth` specific authentication methods, such as login by e-mail
+    'allauth.account.auth_backends.AuthenticationBackend',
+]
+
+SITE_ID = 1
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': [
+            'profile',
+            'email',
+        ],
+        'AUTH_PARAMS': {
+            'access_type': 'online',
+        }
+    }
+}

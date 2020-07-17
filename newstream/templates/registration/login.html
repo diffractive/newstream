@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load common_tags widget_tweaks %}
+{% load common_tags widget_tweaks socialaccount %}
 
 {% block title %}Login to {{ request|site_name }}{% endblock %}
 
@@ -30,6 +30,7 @@
                 </div>
             </div>
             <button class="ns-wide-btn right-arrow-btn" type="submit">Login<span class="icon"></span></button>
+            <a href="{% provider_login_url 'google' %}" class="ns-wide-btn">Google Login</a>
             <div class="login-form-footer flex flex-col items-center">
                 <a href="{% url 'password_reset' %}" class="mb-2">Forgot
                     Password?</a>

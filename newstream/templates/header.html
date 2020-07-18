@@ -17,16 +17,16 @@
                 class="dropdown-toggle-checkbox">
             <label for="dropdown-toggle-checkbox" class="dropdown-toggle-label"></label>
             <span class="avatar-icon"></span>
-            <span class="user-fullname">{{ user.fullname }}</span>
+            <span class="user-fullname">{{ user|display_username }}</span>
             <span class="dropdown-chevron-icon"></span>
             <div class="user-dropdown-menu flex flex-col items-stretch">
                 <a href="{% url 'personal-info' %}">Profile Settings</a>
                 <a href="{% url 'donations:my-donations' %}">My Donations</a>
-                <a href="{% url 'logout'%}">Logout</a>
+                <a href="{% url 'account_logout' %}">Logout</a>
             </div>
         </div>
         {% else %}
-        <a href="{% url 'login'%}?next={{request.path}}" class="mr-16 menu-item">Sign in</a>
+        <a href="{% url 'account_login' %}?next={{request.path}}" class="mr-16 menu-item">Sign in</a>
         {% endif %}
         <a href="{% url 'donations:donate'%}" class="menu-item nav-donate-btn">Donate</a>
     </div>

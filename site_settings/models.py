@@ -46,7 +46,9 @@ class AdminEmails(models.Model):
 
 @register_setting
 class SiteSettings(BaseSetting, ClusterableModel):
+    default_from_email = models.EmailField()
     general_general_panels = [
+        FieldPanel('default_from_email'),
         InlinePanel('admin_emails', label="Admin Email", heading="List of Admins' Emails",
                     help_text='Email notifications such as new donations will be sent to this list.')
     ]

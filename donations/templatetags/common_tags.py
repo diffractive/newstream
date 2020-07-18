@@ -1,3 +1,4 @@
+import re
 import os
 import html
 from django import template
@@ -63,3 +64,16 @@ def displayDonationAmountWithCurrency(donation):
 def _pickleprint(obj):
     pickleprint(obj)
     return ''
+
+
+@register.filter(name='remember_filter')
+def remember_filter(html):
+    return mark_safe(re.sub(r':', '?', html))
+
+
+@register.filter(name='display_username')
+def display_username(user):
+    if user.first_name and user.last_name:
+        return user.first_name + ' ' + user.last_name
+    else:
+        return user.email

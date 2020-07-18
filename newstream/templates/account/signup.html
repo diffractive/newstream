@@ -37,7 +37,10 @@
     </div>
 
     {# Form Area #}
-    <form method='POST' action=''>
+    <form method='POST' action="{% url 'account_signup' %}?next={{ redirect_field_value }}">
+        {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
         <div class="flex flex-row justify-center mb-4">
             {% csrf_token %}
             {# Include the hidden fields #}
@@ -47,7 +50,7 @@
             <div class="personal-info-section">
                 <h2 class="mb-4">Personal info</h2>
                 {% for field in form.visible_fields %}
-                {% if field.html_name in personal_info_fields %}
+                {% if field.html_name in form.personal_info_fields %}
                 <div class="mb-4">
                     <div class="label-div">{{ field.label_tag }}</div>
                     <div class="field-div widget_{{ field|widget_type }}">
@@ -59,7 +62,7 @@
 
                 {# Other Fields #}
                 {% for field in form.visible_fields %}
-                {% if field.html_name in other_fields %}
+                {% if field.html_name in form.other_fields %}
                 {% if field|widget_type == 'checkboxinput' %}
                 <div class="mb-4 widget_checkboxinput flex items-center">
                     {{ field }} {{ field.label_tag }}

@@ -9,12 +9,14 @@ from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
 from newstream.functions import getSiteSettings
 from django.contrib.auth import get_user_model
+import django.conf as conf
 from datetime import datetime, timedelta
 from pytz import timezone
 from .includes.currency_dictionary import currency_dict
 from .templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text
 from newstream.functions import evTokenGenerator, raiseObjectNone, getFullReverseUrl, getSiteName
 from newstream.templates.registration.email_templates.plain_texts import get_verify_your_email_text
+from allauth.account.utils import send_email_confirmation
 User = get_user_model()
 
 
@@ -88,6 +90,15 @@ def getSuperUserEmail():
     return su.email
 
 
+def setDefaultFromEmail(request):
+    conf.settings.DEFAULT_FROM_EMAIL = getDefaultFromEmail(request)
+
+
+def getDefaultFromEmail(request):
+    siteSettings = getSiteSettings(request)
+    return siteSettings.default_from_email if siteSettings.default_from_email else getSuperUserEmail()
+
+
 def getNextDateFromRecurringInterval(days, format):
     tz = timezone(getSuperUserTimezone())
     loc_dt = datetime.now(tz)
@@ -121,7 +132,7 @@ def sendDonationNotifToAdmins(request, donation):
             "New Donation",
             get_new_donation_text(
                 request, donation),
-            getSuperUserEmail(),
+            getDefaultFromEmail(request),
             admin_list,  # requires admin list to be set in siteSettings
             html_message=render_to_string('donations/email_templates/new_donation.html', context={
                 'donation': donation}, request=request)
@@ -136,7 +147,7 @@ def sendDonationReceipt(request, donation):
             "Donation Receipt",
             get_donation_receipt_text(
                 request, donation),
-            getSuperUserEmail(),
+            getDefaultFromEmail(request),
             [donation.donor.email],
             html_message=render_to_string('donations/email_templates/donation_receipt.html', context={
                 'donation': donation}, request=request)
@@ -146,23 +157,26 @@ def sendDonationReceipt(request, donation):
 
 
 def sendVerificationEmail(request, user):
-    try:
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = evTokenGenerator.make_token(user)
-        fullurl = getFullReverseUrl(
-            request, 'verify-email', kwargs={'uidb64': uid, 'token': token})
-        ms = send_mail(
-            "Please verify your email at "+getSiteName(request),
-            get_verify_your_email_text(
-                request, user.fullname, fullurl),
-            getSuperUserEmail(),
-            [user.email],
-            html_message=render_to_string('registration/email_templates/verify_your_email.html', context={
-                'fullname': user.fullname, 'fullurl': fullurl}, request=request)
-        )
-        print("Number of email verifications sent: " +
-              str(ms), flush=True)
-    except Exception as e:
-        print("Cannot send verification email to donor: " +
-              str(e), flush=True)
-        print(traceback.format_exc(), flush=True)
+    setDefaultFromEmail(request)
+    # allauth's email confirmation uses DEFAULT_FROM_EMAIL
+    send_email_confirmation(request, user, True)
+    # try:
+    #     uid = urlsafe_base64_encode(force_bytes(user.pk))
+    #     token = evTokenGenerator.make_token(user)
+    #     fullurl = getFullReverseUrl(
+    #         request, 'verify-email', kwargs={'uidb64': uid, 'token': token})
+    #     ms = send_mail(
+    #         "Please verify your email at "+getSiteName(request),
+    #         get_verify_your_email_text(
+    #             request, user.fullname, fullurl),
+    #         getSuperUserEmail(),
+    #         [user.email],
+    #         html_message=render_to_string('registration/email_templates/verify_your_email.html', context={
+    #             'fullname': user.fullname, 'fullurl': fullurl}, request=request)
+    #     )
+    #     print("Number of email verifications sent: " +
+    #           str(ms), flush=True)
+    # except Exception as e:
+    #     print("Cannot send verification email to donor: " +
+    #           str(e), flush=True)
+    #     print(traceback.format_exc(), flush=True)

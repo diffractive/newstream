@@ -1,17 +1,19 @@
 {% extends "base.html" %}
-{% load static common_tags %}
+{% load static common_tags account socialaccount %}
 
 {% block title %}Sign in to donate{% endblock %}
 
-{% block body_class %}omp-signin-method-page{% endblock %}
+{% block body_class %}newstream-signin-method-page{% endblock %}
 
 {% block content %}
 <div class="container-tight flex flex-col items-center">
     <h2 class="mb-4">Sign in to donate</h2>
     <div class="email-signin-div">
-        <a href="{% url 'login' %}?next=/donations/donation-details/" class="ns-wide-btn right-arrow-btn block">Sign in
+        <a href="{% url 'account_login' %}?next=/donations/donation-details/"
+            class="ns-wide-btn right-arrow-btn block">Sign in
             with Email<span class="icon"></span></a>
-        <a href="{% url 'donations:personal-info'%}" class="ns-wide-btn right-arrow-btn block">Continue with Email Sign
+        <a href="{% url 'account_signup' %}?next=/donations/donation-details/"
+            class="ns-wide-btn right-arrow-btn block">Continue with Email Sign
             up<span class="icon"></span></a>
     </div>
 </div>

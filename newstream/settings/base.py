@@ -22,15 +22,19 @@ LOGIN_URL = "/login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-#django-allauth
+# django-allauth
 ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_EMAIL_REQUIRED=True
-ACCOUNT_USERNAME_REQUIRED=False
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_SIGNUP_FORM_CLASS = 'donations.forms.PersonalInfoForm'
+# ACCOUNT_SIGNUP_PASSWORD_VERIFICATION = False
+ACCOUNT_ADAPTER = 'donations.forms.NewstreamAdapter'
 
 # Custom User Model
-#WAGTAIL_USER_EDIT_FORM = 'custom_user.forms.CustomUserEditForm'
-#WAGTAIL_USER_CREATION_FORM = 'custom_user.forms.CustomUserCreationForm'
-#WAGTAIL_USER_CUSTOM_FIELDS = ['is_email_verified', 'opt_in_mailing_list']
+AUTH_USER_MODEL = 'newstream_user.User'
+WAGTAIL_USER_EDIT_FORM = 'newstream_user.forms.NewstreamUserEditForm'
+WAGTAIL_USER_CREATION_FORM = 'newstream_user.forms.NewstreamUserCreationForm'
+WAGTAIL_USER_CUSTOM_FIELDS = ['is_email_verified', 'opt_in_mailing_list']
 
 
 # Quick-start development settings - unsuitable for production
@@ -40,6 +44,7 @@ ACCOUNT_USERNAME_REQUIRED=False
 # Application definition
 
 INSTALLED_APPS = [
+    'newstream_user',
     'home',
     'search',
     'site_settings',
@@ -68,9 +73,9 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    #'allauth.socialaccount.providers.facebook',
+    # 'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
-    #'allauth.socialaccount.providers.twitter',
+    # 'allauth.socialaccount.providers.twitter',
 
     'django.contrib.admin',
     'django.contrib.auth',

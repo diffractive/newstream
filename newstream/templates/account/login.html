@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% load common_tags widget_tweaks account socialaccount %}
+
+{% block title %}Login to {{ request|site_name }}{% endblock %}
+
+{% block content %}
+<div class="container-tight flex flex-col items-center">
+    <h1 class="mb-5">Login to {{ request|site_name }}</h1>
+    <form method="post" action="{% url 'account_login' %}">
+        {% csrf_token %}
+        {% for hidden in form.hidden_fields %}
+        {{ hidden }}
+        {% endfor %}
+        <!-- <input type="hidden" name="next" value="{{ next }}" /> -->
+        {% if redirect_field_value %}
+        <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+        {% endif %}
+        <div class="flex flex-col login-container items-stretch">
+            {% if form.errors %}
+            {% for field in form %}
+            {% for error in field.errors %}
+            <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 mb-4" role="alert">
+                <p class="font-bold">Login Form Error - {{ field.label }}:</p>
+                <p>{{ error|escape }}</p>
+            </div>
+            {% endfor %}
+            {% endfor %}
+            {% endif %}
+
+            {% if form.non_field_errors %}
+            {% for error in form.non_field_errors %}
+            <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 mb-4" role="alert">
+                <p class="font-bold">Login Form Error:</p>
+                <p>{{ error|escape }}</p>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="mb-4">
+                <div class="label-div">{{ form.login.label_tag }}</div>
+                <div class="field-div widget_{{ form.login|widget_type }}">
+                    {{ form.login }}
+                </div>
+            </div>
+            <div class="mb-4">
+                <div class="label-div">{{ form.password.label_tag }}</div>
+                <div class="field-div widget_{{ form.password|widget_type }}">
+                    {{ form.password }}
+                </div>
+            </div>
+            <div class="mb-4 widget_checkboxinput flex items-center">
+                {{ form.remember }} {{ form.remember.label_tag|remember_filter }}
+            </div>
+            <button class="ns-wide-btn right-arrow-btn" type="submit">Login<span class="icon"></span></button>
+            <div class="login-form-footer flex flex-col items-center">
+                <a href="{% url 'account_reset_password' %}" class="mb-2">Forgot
+                    Password?</a>
+                <span>Not yet a member? <a href="{% url 'donations:donate' %}">Donate and Join Now</a></span>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}

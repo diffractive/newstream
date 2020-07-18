@@ -12,6 +12,7 @@ from donations.functions import sendVerificationEmail
 from donations.models import Donor
 from newstream.functions import evTokenGenerator, generateIDSecretHash
 from newstream.forms import PersonalInfoForm, ChangeEmailForm, ChangePasswordForm, DeleteAccountForm
+# from allauth.account.views import SignupView
 User = get_user_model()
 
 

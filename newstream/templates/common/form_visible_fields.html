@@ -1,0 +1,10 @@
+{% load static widget_tweaks %}
+
+{% for field in form.visible_fields %}
+<div class="mb-4">
+    <div class="label-div">{{ field.label_tag }}</div>
+    <div class="field-div widget_{{ field|widget_type }}">
+        {{ field }}
+    </div>
+</div>
+{% endfor %}

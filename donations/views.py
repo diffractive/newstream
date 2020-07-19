@@ -16,12 +16,6 @@ import re
 User = get_user_model()
 
 
-class CustomPasswordResetView(PasswordResetView):
-    def __init__(self, *args, **kwargs):
-        self.from_email = getSuperUserEmail()
-        super().__init__(*args, **kwargs)
-
-
 def verify_gateway_response(request):
     gatewayManager = PaymentGatewayFactory.initGatewayByVerification(request)
     if gatewayManager:
@@ -61,6 +55,7 @@ def thank_you(request):
             pk=request.session['thankyou-donation-id'])
         # logs donor in
         if donation.donor.linked_user:
+            # todo: need to specify which backend to login through (i.e. standard or social)
             login(request, donation.donor.linked_user)
         return render(request, 'donations/thankyou.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
     if 'thankyou-error' in request.session:
@@ -75,77 +70,6 @@ def donate(request):
     else:
         # show login or sign-up options page
         return render(request, 'donations/signin_method.html')
-
-
-def personal_info(request):
-    form_template = 'donations/personal_info_form.html'
-    try:
-        form_blueprint = DonationForm.objects.get(
-            is_active__exact=True)
-    except Exception as e:
-        print("There should be exactly one active DonationForm.", flush=True)
-        raise e
-    if request.method == 'POST':
-        form = PersonalInfoForm(
-            request.POST, request=request, blueprint=form_blueprint, label_suffix='')
-        # if form is valid, this should mean the email is brand new in the system
-        if form.is_valid():
-            # process meta data
-            donor_metas = []
-            for key, val in request.POST.items():
-                donormeta_key = re.match("^donormeta_([a-z_]+)$", key)
-                if donormeta_key:
-                    donor_metas.append(DonorMeta(
-                        field_key=donormeta_key.group(1), field_value=val))
-
-            # creates a new donor
-            donor = Donor(
-                first_name=form.cleaned_data['first_name'],
-                last_name=form.cleaned_data['last_name'],
-                email=form.cleaned_data['email'],
-                opt_in_mailing_list=form.cleaned_data['opt_in_mailing_list'],
-                metas=donor_metas
-            )
-            donor.save()
-
-            # proceed to create account
-            try:
-                generated_pwd = secrets.token_hex(10)
-                donor_user = User.objects.create_user(
-                    email=donor.email, password=generated_pwd)
-                donor_user.first_name = donor.first_name
-                donor_user.last_name = donor.last_name
-                donor_user.opt_in_mailing_list = donor.opt_in_mailing_list
-                donor_user.save()
-                # link donor to user
-                donor.linked_user = donor_user
-                donor.save()
-                # save to session to remember user's registration
-                request.session['first_time_registration'] = True
-            except Exception as e:
-                print("Cannot Create new Django user: " +
-                      str(e), flush=True)
-                # Should have been checked against duplication in form validation
-                # double check again for safety
-                form.add_error(None, str(e))
-                return render(request, form_template, {'form': form, 'personal_info_fields': PERSONAL_INFO_FIELDS, 'other_fields': OTHER_FIELDS})
-
-            # logs new user in
-            login(request, donor_user)
-
-            # email verification to user
-            sendVerificationEmail(
-                request, donor_user)
-
-            # redirects to donation-details (step 2)
-            return redirect('donations:donation-details')
-        else:
-            pprint(form.errors)
-    else:
-        form = PersonalInfoForm(
-            request=request, blueprint=form_blueprint, label_suffix='')
-
-    return render(request, form_template, {'form': form, 'personal_info_fields': PERSONAL_INFO_FIELDS, 'other_fields': OTHER_FIELDS})
 
 
 def donation_details(request):
@@ -176,9 +100,16 @@ def donation_details(request):
                 donor = Donor.objects.get(email__exact=request.user.email)
             except Exception as e:
                 print("Cannot find user's linked donor: " +
-                      str(e), flush=True)
-                form.add_error(None, str(e))
-                return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS})
+                      str(e) + ', thus creates new linked donor.', flush=True)
+                # creates a new linked donor
+                donor = Donor(
+                    first_name=request.user.first_name,
+                    last_name=request.user.last_name,
+                    email=request.user.email,
+                    opt_in_mailing_list=request.user.opt_in_mailing_list,
+                    linked_user=request.user
+                )
+                donor.save()
 
             # create pending donation
             payment_gateway = PaymentGateway.objects.get(

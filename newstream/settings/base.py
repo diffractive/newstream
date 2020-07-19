@@ -28,13 +28,20 @@ ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_SIGNUP_FORM_CLASS = 'donations.forms.PersonalInfoForm'
 # ACCOUNT_SIGNUP_PASSWORD_VERIFICATION = False
-ACCOUNT_ADAPTER = 'donations.forms.NewstreamAdapter'
+# ACCOUNT_ADAPTER = 'donations.forms.NewstreamAdapter'
+ACCOUNT_LOGOUT_ON_GET = True
+ACCOUNT_FORMS = {
+    'signup': 'newstream.forms.NewstreamSignupForm',
+    'add_email': 'newstream.forms.NewstreamAddEmailForm'
+}
+
+DEFAULT_FROM_EMAIL = 'franky@uxcodified.com'
 
 # Custom User Model
 AUTH_USER_MODEL = 'newstream_user.User'
 WAGTAIL_USER_EDIT_FORM = 'newstream_user.forms.NewstreamUserEditForm'
 WAGTAIL_USER_CREATION_FORM = 'newstream_user.forms.NewstreamUserCreationForm'
-WAGTAIL_USER_CUSTOM_FIELDS = ['is_email_verified', 'opt_in_mailing_list']
+WAGTAIL_USER_CUSTOM_FIELDS = ['opt_in_mailing_list']
 
 
 # Quick-start development settings - unsuitable for production
@@ -189,7 +196,7 @@ WAGTAIL_SITE_NAME = "Newstream"
 
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
-BASE_URL = 'http://example.com'
+BASE_URL = 'https://newstream.hongkongfp.com'
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`

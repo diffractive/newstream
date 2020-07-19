@@ -10,8 +10,6 @@ from search import views as search_views
 
 from wagtailautocomplete.urls.admin import urlpatterns as autocomplete_admin_urls
 
-from donations.views import CustomPasswordResetView
-from django.contrib.auth import views
 from django.urls import path
 import newstream.views as user_views
 
@@ -26,31 +24,10 @@ urlpatterns = [
 
     path('donations/', include('donations.urls')),
 
-    path('login/', views.LoginView.as_view(), name='login'),
-    path('logout/', views.LogoutView.as_view(), name='logout'),
-
     path('accounts/', include('allauth.urls')),
 
-    # password_reset* are meant for forgot password path
-    path('password_reset/',
-         CustomPasswordResetView.as_view(), name='password_reset'),
-    path('password_reset/done/', views.PasswordResetDoneView.as_view(),
-         name='password_reset_done'),
-    path('reset/<uidb64>/<token>/', views.PasswordResetConfirmView.as_view(),
-         name='password_reset_confirm'),
-    path('reset/done/', views.PasswordResetCompleteView.as_view(),
-         name='password_reset_complete'),
-
-    path('verify-email/<uidb64>/<token>/', user_views.verify_email,
-         name='verify-email'),
     path('personal-info/', user_views.personal_info, name='personal-info'),
-    path('resend-verification-email/', user_views.resend_verification_email,
-         name='resend-verification-email'),
-    path('personal-info/change-email-address/', user_views.change_email_address,
-         name='change-email-address'),
     path('security/', user_views.security, name='security'),
-    path('security/change-password/', user_views.change_password,
-         name='change-password'),
     path('advanced-settings/', user_views.advanced_settings,
          name='advanced-settings'),
     path('advanced-settings/delete-account/', user_views.delete_account,

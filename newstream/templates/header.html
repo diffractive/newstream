@@ -26,7 +26,7 @@
             </div>
         </div>
         {% else %}
-        <a href="{% url 'account_login' %}?next={{request.path}}" class="mr-16 menu-item">Sign in</a>
+        <a href="{% url 'account_login' %}{{ request|next_path_filter }}" class="mr-16 menu-item">Sign in</a>
         {% endif %}
         <a href="{% url 'donations:donate'%}" class="menu-item nav-donate-btn">Donate</a>
     </div>

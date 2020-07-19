@@ -8,9 +8,9 @@ from newstream.functions import raiseObjectNone, getSiteSettings
 from donations.functions import getCurrencyDictAt
 from wagtail.contrib.forms.forms import FormBuilder
 from .models import Donor, DonationForm, DonorMeta
-from .functions import setDefaultFromEmail, sendVerificationEmail
-# from allauth.account.forms import SetPasswordField
+from .functions import setDefaultFromEmail, sendVerificationEmail, donor_email_exists
 from allauth.account.adapter import DefaultAccountAdapter
+from allauth.utils import email_address_exists
 User = get_user_model()
 
 
@@ -80,11 +80,6 @@ class DonationDetailsForm(forms.Form):
 class PersonalInfoForm(forms.Form):
     first_name = forms.CharField(label='First Name', max_length=255)
     last_name = forms.CharField(label='Last Name', max_length=255)
-    # email = forms.EmailField(label='Email Address', max_length=255)
-    # password1 = forms.CharField(
-    #     min_length=6, widget=forms.PasswordInput, label=("Password"))
-    # password2 = forms.CharField(
-    #     min_length=6, widget=forms.PasswordInput, label=("Password (again)"))
     opt_in_mailing_list = forms.BooleanField(
         label='Opt in Mailing List?', required=False)
     personal_info_fields = [
@@ -100,12 +95,6 @@ class PersonalInfoForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # if not request:
-        #     raiseObjectNone('Please provide request object')
-        # if not blueprint:
-        #     raiseObjectNone('Please provide a DonationForm blueprint')
-        # self.request = request
-        # self.global_settings = getSiteSettings(request)
         try:
             form = DonationForm.objects.get(
                 is_active__exact=True)
@@ -145,7 +134,6 @@ class PersonalInfoForm(forms.Form):
             user.first_name = self.cleaned_data['first_name']
             user.last_name = self.cleaned_data['last_name']
             user.opt_in_mailing_list = self.cleaned_data['opt_in_mailing_list']
-            user.is_email_verified = False
             user.save()
             # link donor to user
             donor.linked_user = user
@@ -162,24 +150,17 @@ class PersonalInfoForm(forms.Form):
         # set DEFAULT_FROM_EMAIL
         setDefaultFromEmail(request)
 
-        # logs new user in
-        # login(request, user, backend='django.contrib.auth.backends.ModelBackend')
 
-        # email verification to user
-        # sendVerificationEmail(
-        #     request, user)
+# class NewstreamAdapter(DefaultAccountAdapter):
 
-
-class NewstreamAdapter(DefaultAccountAdapter):
-
-    def clean_email(self, email):
-        """
-        Validates an email value. You can hook into this if you want to
-        (dynamically) restrict what email addresses can be chosen.
-        """
-        # check if email input is taken by existing donor records
-        # by current design, one user can be linked to by multiple donor records, and only one donor record is "active" for that user having the same email; this situation occurs only because of email changes by that user
-        if Donor.objects.filter(email=email).exists():
-            raise ValidationError(
-                "Email has already been taken. Login if you already have an account.")
-        return email
+#     def clean_email(self, email):
+#         """
+#         Validates an email value. You can hook into this if you want to
+#         (dynamically) restrict what email addresses can be chosen.
+#         """
+#         # check if email input is taken by existing donors or users
+#         # by current design, one user can be linked to by multiple donor records, and only one donor record is "active" for that user having the same email; this situation occurs only because of user changes his primary email
+#         if donor_email_exists(email) or email_address_exists(email):
+#             raise ValidationError(
+#                 "Email has already been taken. Login if you already have an account.")
+#         return email

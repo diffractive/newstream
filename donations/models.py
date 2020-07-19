@@ -5,6 +5,7 @@ from wagtailautocomplete.edit_handlers import AutocompletePanel
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 from wagtail.contrib.forms.models import AbstractFormField
+from newstream.edit_handlers import ReadOnlyPanel
 
 GATEWAY_2C2P = '2C2P'
 GATEWAY_PAYPAL = 'PayPal'
@@ -131,6 +132,7 @@ class DonationForm(ClusterableModel):
 class Donor(ClusterableModel):
     linked_user = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    linked_user_deleted = models.BooleanField(default=False)
     first_name = models.CharField(max_length=255)
     last_name = models.CharField(max_length=255)
     email = models.EmailField(unique=True)
@@ -146,6 +148,8 @@ class Donor(ClusterableModel):
         FieldPanel('opt_in_mailing_list'),
         InlinePanel('metas', label='Donor Meta', heading='Donor Meta Data',
                     help_text='Meta data about this donor is recorded here'),
+        ReadOnlyPanel('linked_user_deleted',
+                      heading="Linked User Account Deleted?"),
     ]
 
     class Meta:

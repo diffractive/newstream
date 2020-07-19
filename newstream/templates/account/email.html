@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% load static widget_tweaks %}
+
+{% block title %}Personal Email Settings{% endblock %}
+
+{% block body_class %}newstream-personal-emails{% endblock %}
+
+{% block content %}
+<div class="container grid grid-cols-1 gap-4 lg:grid-cols-3">
+    {% include 'profile_settings/sidebar.html' %}
+    <div class="settings-div w-full flex flex-col lg:col-span-2">
+        <h1 class="mb-5">Email Addresses</h1>
+        {% if user.emailaddress_set.all %}
+        <p class="mb-3">The following e-mail addresses are associated with your account:</p>
+
+        <form action="{% url 'account_email' %}" class="email_list" method="post">
+            {% csrf_token %}
+            <fieldset class="blockLabels">
+                <div class="mb-4">
+                    <div class="field-div widget_radioselect">
+                        <ul class="email-addresses-ul">
+                            {% for emailaddress in user.emailaddress_set.all %}
+                            <li>
+                                <label for="email_radio_{{forloop.counter}}"
+                                    class="{% if emailaddress.primary %}primary_email{%endif%}">
+
+                                    <input id="email_radio_{{forloop.counter}}" type="radio" name="email"
+                                        {% if emailaddress.primary or user.emailaddress_set.count == 1 %}checked="checked"
+                                        {%endif %} value="{{emailaddress.email}}" />
+
+                                    {{ emailaddress.email }}
+                                    {% if emailaddress.verified %}
+                                    <span
+                                        class="bg-green-100 border-l-2 border-green-500 text-green-700 p-1 ml-2">Verified</span>
+                                    {% else %}
+                                    <span
+                                        class="bg-orange-100 border-l-2 border-orange-500 text-orange-700 p-1 ml-2">Unverified</span>
+                                    {% endif %}
+                                    {% if emailaddress.primary %}<span
+                                        class="bg-blue-100 border-l-2 border-blue-500 text-blue-700 p-1 ml-2">Primary</span>{% endif %}
+                                </label>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="buttonHolder">
+                    <button class="ns-btn" type="submit" name="action_primary">Make Primary</button>
+                    <button class="ml-4 ns-btn" type="submit" name="action_send">Re-send Verification</button>
+                    <button class="ml-4 ns-dark-btn" type="submit" name="action_remove">Remove</button>
+                </div>
+            </fieldset>
+        </form>
+
+        {% else %}
+        <p class="mb-3"><strong>Warning:</strong>
+            You currently do not have any e-mail address set up. You should really add an e-mail address so you can
+            receive notifications, reset your password, etc.
+        </p>
+        {% endif %}
+
+        <div class="ns-page-breaker my-5"></div>
+
+        <h2 class="mb-4">Add E-mail Address</h2>
+        {% include 'common/form_errors.html' %}
+        <form method='POST' action="{% url 'account_email' %}" class="add_email">
+            {% csrf_token %}
+            {% include 'common/form_visible_fields.html' %}
+            <button class="ns-btn" name="action_add" type="submit">Add E-mail</button>
+        </form>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    (function () {
+        var message = "Do you really want to remove the selected e-mail address?";
+        var actions = document.getElementsByName('action_remove');
+        if (actions.length) {
+            actions[0].addEventListener("click", function (e) {
+                if (!confirm(message)) {
+                    e.preventDefault();
+                }
+            });
+        }
+    })();
+</script>
+{% endblock %}

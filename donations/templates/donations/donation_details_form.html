@@ -48,8 +48,8 @@
                 <h2 class="mb-2">Donation Details</h2>
                 {% if request.user.is_authenticated %}
                 <div class="mb-6">
-                    <p>Logged in as {{request.user.email}}. <a
-                            href="{% url 'logout' %}?next={{request.path}}">Logout</a></p>
+                    <p>Logged in as {{ request.user|display_username }}. <a
+                            href="{% url 'account_logout' %}?next={{request.path}}">Logout</a></p>
                 </div>
                 {% endif %}
                 {% for field in form.visible_fields %}

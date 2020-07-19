@@ -47,6 +47,15 @@ def getAlertClass(tags):
         return "bg-blue-100 border-l-4 border-blue-500 text-blue-700 p4"
 
 
+@register.filter(name='next_path_filter')
+def next_path_filter(request):
+    exceptions = ['/reset/key/done/']
+    for exception in exceptions:
+        if exception in request.path:
+            return ''
+    return '?next=' + request.path
+
+
 @register.filter(name='is_active_page')
 def returnIsActivePage(request, urlname):
     if urlname in request.path:

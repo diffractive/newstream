@@ -12,6 +12,7 @@ from django.contrib.auth import get_user_model
 import django.conf as conf
 from datetime import datetime, timedelta
 from pytz import timezone
+from .models import Donor
 from .includes.currency_dictionary import currency_dict
 from .templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text
 from newstream.functions import evTokenGenerator, raiseObjectNone, getFullReverseUrl, getSiteName
@@ -180,3 +181,11 @@ def sendVerificationEmail(request, user):
     #     print("Cannot send verification email to donor: " +
     #           str(e), flush=True)
     #     print(traceback.format_exc(), flush=True)
+
+
+def donor_email_exists(email, exclude_user=None):
+    ''' accepts an optional second parameter as the user to exclude from the email checking'''
+    donors = Donor.objects
+    if exclude_user:
+        donors = donors.exclude(linked_user=exclude_user)
+    return donors.exclude(linked_user_deleted=True).filter(email__iexact=email).exists()

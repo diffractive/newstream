@@ -11,37 +11,9 @@ from django.contrib.auth import update_session_auth_hash
 from donations.functions import sendVerificationEmail
 from donations.models import Donor
 from newstream.functions import evTokenGenerator, generateIDSecretHash
-from newstream.forms import PersonalInfoForm, ChangeEmailForm, ChangePasswordForm, DeleteAccountForm
+from newstream.forms import PersonalInfoForm, ChangePasswordForm, DeleteAccountForm
 # from allauth.account.views import SignupView
 User = get_user_model()
-
-
-def verify_email(request, uidb64, token):
-    try:
-        uid = force_text(urlsafe_base64_decode(uidb64))
-        user = User.objects.get(pk=uid)
-    except(TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
-    if user is not None and evTokenGenerator.check_token(user, token):
-        user.is_email_verified = True
-        user.save()
-        # in case this is an existing user changing into an existing donor's email
-        # if not above case, the following linking would be redundant
-        # because a fresh email verification means a linked donor already, but i'll just leave this for now
-        try:
-            donor = Donor.objects.get(email=user.email)
-            donor.linked_user = user
-            donor.save()
-        except Donor.MultipleObjectsReturned as e1:
-            # This must not be allowed as donors should have unique emails
-            # todo: Try not to re-raise Exception?
-            raise e1
-        except Donor.DoesNotExist:
-            # This simply means the new email isn't used by existing donors
-            pass
-
-        login(request, user)
-    return render(request, 'registration/email_verified.html')
 
 
 def unsubscribe(request, email, hash):
@@ -59,58 +31,6 @@ def unsubscribe(request, email, hash):
         print(str(e), flush=True)
         failure = True
     return render(request, 'unsubscription.html', {'failure': failure, 'email': email})
-
-
-@login_required
-def change_password(request):
-    if request.method == 'POST':
-        form = ChangePasswordForm(request.user, request.POST)
-        if form.is_valid():
-            user = form.save()
-            update_session_auth_hash(request, user)  # Important!
-            messages.success(
-                request, 'Your password was successfully updated!')
-            return redirect('security')
-        else:
-            messages.error(request, 'Please correct the error below.')
-    else:
-        form = ChangePasswordForm(request.user)
-    return render(request, 'profile_settings/change_password.html', {
-        'form': form
-    })
-
-
-@login_required
-def change_email_address(request):
-    if request.method == 'POST':
-        form = ChangeEmailForm(request.POST)
-        if form.is_valid():
-            # process the data in form.cleaned_data as required
-            user = request.user
-            user.email = form.cleaned_data['email']
-            user.is_email_verified = False
-            user.save()
-            # send the verification email
-            sendVerificationEmail(request, user)
-            messages.add_message(request, messages.INFO,
-                                 'Verification email is resent to {}, please check your mailbox.'.format(user.email))
-            return redirect('personal-info')
-    else:
-        form = ChangeEmailForm()
-    return render(request, 'profile_settings/change_email.html', {'form': form})
-
-
-@login_required
-def resend_verification_email(request):
-    user = request.user
-    if not user.is_email_verified:
-        sendVerificationEmail(request, user)
-        messages.add_message(request, messages.SUCCESS,
-                             'Verification email is resent to {}, please check your mailbox.'.format(user.email))
-    else:
-        messages.add_message(request, messages.WARNING,
-                             'Your email {} is already verified.'.format(user.email))
-    return redirect('personal-info')
 
 
 @login_required
@@ -148,10 +68,17 @@ def delete_account(request):
         form = DeleteAccountForm(request.POST)
         if form.is_valid():
             # proceed to logout user
+            # then, mark linked donors to linked_user_deleted=True
             # then, todo: cancel all recurring payments
             # lastly, deletes the account
             user = request.user
             logout(request)
+            donors = Donor.objects.filter(linked_user=user).all()
+            for donor in donors:
+                donor.email = 'deleted_' + str(donor.id) + '_' + donor.email
+                donor.linked_user_deleted = True
+                donor.linked_user = None
+                donor.save()
             user.delete()
             messages.add_message(request, messages.SUCCESS,
                                  'Your account is deleted.')

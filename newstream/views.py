@@ -1,18 +1,17 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import get_user_model
+import re
 from django.http import HttpResponse
-from django.contrib.auth import login, logout
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth import login, logout, get_user_model, update_session_auth_hash
+from django.contrib.auth.decorators import login_required
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import update_session_auth_hash
-# from django.contrib.auth.forms import PasswordChangeForm
+
+from newstream_user.models import UserMeta
+from donations.models import Donation
 from donations.functions import sendVerificationEmail
-from donations.models import Donor
-from newstream.functions import evTokenGenerator, generateIDSecretHash
-from newstream.forms import PersonalInfoForm, ChangePasswordForm, DeleteAccountForm
-# from allauth.account.views import SignupView
+from newstream.functions import evTokenGenerator, generateIDSecretHash, process_user_meta
+from newstream.forms import PersonalInfoForm, DeleteAccountForm
 User = get_user_model()
 
 
@@ -38,11 +37,15 @@ def personal_info(request):
     if request.method == 'POST':
         form = PersonalInfoForm(request.POST, request=request)
         if form.is_valid():
+            # process meta data
+            user_metas = process_user_meta(request)
+
             # process the data in form.cleaned_data as required
             user = request.user
             user.first_name = form.cleaned_data['first_name']
             user.last_name = form.cleaned_data['last_name']
             user.opt_in_mailing_list = form.cleaned_data['opt_in_mailing_list']
+            user.metas = user_metas
             user.save()
             messages.add_message(request, messages.SUCCESS,
                                  'Personal Info Updated.')
@@ -68,17 +71,15 @@ def delete_account(request):
         form = DeleteAccountForm(request.POST)
         if form.is_valid():
             # proceed to logout user
-            # then, mark linked donors to linked_user_deleted=True
+            # then, mark linked donations to linked_user_deleted=True
             # then, todo: cancel all recurring payments
             # lastly, deletes the account
             user = request.user
             logout(request)
-            donors = Donor.objects.filter(linked_user=user).all()
-            for donor in donors:
-                donor.email = 'deleted_' + str(donor.id) + '_' + donor.email
-                donor.linked_user_deleted = True
-                donor.linked_user = None
-                donor.save()
+            donations = Donation.objects.filter(user=user).all()
+            for donation in donations:
+                donation.linked_user_deleted = True
+                donation.save()
             user.delete()
             messages.add_message(request, messages.SUCCESS,
                                  'Your account is deleted.')

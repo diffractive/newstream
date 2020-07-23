@@ -1,4 +1,4 @@
-from .models import Donor, Donation, PaymentGateway, DonationForm, DonationMeta
+from .models import Donation, PaymentGateway, DonationForm, DonationMeta
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
 from django.contrib import admin
@@ -31,17 +31,6 @@ class DonationInspectView(InspectView):
         return super().get_context_data(**kwargs)
 
 
-class DonorAdmin(ModelAdmin):
-    model = Donor
-    menu_label = 'Donors'
-    menu_icon = 'pilcrow'
-    menu_order = 0
-    add_to_settings_menu = False
-    exclude_from_explorer = False
-    list_display = ('first_name', 'last_name', 'email',)
-    search_fields = ('first_name', 'last_name', 'email',)
-
-
 class DonationAdmin(ModelAdmin):
     model = Donation
     menu_label = 'Donations'
@@ -51,10 +40,10 @@ class DonationAdmin(ModelAdmin):
     exclude_from_explorer = False
     # todo: format donation amount upon display according the currency_dict
     list_display = ('donation_amount', 'gateway',
-                    'donor', 'is_recurring', 'payment_status', 'created_at',)
+                    'is_recurring', 'payment_status', 'created_at',)
     list_filter = ('is_recurring', 'payment_status', 'created_at',)
     search_fields = ('order_number', 'donation_amount',
-                     'payment_status', 'is_recurring', 'donor', 'created_at',)
+                     'payment_status', 'is_recurring', 'created_at',)
     inspect_view_enabled = True
     inspect_view_class = DonationInspectView
 
@@ -85,7 +74,7 @@ class DonationGroup(ModelAdminGroup):
     menu_label = 'Donations'
     menu_icon = 'folder-open-inverse'
     menu_order = 200
-    items = (DonorAdmin, DonationAdmin, PaymentGatewayAdmin, DonationFormAdmin)
+    items = (DonationAdmin, PaymentGatewayAdmin, DonationFormAdmin)
 
 
 modeladmin_register(DonationGroup)

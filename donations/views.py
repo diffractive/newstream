@@ -1,18 +1,18 @@
-from django.shortcuts import render, redirect
+import re
+import secrets
+from pprint import pprint
 from django.db import IntegrityError
-from django.contrib.auth import get_user_model
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
+from django.shortcuts import render, redirect
+from django.contrib.auth import get_user_model, authenticate, login
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetView
+
 from .models import *
 from .forms import *
 from .functions import *
 from newstream.functions import getFullReverseUrl
 from .payment_gateways.gateway_factory import PaymentGatewayFactory
-from pprint import pprint
-import secrets
-import re
 User = get_user_model()
 
 
@@ -26,7 +26,7 @@ def verify_gateway_response(request):
             if not gatewayManager.donation.parent_donation:
                 sendDonationNotifToAdmins(request, gatewayManager.donation)
 
-            # email thank you receipt to donor
+            # email thank you receipt to user
             sendDonationReceipt(request, gatewayManager.donation)
 
             return HttpResponse(status=200)
@@ -53,10 +53,10 @@ def thank_you(request):
     if 'thankyou-donation-id' in request.session:
         donation = Donation.objects.get(
             pk=request.session['thankyou-donation-id'])
-        # logs donor in
-        if donation.donor.linked_user:
+        # logs user in
+        if donation.user:
             # todo: need to specify which backend to login through (i.e. standard or social)
-            login(request, donation.donor.linked_user)
+            login(request, donation.user)
         return render(request, 'donations/thankyou.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
     if 'thankyou-error' in request.session:
         return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': request.session['thankyou-error']})
@@ -88,28 +88,7 @@ def donation_details(request):
             request.POST, request=request, blueprint=form_blueprint, label_suffix='')
         if form.is_valid():
             # process meta data
-            donation_metas = []
-            for key, val in request.POST.items():
-                donationmeta_key = re.match("^donationmeta_([a-z_]+)$", key)
-                if donationmeta_key:
-                    donation_metas.append(DonationMeta(
-                        field_key=donationmeta_key.group(1), field_value=val))
-
-            # get user's current donor record
-            try:
-                donor = Donor.objects.get(email__exact=request.user.email)
-            except Exception as e:
-                print("Cannot find user's linked donor: " +
-                      str(e) + ', thus creates new linked donor.', flush=True)
-                # creates a new linked donor
-                donor = Donor(
-                    first_name=request.user.first_name,
-                    last_name=request.user.last_name,
-                    email=request.user.email,
-                    opt_in_mailing_list=request.user.opt_in_mailing_list,
-                    linked_user=request.user
-                )
-                donor.save()
+            donation_metas = process_donation_meta(request)
 
             # create pending donation
             payment_gateway = PaymentGateway.objects.get(
@@ -117,7 +96,7 @@ def donation_details(request):
             order_id = gen_order_id(gateway=payment_gateway)
             donation = Donation(
                 order_number=order_id,
-                donor=donor,
+                user=request.user,
                 form=form_blueprint,
                 gateway=payment_gateway,
                 is_recurring=True if form.cleaned_data['donation_frequency'] == 'monthly' else False,
@@ -156,5 +135,5 @@ def donation_details(request):
 def my_donations(request):
     # todo: handle updating/cancelling recurring payments
     donations = Donation.objects.filter(
-        donor__linked_user=request.user).order_by('-created_at')
+        user=request.user).order_by('-created_at')
     return render(request, 'donations/my_donations.html', {'donations': donations})

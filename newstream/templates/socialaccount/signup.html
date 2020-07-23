@@ -1,21 +1,18 @@
 {% extends "base.html" %}
 {% load static common_tags widget_tweaks %}
 
-{% block title %}Personal Info Registration{% endblock %}
+{% block title %}Complete Account Registration{% endblock %}
 
-{% block body_class %}newstream-personal-info-page{% endblock %}
+{% block body_class %}newstream-account-registration-page{% endblock %}
 
 {% block content %}
-
-<div class="flex donation-header">
-    <div class="step-div w-40 p-6 text-right">Step 1 of 3</div>
-    <div class="step-label-div flex-1 p-6 text-left text-white">Personal Info</div>
-</div>
-
-<div class="personal-info-form-div container-tight">
+<div class="complete-registration-form-div container-tight">
+    <h3 class="my-6">You are about to use your {{provider_name}} account to login to {{ request|site_name }}. As a final
+        step,
+        please complete the following form:</h3>
     {% include 'common/form_errors.html' %}
     {# Form Area #}
-    <form method='POST' action="{% url 'account_signup' %}?next={{ redirect_field_value }}">
+    <form method='POST' action="{% url 'socialaccount_signup' %}">
         {% if redirect_field_value %}
         <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
         {% endif %}

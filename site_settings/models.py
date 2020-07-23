@@ -1,9 +1,10 @@
 import html
 from django.db import models
 
-from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList
+from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList, RichTextField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtail.contrib.settings.models import BaseSetting, register_setting
+from wagtail.contrib.forms.models import AbstractFormField
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
 
@@ -44,6 +45,11 @@ class AdminEmails(models.Model):
         return self.title+" "+'({})'.format(self.email)
 
 
+class UserMetaField(AbstractFormField):
+    parent = ParentalKey('SiteSettings', on_delete=models.CASCADE,
+                         related_name='user_meta_fields')
+
+
 @register_setting
 class SiteSettings(BaseSetting, ClusterableModel):
     default_from_email = models.EmailField()
@@ -51,6 +57,16 @@ class SiteSettings(BaseSetting, ClusterableModel):
         FieldPanel('default_from_email'),
         InlinePanel('admin_emails', label="Admin Email", heading="List of Admins' Emails",
                     help_text='Email notifications such as new donations will be sent to this list.')
+    ]
+    social_skip_signup = models.BooleanField(default=False)
+    signup_footer_text = RichTextField(blank=True)
+    general_user_panels = [
+        FieldPanel('social_skip_signup',
+                   heading='Allow Firsttime Social Logins bypass Signup Form?'),
+        FieldPanel('signup_footer_text',
+                   heading='Footer Text(Under Signup Form)'),
+        InlinePanel('user_meta_fields', label='User Meta Fields',
+                    help_text='Add extra fields for the user signup form for additional data you want to collect from them.'),
     ]
 
     # todo: make supported currencies for each payment gateway
@@ -103,6 +119,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
         SubTabbedInterface([
             SubObjectList(general_general_panels, slug='general-general',
                           heading='General'),
+            SubObjectList(general_user_panels, slug='general-user',
+                          heading='User Settings'),
         ], heading="General"),
         SubTabbedInterface([
             SubObjectList(gateways_general_panels,

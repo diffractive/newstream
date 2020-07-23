@@ -39,7 +39,7 @@ class PaymentGatewayFactory(object):
                 # Create new donation record from pDonation
                 donation = Donation(
                     order_number=request.POST['order_id'],
-                    donor=pDonation.donor,
+                    user=pDonation.user,
                     form=pDonation.form,
                     gateway=pDonation.gateway,
                     is_recurring=True,

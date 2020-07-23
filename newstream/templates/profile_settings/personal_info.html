@@ -14,6 +14,7 @@
         <form method='POST'>
             {% csrf_token %}
             {% for field in form.visible_fields %}
+            {% if field.html_name in form.personal_info_fields %}
             {% if field|widget_type == 'checkboxinput' %}
             <div class="mb-4 widget_checkboxinput flex items-center">
                 {{ field }} {{ field.label_tag }}
@@ -31,7 +32,10 @@
                 </div>
             </div>
             {% endif %}
+            {% endif %}
             {% endfor %}
+
+            {% include "common/usermeta_fields.html" %}
             <button class="ns-wide-btn right-arrow-btn" type="submit">Submit<span class="icon"></span></button>
         </form>
     </div>

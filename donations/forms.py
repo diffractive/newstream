@@ -4,13 +4,15 @@ import secrets
 from django import forms
 from django.contrib.auth import get_user_model, login
 from django.core.exceptions import ValidationError
-from newstream.functions import raiseObjectNone, getSiteSettings
-from donations.functions import getCurrencyDictAt
+
 from wagtail.contrib.forms.forms import FormBuilder
-from .models import Donor, DonationForm, DonorMeta
-from .functions import setDefaultFromEmail, sendVerificationEmail, donor_email_exists
+
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.utils import email_address_exists
+
+from newstream.functions import raiseObjectNone, getSiteSettings
+from donations.functions import getCurrencyDictAt
+from .models import DonationForm
 User = get_user_model()
 
 
@@ -74,93 +76,7 @@ class DonationDetailsForm(forms.Form):
         donationmetafields = form.donation_meta_fields.all()
         fb = FormBuilder(donationmetafields)
         for key, val in fb.formfields.items():
-            self.fields["donationmeta_"+key] = val
-
-
-class PersonalInfoForm(forms.Form):
-    first_name = forms.CharField(label='First Name', max_length=255)
-    last_name = forms.CharField(label='Last Name', max_length=255)
-    opt_in_mailing_list = forms.BooleanField(
-        label='Opt in Mailing List?', required=False)
-    personal_info_fields = [
-        'first_name',
-        'last_name',
-        'email',
-        'password1',
-        'password2'
-    ]
-    other_fields = [
-        'opt_in_mailing_list'
-    ]
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        try:
-            form = DonationForm.objects.get(
-                is_active__exact=True)
-        except Exception as e:
-            print("There should be exactly one active DonationForm.", flush=True)
-            raise e
-        self.footer_html = form.personal_footer_text
-
-        # construct donor meta fields from form configuration
-        donormetafields = form.donor_meta_fields.all()
-        fb = FormBuilder(donormetafields)
-        for key, val in fb.formfields.items():
-            self.fields["donormeta_"+key] = val
-
-    def signup(self, request, user):
-        # process meta data
-        donor_metas = []
-        for key, val in request.POST.items():
-            donormeta_key = re.match("^donormeta_([a-z_]+)$", key)
-            if donormeta_key:
-                donor_metas.append(DonorMeta(
-                    field_key=donormeta_key.group(1), field_value=val))
-
-        # creates a new donor
-        donor = Donor(
-            first_name=self.cleaned_data['first_name'],
-            last_name=self.cleaned_data['last_name'],
-            email=self.cleaned_data['email'],
-            opt_in_mailing_list=self.cleaned_data['opt_in_mailing_list'],
-            metas=donor_metas
-        )
-        donor.save()
-
-        # proceed to create account
-        try:
-            # user.set_password(self.cleaned_data["password1"])
-            user.first_name = self.cleaned_data['first_name']
-            user.last_name = self.cleaned_data['last_name']
-            user.opt_in_mailing_list = self.cleaned_data['opt_in_mailing_list']
-            user.save()
-            # link donor to user
-            donor.linked_user = user
-            donor.save()
-            # save to session to remember user's registration
-            request.session['first_time_registration'] = True
-        except Exception as e:
-            print("Cannot Create new Django user: " +
-                  str(e), flush=True)
-            # Should have been checked against duplication in form validation
-            # double check again for safety
-            raise e
-
-        # set DEFAULT_FROM_EMAIL
-        setDefaultFromEmail(request)
-
-
-# class NewstreamAdapter(DefaultAccountAdapter):
-
-#     def clean_email(self, email):
-#         """
-#         Validates an email value. You can hook into this if you want to
-#         (dynamically) restrict what email addresses can be chosen.
-#         """
-#         # check if email input is taken by existing donors or users
-#         # by current design, one user can be linked to by multiple donor records, and only one donor record is "active" for that user having the same email; this situation occurs only because of user changes his primary email
-#         if donor_email_exists(email) or email_address_exists(email):
-#             raise ValidationError(
-#                 "Email has already been taken. Login if you already have an account.")
-#         return email
+            if isinstance(val, forms.MultipleChoiceField):
+                self.fields["donationmetalist_"+key] = val
+            else:
+                self.fields["donationmeta_"+key] = val

@@ -65,7 +65,7 @@
 
                 {# Meta Fields #}
                 {% for field in form.visible_fields %}
-                {% if "donationmeta_" in field.html_name %}
+                {% if field.html_name|startswith:"donationmeta" %}
                 {% if field|widget_type == 'checkboxinput' %}
                 <div class="mb-4 widget_checkboxinput flex items-center">
                     {{ field }} {{ field.label_tag }}

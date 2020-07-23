@@ -20,12 +20,12 @@ def get_new_donation_text(request, donation):
         Thank you,\n
         %s
     """ % (request.build_absolute_uri('/')[:-1],
-           donation.donor.fullname,
+           donation.user.fullname,
            donation.order_number,
            donation.isRecurring(),
            donation.currency,
            donation.donation_amount,
-           donation.donor.optInMailing(),
+           donation.user.optInMailing(),
            donation.payment_status,
            getSiteName(request)
            )
@@ -47,12 +47,12 @@ def get_donation_receipt_text(request, donation):
         \n
         Thank you,\n
         %s
-    """ % (donation.donor.fullname,
+    """ % (donation.user.fullname,
            donation.order_number,
            donation.isRecurring(),
            donation.currency,
            donation.donation_amount,
-           donation.donor.optInMailing(),
+           donation.user.optInMailing(),
            donation.payment_status,
            getSiteName(request)
            )

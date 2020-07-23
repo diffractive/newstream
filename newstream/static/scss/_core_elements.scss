@@ -49,6 +49,27 @@ a {
     }
 }
 
+.right-facebook-btn {
+    @extend .svg-icon-btn;
+    span.icon {
+        background-image: url("../svg/facebook-white.svg");
+    }
+}
+
+.right-twitter-btn {
+    @extend .svg-icon-btn;
+    span.icon {
+        background-image: url("../svg/twitter-white.svg");
+    }
+}
+
+.right-google-btn {
+    @extend .svg-icon-btn;
+    span.icon {
+        background-image: url("../svg/google-white.svg");
+    }
+}
+
 .ns-page-breaker {
     background-color: $border-grey-color;
     height: 2px;

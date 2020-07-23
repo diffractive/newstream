@@ -1,13 +1,21 @@
+import re
 import os
 import json
 import jsonpickle
 from hashlib import blake2b
+import django.conf as conf
 from django.conf import settings
 from django.urls import reverse
 from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
+from django.contrib.auth import get_user_model
+
+from wagtail.core.models import Site
+
 from site_settings.models import SiteSettings
+from newstream_user.models import UserMeta
+User = get_user_model()
 
 
 class EmailVerificationTokenGenerator(PasswordResetTokenGenerator):
@@ -33,8 +41,67 @@ def getSiteSettings(request):
     return SiteSettings.for_site(request.site)
 
 
+def getSiteSettings_from_default_site():
+    '''
+    The usual way of getting the site object is from the request object.
+    But since newstream is very unlikely to support multi-site functionality,
+    I would provide a method to get the default site object from db directly,
+    so that places where code has no access to request can still have access to SiteSettings.
+
+    The prerequisites for this method is the default site object being created at the start of wagtail core migrations.
+    '''
+
+    site = Site.objects.get(is_default_site=True)
+    return SiteSettings.for_site(site)
+
+
+def process_user_meta(request):
+    user_metas = []
+    for key, val in request.POST.items():
+        usermeta_key = re.match("^usermeta_([a-z_-]+)$", key)
+        usermetalist_key = re.match("^usermetalist_([a-z_-]+)$", key)
+        if usermeta_key:
+            user_metas.append(UserMeta(
+                field_key=usermeta_key.group(1), field_value=val))
+        elif usermetalist_key:
+            listval = request.POST.getlist(key)
+            if len(listval) > 0:
+                # using comma-linebreak as the separator
+                user_metas.append(UserMeta(
+                    field_key=usermetalist_key.group(1), field_value=',\n'.join(listval)))
+    return user_metas
+
+
 def raiseObjectNone(message=''):
     raise ObjectDoesNotExist(message)
+
+
+def getSuperUserTimezone():
+    """
+    For the calculation of correct datetimes for payment gateways on when exactly to charge recurring payments
+    Assumption: the superuser has set the correct local timezone which matches with the payment gateway's timezone setting
+    """
+    su = User.objects.get(is_superuser=1)
+    if not su:
+        raiseObjectNone('Superuser not found')
+    return su.wagtail_userprofile.get_current_time_zone()
+
+
+def getSuperUserEmail():
+    """ For sending out password reset emails """
+    su = User.objects.get(is_superuser=1)
+    if not su:
+        raiseObjectNone('Superuser not found')
+    return su.email
+
+
+def setDefaultFromEmail(request):
+    conf.settings.DEFAULT_FROM_EMAIL = getDefaultFromEmail(request)
+
+
+def getDefaultFromEmail(request):
+    siteSettings = getSiteSettings(request)
+    return siteSettings.default_from_email if siteSettings.default_from_email else getSuperUserEmail()
 
 
 def send_mass_html_mail(datatuple, fail_silently=False, user=None, password=None,

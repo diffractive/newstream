@@ -18,7 +18,7 @@ PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
 # django needs this to redirects user correctly when he stumbles upon a logn_required route
-LOGIN_URL = "/login"
+LOGIN_URL = "/accounts/login"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
@@ -26,14 +26,10 @@ LOGOUT_REDIRECT_URL = "/"
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_SIGNUP_FORM_CLASS = 'donations.forms.PersonalInfoForm'
-# ACCOUNT_SIGNUP_PASSWORD_VERIFICATION = False
-# ACCOUNT_ADAPTER = 'donations.forms.NewstreamAdapter'
+# this extra signup form class is shared by both account and socialaccount
+ACCOUNT_SIGNUP_FORM_CLASS = 'newstream.forms_signup.BaseSignupForm'
 ACCOUNT_LOGOUT_ON_GET = True
-ACCOUNT_FORMS = {
-    'signup': 'newstream.forms.NewstreamSignupForm',
-    'add_email': 'newstream.forms.NewstreamAddEmailForm'
-}
+SOCIALACCOUNT_ADAPTER = 'newstream.forms.NewstreamSAAdapter'
 
 DEFAULT_FROM_EMAIL = 'franky@uxcodified.com'
 
@@ -80,9 +76,9 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    # 'allauth.socialaccount.providers.facebook',
+    'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
-    # 'allauth.socialaccount.providers.twitter',
+    'allauth.socialaccount.providers.twitter',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -215,6 +211,22 @@ SOCIALACCOUNT_PROVIDERS = {
         ],
         'AUTH_PARAMS': {
             'access_type': 'online',
-        }
+        },
+        'VERIFIED_EMAIL': True
+    },
+    'facebook': {
+        'METHOD': 'js_sdk',
+        'SCOPE': [
+            'email',
+            'public_profile',
+        ],
+        'AUTH_PARAMS': {'auth_type': 'reauthenticate'},
+        'EXCHANGE_TOKEN': True,
+        # comment this param to enforce email verification signing up any emails from facebook
+        'VERIFIED_EMAIL': True,
+    },
+    'twitter': {
+        # comment this param to enforce email verification signing up any emails from twitter
+        'VERIFIED_EMAIL': True,
     }
 }

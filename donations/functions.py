@@ -3,22 +3,21 @@ import secrets
 import re
 import traceback
 from pprint import pprint
+from datetime import datetime, timedelta
+from pytz import timezone
 from django.core.mail import send_mail
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
-from newstream.functions import getSiteSettings
-from django.contrib.auth import get_user_model
-import django.conf as conf
-from datetime import datetime, timedelta
-from pytz import timezone
-from .models import Donor
+
+from allauth.account.utils import send_email_confirmation
+
 from .includes.currency_dictionary import currency_dict
 from .templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text
+from newstream.functions import getSiteSettings, getDefaultFromEmail, setDefaultFromEmail, getSuperUserTimezone
 from newstream.functions import evTokenGenerator, raiseObjectNone, getFullReverseUrl, getSiteName
 from newstream.templates.registration.email_templates.plain_texts import get_verify_your_email_text
-from allauth.account.utils import send_email_confirmation
-User = get_user_model()
+from donations.models import DonationMeta
 
 
 class Settings2C2P:
@@ -72,34 +71,6 @@ def gen_order_prefix_2c2p():
     return 'P' + secrets.token_hex(7)
 
 
-def getSuperUserTimezone():
-    """
-    For the calculation of correct datetimes for payment gateways on when exactly to charge recurring payments
-    Assumption: the superuser has set the correct local timezone which matches with the payment gateway's timezone setting
-    """
-    su = User.objects.get(is_superuser=1)
-    if not su:
-        raiseObjectNone('Superuser not found')
-    return su.wagtail_userprofile.get_current_time_zone()
-
-
-def getSuperUserEmail():
-    """ For sending out password reset emails """
-    su = User.objects.get(is_superuser=1)
-    if not su:
-        raiseObjectNone('Superuser not found')
-    return su.email
-
-
-def setDefaultFromEmail(request):
-    conf.settings.DEFAULT_FROM_EMAIL = getDefaultFromEmail(request)
-
-
-def getDefaultFromEmail(request):
-    siteSettings = getSiteSettings(request)
-    return siteSettings.default_from_email if siteSettings.default_from_email else getSuperUserEmail()
-
-
 def getNextDateFromRecurringInterval(days, format):
     tz = timezone(getSuperUserTimezone())
     loc_dt = datetime.now(tz)
@@ -122,6 +93,23 @@ def getRecurringDateNextMonth(format):
             """
             nextmonthdate = loc_dt.replace(month=loc_dt.month+2, day=1)
     return nextmonthdate.strftime(format)
+
+
+def process_donation_meta(request):
+    donation_metas = []
+    for key, val in request.POST.items():
+        donationmeta_key = re.match("^donationmeta_([a-z_-]+)$", key)
+        donationmetalist_key = re.match("^donationmetalist_([a-z_-]+)$", key)
+        if donationmeta_key:
+            donation_metas.append(DonationMeta(
+                field_key=donationmeta_key.group(1), field_value=val))
+        elif donationmetalist_key:
+            listval = request.POST.getlist(key)
+            if len(listval) > 0:
+                # using comma-linebreak as the separator
+                donation_metas.append(DonationMeta(
+                    field_key=donationmetalist_key.group(1), field_value=',\n'.join(listval)))
+    return donation_metas
 
 
 def sendDonationNotifToAdmins(request, donation):
@@ -149,43 +137,15 @@ def sendDonationReceipt(request, donation):
             get_donation_receipt_text(
                 request, donation),
             getDefaultFromEmail(request),
-            [donation.donor.email],
+            [donation.user.email],
             html_message=render_to_string('donations/email_templates/donation_receipt.html', context={
                 'donation': donation}, request=request)
         )
     except Exception as e:
-        print("Cannot send receipt to donor: "+str(e), flush=True)
+        print("Cannot send receipt to user: "+str(e), flush=True)
 
 
 def sendVerificationEmail(request, user):
     setDefaultFromEmail(request)
     # allauth's email confirmation uses DEFAULT_FROM_EMAIL
     send_email_confirmation(request, user, True)
-    # try:
-    #     uid = urlsafe_base64_encode(force_bytes(user.pk))
-    #     token = evTokenGenerator.make_token(user)
-    #     fullurl = getFullReverseUrl(
-    #         request, 'verify-email', kwargs={'uidb64': uid, 'token': token})
-    #     ms = send_mail(
-    #         "Please verify your email at "+getSiteName(request),
-    #         get_verify_your_email_text(
-    #             request, user.fullname, fullurl),
-    #         getSuperUserEmail(),
-    #         [user.email],
-    #         html_message=render_to_string('registration/email_templates/verify_your_email.html', context={
-    #             'fullname': user.fullname, 'fullurl': fullurl}, request=request)
-    #     )
-    #     print("Number of email verifications sent: " +
-    #           str(ms), flush=True)
-    # except Exception as e:
-    #     print("Cannot send verification email to donor: " +
-    #           str(e), flush=True)
-    #     print(traceback.format_exc(), flush=True)
-
-
-def donor_email_exists(email, exclude_user=None):
-    ''' accepts an optional second parameter as the user to exclude from the email checking'''
-    donors = Donor.objects
-    if exclude_user:
-        donors = donors.exclude(linked_user=exclude_user)
-    return donors.exclude(linked_user_deleted=True).filter(email__iexact=email).exists()

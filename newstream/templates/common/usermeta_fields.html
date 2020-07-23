@@ -1,0 +1,19 @@
+{% load static common_tags widget_tweaks %}
+
+{# Meta Fields #}
+{% for field in form.visible_fields %}
+{% if field.html_name|startswith:"usermeta" %}
+{% if field|widget_type == 'checkboxinput' %}
+<div class="mb-4 widget_checkboxinput flex items-center">
+    {{ field }} {{ field.label_tag }}
+</div>
+{% else %}
+<div class="mb-4">
+    <div class="label-div">{{ field.label_tag }}</div>
+    <div class="field-div widget_{{ field|widget_type }}">
+        {{ field }}
+    </div>
+</div>
+{% endif %}
+{% endif %}
+{% endfor %}

@@ -20,7 +20,7 @@
         <table class="thankyou-table">
             <tr>
                 <td>Donor</td>
-                <td>{{ donation.donor.fullname }}</td>
+                <td>{{ donation.user.fullname }}</td>
             </tr>
             <tr>
                 <td>Order number</td>
@@ -40,7 +40,7 @@
             </tr>
             <tr>
                 <td>Opt in Mailing List?</td>
-                <td>{{ donation.donor.optInMailingIcon|safe }}</td>
+                <td>{{ donation.user.optInMailingIcon|safe }}</td>
             </tr>
             <tr>
                 <td>Payment status</td>

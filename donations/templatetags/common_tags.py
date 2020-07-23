@@ -11,6 +11,13 @@ from newstream.functions import getSiteName, pickleprint
 register = template.Library()
 
 
+@register.filter(name='startswith')
+def startswith(text, starts):
+    if isinstance(text, str):
+        return text.startswith(starts)
+    return False
+
+
 @register.filter(name='domain')
 def domain(req):
     return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + req.get_host()

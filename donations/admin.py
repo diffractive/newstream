@@ -40,12 +40,18 @@ class DonationAdmin(ModelAdmin):
     exclude_from_explorer = False
     # todo: format donation amount upon display according the currency_dict
     list_display = ('donation_amount', 'gateway',
-                    'is_recurring', 'payment_status', 'created_at',)
+                    'is_recurring', 'payment_status', 'user_column', 'created_at',)
     list_filter = ('is_recurring', 'payment_status', 'created_at',)
     search_fields = ('order_number', 'donation_amount',
                      'payment_status', 'is_recurring', 'created_at',)
     inspect_view_enabled = True
     inspect_view_class = DonationInspectView
+
+    def user_column(self, obj):
+        return obj.user.email if obj.user else '-'
+
+    user_column.admin_order_field = 'user'  # Allows column order sorting
+    user_column.short_description = 'User Email'  # Renames column head
 
 
 class PaymentGatewayAdmin(ModelAdmin):

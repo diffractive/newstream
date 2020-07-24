@@ -71,15 +71,9 @@ def delete_account(request):
         form = DeleteAccountForm(request.POST)
         if form.is_valid():
             # proceed to logout user
-            # then, mark linked donations to linked_user_deleted=True
-            # then, todo: cancel all recurring payments
             # lastly, deletes the account
             user = request.user
             logout(request)
-            donations = Donation.objects.filter(user=user).all()
-            for donation in donations:
-                donation.linked_user_deleted = True
-                donation.save()
             user.delete()
             messages.add_message(request, messages.SUCCESS,
                                  'Your account is deleted.')

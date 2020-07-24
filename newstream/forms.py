@@ -66,7 +66,6 @@ class NewstreamSAAdapter(DefaultSocialAccountAdapter):
 
     def is_auto_signup_allowed(self, request, sociallogin):
         # Very Important: if connect is made in pre_social_login, this method should then be never called! (According to allauth source code)
-        print("is_auto_signup_allowed: No auto connect!", flush=True)
         # then decide if social login can skip signup form (draw flag from siteSettings)
         siteSettings = getSiteSettings(request)
         return siteSettings.social_skip_signup
@@ -100,8 +99,6 @@ class NewstreamSAAdapter(DefaultSocialAccountAdapter):
             return
 
         # if it does, connect this new social login to the existing user
-        print("Yes! Connect this sonofabitch " +
-              existing_email.email, flush=True)
         sociallogin.connect(request, existing_email.user)
 
 

@@ -55,8 +55,8 @@ def thank_you(request):
             pk=request.session['thankyou-donation-id'])
         # logs user in
         if donation.user:
-            # todo: need to specify which backend to login through (i.e. standard or social)
-            login(request, donation.user)
+            login(request, donation.user,
+                  backend='django.contrib.auth.backends.ModelBackend')
         return render(request, 'donations/thankyou.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
     if 'thankyou-error' in request.session:
         return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': request.session['thankyou-error']})

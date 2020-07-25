@@ -1,6 +1,5 @@
 {% extends "base.html" %}
 {% load static common_tags account socialaccount %}
-{% providers_media_js %}
 
 {% block title %}Sign in to donate{% endblock %}
 
@@ -9,17 +8,31 @@
 {% block content %}
 <div class="container-tight flex flex-col items-center">
     <h2 class="mb-4">Sign in to donate</h2>
+    {% with sociallogin_enabled=request|sociallogin_enabled %}
+    {% if sociallogin_enabled %}
     <div class="social-signin-div">
+        {% with googlelogin_enabled=request|googlelogin_enabled %}
+        {% if googlelogin_enabled %}
         <a href="{% provider_login_url 'google' next='/donations/donation-details/' %}"
             class="ns-wide-btn right-google-btn block">Sign in
             with Google<span class="icon"></span></a>
-        <a href="{% provider_login_url 'facebook' method='js_sdk' next='/donations/donation-details/' %}"
+        {% endif %}
+        {% endwith %}
+        {% with facebooklogin_enabled=request|facebooklogin_enabled %}
+        {% if facebooklogin_enabled %}
+        <a href="{% provider_login_url 'facebook' next='/donations/donation-details/' %}"
             class="ns-wide-btn right-facebook-btn block">Sign
             in
             with Facebook<span class="icon"></span></a>
+        {% endif %}
+        {% endwith %}
+        {% with twitterlogin_enabled=request|twitterlogin_enabled %}
+        {% if twitterlogin_enabled %}
         <a href="{% provider_login_url 'twitter' next='/donations/donation-details/' %}"
             class="ns-wide-btn right-twitter-btn block">Sign in
             with Twitter<span class="icon"></span></a>
+        {% endif %}
+        {% endwith %}
     </div>
     {% include "socialaccount/snippets/login_extra.html" %}
     <div class="or-separator w-1/2 my-6 flex justify-between items-center">
@@ -27,6 +40,8 @@
         <div class="or-text-div p-2">OR</div>
         <div class="ns-page-breaker flex-1"></div>
     </div>
+    {% endif %}
+    {% endwith %}
     <div class="email-signin-div">
         <a href="{% url 'account_login' %}?next=/donations/donation-details/"
             class="ns-wide-btn right-arrow-btn block">Sign in

@@ -58,11 +58,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
         InlinePanel('admin_emails', label="Admin Email", heading="List of Admins' Emails",
                     help_text='Email notifications such as new donations will be sent to this list.')
     ]
-    social_skip_signup = models.BooleanField(default=False)
     signup_footer_text = RichTextField(blank=True)
-    general_user_panels = [
-        FieldPanel('social_skip_signup',
-                   heading='Allow Firsttime Social Logins bypass Signup Form?'),
+    general_signup_panels = [
         FieldPanel('signup_footer_text',
                    heading='Footer Text(Under Signup Form)'),
         InlinePanel('user_meta_fields', label='User Meta Fields',
@@ -115,13 +112,47 @@ class SiteSettings(BaseSetting, ClusterableModel):
         ImageChooserPanel('site_icon'),
     ]
 
+    social_login_enabled = models.BooleanField(default=True)
+    social_skip_signup = models.BooleanField(default=False)
+    social_general_panels = [
+        FieldPanel('social_login_enabled',
+                   heading='Enable Social Login for this site ?'),
+        FieldPanel('social_skip_signup',
+                   heading='Allow Firsttime Social Logins bypass Signup Form ?'),
+    ]
+    google_login_enabled = models.BooleanField(default=True)
+    social_google_panels = [
+        FieldPanel('google_login_enabled',
+                   heading='Enable Google Login ? (Only if Social Login is enabled)'),
+    ]
+    facebook_login_enabled = models.BooleanField(default=True)
+    social_facebook_panels = [
+        FieldPanel('facebook_login_enabled',
+                   heading='Enable Facebook Login ? (Only if Social Login is enabled)'),
+    ]
+    twitter_login_enabled = models.BooleanField(default=True)
+    social_twitter_panels = [
+        FieldPanel('twitter_login_enabled',
+                   heading='Enable Twitter Login ? (Only if Social Login is enabled)'),
+    ]
+
     edit_handler = TopTabbedInterface([
         SubTabbedInterface([
             SubObjectList(general_general_panels, slug='general-general',
                           heading='General'),
-            SubObjectList(general_user_panels, slug='general-user',
-                          heading='User Settings'),
+            SubObjectList(general_signup_panels, slug='general-signup',
+                          heading='User Signup'),
         ], heading="General"),
+        SubTabbedInterface([
+            SubObjectList(social_general_panels, slug='social-general',
+                          heading='General'),
+            SubObjectList(social_google_panels, slug='social-google',
+                          heading='Google'),
+            SubObjectList(social_facebook_panels, slug='social-facebook',
+                          heading='Facebook'),
+            SubObjectList(social_twitter_panels, slug='social-twitter',
+                          heading='Twitter'),
+        ], heading="Social Logins"),
         SubTabbedInterface([
             SubObjectList(gateways_general_panels,
                           heading='General', slug='gateways-general'),

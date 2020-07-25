@@ -4,11 +4,44 @@ import html
 from django import template
 from django.urls import reverse
 from django.utils.safestring import mark_safe
-from site_settings.models import SiteSettings
+
 from donations.functions import getCurrencyDictAt
-from newstream.functions import getSiteName, pickleprint
+from newstream.functions import getSiteName, pickleprint, getSiteSettings
 
 register = template.Library()
+
+
+@register.filter(name='sociallogin_enabled')
+def sociallogin_enabled(req):
+    settings = getSiteSettings(req)
+    return settings.social_login_enabled
+
+
+@register.filter(name='googlelogin_enabled')
+def googlelogin_enabled(req):
+    settings = getSiteSettings(req)
+    return settings.google_login_enabled
+
+
+@register.filter(name='facebooklogin_enabled')
+def facebooklogin_enabled(req):
+    settings = getSiteSettings(req)
+    return settings.facebook_login_enabled
+
+
+@register.filter(name='twitterlogin_enabled')
+def twitterlogin_enabled(req):
+    settings = getSiteSettings(req)
+    return settings.twitter_login_enabled
+
+
+@register.filter(name='has_socialaccount')
+def has_socialaccount(user):
+    accounts = user.socialaccount_set.all()
+    if len(accounts) > 0:
+        return True
+    else:
+        return False
 
 
 @register.filter(name='startswith')
@@ -25,13 +58,13 @@ def domain(req):
 
 @register.filter(name='brand_logo')
 def getBrandLogo(req):
-    settings = SiteSettings.for_site(req.site)
+    settings = getSiteSettings(req)
     return settings.brand_logo
 
 
 @register.filter(name='site_icon')
 def getSiteIcon(req):
-    settings = SiteSettings.for_site(req.site)
+    settings = getSiteSettings(req)
     return settings.site_icon
 
 

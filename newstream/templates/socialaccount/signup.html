@@ -7,9 +7,9 @@
 
 {% block content %}
 <div class="complete-registration-form-div container-tight">
-    <h3 class="my-6">You are about to use your {{provider_name}} account to login to {{ request|site_name }}. As a final
-        step,
-        please complete the following form:</h3>
+    <h3 class="my-6">{% with provider_name=account.get_provider.name %}You are about to use your {{provider_name}}
+        account to login to {{ request|site_name }}. Please complete the following form to complete user
+        registration:{% endwith %}</h3>
     {% include 'common/form_errors.html' %}
     {# Form Area #}
     <form method='POST' action="{% url 'socialaccount_signup' %}">

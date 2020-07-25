@@ -101,6 +101,8 @@ MIDDLEWARE = [
 
     'wagtail.core.middleware.SiteMiddleware',
     'wagtail.contrib.redirects.middleware.RedirectMiddleware',
+
+    'newstream.view_middleware.DisableSocialLoginMiddleware',
 ]
 
 ROOT_URLCONF = 'newstream.urls'
@@ -120,8 +122,10 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                # 'donations.context_processors.extras',
             ],
+            'libraries': {
+                'common_tags': 'newstream.templatetags.common_tags',
+            },
         },
     },
 ]
@@ -215,7 +219,7 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERIFIED_EMAIL': True
     },
     'facebook': {
-        'METHOD': 'js_sdk',
+        'METHOD': 'oauth2',
         'SCOPE': [
             'email',
             'public_profile',

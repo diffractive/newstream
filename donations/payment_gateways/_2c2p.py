@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.functions import get2C2PSettings, getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
-from donations.models import DonationMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
+from donations.models import DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
 from newstream.functions import raiseObjectNone, getFullReverseUrl, getSiteName, getSiteSettings
 from urllib.parse import urlencode
 import hmac
@@ -72,9 +72,9 @@ class Gateway_2C2P(PaymentGatewayManager):
             data['payment_option'] = 'A'
 
             # append order_prefix to donation metas for distinguishment
-            dmeta = DonationMeta(
+            dpmeta = DonationPaymentMeta(
                 donation=self.donation, field_key='order_prefix', field_value=data['order_prefix'])
-            dmeta.save()
+            dpmeta.save()
         else:
             data['payment_description'] = 'Onetime Donation for {}'.format(
                 getSiteName(self.request))
@@ -90,9 +90,9 @@ class Gateway_2C2P(PaymentGatewayManager):
             bytes(params, 'utf-8'), hashlib.sha256).hexdigest()
 
         # append hash_value to donation metas for checking purposes
-        # dmeta = DonationMeta(
+        # dpmeta = DonationPaymentMeta(
         #     donation=self.donation, field_key='hash_value', field_value=data['hash_value'])
-        # dmeta.save()
+        # dpmeta.save()
 
         return render(self.request, 'donations/redirection_2c2p_form.html', {'action': self.base_gateway_redirect_url, 'data': data})
 
@@ -131,14 +131,14 @@ class Gateway_2C2P(PaymentGatewayManager):
                     self.donation.recurring_status = STATUS_NONRECURRING
                 self.donation.save()
                 # add checkHash to donation metas for checking purposes
-                # dmeta = DonationMeta(
+                # dpmeta = DonationPaymentMeta(
                 #     donation=self.donation, field_key='checkHash', field_value=checkHash)
-                # dmeta.save()
+                # dpmeta.save()
                 # add recurring_unique_id to donation metas for hooking up future recurring payments
                 if 'recurring_unique_id' in data and data['recurring_unique_id'] != '':
-                    dmeta = DonationMeta(
+                    dpmeta = DonationPaymentMeta(
                         donation=self.donation, field_key='recurring_unique_id', field_value=data['recurring_unique_id'])
-                    dmeta.save()
+                    dpmeta.save()
             elif self.request.path.find('return-from-gateway') != -1:
                 print("--Incoming from return-from-gateway--", flush=True)
                 # no need to do anything extra when return-from-gateway

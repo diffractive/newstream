@@ -31,8 +31,9 @@ class PaymentGatewayFactory(object):
         if 'recurring_unique_id' in request.POST and request.POST['recurring_unique_id'] != '':
             # First distinguish between initial and renewal payment responses
             # The parent donation should have both the matching recurring_unique_id and order_prefix, thus producing two records exactly
-            DonationSet = Donation.objects.filter((Q(metas__field_key='recurring_unique_id', metas__field_value=request.POST['recurring_unique_id']) | Q(
-                metas__field_key='order_prefix', metas__field_value=request.POST['order_id'][:-5])) & Q(parent_donation__isnull=True) & Q(id=int(request.POST['user_defined_1'])))
+            # the -5 position is to cut away the 0000n numbering on the order_id to just match the order prefixx
+            DonationSet = Donation.objects.filter((Q(payment_metas__field_key='recurring_unique_id', payment_metas__field_value=request.POST['recurring_unique_id']) | Q(
+                payment_metas__field_key='order_prefix', payment_metas__field_value=request.POST['order_id'][:-5])) & Q(parent_donation__isnull=True) & Q(id=int(request.POST['user_defined_1'])))
             if len(DonationSet) == 2:
                 pDonation = DonationSet[0]
 

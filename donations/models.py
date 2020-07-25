@@ -225,6 +225,25 @@ class DonationMeta(models.Model):
         return self.field_key
 
 
+class DonationPaymentMeta(models.Model):
+    donation = ParentalKey(
+        'Donation',
+        related_name='payment_metas',
+        on_delete=models.CASCADE,
+    )
+    field_key = models.CharField(max_length=255)
+    field_value = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-id']
+
+    def __str__(self):
+        return self.field_key
+
+
 @receiver(pre_delete, sender=User)
 def update_deleted_users_donations(sender, instance, using, **kwargs):
     # todo: cancel all recurring payments

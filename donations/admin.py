@@ -1,4 +1,4 @@
-from .models import Donation, PaymentGateway, DonationForm, DonationMeta
+from .models import Donation, PaymentGateway, DonationForm, DonationMeta, DonationPaymentMeta
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
 from django.contrib import admin
@@ -16,7 +16,7 @@ class DonationInspectView(InspectView):
 
         # 2C2P specific, recurring payment inquiry
         if model.is_recurring:
-            metaSet = DonationMeta.objects.filter(
+            metaSet = DonationPaymentMeta.objects.filter(
                 donation=model, field_key='recurring_unique_id')
             if len(metaSet) == 1:
                 ruid = metaSet[0].field_value

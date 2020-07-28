@@ -1,33 +1,37 @@
-{% load common_tags wagtailimages_tags %}
+{% load common_tags wagtailimages_tags menu_tags %}
 {% image request|brand_logo max-120x120 as brand_logo %}
 
-<div class='newstream-top-nav'>
-    <a href="{{ request|domain }}" class="brand-logo-link">
-        <img src="{{ brand_logo.url }}" alt="{{ brand_logo.alt }}" width="{{ brand_logo.width }}"
-            height="{{ brand_logo.height }}">
-    </a>
-    <div class="left-nav flex items-center">
-        <a id="nav-toggle" href="#"><span></span></a>
-        <a href="/contact-us" class="menu-item ml-16">Contact</a>
-    </div>
-    <div class="right-nav flex items-center justify-end">
-        {% if user.is_authenticated %}
-        <div class="nav-user-dropdown-div mr-6 flex items-center dropdown-div-wrapper">
-            <input type="checkbox" name="dropdown-toggle-checkbox" id="dropdown-toggle-checkbox"
-                class="dropdown-toggle-checkbox">
-            <label for="dropdown-toggle-checkbox" class="dropdown-toggle-label"></label>
-            <span class="avatar-icon"></span>
-            <span class="user-fullname">{{ user|display_username }}</span>
-            <span class="dropdown-chevron-icon"></span>
-            <div class="user-dropdown-menu flex flex-col items-stretch">
-                <a href="{% url 'personal-info' %}">Profile Settings</a>
-                <a href="{% url 'donations:my-donations' %}">My Donations</a>
-                <a href="{% url 'account_logout' %}">Logout</a>
-            </div>
+<div id="newstream-header" class='z-50 bg-white fixed'>
+    <div id="newstream-topnav" class="flex justify-between items-center w-screen py-4 md:py-10 px-8 lg:px-10 xl:px-16">
+        <div class="left-nav flex items-center pr-8">
+            <div id="nav-toggle" class="lg:hidden focus:outline-none cursor-pointer" onclick="(e) => navToggle(e);">
+                <span></span></div>
+            {% main_menu template="common/main_menu.html" sub_menu_template="common/main_sub_menu.html" %}
         </div>
-        {% else %}
-        <a href="{% url 'account_login' %}{{ request|next_path_filter }}" class="mr-16 menu-item">Sign in</a>
-        {% endif %}
-        <a href="{% url 'donations:donate'%}" class="menu-item nav-donate-btn">Donate</a>
+        <a href="{{ request|domain }}" class="brand-logo-link">
+            <img src="{{ brand_logo.url }}" alt="{{ brand_logo.alt }}" width="{{ brand_logo.width }}"
+                height="{{ brand_logo.height }}">
+        </a>
+        <div class="right-nav items-center justify-end pl-8 hidden md:flex">
+            {% if user.is_authenticated %}
+            <div class="nav-user-dropdown-div mr-6 hidden lg:flex items-center dropdown-div-wrapper">
+                <input type="checkbox" name="dropdown-toggle-checkbox" id="dropdown-toggle-checkbox"
+                    class="dropdown-toggle-checkbox">
+                <label for="dropdown-toggle-checkbox" class="dropdown-toggle-label"></label>
+                <span class="avatar-icon"></span>
+                <span class="user-fullname">{{ user|display_username }}</span>
+                <span class="dropdown-chevron-icon"></span>
+                <div class="user-dropdown-menu flex flex-col items-stretch">
+                    <a href="{% url 'personal-info' %}">Profile Settings</a>
+                    <a href="{% url 'donations:my-donations' %}">My Donations</a>
+                    <a href="{% url 'account_logout' %}">Logout</a>
+                </div>
+            </div>
+            {% else %}
+            <a href="{% url 'account_login' %}{{ request|next_path_filter }}" class="mr-16 menu-item">Sign in</a>
+            {% endif %}
+            <a href="{% url 'donations:donate'%}" class="menu-item nav-donate-btn">Donate</a>
+        </div>
     </div>
+    {% main_menu template="common/mobile_main_menu.html" sub_menu_template="common/mobile_main_sub_menu.html" %}
 </div>

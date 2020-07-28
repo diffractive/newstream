@@ -1,0 +1,14 @@
+{% load menu_tags %}
+
+<div id="newstream-mainmenu" class="w-auto hidden lg:flex items-center ">
+    {% for item in menu_items %}
+    <div class="menu-item-wrapper">
+        <a href="{{ item.href }}" class="{{ item.active_class }} menu-item">{{ item.text }}</a>
+        {% if item.has_children_in_menu %}
+        <div class="hidden submenu">
+            {% sub_menu item %}
+        </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>

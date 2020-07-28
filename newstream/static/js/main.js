@@ -34,3 +34,24 @@ for (wrapper of document.getElementsByClassName("dropdown-toggle-label")) {
         }
     }, 4000); // invisible transition is 1s
 })();
+
+function pushContentDownFromHeader() {
+    // calculate drop distance for content below fixed header
+    headerHeight = document.getElementById('newstream-topnav').offsetHeight;
+    document.getElementById('base-content-wrapper').style.paddingTop = headerHeight + 'px';
+}
+window.addEventListener('load', function () {
+    // mobile hamburger toggle function
+    var hamburger_anchor = document.getElementById('nav-toggle');
+    hamburger_anchor.addEventListener('click', function (e) {
+        let el = e.target;
+        let mobile_nav = document.getElementById('newstream-mobile-mainmenu');
+
+        el.classList.toggle('menu-open');
+        mobile_nav.classList.toggle('hidden');
+    })
+    pushContentDownFromHeader();
+});
+window.addEventListener('resize', function () {
+    pushContentDownFromHeader();
+});

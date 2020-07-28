@@ -5,7 +5,10 @@
     position: relative;
     padding-right: 2.5rem;
     top: -2px;
+    height: 40px;
     span { 
+        top: 20px;
+
         &, &:before, &:after {
             cursor: pointer;
             border-radius: 1px;
@@ -21,18 +24,17 @@
             top: -8px;
         }
         &:after {
-            bottom: -8px;
+            top: 8px;
         }
     }
 }
-.newstream-top-nav {
-    @apply w-screen flex justify-between items-center;
-    padding: 2.5rem 4rem;
+#newstream-topnav {
     border-bottom: $border-grey-color 2px solid;
     a {
         font-family: 'Fira Sans';
         @apply text-black;
         &.brand-logo-link {
+            display: inline-block;
             position: absolute;
             left: 50%;
             transform: translateX(-50%);
@@ -40,11 +42,145 @@
         &.menu-item {
             text-transform: uppercase;
             font-weight: 600;
+            position: relative;
+            display: inline-block;
         }
         &.nav-donate-btn {
             @apply bg-primary text-white;
             padding: 0.5rem 2.5rem;
         }
+    }
+    #newstream-mainmenu {
+        .menu-item {
+            margin-right: 1rem;
+            white-space: nowrap;
+        }
+        .menu-item-wrapper {
+            position: relative;
+            
+            &:hover {
+                > .submenu {
+                    opacity: 1;
+                    visibility: visible;
+                }
+            }
+
+            .submenu {
+                z-index: 55;
+                background-color: white;
+                box-shadow: 0 2px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);
+                position: absolute;
+                @apply pt-6 pb-2 flex flex-col;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease-in-out 0s;
+
+                .menu-item-wrapper {
+                    margin-right: 0;
+                    margin-bottom: 1rem;
+
+                    .menu-item {
+                        @apply px-6;
+                    }
+                }
+
+                &:hover {
+                    opacity: 1;
+                    visibility: visible;
+                }
+
+                .submenu {
+                    top: 0;
+                    left: 100%;
+                }
+            }
+        }
+        > .menu-item-wrapper > .menu-item {
+            &::before {
+                content: "";
+                position: absolute;
+                width: 100%;
+                height: 3px;
+                bottom: 0;
+                left: 0;
+                background-color: $primary-color;
+                visibility: hidden;
+                transform: scaleX(0);
+                transition: all 0.2s ease-in-out 0s;
+            }
+
+            &:hover::before {
+                visibility: visible;
+                transform: scaleX(1);
+            }
+        }
+    }
+}
+#newstream-mobile-mainmenu {
+    box-shadow: 0 2px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);
+    @apply pt-6 pb-2 px-8;
+
+    .menu-item-wrapper {
+        @apply mb-4;
+        position: relative;
+        
+        .menu-item {
+            @apply text-black;
+            font-family: 'Fira Sans';
+            text-transform: uppercase;
+            font-weight: 600;
+
+            .dropdown-chevron-icon::after {
+                background-color: black;
+            }
+        }
+        .user-fullname {
+            color: $primary-color !important;
+        }
+        a.nav-donate-btn {
+            @apply bg-primary text-white;
+            padding: 0.5rem 2.5rem;
+        }
+    }
+}
+
+span.avatar-icon {
+    position: relative;
+    padding: 0rem 1rem;
+    width: 1rem;
+    height: 2rem;
+    display: inline-block;
+
+    &:after {
+        content: '';
+        position: absolute;
+        mask: url('../svg/fat-user.svg');
+        mask-size: cover;
+        @apply bg-primary;
+        width: 2rem;
+        height: 2rem;
+        transform: translateX(-50%);
+    }
+}
+span.user-fullname {
+    font-weight: 600;
+}
+span.dropdown-chevron-icon {
+    position: relative;
+    padding: 0rem 1rem;
+    width: 1rem;
+    height: 2rem;
+    display: inline-block;
+
+    &:after {
+        content: '';
+        position: absolute;
+        mask: url('../svg/black-down-chevron.svg');
+        mask-size: cover;
+        @apply bg-primary;
+        width: 1rem;
+        height: 1rem;
+        transform: translateX(-50%) translateY(50%);
     }
 }
 
@@ -126,46 +262,6 @@
         top: 0px;
         left: 0px;
         z-index: 5;
-    }
-
-    span.avatar-icon {
-        position: relative;
-        padding: 0rem 1.5rem;
-        width: 2rem;
-        height: 2rem;
-        display: inline-block;
-
-        &:after {
-            content: '';
-            position: absolute;
-            mask: url('../svg/fat-user.svg');
-            mask-size: cover;
-            @apply bg-primary;
-            width: 2rem;
-            height: 2rem;
-            transform: translateX(-50%);
-        }
-    }
-    span.user-fullname {
-        font-weight: 600;
-    }
-    span.dropdown-chevron-icon {
-        position: relative;
-        padding: 0rem 1.5rem;
-        width: 2rem;
-        height: 2rem;
-        display: inline-block;
-
-        &:after {
-            content: '';
-            position: absolute;
-            mask: url('../svg/black-down-chevron.svg');
-            mask-size: cover;
-            @apply bg-primary;
-            width: 1rem;
-            height: 1rem;
-            transform: translateX(-50%) translateY(50%);
-        }
     }
     .user-dropdown-menu {
         z-index: 100;

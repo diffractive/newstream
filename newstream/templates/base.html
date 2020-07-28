@@ -36,7 +36,9 @@
 
     {% include "messages.html" %}
 
-    {% block content %}{% endblock %}
+    <div id="base-content-wrapper">
+        {% block content %}{% endblock %}
+    </div>
 
     {% include "footer.html" %}
 

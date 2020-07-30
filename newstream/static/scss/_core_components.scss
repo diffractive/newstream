@@ -7,24 +7,42 @@
     top: -2px;
     height: 40px;
     span { 
-        top: 20px;
+        transition: all 0.25s ease-in-out 0s;
+        cursor: pointer;
+        border-radius: 1px;
+        height: 4px;
+        width: 28px;
+        @apply bg-primary;
+        position: absolute;
+        display: block;
+        content: '';
+        left: 0px;
 
-        &, &:before, &:after {
-            cursor: pointer;
-            border-radius: 1px;
-            height: 4px;
-            width: 28px;
-            @apply bg-primary;
-            position: absolute;
-            display: block;
-            content: '';
+        &:nth-child(1) {
+            transform-origin: left center;
+            top: 12px;
         }
-
-        &:before {
-            top: -8px;
+        &:nth-child(2) {
+            top: 20px;
         }
-        &:after {
-            top: 8px;
+        &:nth-child(3) {
+            transform-origin: left center;
+            top: 28px;
+        }
+    }
+    &.menu-open {
+        span:nth-child(1) {
+            left: 2px;
+            top: 10px;
+            transform: rotate(45deg);
+        }
+        span:nth-child(2) {
+            opacity: 0;
+        }
+        span:nth-child(3) {
+            left: 2px;
+            top: 30px;
+            transform: rotate(-45deg);
         }
     }
 }

@@ -44,7 +44,7 @@ window.addEventListener('load', function () {
     // mobile hamburger toggle function
     var hamburger_anchor = document.getElementById('nav-toggle');
     hamburger_anchor.addEventListener('click', function (e) {
-        let el = e.target;
+        let el = document.getElementById('nav-toggle');
         let mobile_nav = document.getElementById('newstream-mobile-mainmenu');
 
         el.classList.toggle('menu-open');

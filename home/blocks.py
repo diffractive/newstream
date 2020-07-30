@@ -1,4 +1,4 @@
-from wagtail.core.blocks import StructBlock, StreamBlock, RichTextBlock, ChoiceBlock, IntegerBlock, CharBlock, URLBlock, ListBlock, RawHTMLBlock
+from wagtail.core.blocks import StructBlock, StreamBlock, RichTextBlock, ChoiceBlock, IntegerBlock, CharBlock, RawHTMLBlock, URLBlock, ListBlock, RawHTMLBlock
 from wagtail.images.blocks import ImageChooserBlock
 
 
@@ -63,6 +63,16 @@ class PageBreaker(StructBlock):
         label = 'Page Breaker'
 
 
+class ResponsiveVideoIframeBlock(StructBlock):
+    iframe_embed = RawHTMLBlock(
+        help_text='Currently only youtube/vimeo embeds can be responsive')
+
+    class Meta:
+        icon = "media"
+        template = 'home/blocks/responsive_video_iframe_block.html'
+        label = 'Responsive Video iFrame'
+
+
 class ColumnContentBlock(StreamBlock):
     heading_block = HeadingBlock()
     text_block = RichTextBlock(
@@ -73,6 +83,7 @@ class ColumnContentBlock(StreamBlock):
         template="home/blocks/raw_html.html", label="HTML")
     accordion_block = AccordionBlock()
     pagebreaker_block = PageBreaker()
+    resp_video_iframe_block = ResponsiveVideoIframeBlock()
 
     class Meta:
         icon = 'form'

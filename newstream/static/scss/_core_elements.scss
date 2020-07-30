@@ -414,3 +414,18 @@ span.no-icon {
         }
     }
 }
+
+/* Used by the Responsive Video Block */
+.responsive-video-wrapper {
+  position: relative;
+  padding-bottom: 56.25%;
+  width: 100%;
+  height: 0;
+}
+.responsive-video-wrapper iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}

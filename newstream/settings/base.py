@@ -196,9 +196,23 @@ MEDIA_URL = '/media/'
 
 WAGTAIL_SITE_NAME = "Newstream"
 
+WAGTAILADMIN_RICH_TEXT_EDITORS = {
+    'default': {
+        'WIDGET': 'wagtail.admin.rich_text.DraftailRichTextArea',
+        'OPTIONS': {
+            'features': ['h1', 'h2', 'h3', 'h4', 'bold', 'italic', 'ol', 'ul', 'hr', 'link', 'document-link', 'image', 'embed', 'code', 'superscript', 'subscript', 'strikethrough', 'blockquote']
+        }
+    },
+    'legacy': {
+        'WIDGET': 'wagtail.admin.rich_text.HalloRichTextArea',
+    }
+}
+
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
 BASE_URL = 'https://newstream.hongkongfp.com'
+
+# allauth-related settings
 
 AUTHENTICATION_BACKENDS = [
     # Needed to login by username in Django admin, regardless of `allauth`

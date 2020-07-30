@@ -1,16 +1,5 @@
-from wagtail.core.blocks import StructBlock, StreamBlock, RichTextBlock, ChoiceBlock, CharBlock, URLBlock, ListBlock, RawHTMLBlock
+from wagtail.core.blocks import StructBlock, StreamBlock, RichTextBlock, ChoiceBlock, IntegerBlock, CharBlock, URLBlock, ListBlock, RawHTMLBlock
 from wagtail.images.blocks import ImageChooserBlock
-
-
-class FullWidthImageBlock(StructBlock):
-    banner = ImageChooserBlock()
-
-    class Meta:
-        icon = 'image'
-        label = 'Full-width Image Block'
-        admin_text = '{label}: image that extends to fit the screen width'.format(
-            label=label)
-        template = 'home/blocks/full_width_image.html'
 
 
 class LinkButtonBlock(StructBlock):
@@ -136,6 +125,29 @@ class SectionContentBlock(StreamBlock):
     class Meta:
         icon = 'form'
         label = 'Section Content'
+
+
+class FullWidthImageSectionBlock(StructBlock):
+    width_css = ChoiceBlock(choices=[
+        ('container-tight', 'tight'),
+        ('container', 'standard'),
+        ('container-wide', 'wide'),
+    ], icon='cog', label='Width of Inner Container')
+    min_height = IntegerBlock(
+        min_value=0, help_text='Minimum height of this section(pixels)')
+    banner = ImageChooserBlock(label='Background Image')
+    text_color = ChoiceBlock(choices=[
+        ('text-white', 'White'),
+        ('text-black', 'Black'),
+    ], label='Text Color of Inner Container')
+    content = SectionContentBlock(required=False)
+
+    class Meta:
+        icon = 'image'
+        label = 'Full-width Image Block'
+        admin_text = '{label}: image that extends to fit the screen width'.format(
+            label=label)
+        template = 'home/blocks/full_width_image.html'
 
 
 class FullWidthSectionBlock(StructBlock):

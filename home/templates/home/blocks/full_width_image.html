@@ -1,6 +1,11 @@
-{% load wagtailimages_tags %}
+{% load wagtailcore_tags wagtailimages_tags %}
 {% image value.banner original as img %}
 
-<div class="full-width-img-wrapper">
-    <img src="{{ img.url }}" alt="{{ img.alt }}" class="w-screen">
+<div style="min-height: {{ value.min_height }}px;background-image: url({{ img.url }});background-repeat:no-repeat;background-size:cover;background-position:center center;"
+    class="full-width-img-wrapper w-screen flex items-center {{ value.text_color }}">
+    <div class="{{ value.width_css }}">
+        {% for block in value.content %}
+        {% include_block block %}
+        {% endfor %}
+    </div>
 </div>

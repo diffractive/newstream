@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% load static wagtailcore_tags %}
+
+{% block body_class %}newstream-staticpage{% endblock %}
+
+{% block content %}
+{% for block in page.body %}
+{% include_block block %}
+{% endfor %}
+{% endblock content %}

@@ -27,9 +27,18 @@
     {% block extra_css %}
     {# Override this in templates to add extra stylesheets #}
     {% endblock %}
+
+    <script>
+        function toggleSidenav() {
+            document.body.classList.toggle('sidenav-active');
+            document.body.classList.toggle('noscroll');
+        }
+    </script>
 </head>
 
 <body class="{% block body_class %}{% endblock %}">
+    <div class="cover" onclick="toggleSidenav();"></div>
+
     {% wagtailuserbar %}
 
     {% include "header.html" %}

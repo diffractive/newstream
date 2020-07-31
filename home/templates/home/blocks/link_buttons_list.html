@@ -1,6 +1,6 @@
 {% load wagtailcore_tags %}
 
-<div class="column-element flex">
+<div class="column-element flex flex-col md:flex-row">
     {% for block in self %}
     {% include_block block %}
     {% endfor %}

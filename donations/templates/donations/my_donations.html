@@ -18,7 +18,49 @@
     </div>
 </div>
 <div class="container">
-    <table class="w-full my-donations-table">
+    <div class="lg:hidden flex flex-col">
+        {% if donations %}
+        {% for donation in donations %}
+        <div class="donation-record p-4 rounded-lg bg-primary-light mb-4">
+            <table class="w-full">
+                <tr>
+                    <td colspan="2"><span class="font-bold">#&nbsp;</span>{{ donation.order_number }}</td>
+                    <td width="50">
+                        {% if donation.is_recurring %}
+                        <div class="more-dropdown-div flex items-center dropdown-div-wrapper">
+                            <input type="checkbox" name="m_dropdown-toggle-checkbox"
+                                id="m_dropdown-toggle-checkbox{{forloop.counter}}" class="dropdown-toggle-checkbox">
+                            <label for="m_dropdown-toggle-checkbox{{forloop.counter}}"
+                                class="dropdown-toggle-label"></label>
+                            <span class="three-dots-icon"></span>
+                            <div class="more-dropdown-menu flex flex-col items-stretch">
+                                {% if request.user.is_email_verified %}
+                                <a href="#">View all renewals</a>
+                                <a href="#">Edit donation</a>
+                                <a href="#">Cancel donation</a>
+                                {% else %}
+                                <a class="actions-locked" href="#">Actions locked (Email unverified)</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+                <tr>
+                    <td width="120">{{ donation|amount_with_currency }}</td>
+                    <td>{{ donation.gateway.frontend_label }}</td>
+                    <td>&nbsp;</td>
+                <tr>
+                    <td>{{ donation.donation_frequency }}</td>
+                    <td>{{ donation.created_at|date:'j M Y' }}</td>
+                    <td>&nbsp;</td>
+                </tr>
+            </table>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    <table class="w-full my-donations-table hidden lg:block">
         <thead>
             <tr>
                 <th>Donation Amount</th>

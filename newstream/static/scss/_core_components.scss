@@ -1,11 +1,70 @@
 /* scss items for major components on the web page */
 
 /* Top Navigation Bar */
+//When sidenav is open:
+//a. Create a transparent overlay over the content 
+.sidenav-active .cover {
+    background-color: rgba(0,0,0,0.3);
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100vh;
+    z-index: 100;
+    transition: background-color .3s, transform 0.3s;
+}
+//b. Nudge everything to the side
+#newstream-mobile-mainmenu {
+    transition: transform 0.3s;
+    box-shadow: 0 2px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);
+    position: fixed;
+    height: 100vh;
+    width: $sidenav-width;
+    right: -$sidenav-width;
+    z-index: 200;
+
+    .sidenav-active & {
+        transform: translateX(-100%);
+    }
+    .user-area-links {
+        padding-left: 40px;
+    }
+    .menu-item-wrapper {
+        @apply py-4 px-6;
+        position: relative;
+        
+        .menu-item {
+            @apply text-black;
+            font-family: 'Barlow';
+            text-transform: uppercase;
+            font-weight: 600;
+
+            .dropdown-chevron-icon::after {
+                background-color: black;
+            }
+        }
+        .user-link {
+            color: $primary-color !important;
+            font-family: 'Barlow';
+            text-transform: uppercase;
+        }
+    }
+    a.nav-donate-btn {
+        @apply bg-primary text-white;
+        padding: 0.5rem 2.5rem;
+    }
+}
+//c. Prevent body scroll
+.noscroll {
+  position: relative; //for ios
+  overflow: hidden;
+}
 #nav-toggle{
     position: relative;
-    padding-right: 2.5rem;
+    padding-right: 30px;
+    height: 30px;
     top: -2px;
-    height: 40px;
     span { 
         transition: all 0.25s ease-in-out 0s;
         cursor: pointer;
@@ -20,28 +79,44 @@
 
         &:nth-child(1) {
             transform-origin: left center;
-            top: 12px;
+            top: 8px;
         }
         &:nth-child(2) {
-            top: 20px;
+            top: 16px;
         }
         &:nth-child(3) {
             transform-origin: left center;
-            top: 28px;
+            top: 24px;
         }
     }
-    &.menu-open {
-        span:nth-child(1) {
+}
+#close-nav-toggle{
+    position: relative;
+    padding-right: 30px;
+    height: 30px;
+    top: -2px;
+    span { 
+        transition: all 0.25s ease-in-out 0s;
+        cursor: pointer;
+        border-radius: 1px;
+        height: 4px;
+        width: 28px;
+        @apply bg-primary;
+        position: absolute;
+        display: block;
+        content: '';
+        left: 0px;
+
+        &:nth-child(1) {
+            transform-origin: left center;
             left: 2px;
-            top: 10px;
+            top: 6px;
             transform: rotate(45deg);
         }
-        span:nth-child(2) {
-            opacity: 0;
-        }
-        span:nth-child(3) {
+        &:nth-child(2) {
+            transform-origin: left center;
             left: 2px;
-            top: 30px;
+            top: 26px;
             transform: rotate(-45deg);
         }
     }
@@ -54,8 +129,13 @@
         &.brand-logo-link {
             display: inline-block;
             position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
+            left: 2rem;
+            transform: translateX(0);
+
+            @screen lg {
+                left: 50%;
+                transform: translateX(-50%);
+            }
         }
         &.menu-item {
             text-transform: uppercase;
@@ -131,33 +211,6 @@
                 visibility: visible;
                 transform: scaleX(1);
             }
-        }
-    }
-}
-#newstream-mobile-mainmenu {
-    box-shadow: 0 2px 15px -3px rgba(0,0,0,.1),0 4px 6px -2px rgba(0,0,0,.05);
-    @apply pt-6 pb-2 px-8;
-
-    .menu-item-wrapper {
-        @apply mb-4;
-        position: relative;
-        
-        .menu-item {
-            @apply text-black;
-            font-family: 'Fira Sans';
-            text-transform: uppercase;
-            font-weight: 600;
-
-            .dropdown-chevron-icon::after {
-                background-color: black;
-            }
-        }
-        .user-fullname {
-            color: $primary-color !important;
-        }
-        a.nav-donate-btn {
-            @apply bg-primary text-white;
-            padding: 0.5rem 2.5rem;
         }
     }
 }
@@ -350,7 +403,7 @@ span.dropdown-chevron-icon {
 
 /* Footer */
 .newstream-footer {
-    @apply flex flex-col items-center;
+    @apply flex flex-col;
     padding: 2rem;
     border-top: $border-grey-color 2px solid;
     .brand-logo-link {

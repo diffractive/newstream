@@ -1,7 +1,9 @@
 a {
     @apply text-primary;
 }
-
+.btm-grey-border {
+    border-bottom: $border-grey-color 2px solid;
+}
 .ns-btn {
     @apply bg-primary;
     font-family: 'Fira Sans';

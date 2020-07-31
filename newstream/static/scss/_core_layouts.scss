@@ -3,11 +3,17 @@
 }
 .container {
     @apply mx-auto;
-    padding: 4rem 1rem;
+    padding: 2rem 1rem;
+    @screen md {
+        padding: 4rem 1rem;
+    }
 }
 .container-wide {
     @apply mx-auto;
-    padding: 4rem 1rem;
+    padding: 2rem 1rem;
+    @screen md {
+        padding: 4rem 1rem;
+    }
     width: 100%;
 
     @screen sm {
@@ -31,7 +37,10 @@
 }
 .container-tight {
     @apply mx-auto;
-    padding: 4rem 1rem;
+    padding: 2rem 1rem;
+    @screen md {
+        padding: 4rem 1rem;
+    }
     width: 100%;
 
     @screen sm {
@@ -46,7 +55,10 @@
 }
 
 .container-row {
-    margin-bottom: 4rem;
+    margin-bottom: 2rem;
+    @screen md {
+        padding: 4rem 1rem;
+    }
 
     &:last-child {
         margin-bottom: 0rem;

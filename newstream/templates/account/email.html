@@ -29,16 +29,20 @@
                                         {% if emailaddress.primary or user.emailaddress_set.count == 1 %}checked="checked"
                                         {%endif %} value="{{emailaddress.email}}" />
 
-                                    {{ emailaddress.email }}
-                                    {% if emailaddress.verified %}
-                                    <span
-                                        class="bg-green-100 border-l-2 border-green-500 text-green-700 p-1 ml-2">Verified</span>
-                                    {% else %}
-                                    <span
-                                        class="bg-orange-100 border-l-2 border-orange-500 text-orange-700 p-1 ml-2">Unverified</span>
-                                    {% endif %}
-                                    {% if emailaddress.primary %}<span
-                                        class="bg-blue-100 border-l-2 border-blue-500 text-blue-700 p-1 ml-2">Primary</span>{% endif %}
+                                    <div class="flex flex-col md:flex-row">
+                                        <div>{{ emailaddress.email }}</div>
+                                        <div>
+                                            {% if emailaddress.verified %}
+                                            <span
+                                                class="bg-green-100 border-l-2 border-green-500 text-green-700 p-1 ml-2">Verified</span>
+                                            {% else %}
+                                            <span
+                                                class="bg-orange-100 border-l-2 border-orange-500 text-orange-700 p-1 ml-2">Unverified</span>
+                                            {% endif %}
+                                            {% if emailaddress.primary %}<span
+                                                class="bg-blue-100 border-l-2 border-blue-500 text-blue-700 p-1 ml-2">Primary</span>{% endif %}
+                                        </div>
+                                    </div>
                                 </label>
                             </li>
                             {% endfor %}
@@ -47,9 +51,9 @@
                 </div>
 
                 <div class="buttonHolder">
-                    <button class="ns-btn" type="submit" name="action_primary">Make Primary</button>
-                    <button class="ml-4 ns-btn" type="submit" name="action_send">Re-send Verification</button>
-                    <button class="ml-4 ns-dark-btn" type="submit" name="action_remove">Remove</button>
+                    <button class="ns-btn mr-4 mb-4" type="submit" name="action_primary">Make Primary</button>
+                    <button class="ns-btn mr-4 mb-4" type="submit" name="action_send">Re-send Verification</button>
+                    <button class="ns-dark-btn" type="submit" name="action_remove">Remove</button>
                 </div>
             </fieldset>
         </form>

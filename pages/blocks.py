@@ -13,7 +13,7 @@ class LinkButtonBlock(StructBlock):
     class Meta:
         icon = 'link'
         label = 'Link Button'
-        template = 'home/blocks/link_button.html'
+        template = 'pages/blocks/link_button.html'
 
 
 class HeadingBlock(StructBlock):
@@ -29,7 +29,7 @@ class HeadingBlock(StructBlock):
 
     class Meta:
         icon = 'title'
-        template = 'home/blocks/heading_block.html'
+        template = 'pages/blocks/heading_block.html'
         label = "Heading"
 
 
@@ -45,7 +45,7 @@ class AccordionBlock(StructBlock):
 
     class Meta:
         icon = 'list-ul'
-        template = 'home/blocks/accordion_block.html'
+        template = 'pages/blocks/accordion_block.html'
         label = 'Accordion'
 
 
@@ -59,7 +59,7 @@ class PageBreaker(StructBlock):
 
     class Meta:
         icon = "horizontalrule"
-        template = 'home/blocks/page_breaker_block.html'
+        template = 'pages/blocks/page_breaker_block.html'
         label = 'Page Breaker'
 
 
@@ -69,18 +69,18 @@ class ResponsiveVideoIframeBlock(StructBlock):
 
     class Meta:
         icon = "media"
-        template = 'home/blocks/responsive_video_iframe_block.html'
+        template = 'pages/blocks/responsive_video_iframe_block.html'
         label = 'Responsive Video iFrame'
 
 
 class ColumnContentBlock(StreamBlock):
     heading_block = HeadingBlock()
     text_block = RichTextBlock(
-        template="home/blocks/text_block.html", label="Text")
+        template="pages/blocks/text_block.html", label="Text")
     buttons_block = ListBlock(
-        LinkButtonBlock(), template="home/blocks/link_buttons_list.html", label="Action Buttons")
+        LinkButtonBlock(), template="pages/blocks/link_buttons_list.html", label="Action Buttons")
     html_block = RawHTMLBlock(
-        template="home/blocks/raw_html.html", label="HTML")
+        template="pages/blocks/raw_html.html", label="HTML")
     accordion_block = AccordionBlock()
     pagebreaker_block = PageBreaker()
     resp_video_iframe_block = ResponsiveVideoIframeBlock()
@@ -106,7 +106,7 @@ class SingleColumnBlock(ColumnBlock):
 
     class Meta:
         label = 'Single-Column Block'
-        template = 'home/blocks/single_column.html'
+        template = 'pages/blocks/single_column.html'
 
 
 class TwoColumnBlock(ColumnBlock):
@@ -115,7 +115,7 @@ class TwoColumnBlock(ColumnBlock):
 
     class Meta:
         label = 'Two-Column Block'
-        template = 'home/blocks/two_column.html'
+        template = 'pages/blocks/two_column.html'
 
 
 class ThreeColumnBlock(ColumnBlock):
@@ -125,7 +125,7 @@ class ThreeColumnBlock(ColumnBlock):
 
     class Meta:
         label = 'Three-Column Block'
-        template = 'home/blocks/three_column.html'
+        template = 'pages/blocks/three_column.html'
 
 
 class SectionContentBlock(StreamBlock):
@@ -158,7 +158,7 @@ class FullWidthImageSectionBlock(StructBlock):
         label = 'Full-width Image Block'
         admin_text = '{label}: image that extends to fit the screen width'.format(
             label=label)
-        template = 'home/blocks/full_width_image.html'
+        template = 'pages/blocks/full_width_image.html'
 
 
 class FullWidthSectionBlock(StructBlock):
@@ -179,4 +179,4 @@ class FullWidthSectionBlock(StructBlock):
         label = 'Full-width Section'
         admin_text = '{label}: full-width section that can contains many more child blocks'.format(
             label=label)
-        template = 'home/blocks/full_width_section.html'
+        template = 'pages/blocks/full_width_section.html'

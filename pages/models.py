@@ -6,7 +6,7 @@ from wagtail.core.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel
 
-from home.blocks import FullWidthImageSectionBlock, FullWidthSectionBlock
+from pages.blocks import FullWidthImageSectionBlock, FullWidthSectionBlock
 
 
 class StaticPage(Page):
@@ -19,6 +19,7 @@ class StaticPage(Page):
     content_panels = Page.content_panels + [
         StreamFieldPanel('body'),
     ]
+    show_in_menus_default = True
 
 
 class HomePage(Page):

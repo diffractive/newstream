@@ -48,7 +48,7 @@ WAGTAIL_USER_CUSTOM_FIELDS = ['opt_in_mailing_list']
 
 INSTALLED_APPS = [
     'newstream_user',
-    'home',
+    'pages',
     'search',
     'site_settings',
     'donations',

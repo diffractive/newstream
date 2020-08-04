@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import django
+from django.utils.translation import gettext_lazy as _
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
@@ -69,6 +70,7 @@ INSTALLED_APPS = [
     'wagtail.core',
     'wagtail.contrib.styleguide',
 
+    'wagtailtrans',
     'modelcluster',
     'taggit',
     'wagtailautocomplete',
@@ -91,7 +93,10 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # Recommended order from https://www.accordbox.com/blog/how-support-multi-language-wagtail-cms/
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'wagtail.core.middleware.SiteMiddleware',
+    'wagtailtrans.middleware.TranslationMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'newstream.csrf_middleware.CustomCsrfViewMiddleware',
@@ -99,8 +104,6 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
-
-    'wagtail.core.middleware.SiteMiddleware',
     'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 
     'newstream.view_middleware.DisableSocialLoginMiddleware',
@@ -157,7 +160,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en'
+
+LANGUAGES = [
+    ('en', _('English')),
+    ('zh-tw', _('Chinese (Traditional)')),
+    ('ms-my', _('Malay (Malaysia)')),
+    ('id-id', _('Indonesian (Indonesia)')),
+    ('tl-ph', _('Tagalog (Philippines)')),
+]
 
 TIME_ZONE = 'UTC'
 

@@ -1,7 +1,10 @@
-{% load common_tags wagtailimages_tags menu_tags %}
+{% load i18n common_tags wagtailcore_tags wagtailimages_tags wagtailtrans_tags %}
 {% image request|brand_logo max-120x120 as brand_logo %}
+{% if 'get_site' in page.attrs.class %}
+{% get_translations page homepage_fallback=False include_self=False as translations %}
+{% endif %}
 
-{% main_menu template="common/mobile_main_menu.html" sub_menu_template="common/mobile_main_sub_menu.html" %}
+{% include "common/mobile_main_menu.html" %}
 <div id="newstream-header" class='z-50 bg-white fixed'>
     <div id="newstream-topnav"
         class="flex justify-end lg:justify-between items-center w-screen py-6 px-8 lg:py-10 lg:px-10 xl:px-16">
@@ -11,9 +14,9 @@
                 <span></span>
                 <span></span>
             </div>
-            {% main_menu template="common/main_menu.html" sub_menu_template="common/main_sub_menu.html" %}
+            {% include "common/main_menu.html" %}
         </div>
-        <a href="{{ request|domain }}" class="brand-logo-link">
+        <a href="{% pageurl homepage %}" class="brand-logo-link">
             <img src="{{ brand_logo.url }}" alt="{{ brand_logo.alt }}" width="{{ brand_logo.width }}"
                 height="{{ brand_logo.height }}">
         </a>
@@ -26,7 +29,7 @@
                 <span class="avatar-icon"></span>
                 <span class="user-fullname">{{ user|display_username }}</span>
                 <span class="dropdown-chevron-icon"></span>
-                <div class="user-dropdown-menu flex flex-col items-stretch">
+                <div class="user-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
                     <a href="{% url 'personal-info' %}">Profile Settings</a>
                     <a href="{% url 'donations:my-donations' %}">My Donations</a>
                     <a href="{% url 'account_logout' %}">Logout</a>
@@ -36,6 +39,9 @@
             <a href="{% url 'account_login' %}{{ request|next_path_filter }}" class="mr-16 menu-item">Sign in</a>
             {% endif %}
             <a href="{% url 'donations:donate'%}" class="menu-item nav-donate-btn">Donate</a>
+            <div class="multilang-dropdown-div ml-6 hidden lg:flex items-center dropdown-div-wrapper">
+                {% include 'common/lang_switcher_body.html' with prefix='main' %}
+            </div>
         </div>
     </div>
 </div>

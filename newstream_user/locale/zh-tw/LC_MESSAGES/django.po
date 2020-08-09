@@ -1,0 +1,54 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-09 19:17+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: newstream_user/forms.py:10 newstream_user/forms.py:15
+msgid "Opt in Mailing List"
+msgstr ""
+
+#: newstream_user/models.py:25
+msgid "User Meta"
+msgstr ""
+
+#: newstream_user/models.py:26
+msgid "User Metas"
+msgstr ""
+
+#: newstream_user/models.py:38
+msgid "(Verified)"
+msgstr ""
+
+#: newstream_user/models.py:39
+msgid "(Unverified)"
+msgstr ""
+
+#: newstream_user/models.py:48
+msgid "Yes"
+msgstr ""
+
+#: newstream_user/models.py:48
+msgid "No"
+msgstr ""
+
+#: newstream_user/models.py:67
+msgid "User"
+msgstr ""
+
+#: newstream_user/models.py:68
+msgid "Users"
+msgstr ""

@@ -1,8 +1,8 @@
 {% extends "base_email.html" %}
-{% load common_tags %}
+{% load common_tags i18n %}
 
 {% block title %}
-New Donation
+{% trans 'New Donation' %}
 {% endblock %}
 
 {% block content %}
@@ -10,48 +10,48 @@ New Donation
     <tr>
         <th style="width: 100%;text-align: left;">
             <h2 style="font-weight: bold;">
-                New Donation
+                {% trans 'New Donation' %}
             </h2>
         </th>
     </tr>
     <tr>
         <td style="width: 100%;">
-            <p>Hi Admins,</p>
+            <p>{% trans 'Hi Admins,' %}</p>
             <p>
-                This email is to inform you that a new donation has been made on your website:<br>
+                {% trans 'This email is to inform you that a new donation has been made on your website:' %}<br>
                 <a href=" {{ request|domain }}" target="_blank">{{ request|domain }}</a>
             </p>
             <table cellpadding="10">
                 <tr>
-                    <td style="font-weight: bold;">Donor</td>
+                    <td style="font-weight: bold;">{% trans 'Donor' %}</td>
                     <td>{{ donation.user.fullname }}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold;">Order Number</td>
+                    <td style="font-weight: bold;">{% trans 'Order Number' %}</td>
                     <td>{{ donation.order_number }}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold;">Is Monthly Donation?</td>
-                    <td>{{ donation.isRecurring }}</td>
+                    <td style="font-weight: bold;">{% trans 'Donation Frequency' %}</td>
+                    <td>{{ donation.donation_frequency }}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold;">Currency</td>
+                    <td style="font-weight: bold;">{% trans 'Currency' %}</td>
                     <td>{{ donation.currency }}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold;">Donation Amount</td>
+                    <td style="font-weight: bold;">{% trans 'Donation Amount' %}</td>
                     <td>{{ donation|amount_with_currency }}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold;">Opt in Mailing List?</td>
+                    <td style="font-weight: bold;">{% trans 'Opt in Mailing List?' %}</td>
                     <td>{{ donation.user.optInMailing }}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold;">Payment Status</td>
+                    <td style="font-weight: bold;">{% trans 'Payment Status' %}</td>
                     <td>{{ donation.payment_status }}</td>
                 </tr>
             </table>
-            <p>Thank you,</p>
+            <p>{% trans 'Thank you,' %}</p>
             <p>{{ request|site_name }}</p>
         </td>
     </tr>

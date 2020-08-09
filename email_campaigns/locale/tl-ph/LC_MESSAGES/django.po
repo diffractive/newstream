@@ -1,0 +1,118 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-09 19:20+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: email_campaigns/admin.py:13 email_campaigns/models.py:37
+msgid "Email Templates"
+msgstr ""
+
+#: email_campaigns/admin.py:24 email_campaigns/models.py:57
+msgid "Target Groups"
+msgstr ""
+
+#: email_campaigns/admin.py:35 email_campaigns/models.py:82
+msgid "Campaigns"
+msgstr ""
+
+#: email_campaigns/admin.py:45
+msgid "Email Campaigns"
+msgstr ""
+
+#: email_campaigns/custom_classes.py:25
+msgid "Send Emails"
+msgstr ""
+
+#: email_campaigns/custom_classes.py:69
+msgid "Link to unsubscribe: "
+msgstr ""
+
+#: email_campaigns/custom_classes.py:75
+msgid "Unsubscribe"
+msgstr ""
+
+#: email_campaigns/models.py:26 email_campaigns/models.py:46
+#: email_campaigns/models.py:70
+msgid "Title"
+msgstr ""
+
+#: email_campaigns/models.py:27
+msgid "Subject"
+msgstr ""
+
+#: email_campaigns/models.py:28
+msgid "Plain Text Body"
+msgstr ""
+
+#: email_campaigns/models.py:29
+msgid "HTML Body"
+msgstr ""
+
+#: email_campaigns/models.py:36
+msgid "Email Template"
+msgstr ""
+
+#: email_campaigns/models.py:48
+msgid "Users (Only opted-in and verified users are listed here)"
+msgstr ""
+
+#: email_campaigns/models.py:56
+msgid "Target Group"
+msgstr ""
+
+#: email_campaigns/models.py:71
+msgid "From Address"
+msgstr ""
+
+#: email_campaigns/models.py:72
+msgid "Template"
+msgstr ""
+
+#: email_campaigns/models.py:73
+msgid "Recipients"
+msgstr ""
+
+#: email_campaigns/models.py:81
+msgid "Campaign"
+msgstr ""
+
+#: email_campaigns/templates/django/forms/widgets/custom_checkbox_select.html:6
+msgid "Check All"
+msgstr ""
+
+#: email_campaigns/templates/django/forms/widgets/custom_checkbox_select.html:8
+msgid "Uncheck All"
+msgstr ""
+
+#: email_campaigns/templates/modeladmin/email_campaigns/campaign/send_emails.html:29
+#, python-format
+msgid ""
+"Back to\n"
+"                %(model_name)s list"
+msgstr ""
+
+#: email_campaigns/templates/modeladmin/email_campaigns/campaign/send_emails.html:33
+msgid "Emails are sent."
+msgstr ""
+
+#: email_campaigns/templates/modeladmin/email_campaigns/campaign/send_emails.html:35
+msgid "The following recipients are rejected:"
+msgstr ""
+
+#: email_campaigns/templates/modeladmin/email_campaigns/campaign/send_emails.html:43
+msgid "All Emails sent successfully."
+msgstr ""

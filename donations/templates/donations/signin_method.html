@@ -1,36 +1,34 @@
 {% extends "base.html" %}
-{% load static common_tags account socialaccount %}
+{% load static common_tags account socialaccount i18n %}
 
-{% block title %}Sign in to donate{% endblock %}
+{% block title %}{% trans 'Sign in to donate' %}{% endblock %}
 
 {% block body_class %}newstream-signin-method-page{% endblock %}
 
 {% block content %}
 <div class="container-tight flex flex-col items-center">
-    <h2 class="mb-4">Sign in to donate</h2>
+    <h2 class="mb-4">{% trans 'Sign in to donate' %}</h2>
+    {% url 'donations:donation-details' as donate_url %}
     {% with sociallogin_enabled=request|sociallogin_enabled %}
     {% if sociallogin_enabled %}
     <div class="social-signin-div">
         {% with googlelogin_enabled=request|googlelogin_enabled %}
         {% if googlelogin_enabled %}
-        <a href="{% provider_login_url 'google' next='/donations/donation-details/' %}"
-            class="ns-wide-btn right-google-btn block">Sign in
-            with Google<span class="icon"></span></a>
+        <a href="{% provider_login_url 'google' next=donate_url %}"
+            class="ns-wide-btn right-google-btn block">{% trans 'Sign in with Google' %}<span class="icon"></span></a>
         {% endif %}
         {% endwith %}
         {% with facebooklogin_enabled=request|facebooklogin_enabled %}
         {% if facebooklogin_enabled %}
-        <a href="{% provider_login_url 'facebook' next='/donations/donation-details/' %}"
-            class="ns-wide-btn right-facebook-btn block">Sign
-            in
-            with Facebook<span class="icon"></span></a>
+        <a href="{% provider_login_url 'facebook' next=donate_url %}"
+            class="ns-wide-btn right-facebook-btn block">{% trans 'Sign in with Facebook' %}<span
+                class="icon"></span></a>
         {% endif %}
         {% endwith %}
         {% with twitterlogin_enabled=request|twitterlogin_enabled %}
         {% if twitterlogin_enabled %}
-        <a href="{% provider_login_url 'twitter' next='/donations/donation-details/' %}"
-            class="ns-wide-btn right-twitter-btn block">Sign in
-            with Twitter<span class="icon"></span></a>
+        <a href="{% provider_login_url 'twitter' next=donate_url %}"
+            class="ns-wide-btn right-twitter-btn block">{% trans 'Sign in with Twitter' %}<span class="icon"></span></a>
         {% endif %}
         {% endwith %}
     </div>
@@ -43,12 +41,11 @@
     {% endif %}
     {% endwith %}
     <div class="email-signin-div">
-        <a href="{% url 'account_login' %}?next=/donations/donation-details/"
-            class="ns-wide-btn right-arrow-btn block">Sign in
-            with Email<span class="icon"></span></a>
-        <a href="{% url 'account_signup' %}?next=/donations/donation-details/"
-            class="ns-wide-btn right-arrow-btn block">Continue with Email Sign
-            up<span class="icon"></span></a>
+        <a href="{% url 'account_login' %}?next={{ donate_url }}"
+            class="ns-wide-btn right-arrow-btn block">{% trans 'Sign in with Email' %}<span class="icon"></span></a>
+        <a href="{% url 'account_signup' %}?next={{ donate_url }}"
+            class="ns-wide-btn right-arrow-btn block">{% trans 'Continue with Email Sign up' %}<span
+                class="icon"></span></a>
     </div>
 </div>
 {% endblock content %}

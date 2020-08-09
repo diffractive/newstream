@@ -1,5 +1,6 @@
 import re
 from django import forms
+from django.utils.translation import gettext_lazy as _
 
 from wagtail.contrib.forms.forms import FormBuilder
 
@@ -8,10 +9,10 @@ from newstream_user.models import UserMeta
 
 
 class BaseSignupForm(forms.Form):
-    first_name = forms.CharField(label='First Name', max_length=255)
-    last_name = forms.CharField(label='Last Name', max_length=255)
+    first_name = forms.CharField(label=_('First Name'), max_length=255)
+    last_name = forms.CharField(label=_('Last Name'), max_length=255)
     opt_in_mailing_list = forms.BooleanField(
-        label='Opt in Mailing List?', required=False)
+        label=_('Opt in Mailing List?'), required=False)
     personal_info_fields = [
         'first_name',
         'last_name',
@@ -29,6 +30,7 @@ class BaseSignupForm(forms.Form):
         self.footer_html = site_settings.signup_footer_text
 
         # construct user meta fields from site settings configuration
+        # todo: translations: how to translate user meta fields
         usermetafields = site_settings.user_meta_fields.all()
         fb = FormBuilder(usermetafields)
         for key, val in fb.formfields.items():

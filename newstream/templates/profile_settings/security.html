@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Security Settings{% endblock %}
+{% block title %}{% trans 'Security Settings' %}{% endblock %}
 
 {% block body_class %}newstream-security{% endblock %}
 
@@ -9,10 +9,11 @@
 <div class="container grid grid-cols-1 gap-4 lg:grid-cols-3">
     {% include 'profile_settings/sidebar.html' %}
     <div class="settings-div w-full flex flex-col lg:col-span-2">
-        <h1 class="mb-5">Security</h1>
+        <h1 class="mb-5">{% trans 'Security' %}</h1>
         <div class="mb-4">
-            <div class="label-div">Password</div>
-            <a class="ns-dark-btn inline-block" href="{% url 'account_change_password' %}">Change Password</a>
+            <div class="label-div">{% trans 'Password' %}</div>
+            <a class="ns-dark-btn inline-block"
+                href="{% url 'account_change_password' %}">{% trans 'Change Password' %}</a>
         </div>
     </div>
 </div>

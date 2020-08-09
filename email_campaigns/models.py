@@ -2,11 +2,14 @@ from django import forms
 from django.db import models
 from django.conf import settings
 from django.forms.widgets import CheckboxSelectMultiple
+from django.utils.translation import gettext_lazy as _
+
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, RichTextField
+from wagtail.contrib.forms.models import AbstractFormField
+
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from modelcluster.models import ClusterableModel
-from wagtail.contrib.forms.models import AbstractFormField
 
 
 class CustomCheckboxMultiple(CheckboxSelectMultiple):
@@ -20,14 +23,18 @@ class EmailTemplate(models.Model):
     html_body = RichTextField(blank=True)
 
     panels = [
-        FieldPanel('title'),
-        FieldPanel('subject'),
-        FieldPanel('plain_text'),
-        FieldPanel('html_body'),
+        FieldPanel('title', heading=_('Title')),
+        FieldPanel('subject', heading=_('Subject')),
+        FieldPanel('plain_text', heading=_('Plain Text Body')),
+        FieldPanel('html_body', heading=_('HTML Body')),
     ]
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        verbose_name = _('Email Template')
+        verbose_name_plural = _('Email Templates')
 
 
 class TargetGroup(ClusterableModel):
@@ -36,14 +43,18 @@ class TargetGroup(ClusterableModel):
         settings.AUTH_USER_MODEL, related_name='target_groups', limit_choices_to={'is_email_verified': True, 'opt_in_mailing_list': True})
 
     panels = [
-        FieldPanel('title'),
+        FieldPanel('title', heading=_('Title')),
         # neither help_text or heading works for users field below, switched to verbose_name above
-        FieldPanel('users', heading='Users (Only opted-in and verified users are listed here)',
+        FieldPanel('users', heading=_('Users (Only opted-in and verified users are listed here)'),
                    widget=CustomCheckboxMultiple),
     ]
 
     def __str__(self):
         return self.title
+
+    class Meta:
+        verbose_name = _('Target Group')
+        verbose_name_plural = _('Target Groups')
 
 
 class Campaign(ClusterableModel):
@@ -56,10 +67,10 @@ class Campaign(ClusterableModel):
     sent_at = models.DateTimeField(blank=True, null=True)
 
     panels = [
-        FieldPanel('title'),
-        FieldPanel('from_address'),
-        FieldPanel('template'),
-        AutocompletePanel('recipients'),
+        FieldPanel('title', heading=_('Title')),
+        FieldPanel('from_address', heading=_('From Address')),
+        FieldPanel('template', heading=_('Template')),
+        AutocompletePanel('recipients', heading=_('Recipients')),
     ]
 
     def __str__(self):
@@ -67,3 +78,5 @@ class Campaign(ClusterableModel):
 
     class Meta:
         ordering = ['-id']
+        verbose_name = _('Campaign')
+        verbose_name_plural = _('Campaigns')

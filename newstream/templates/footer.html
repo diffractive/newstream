@@ -1,19 +1,20 @@
-{% load common_tags wagtailimages_tags %}
+{% load common_tags wagtailcore_tags wagtailimages_tags i18n %}
 {% image request|brand_logo max-80x80 as brand_logo %}
 
 <div class='newstream-footer md:items-center'>
-    <a href="{{ request|domain }}" class="brand-logo-link">
+    <a href="{% pageurl homepage %}" class="brand-logo-link">
         <img src="{{ brand_logo.url }}" alt="{{ brand_logo.alt }}" width="{{ brand_logo.width }}"
             height="{{ brand_logo.height }}">
     </a>
     <div class="site-links mb-2">
-        <a href="/privacy-policy">Privacy Policy</a>
+        <a href="/privacy-policy">{% trans 'Privacy Policy' %}</a>
         <span class="mx-4">|</span>
-        <a href="/terms-conditions">Terms & Conditions</a>
+        <a href="/terms-conditions">{% trans 'Terms & Conditions' %}</a>
     </div>
     <div class="site-copyright-text flex md:justify-center md:items-center flex-col md:flex-row">
-        <span>© 2020 Hong Kong Free Press Limited.</span><span>&nbsp;Part of <a href="#" class="pl-1">The
+        <span>{% blocktrans %}© 2020 Hong Kong Free Press Limited.</span><span>&nbsp;Part of <a href="#"
+                class="pl-1">The
                 NewStream
-                Project</a>.</span>
+                Project</a>.{% endblocktrans %}</span>
     </div>
 </div>

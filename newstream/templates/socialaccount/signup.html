@@ -1,15 +1,12 @@
 {% extends "base.html" %}
-{% load static common_tags widget_tweaks %}
+{% load static common_tags widget_tweaks i18n %}
 
-{% block title %}Complete Account Registration{% endblock %}
+{% block title %}{% trans 'Complete Account Registration' %}{% endblock %}
 
 {% block body_class %}newstream-account-registration-page{% endblock %}
 
 {% block content %}
 <div class="complete-registration-form-div container-tight">
-    <h3 class="my-6">{% with provider_name=account.get_provider.name %}You are about to use your {{provider_name}}
-        account to login to {{ request|site_name }}. Please complete the following form to complete user
-        registration:{% endwith %}</h3>
     {% include 'common/form_errors.html' %}
     {# Form Area #}
     <form method='POST' action="{% url 'socialaccount_signup' %}">
@@ -18,7 +15,15 @@
         {% endif %}
         <div class="flex flex-row justify-center mb-4">
             {% csrf_token %}
-            {% include 'common/signup_form_content.html' %}
+            <div class="personal-info-section w-full">
+                <h2 class="mb-4">{% trans 'Personal info' %}</h2>
+                <p class="my-6 font-bold">{% with provider_name=account.get_provider.name %}{% blocktrans %}You are
+                    about to use your
+                    {{provider_name}}
+                    account to login to {{ request|site_name }}. Please complete the following form to complete user
+                    registration:{% endblocktrans %}{% endwith %}</p>
+                {% include 'common/signup_form_content.html' %}
+            </div>
         </div>
     </form>
 </div>

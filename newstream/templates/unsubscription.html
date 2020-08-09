@@ -1,20 +1,22 @@
 {% extends 'base.html' %}
-{% load common_tags widget_tweaks %}
+{% load common_tags widget_tweaks i18n %}
 
-{% block title %}Unsubscribe from {{ request|site_name }}{% endblock %}
+{% block title %}{% blocktrans %}Unsubscribe from {{ request|site_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="container-tight flex flex-col items-center">
     {% if failure %}
-    <h1 class="mb-5">Failed to unsubscribe</h1>
-    <p class="text-center mb-5">We failed to unsubscribe you <span class="font-bold">({{email}})</span> from us, your
-        unsubscription link is invalid.
+    <h1 class="mb-5">{% trans 'Failed to unsubscribe' %}</h1>
+    <p class="text-center mb-5">{% blocktrans %}We failed to unsubscribe you <span class="font-bold">({{email}})</span>
+        from us, your
+        unsubscription link is invalid.{% endblocktrans %}
     </p>
     {% else %}
-    <h1 class="mb-5">Successful.</h1>
-    <p class="text-center mb-5">You <span class="font-bold">({{email}})</span> have unsubscribed from us. You can
+    <h1 class="mb-5">{% trans 'Successful' %}</h1>
+    <p class="text-center mb-5">{% blocktrans %}You <span class="font-bold">({{email}})</span> have unsubscribed from
+        us. You can
         subscribe back to us anytime you like
-        by checking the opt in mailing box in your personal info settings.
+        by checking the opt in mailing box in your personal info settings.{% endblocktrans %}
     </p>
     {% endif %}
 </div>

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from wagtail.core.models import Page
 from wagtail.core import blocks
@@ -18,9 +19,13 @@ class StaticPage(TranslatablePage):
     ])
 
     content_panels = Page.content_panels + [
-        StreamFieldPanel('body'),
+        StreamFieldPanel('body', heading=_('Page Body')),
     ]
     show_in_menus_default = True
+
+    class Meta:
+        verbose_name = _('Static Page')
+        verbose_name_plural = _('Static Pages')
 
 
 class HomePage(TranslatablePage):
@@ -31,5 +36,9 @@ class HomePage(TranslatablePage):
     ])
 
     content_panels = Page.content_panels + [
-        StreamFieldPanel('body'),
+        StreamFieldPanel('body', heading=_('Page Body')),
     ]
+
+    class Meta:
+        verbose_name = _('Home Page')
+        verbose_name_plural = _('Home Pages')

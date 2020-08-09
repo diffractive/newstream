@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static widget_tweaks %}
+{% load static widget_tweaks i18n %}
 
-{% block title %}Delete My Password{% endblock %}
+{% block title %}{% trans 'Delete My Password' %}{% endblock %}
 
 {% block body_class %}newstream-delete-account{% endblock %}
 
@@ -9,18 +9,10 @@
 <div class="container grid grid-cols-1 gap-4 lg:grid-cols-3">
     {% include 'profile_settings/sidebar.html' %}
     <div class="settings-div w-full flex flex-col lg:col-span-2">
-        <h1 class="mb-5">Delete my account</h1>
-        <p class="mb-3">Please enter exactly '{{ confirm_text }}' in the Confirmation textbox below.</p>
-        {% if form.errors %}
-        {% for field in form %}
-        {% for error in field.errors %}
-        <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 mb-4" role="alert">
-            <p class="font-bold">Form Error - {{ field.label }}:</p>
-            <p>{{ error|escape }}</p>
-        </div>
-        {% endfor %}
-        {% endfor %}
-        {% endif %}
+        <h1 class="mb-5">{% trans 'Delete my account' %}</h1>
+        <p class="mb-3">{% blocktrans %}Please enter exactly '{{ confirm_text }}' in the Confirmation textbox
+            below.{% endblocktrans %}</p>
+        {% include 'common/form_errors.html' %}
         <form method='POST'>
             {% csrf_token %}
             {% for field in form.visible_fields %}
@@ -31,7 +23,7 @@
                 </div>
             </div>
             {% endfor %}
-            <button class="ns-dark-btn inline-block" type="submit">Delete My Account Now</button>
+            <button class="ns-dark-btn inline-block" type="submit">{% trans 'Delete My Account Now' %}</button>
         </form>
     </div>
 </div>

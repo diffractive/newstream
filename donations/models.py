@@ -3,6 +3,7 @@ from django.conf import settings
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, RichTextField
 from wagtail.contrib.forms.models import AbstractFormField
@@ -34,13 +35,15 @@ class PaymentGateway(models.Model):
     list_order = models.IntegerField(default=0)
 
     panels = [
-        FieldPanel('title'),
-        FieldPanel('frontend_label'),
-        FieldPanel('list_order'),
+        FieldPanel('title', heading=_('Title')),
+        FieldPanel('frontend_label', heading=_('Frontend Label')),
+        FieldPanel('list_order', heading=_('List Order')),
     ]
 
     class Meta:
         ordering = ['list_order']
+        verbose_name = _('Payment Gateway')
+        verbose_name_plural = _('Payment Gateways')
 
     def __str__(self):
         return self.title
@@ -66,7 +69,7 @@ class AmountStep(models.Model):
     step = models.FloatField(default=0)
 
     panels = [
-        FieldPanel('step'),
+        FieldPanel('step', heading=_('Step')),
     ]
 
     class Meta:
@@ -75,9 +78,9 @@ class AmountStep(models.Model):
 
 class DonationForm(ClusterableModel):
     AMOUNT_TYPE_CHOICES = [
-        ('fixed', 'Fixed Amount'),
-        ('stepped', 'Fixed Steps'),
-        ('custom', 'Custom Amount'),
+        ('fixed', _('Fixed Amount')),
+        ('stepped', _('Fixed Steps')),
+        ('custom', _('Custom Amount')),
     ]
     title = models.CharField(max_length=191, unique=True)
     description = models.TextField(blank=True)
@@ -87,7 +90,7 @@ class DonationForm(ClusterableModel):
     amount_type = models.CharField(
         max_length=20, choices=AMOUNT_TYPE_CHOICES)
     fixed_amount = models.FloatField(blank=True, null=True,
-                                     help_text='Define fixed donation amount if you chose "Fixed Amount" for your Amount Type')
+                                     help_text=_('Define fixed donation amount if you chose "Fixed Amount" for your Amount Type'))
     allowed_gateways = models.ManyToManyField('PaymentGateway')
     # todo: implement this logic at wagtail backend: there should only be one active form in use at a time
     is_active = models.BooleanField(default=False)
@@ -97,22 +100,26 @@ class DonationForm(ClusterableModel):
     deleted = models.BooleanField(default=False)
 
     panels = [
-        FieldPanel('title'),
-        FieldPanel('description'),
-        FieldPanel('is_active'),
-        FieldPanel('amount_type', heading='Donation Amount Type'),
+        FieldPanel('title', heading=_('Title')),
+        FieldPanel('description', heading=_('Description')),
+        FieldPanel('is_active', heading=_('Is Active')),
+        FieldPanel('amount_type', heading=_('Donation Amount Type')),
         FieldPanel(
-            'fixed_amount', heading='Define Fixed Donation Amount', help_text='Define your fixed donation amount if you chose "Fixed Amount" for your Amount Type.'),
-        InlinePanel('amount_steps', label='Fixed Amount Steps', heading='Define Fixed Donation Amount Steps',
-                    help_text='Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type.'),
-        AutocompletePanel('allowed_gateways'),
-        InlinePanel('donation_meta_fields', label='Donation Meta Fields'),
-        FieldPanel('donation_footer_text', heading='Footer Text(Under Donation Details Form)',
-                   help_text='Footer text to be displayed under the "Donation Details" Form (Step 2 of payment)')
+            'fixed_amount', heading=_('Define Fixed Donation Amount'), help_text=_('Define your fixed donation amount if you chose "Fixed Amount" for your Amount Type.')),
+        InlinePanel('amount_steps', label=_('Fixed Amount Steps'), heading=_('Define Fixed Donation Amount Steps'),
+                    help_text=_('Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type.')),
+        AutocompletePanel('allowed_gateways', heading=_(
+            'Allowed Payment Gateways')),
+        InlinePanel('donation_meta_fields', label=_(
+            'Donation Meta Fields'), heading=_('Donation Meta Fields')),
+        FieldPanel('donation_footer_text', heading=_('Footer Text(Under Donation Details Form)'),
+                   help_text=_('Footer text to be displayed under the "Donation Details" Form (Step 2 of payment)'))
     ]
 
     class Meta:
         ordering = ['title']
+        verbose_name = _('Donation Form')
+        verbose_name_plural = _('Donation Forms')
 
     def __str__(self):
         return self.title
@@ -128,18 +135,19 @@ class DonationForm(ClusterableModel):
 
 
 class Donation(ClusterableModel):
+    # todo: translations: Notice variables aren't picked up by makemessages
     PAYMENT_STATUS_CHOICES = [
-        (STATUS_COMPLETE, STATUS_COMPLETE.capitalize()),
-        (STATUS_PENDING, STATUS_PENDING.capitalize()),
-        (STATUS_REFUNDED, STATUS_REFUNDED.capitalize()),
-        (STATUS_REVOKED, STATUS_REVOKED.capitalize()),
-        (STATUS_FAILED, STATUS_FAILED.capitalize()),
-        (STATUS_CANCELLED, STATUS_CANCELLED.capitalize()),
+        (STATUS_COMPLETE, _(STATUS_COMPLETE.capitalize())),
+        (STATUS_PENDING, _(STATUS_PENDING.capitalize())),
+        (STATUS_REFUNDED, _(STATUS_REFUNDED.capitalize())),
+        (STATUS_REVOKED, _(STATUS_REVOKED.capitalize())),
+        (STATUS_FAILED, _(STATUS_FAILED.capitalize())),
+        (STATUS_CANCELLED, _(STATUS_CANCELLED.capitalize())),
     ]
     RECURRING_STATUS_CHOICES = [
-        (STATUS_ONGOING, STATUS_ONGOING.capitalize()),
-        (STATUS_CANCELLED, STATUS_CANCELLED.capitalize()),
-        (STATUS_NONRECURRING, STATUS_NONRECURRING.capitalize()),
+        (STATUS_ONGOING, _(STATUS_ONGOING.capitalize())),
+        (STATUS_CANCELLED, _(STATUS_CANCELLED.capitalize())),
+        (STATUS_NONRECURRING, _(STATUS_NONRECURRING.capitalize())),
     ]
     user = models.ForeignKey(
         'newstream_user.User',
@@ -173,20 +181,22 @@ class Donation(ClusterableModel):
     deleted = models.BooleanField(default=False)
 
     panels = [
-        FieldPanel('order_number'),
-        FieldPanel('donation_amount'),
-        FieldPanel('is_recurring'),
-        FieldPanel('currency'),
-        FieldPanel('payment_status'),
-        FieldPanel('recurring_status'),
-        InlinePanel('metas', label='Donation Meta', heading='Donation Meta Data',
-                    help_text='Meta data about this donation is recorded here'),
+        FieldPanel('order_number', heading=_('Order Number')),
+        FieldPanel('donation_amount', heading=_('Donation Amount')),
+        FieldPanel('is_recurring', heading=_('Is Recurring')),
+        FieldPanel('currency', heading=_('Currency')),
+        FieldPanel('payment_status', heading=_('Payment Status')),
+        FieldPanel('recurring_status', heading=_('Recurring Status')),
+        InlinePanel('metas', label=_('Donation Meta'), heading=_('Donation Meta Data'),
+                    help_text=_('Meta data about this donation is recorded here')),
         ReadOnlyPanel('linked_user_deleted',
-                      heading="Linked User Account Deleted?"),
+                      heading=_("Linked User Account Deleted?")),
     ]
 
     class Meta:
         ordering = ['-created_at']
+        verbose_name = _('Donation')
+        verbose_name_plural = _('Donations')
 
     def __str__(self):
         return '#'+str(self.id)+' - '+str(self.user)
@@ -220,6 +230,8 @@ class DonationMeta(models.Model):
 
     class Meta:
         ordering = ['-id']
+        verbose_name = _('Donation Meta')
+        verbose_name_plural = _('Donation Metas')
 
     def __str__(self):
         return self.field_key
@@ -239,6 +251,8 @@ class DonationPaymentMeta(models.Model):
 
     class Meta:
         ordering = ['-id']
+        verbose_name = _('Donation Payment Meta')
+        verbose_name_plural = _('Donation Payment Metas')
 
     def __str__(self):
         return self.field_key

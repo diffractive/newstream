@@ -1,40 +1,19 @@
 {% extends "base.html" %}
-{% load static common_tags widget_tweaks %}
+{% load static common_tags widget_tweaks i18n %}
 
-{% block title %}Donation Details{% endblock %}
+{% block title %}{% trans 'Donation Details' %}{% endblock %}
 
 {% block body_class %}newstream-donation-details-page{% endblock %}
 
 {% block content %}
 
 <div class="flex donation-header">
-    <div class="step-div w-30 md:w-40 p-6 text-right">Step 2 of 3</div>
-    <div class="step-label-div flex-1 p-6 text-left text-white">Donation Details</div>
+    <div class="step-div w-30 md:w-40 p-6 text-right">{% trans 'Step 2 of 3' %}</div>
+    <div class="step-label-div flex-1 p-6 text-left text-white">{% trans 'Donation Details' %}</div>
 </div>
 
-<div class="donation-form-div container-tight">
-    {# Form Errors #}
-    <div class="form-errors flex flex-col">
-        {% if form.errors %}
-        {% for field in form %}
-        {% for error in field.errors %}
-        <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 mb-4" role="alert">
-            <p class="font-bold">Form Error - {{ field.label }}:</p>
-            <p>{{ error|escape }}</p>
-        </div>
-        {% endfor %}
-        {% endfor %}
-        {% endif %}
-
-        {% if form.non_field_errors %}
-        {% for error in form.non_field_errors %}
-        <div class="bg-orange-100 border-l-4 border-orange-500 text-orange-700 p-4 mb-4" role="alert">
-            <p class="font-bold">Form Error:</p>
-            <p>{{ error|escape }}</p>
-        </div>
-        {% endfor %}
-        {% endif %}
-    </div>
+<div class="donation-form-div container-tight w-full">
+    {% include 'common/form_errors.html' %}
 
     {# Form Area #}
     <form method='POST' action=''>
@@ -45,11 +24,11 @@
             {{ hidden }}
             {% endfor %}
             <div class="donation-details-section">
-                <h2 class="mb-2">Donation Details</h2>
+                <h2 class="mb-2">{% trans 'Donation Details' %}</h2>
                 {% if request.user.is_authenticated %}
                 <div class="mb-6">
-                    <p>Logged in as {{ request.user|display_username }}. <a
-                            href="{% url 'account_logout' %}?next={{request.path}}">Logout</a></p>
+                    <p>{% blocktrans %}Logged in as {{ request.user|display_username }}.{% endblocktrans %} <a
+                            href="{% url 'account_logout' %}?next={{request.path}}">{% trans 'Logout' %}</a></p>
                 </div>
                 {% endif %}
                 {% for field in form.visible_fields %}
@@ -81,7 +60,9 @@
                 {% endif %}
                 {% endfor %}
 
-                <button class="ns-wide-btn right-arrow-btn" type="submit">Continue<span class="icon"></span></button>
+                <button class="ns-wide-btn right-arrow-btn" type="submit">{% trans 'Continue' %}<span
+                        class="icon"></span></button>
+                <!-- todo: translations: how to translate footer_html? -->
                 <div class="form-footer-text">{{ form.footer_html|safe }}</div>
             </div>
         </div>

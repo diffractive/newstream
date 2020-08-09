@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Advanced Settings{% endblock %}
+{% block title %}{% trans 'Advanced Settings' %}{% endblock %}
 
 {% block body_class %}newstream-advanced-settings{% endblock %}
 
@@ -9,14 +9,14 @@
 <div class="container grid grid-cols-1 gap-4 lg:grid-cols-3">
     {% include 'profile_settings/sidebar.html' %}
     <div class="settings-div w-full flex flex-col lg:col-span-2">
-        <h1 class="mb-5">Advanced Settings</h1>
+        <h1 class="mb-5">{% trans 'Advanced Settings' %}</h1>
         <div class="mb-4">
-            <div class="label-div">Account Removal</div>
-            <a class="ns-dark-btn inline-block" href="{% url 'delete-account' %}">Delete My Account</a>
+            <div class="label-div">{% trans 'Account Removal' %}</div>
+            <a class="ns-dark-btn inline-block" href="{% url 'delete-account' %}">{% trans 'Delete My Account' %}</a>
         </div>
-        <p class="text-red-500">Note that by deleting your account, all recurring payments will be cancelled and your
-            account will be removed from
-            our database.</p>
+        <p class="text-red-500">
+            {% trans 'Note that by deleting your account, all recurring payments will be cancelled and your account will be removed from our database.' %}
+        </p>
     </div>
 </div>
 {% endblock content %}

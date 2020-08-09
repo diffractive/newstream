@@ -2,6 +2,7 @@ import re
 from django import forms
 from django.contrib.auth.forms import PasswordChangeForm
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from wagtail.contrib.forms.forms import FormBuilder
 
@@ -17,12 +18,12 @@ from newstream_user.models import UserMeta
 
 
 class PersonalInfoForm(forms.Form):
-    email = forms.EmailField(label='Primary Email Address',
+    email = forms.EmailField(label=_('Primary Email Address'),
                              max_length=255, required=False)
-    first_name = forms.CharField(label='First Name', max_length=255)
-    last_name = forms.CharField(label='Last Name', max_length=255)
+    first_name = forms.CharField(label=_('First Name'), max_length=255)
+    last_name = forms.CharField(label=_('Last Name'), max_length=255)
     opt_in_mailing_list = forms.BooleanField(
-        label='Opt in Mailing List?', required=False)
+        label=_('Opt in Mailing List?'), required=False)
     personal_info_fields = [
         'first_name',
         'last_name',
@@ -33,7 +34,7 @@ class PersonalInfoForm(forms.Form):
     def __init__(self, *args, request=None, **kwargs):
         super().__init__(*args, **kwargs)
         if not request:
-            raiseObjectNone('Please provide request object')
+            raiseObjectNone(_('Please provide request object'))
         site_settings = getSiteSettings(request)
         usermeta_dict = {}
         for um in request.user.metas.all():
@@ -105,11 +106,11 @@ class NewstreamSAAdapter(DefaultSocialAccountAdapter):
 class DeleteAccountForm(forms.Form):
     CONFIRM_TEXT = 'Delete My Account'
     confirm_text = forms.CharField(
-        label='Enter Confirmation Text', max_length=255)
+        label=_('Enter Confirmation Text'), max_length=255)
 
     def clean_confirm_text(self):
         input_text = self.cleaned_data['confirm_text']
         if input_text != DeleteAccountForm.CONFIRM_TEXT:
-            raise ValidationError("Your confirmation text is incorrect, please enter exactly '{}'".format(
-                DeleteAccountForm.CONFIRM_TEXT))
+            raise ValidationError(_("Your confirmation text is incorrect, please enter exactly %(target)s" % {'target': DeleteAccountForm.CONFIRM_TEXT}
+                                    ))
         return input_text

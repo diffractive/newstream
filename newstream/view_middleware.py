@@ -22,12 +22,11 @@ class DisableSocialLoginMiddleware:
         # Code to be executed for each request before
         # the view (and later middleware) are called.
         siteSettings = getSiteSettings(request)
-        print(request.path_info, flush=True)
         if not siteSettings.social_login_enabled:
             # return 404 for social login urls
             if request.path_info in self.sociallogin_urls:
                 # todo: render nicer 404 templates
-                print('Dropped in sociallogin_urls', flush=True)
+                # print('Dropped in sociallogin_urls', flush=True)
                 return HttpResponse('Page not found', status=404)
 
         response = self.get_response(request)

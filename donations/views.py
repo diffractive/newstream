@@ -7,11 +7,12 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetView
+from django.utils.translation import gettext_lazy as _
 
+from newstream.functions import getFullReverseUrl
 from .models import *
 from .forms import *
 from .functions import *
-from newstream.functions import getFullReverseUrl
 from .payment_gateways.gateway_factory import PaymentGatewayFactory
 User = get_user_model()
 
@@ -43,9 +44,11 @@ def return_from_gateway(request):
         if isVerified:
             request.session['thankyou-donation-id'] = gatewayManager.donation.id
         else:
-            request.session['thankyou-error'] = "Results returned from gateway is invalid."
+            request.session['thankyou-error'] = _(
+                "Results returned from gateway is invalid.")
     else:
-        request.session['thankyou-error'] = "Could not determine payment gateway from request"
+        request.session['thankyou-error'] = _(
+            "Could not determine payment gateway from request")
     return redirect('donations:thank-you')
 
 
@@ -60,7 +63,7 @@ def thank_you(request):
         return render(request, 'donations/thankyou.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
     if 'thankyou-error' in request.session:
         return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': request.session['thankyou-error']})
-    return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': 'No Payment Data is received.'})
+    return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': _('No Payment Data is received.')})
 
 
 def donate(request):

@@ -1,0 +1,16 @@
+{% load i18n common_tags wagtailcore_tags wagtailtrans_tags %}
+{% if 'get_site' in page.attrs.class %}
+{% get_translations page homepage_fallback=False include_self=False as translations %}
+{% endif %}
+
+<!-- this html must be wrapped by .dropdown-div-wrapper in parent file for the dropdown popup to work  -->
+<input type="checkbox" name="{{prefix}}_multilang-dropdown-toggle-checkbox"
+    id="{{prefix}}_multilang-dropdown-toggle-checkbox" class="dropdown-toggle-checkbox">
+<label for="{{prefix}}_multilang-dropdown-toggle-checkbox" class="dropdown-toggle-label"></label>
+<span class="language-code">{{ request.LANGUAGE_CODE }}</span>
+<span class="multilang-icon"></span>
+<div class="multilang-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
+    {% for language, page in translations.items %}
+    <a href="{{ page.full_url }}"><span>{{ language.code }}</span></a>
+    {% endfor %}
+</div>

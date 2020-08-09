@@ -1,35 +1,36 @@
 {% extends "base.html" %}
 
-{% load static widget_tweaks account %}
+{% load static widget_tweaks account i18n %}
 
-{% block title %}Confirm E-mail Address{% endblock %}
+{% block title %}{% trans 'Confirm E-mail Address' %}{% endblock %}
 
 {% block body_class %}newstream-personal-emails{% endblock %}
 
 {% block content %}
 <div class="container-tight flex flex-col items-center">
-    <h1 class="mb-5">Confirm E-mail Address</h1>
+    <h1 class="mb-5">{% trans 'Confirm E-mail Address' %}</h1>
 
     {% if confirmation %}
 
     {% user_display confirmation.email_address.user as user_display %}
 
-    <p class="text-center mb-4">{% with confirmation.email_address.email as email %}Please confirm that <a
-            href="mailto:{{ email }}">{{ email }}</a> is an e-mail address for user {{ user_display }}.{% endwith %}
+    <p class="text-center mb-4">{% with confirmation.email_address.email as email %}{% blockrans %}Please confirm that
+        <a href="mailto:{{ email }}">{{ email }}</a> is an e-mail address for user
+        {{ user_display }}.{% endblocktrans %}{% endwith %}
     </p>
 
     <form method="post" action="{% url 'account_confirm_email' confirmation.key %}">
         {% csrf_token %}
-        <button class="ns-btn" type="submit">Confirm</button>
+        <button class="ns-btn" type="submit">{% trans 'Confirm' %}</button>
     </form>
 
     {% else %}
 
     {% url 'account_email' as email_url %}
 
-    <p class="text-center mb-4">This e-mail confirmation link expired or is invalid. Please <a
+    <p class="text-center mb-4">{% blocktrans %}This e-mail confirmation link expired or is invalid. Please <a
             href="{{ email_url }}">issue a new
-            e-mail confirmation request</a>.</p>
+            e-mail confirmation request</a>.{% endblocktrans %}</p>
 
     {% endif %}
 </div>

@@ -6,6 +6,7 @@ from django.contrib.auth import login, logout, get_user_model, update_session_au
 from django.contrib.auth.decorators import login_required
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
+from django.utils.translation import gettext_lazy as _
 
 from newstream_user.models import UserMeta
 from donations.models import Donation
@@ -48,7 +49,7 @@ def personal_info(request):
             user.metas = user_metas
             user.save()
             messages.add_message(request, messages.SUCCESS,
-                                 'Personal Info Updated.')
+                                 _('Personal Info Updated.'))
             return redirect('personal-info')
     else:
         form = PersonalInfoForm(request=request)
@@ -76,7 +77,7 @@ def delete_account(request):
             logout(request)
             user.delete()
             messages.add_message(request, messages.SUCCESS,
-                                 'Your account is deleted.')
+                                 _('Your account is deleted.'))
             return redirect('/')
     else:
         form = DeleteAccountForm()

@@ -81,7 +81,6 @@ INSTALLED_APPS = [
     'allauth.socialaccount.providers.facebook',
     'allauth.socialaccount.providers.google',
     'allauth.socialaccount.providers.twitter',
-    'wagtailmenus',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -126,7 +125,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'wagtailmenus.context_processors.wagtailmenus',
+                'pages.context_processors.homepage',
             ],
             'libraries': {
                 'common_tags': 'newstream.templatetags.common_tags',
@@ -160,6 +159,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
+# wagtailtrans
+
 LANGUAGE_CODE = 'en'
 
 LANGUAGES = [
@@ -169,6 +170,8 @@ LANGUAGES = [
     ('id-id', _('Indonesian (Indonesia)')),
     ('tl-ph', _('Tagalog (Philippines)')),
 ]
+
+WAGTAILTRANS_SYNC_TREE = False
 
 TIME_ZONE = 'UTC'
 
@@ -204,7 +207,7 @@ MEDIA_URL = '/media/'
 
 
 # Wagtail settings
-
+# todo: might need to be dynamically set by admin?
 WAGTAIL_SITE_NAME = "Newstream"
 
 WAGTAILADMIN_RICH_TEXT_EDITORS = {
@@ -221,6 +224,7 @@ WAGTAILADMIN_RICH_TEXT_EDITORS = {
 
 # Base URL to use when referring to full URLs within the Wagtail admin backend -
 # e.g. in notification emails. Don't include '/admin' or a trailing slash
+# todo: might need to be dynamically set by admin?
 BASE_URL = 'https://newstream.hongkongfp.com'
 
 # allauth-related settings

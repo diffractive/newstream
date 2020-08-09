@@ -1,11 +1,11 @@
 {% extends "base.html" %}
-{% load common_tags widget_tweaks account socialaccount %}
+{% load common_tags widget_tweaks account socialaccount i18n %}
 
-{% block title %}Login to {{ request|site_name }}{% endblock %}
+{% block title %}{% blocktrans %}Login to {{ request|site_name }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="container-tight flex flex-col items-center">
-    <h1 class="mb-5">Login to {{ request|site_name }}</h1>
+    <h1 class="mb-5">% blocktrans %}Login to {{ request|site_name }}{% endblocktrans %}</h1>
     <form method="post" action="{% url 'account_login' %}">
         {% csrf_token %}
         {% for hidden in form.hidden_fields %}
@@ -32,11 +32,12 @@
             <div class="mb-4 widget_checkboxinput flex items-center">
                 {{ form.remember }} {{ form.remember.label_tag|remember_filter }}
             </div>
-            <button class="ns-wide-btn right-arrow-btn" type="submit">Login<span class="icon"></span></button>
+            <button class="ns-wide-btn right-arrow-btn" type="submit">{% trans 'Login' %}<span
+                    class="icon"></span></button>
             <div class="login-form-footer flex flex-col items-center">
-                <a href="{% url 'account_reset_password' %}" class="mb-2">Forgot
-                    Password?</a>
-                <span>Not yet a member? <a href="{% url 'donations:donate' %}">Donate and Join Now</a></span>
+                <a href="{% url 'account_reset_password' %}" class="mb-2">{% trans 'Forgot Password?' %}</a>
+                <span>{% trans 'Not yet a member?' %} <a
+                        href="{% url 'donations:donate' %}">{% trans 'Donate and Join Now' %}</a></span>
             </div>
         </div>
     </form>

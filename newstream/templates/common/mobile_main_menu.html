@@ -1,19 +1,22 @@
-{% load menu_tags common_tags %}
+{% load common_tags wagtailcore_tags i18n %}
 
 <div id="newstream-mobile-mainmenu" class="bg-white flex flex-col items-stretch">
-    <div class="btm-grey-border flex justify-end items-center py-6 px-8">
+    <div class="btm-grey-border flex justify-between items-center py-6 px-8">
+        <div class="multilang-dropdown-div flex items-center dropdown-div-wrapper">
+            {% include 'common/lang_switcher_body.html' with prefix='mobile' %}
+        </div>
         <div id="close-nav-toggle" class="focus:outline-none cursor-pointer" onclick="toggleSidenav();">
             <span></span>
             <span></span>
         </div>
     </div>
-    {% for item in menu_items %}
+    {% for page in homepage.get_children.specific %}
     <div class="btm-grey-border">
         <div class="menu-item-wrapper">
-            <a href="{{ item.href }}" class="{{ item.active_class }} menu-item flex items-center">{{ item.text }}</a>
+            <a href="{% pageurl page %}" class="menu-item flex items-center">{{ page.title }}</a>
         </div>
-        {% if item.has_children_in_menu %}
-        {% sub_menu item %}
+        {% if page.get_children.specific %}
+        {% include "common/mobile_main_sub_menu.html" with page=page %}
         {% endif %}
     </div>
     {% endfor %}
@@ -25,22 +28,23 @@
         </div>
         <div class="flex flex-col user-area-links">
             <div class="mb-3">
-                <a href="{% url 'personal-info' %}" class="user-link">Profile Settings</a>
+                <a href="{% url 'personal-info' %}" class="user-link">{% trans 'Profile Settings' %}</a>
             </div>
             <div class="mb-3">
-                <a href="{% url 'donations:my-donations' %}" class="user-link">My Donations</a>
+                <a href="{% url 'donations:my-donations' %}" class="user-link">{% trans 'My Donations' %}</a>
             </div>
             <div class="mb-3">
-                <a href="{% url 'account_logout' %}" class="user-link">Logout</a>
+                <a href="{% url 'account_logout' %}" class="user-link">{% trans 'Logout' %}</a>
             </div>
         </div>
     </div>
     {% else %}
     <div class="menu-item-wrapper btm-grey-border">
-        <a href="{% url 'account_login' %}{{ request|next_path_filter }}" class="menu-item">Sign in</a>]
+        <a href="{% url 'account_login' %}{{ request|next_path_filter }}" class="menu-item">{% trans 'Sign in' %}</a>
     </div>
     {% endif %}
     <div class="px-6 py-8 flex">
-        <a href="{% url 'donations:donate'%}" class="menu-item nav-donate-btn text-center w-full">Donate</a>
+        <a href="{% url 'donations:donate'%}"
+            class="menu-item nav-donate-btn text-center w-full">{% trans 'Donate' %}</a>
     </div>
 </div>

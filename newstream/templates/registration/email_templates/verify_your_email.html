@@ -1,8 +1,8 @@
 {% extends "base_email.html" %}
-{% load common_tags %}
+{% load common_tags i18n %}
 
 {% block title %}
-Verify Your Email
+{% trans 'Verify Your Email' %}
 {% endblock %}
 
 {% block content %}
@@ -10,18 +10,18 @@ Verify Your Email
     <tr>
         <th style="width: 100%;text-align: left;">
             <h2 style="font-weight: bold;">
-                Verify Your Email Now
+                {% trans 'Verify Your Email Now' %}
             </h2>
         </th>
     </tr>
     <tr>
         <td style="width: 100%;">
-            <p>Dear {{ fullname }},</p>
-            <p>Your account has been created. Please verify your email by clicking this
+            <p>{% blocktrans %}Dear {{ fullname }},{% endblocktrans %}</p>
+            <p>{% blocktrans %}Your account has been created. Please verify your email by clicking this
                 <a href="{{ fullurl }}" target="_blank">link</a> in order to fully
                 manage
-                your donations and account.</p>
-            <p>Thank you,</p>
+                your donations and account.{% endblocktrans %}</p>
+            <p>{% trans 'Thank you,' %}</p>
             <p>{{ request|site_name }}</p>
         </td>
     </tr>

@@ -1,11 +1,12 @@
 {% extends 'base.html' %}
-{% load common_tags %}
+{% load common_tags i18n %}
 
-{% block title %}Social Network Login Failure{% endblock %}
+{% block title %}{% trans 'Social Network Login Failure' %}{% endblock %}
 
 {% block content %}
 <div class="container-tight flex flex-col items-center">
-    <h1 class="mb-5">Social Network Login Failure</h1>
-    <p class="text-center mt-5">An error occurred while attempting to login via your social network account.</p>
+    <h1 class="mb-5">{% trans 'Social Network Login Failure' %}</h1>
+    <p class="text-center mt-5">
+        {% trans 'An error occurred while attempting to login via your social network account.' %}</p>
 </div>
 {% endblock %}

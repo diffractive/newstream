@@ -1,7 +1,7 @@
 import re
 import os
 import json
-import jsonpickle
+from pprint import pprint
 from hashlib import blake2b
 import django.conf as conf
 from django.conf import settings
@@ -10,6 +10,7 @@ from django.core.mail import get_connection, EmailMultiAlternatives
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth import get_user_model
+from django.utils.translation import gettext_lazy as _
 
 from wagtail.core.models import Site
 
@@ -83,7 +84,7 @@ def getSuperUserTimezone():
     """
     su = User.objects.get(is_superuser=1)
     if not su:
-        raiseObjectNone('Superuser not found')
+        raiseObjectNone(_('Superuser not found'))
     return su.wagtail_userprofile.get_current_time_zone()
 
 
@@ -91,7 +92,7 @@ def getSuperUserEmail():
     """ For sending out password reset emails """
     su = User.objects.get(is_superuser=1)
     if not su:
-        raiseObjectNone('Superuser not found')
+        raiseObjectNone(_('Superuser not found'))
     return su.email
 
 
@@ -137,6 +138,6 @@ def generateIDSecretHash(id):
     return h.hexdigest()
 
 
-def pickleprint(obj):
-    serialized = jsonpickle.encode(obj)
-    print(json.dumps(json.loads(serialized), indent=4))
+def printvars(obj):
+    print("---Vars(obj)---", flush=True)
+    pprint(vars(obj))

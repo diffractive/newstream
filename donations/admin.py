@@ -1,9 +1,12 @@
-from .models import Donation, PaymentGateway, DonationForm, DonationMeta, DonationPaymentMeta
+from django.contrib import admin
+from django.utils.translation import gettext_lazy as _
+
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
-from django.contrib import admin
 from wagtail.contrib.modeladmin.views import InspectView
+
 from newstream.functions import raiseObjectNone
+from .models import Donation, PaymentGateway, DonationForm, DonationMeta, DonationPaymentMeta
 from .payment_gateways._2c2p import Gateway_2C2P
 
 
@@ -12,7 +15,7 @@ class DonationInspectView(InspectView):
         model = self.instance
         if not model:
             raiseObjectNone(
-                'No reference to Donation instance in overridden DonationInspectView')
+                _('No reference to Donation instance in overridden DonationInspectView'))
 
         # 2C2P specific, recurring payment inquiry
         if model.is_recurring:
@@ -33,7 +36,7 @@ class DonationInspectView(InspectView):
 
 class DonationAdmin(ModelAdmin):
     model = Donation
-    menu_label = 'Donations'
+    menu_label = _('Donations')
     menu_icon = 'pilcrow'
     menu_order = 100
     add_to_settings_menu = False
@@ -51,12 +54,12 @@ class DonationAdmin(ModelAdmin):
         return obj.user.email if obj.user else '-'
 
     user_column.admin_order_field = 'user'  # Allows column order sorting
-    user_column.short_description = 'User Email'  # Renames column head
+    user_column.short_description = _('User Email')  # Renames column head
 
 
 class PaymentGatewayAdmin(ModelAdmin):
     model = PaymentGateway
-    menu_label = 'Payment Gateways'
+    menu_label = _('Payment Gateways')
     menu_icon = 'pilcrow'
     menu_order = 200
     add_to_settings_menu = False
@@ -67,7 +70,7 @@ class PaymentGatewayAdmin(ModelAdmin):
 
 class DonationFormAdmin(ModelAdmin):
     model = DonationForm
-    menu_label = 'Donation Forms'
+    menu_label = _('Donation Forms')
     menu_icon = 'pilcrow'
     menu_order = 300
     add_to_settings_menu = False
@@ -77,7 +80,7 @@ class DonationFormAdmin(ModelAdmin):
 
 
 class DonationGroup(ModelAdminGroup):
-    menu_label = 'Donations'
+    menu_label = _('Donations')
     menu_icon = 'folder-open-inverse'
     menu_order = 200
     items = (DonationAdmin, PaymentGatewayAdmin, DonationFormAdmin)

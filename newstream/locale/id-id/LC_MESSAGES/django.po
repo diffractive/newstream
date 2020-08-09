@@ -1,0 +1,512 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-09 19:20+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: newstream/forms.py:21
+msgid "Primary Email Address"
+msgstr ""
+
+#: newstream/forms.py:23 newstream/forms_signup.py:12
+msgid "First Name"
+msgstr ""
+
+#: newstream/forms.py:24 newstream/forms_signup.py:13
+msgid "Last Name"
+msgstr ""
+
+#: newstream/forms.py:26 newstream/forms_signup.py:15
+msgid "Opt in Mailing List?"
+msgstr ""
+
+#: newstream/forms.py:37
+msgid "Please provide request object"
+msgstr ""
+
+#: newstream/forms.py:109
+msgid "Enter Confirmation Text"
+msgstr ""
+
+#: newstream/forms.py:114
+#, python-format
+msgid "Your confirmation text is incorrect, please enter exactly %(target)s"
+msgstr ""
+
+#: newstream/functions.py:87 newstream/functions.py:95
+msgid "Superuser not found"
+msgstr ""
+
+#: newstream/settings/base.py:167
+msgid "English"
+msgstr ""
+
+#: newstream/settings/base.py:168
+msgid "Chinese (Traditional)"
+msgstr ""
+
+#: newstream/settings/base.py:169
+msgid "Malay (Malaysia)"
+msgstr ""
+
+#: newstream/settings/base.py:170
+msgid "Indonesian (Indonesia)"
+msgstr ""
+
+#: newstream/settings/base.py:171
+msgid "Tagalog (Philippines)"
+msgstr ""
+
+#: newstream/templates/404.html:6
+msgid "Page Not Found"
+msgstr ""
+
+#: newstream/templates/404.html:10
+msgid "Page not found"
+msgstr ""
+
+#: newstream/templates/404.html:11
+msgid "Sorry, this page could not be found."
+msgstr ""
+
+#: newstream/templates/500.html:8 newstream/templates/500.html:13
+msgid "Internal server error"
+msgstr ""
+
+#: newstream/templates/500.html:15
+msgid "Sorry, there seems to be an error. Please try again soon."
+msgstr ""
+
+#: newstream/templates/account/email.html:5
+msgid "Personal Email Settings"
+msgstr ""
+
+#: newstream/templates/account/email.html:13
+msgid "Email Addresses"
+msgstr ""
+
+#: newstream/templates/account/email.html:15
+msgid "The following e-mail addresses are associated with your account:"
+msgstr ""
+
+#: newstream/templates/account/email.html:37
+msgid "Verified"
+msgstr ""
+
+#: newstream/templates/account/email.html:40
+msgid "Unverified"
+msgstr ""
+
+#: newstream/templates/account/email.html:43
+msgid "Primary"
+msgstr ""
+
+#: newstream/templates/account/email.html:55
+msgid "Make Primary"
+msgstr ""
+
+#: newstream/templates/account/email.html:57
+msgid "Re-send Verification"
+msgstr ""
+
+#: newstream/templates/account/email.html:58
+msgid "Remove"
+msgstr ""
+
+#: newstream/templates/account/email.html:64
+msgid "Warning:"
+msgstr ""
+
+#: newstream/templates/account/email.html:65
+msgid ""
+"You currently do not have any e-mail address set up. You should really add "
+"an e-mail address so you can receive notifications, reset your password, etc."
+msgstr ""
+
+#: newstream/templates/account/email.html:71
+msgid "Add E-mail Address"
+msgstr ""
+
+#: newstream/templates/account/email.html:76
+msgid "Add E-mail"
+msgstr ""
+
+#: newstream/templates/account/email.html:85
+msgid "Do you really want to remove the selected e-mail address?"
+msgstr ""
+
+#: newstream/templates/account/email_confirm.html:5
+#: newstream/templates/account/email_confirm.html:11
+msgid "Confirm E-mail Address"
+msgstr ""
+
+#: newstream/templates/account/email_confirm.html:24
+msgid "Confirm"
+msgstr ""
+
+#: newstream/templates/account/email_confirm.html:31
+#, python-format
+msgid ""
+"This e-mail confirmation link expired or is invalid. Please <a\n"
+"            href=\"%(email_url)s\">issue a new\n"
+"            e-mail confirmation request</a>."
+msgstr ""
+
+#: newstream/templates/account/login.html:4
+#, python-format
+msgid "Login to %(request|site_name)s"
+msgstr ""
+
+#: newstream/templates/account/login.html:35
+msgid "Login"
+msgstr ""
+
+#: newstream/templates/account/login.html:38
+msgid "Forgot Password?"
+msgstr ""
+
+#: newstream/templates/account/login.html:39
+msgid "Not yet a member?"
+msgstr ""
+
+#: newstream/templates/account/login.html:40
+msgid "Donate and Join Now"
+msgstr ""
+
+#: newstream/templates/account/password_change.html:4
+#: newstream/templates/profile_settings/change_password.html:4
+msgid "Change My Password"
+msgstr ""
+
+#: newstream/templates/account/password_change.html:12
+#: newstream/templates/profile_settings/change_password.html:12
+msgid "Change my password"
+msgstr ""
+
+#: newstream/templates/account/password_change.html:17
+#: newstream/templates/account/password_reset_from_key.html:19
+#: newstream/templates/account/password_set.html:17
+#: newstream/templates/profile_settings/change_password.html:24
+#: newstream/templates/profile_settings/personal_info.html:39
+msgid "Submit"
+msgstr ""
+
+#: newstream/templates/account/password_reset.html:4
+msgid "Reset Your Password?"
+msgstr ""
+
+#: newstream/templates/account/password_reset.html:8
+msgid "Need to reset your password?"
+msgstr ""
+
+#: newstream/templates/account/password_reset.html:16
+msgid ""
+"Once you have filled out the following form, a reset password link will be "
+"sent to your registered email address."
+msgstr ""
+
+#: newstream/templates/account/password_reset_done.html:4
+msgid "Email Sent"
+msgstr ""
+
+#: newstream/templates/account/password_reset_done.html:8
+msgid "Check your inbox."
+msgstr ""
+
+#: newstream/templates/account/password_reset_done.html:13
+msgid "We"
+msgstr ""
+
+#: newstream/templates/account/password_reset_from_key.html:4
+#: newstream/templates/account/password_reset_from_key.html:8
+#: newstream/templates/account/password_reset_from_key_done.html:4
+#: newstream/templates/account/password_reset_from_key_done.html:8
+#: newstream/templates/profile_settings/security.html:16
+msgid "Change Password"
+msgstr ""
+
+#: newstream/templates/account/password_reset_from_key.html:8
+msgid "Bad Token"
+msgstr ""
+
+#: newstream/templates/account/password_reset_from_key.html:11
+#, python-format
+msgid ""
+"The password reset link was invalid, possibly because it has already been "
+"used.\n"
+"        Please request a <a href=\"%(passwd_reset_url)s\">new password "
+"reset</a>."
+msgstr ""
+
+#: newstream/templates/account/password_reset_from_key.html:23
+#: newstream/templates/account/password_reset_from_key_done.html:9
+msgid "Your password is now changed."
+msgstr ""
+
+#: newstream/templates/account/password_set.html:4
+msgid "Set My Password"
+msgstr ""
+
+#: newstream/templates/account/password_set.html:12
+msgid "Set my password"
+msgstr ""
+
+#: newstream/templates/account/signup.html:4
+msgid "Personal Info Registration"
+msgstr ""
+
+#: newstream/templates/account/signup.html:11
+msgid "Step 1 of 3"
+msgstr ""
+
+#: newstream/templates/account/signup.html:12
+#: newstream/templates/account/signup.html:25
+#: newstream/templates/profile_settings/personal_info.html:12
+#: newstream/templates/profile_settings/sidebar.html:7
+msgid "Personal Info"
+msgstr ""
+
+#: newstream/templates/common/form_errors.html:9
+msgid "Form Error"
+msgstr ""
+
+#: newstream/templates/common/form_errors.html:19
+msgid "Form Error:"
+msgstr ""
+
+#: newstream/templates/common/mobile_main_menu.html:31
+#: newstream/templates/profile_settings/sidebar.html:5
+msgid "Profile Settings"
+msgstr ""
+
+#: newstream/templates/common/mobile_main_menu.html:34
+msgid "My Donations"
+msgstr ""
+
+#: newstream/templates/common/mobile_main_menu.html:37
+msgid "Logout"
+msgstr ""
+
+#: newstream/templates/common/mobile_main_menu.html:43
+msgid "Sign in"
+msgstr ""
+
+#: newstream/templates/common/mobile_main_menu.html:48
+msgid "Donate"
+msgstr ""
+
+#: newstream/templates/common/signup_form_content.html:38
+msgid "Continue"
+msgstr ""
+
+#: newstream/templates/footer.html:10
+msgid "Privacy Policy"
+msgstr ""
+
+#: newstream/templates/footer.html:12
+msgid "Terms & Conditions"
+msgstr ""
+
+#: newstream/templates/footer.html:15
+msgid ""
+"© 2020 Hong Kong Free Press Limited.</span><span>&nbsp;Part of <a href=\"#"
+"\"\n"
+"                class=\"pl-1\">The\n"
+"                NewStream\n"
+"                Project</a>."
+msgstr ""
+
+#: newstream/templates/profile_settings/advanced_settings.html:4
+#: newstream/templates/profile_settings/advanced_settings.html:12
+#: newstream/templates/profile_settings/sidebar.html:11
+msgid "Advanced Settings"
+msgstr ""
+
+#: newstream/templates/profile_settings/advanced_settings.html:14
+msgid "Account Removal"
+msgstr ""
+
+#: newstream/templates/profile_settings/advanced_settings.html:15
+msgid "Delete My Account"
+msgstr ""
+
+#: newstream/templates/profile_settings/advanced_settings.html:18
+msgid ""
+"Note that by deleting your account, all recurring payments will be cancelled "
+"and your account will be removed from our database."
+msgstr ""
+
+#: newstream/templates/profile_settings/delete_account.html:4
+msgid "Delete My Password"
+msgstr ""
+
+#: newstream/templates/profile_settings/delete_account.html:12
+msgid "Delete my account"
+msgstr ""
+
+#: newstream/templates/profile_settings/delete_account.html:13
+#, python-format
+msgid ""
+"Please enter exactly '%(confirm_text)s' in the Confirmation textbox\n"
+"            below."
+msgstr ""
+
+#: newstream/templates/profile_settings/delete_account.html:26
+msgid "Delete My Account Now"
+msgstr ""
+
+#: newstream/templates/profile_settings/personal_info.html:4
+msgid "Personal Info Settings"
+msgstr ""
+
+#: newstream/templates/profile_settings/personal_info.html:29
+msgid "Manage Email Addresses"
+msgstr ""
+
+#: newstream/templates/profile_settings/security.html:4
+msgid "Security Settings"
+msgstr ""
+
+#: newstream/templates/profile_settings/security.html:12
+#: newstream/templates/profile_settings/sidebar.html:9
+msgid "Security"
+msgstr ""
+
+#: newstream/templates/profile_settings/security.html:14
+msgid "Password"
+msgstr ""
+
+#: newstream/templates/registration/email_templates/verify_your_email.html:5
+msgid "Verify Your Email"
+msgstr ""
+
+#: newstream/templates/registration/email_templates/verify_your_email.html:13
+msgid "Verify Your Email Now"
+msgstr ""
+
+#: newstream/templates/registration/email_templates/verify_your_email.html:19
+#, python-format
+msgid "Dear %(fullname)s,"
+msgstr ""
+
+#: newstream/templates/registration/email_templates/verify_your_email.html:20
+#, python-format
+msgid ""
+"Your account has been created. Please verify your email by clicking this\n"
+"                <a href=\"%(fullurl)s\" target=\"_blank\">link</a> in order "
+"to fully\n"
+"                manage\n"
+"                your donations and account."
+msgstr ""
+
+#: newstream/templates/registration/email_templates/verify_your_email.html:24
+msgid "Thank you,"
+msgstr ""
+
+#: newstream/templates/registration/logged_out.html:4
+#, python-format
+msgid "Logged out from %(request|site_name)s"
+msgstr ""
+
+#: newstream/templates/registration/logged_out.html:8
+msgid "Goodbye!"
+msgstr ""
+
+#: newstream/templates/registration/logged_out.html:10
+#, python-format
+msgid "Log back in <a href=\"%(loginurl)s\">Here</a>"
+msgstr ""
+
+#: newstream/templates/socialaccount/authentication_error.html:4
+#: newstream/templates/socialaccount/authentication_error.html:8
+msgid "Social Network Login Failure"
+msgstr ""
+
+#: newstream/templates/socialaccount/authentication_error.html:10
+msgid ""
+"An error occurred while attempting to login via your social network account."
+msgstr ""
+
+#: newstream/templates/socialaccount/login_cancelled.html:4
+#: newstream/templates/socialaccount/login_cancelled.html:8
+msgid "Login Cancelled"
+msgstr ""
+
+#: newstream/templates/socialaccount/login_cancelled.html:10
+#, python-format
+msgid ""
+"You decided to cancel logging in to our site using one of your existing\n"
+"        accounts. If\n"
+"        this was a mistake, please proceed\n"
+"        to <a href=\"%(login_url)s\">sign in</a>."
+msgstr ""
+
+#: newstream/templates/socialaccount/signup.html:4
+msgid "Complete Account Registration"
+msgstr ""
+
+#: newstream/templates/socialaccount/signup.html:19
+msgid "Personal info"
+msgstr ""
+
+#: newstream/templates/socialaccount/signup.html:20
+#, python-format
+msgid ""
+"You are\n"
+"                    about to use your\n"
+"                    %(provider_name)s\n"
+"                    account to login to %(request|site_name)s. Please "
+"complete the following form to complete user\n"
+"                    registration:"
+msgstr ""
+
+#: newstream/templates/unsubscription.html:4
+#, python-format
+msgid "Unsubscribe from %(request|site_name)s"
+msgstr ""
+
+#: newstream/templates/unsubscription.html:9
+msgid "Failed to unsubscribe"
+msgstr ""
+
+#: newstream/templates/unsubscription.html:10
+#, python-format
+msgid ""
+"We failed to unsubscribe you <span class=\"font-bold\">(%(email)s)</span>\n"
+"        from us, your\n"
+"        unsubscription link is invalid."
+msgstr ""
+
+#: newstream/templates/unsubscription.html:15
+msgid "Successful"
+msgstr ""
+
+#: newstream/templates/unsubscription.html:16
+#, python-format
+msgid ""
+"You <span class=\"font-bold\">(%(email)s)</span> have unsubscribed from\n"
+"        us. You can\n"
+"        subscribe back to us anytime you like\n"
+"        by checking the opt in mailing box in your personal info settings."
+msgstr ""
+
+#: newstream/views.py:52
+msgid "Personal Info Updated."
+msgstr ""
+
+#: newstream/views.py:80
+msgid "Your account is deleted."
+msgstr ""

@@ -1,51 +1,51 @@
 {% extends "base.html" %}
-{% load static common_tags %}
+{% load static common_tags i18n %}
 
-{% block title %}Thank You for your donation{% endblock %}
+{% block title %}{% trans 'Thank You for your donation' %}{% endblock %}
 
 {% block body_class %}newstream-thankyou-page{% endblock %}
 
 {% block content %}
 <div class="container-tight flex flex-col items-center">
     {% if isValid %}
-    <h1 class="mb-5">Thank you!</h1>
-    <p class="mb-1 text-center">Your payment is successful.
+    <h1 class="mb-5">{% trans 'Thank you!' %}</h1>
+    <p class="mb-1 text-center">{% trans 'Your payment is successful.' %}
         {% with has_socialaccount=donation.user|has_socialaccount %}
         {% if isFirstTime and not has_socialaccount %}
-        <span> You will be receiving a verification email shortly,
-            click on the link in the email to verify your email.</span>
+        <span>
+            {% trans 'You will be receiving a verification email shortly, click on the link in the email to verify your email.' %}</span>
         {% endif %}
         {% endwith %}
     </p>
-    <p class="mb-5 text-center">We are so grateful for your support.</p>
+    <p class="mb-5 text-center">{% trans 'We are so grateful for your support.' %}</p>
     <div class="p-1 sm:p-2 md:p-4 lg:py-8 lg:px-24 border-2 rounded border-gray-200">
         <table class="thankyou-table">
             <tr>
-                <td>Donor</td>
+                <td>{% trans 'Donor' %}</td>
                 <td>{{ donation.user.fullname }}</td>
             </tr>
             <tr>
-                <td>Order number</td>
+                <td>{% trans 'Order number' %}</td>
                 <td>{{ donation.order_number }}</td>
             </tr>
             <tr>
-                <td>Donation frequency</td>
+                <td>{% trans 'Donation frequency' %}</td>
                 <td>{{ donation.donation_frequency }}</td>
             </tr>
             <tr>
-                <td>Currency</td>
+                <td>{% trans 'Currency' %}</td>
                 <td>{{ donation.currency }}</td>
             </tr>
             <tr>
-                <td>Donation amount</td>
+                <td>{% trans 'Donation amount' %}</td>
                 <td>{{ donation|amount_with_currency }}</td>
             </tr>
             <tr>
-                <td>Opt in Mailing List?</td>
+                <td>{% trans 'Opt in Mailing List?' %}</td>
                 <td>{{ donation.user.optInMailingIcon|safe }}</td>
             </tr>
             <tr>
-                <td>Payment status</td>
+                <td>{% trans 'Payment status' %}</td>
                 <td>{{ donation.payment_status }}</td>
             </tr>
         </table>

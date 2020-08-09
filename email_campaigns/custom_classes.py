@@ -5,8 +5,11 @@ from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.utils.decorators import method_decorator
+from django.utils.translation import gettext_lazy as _
+
 from wagtail.contrib.modeladmin.views import InstanceSpecificView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper, AdminURLHelper
+
 from newstream.functions import raiseObjectNone, generateIDSecretHash, getFullReverseUrl
 from .models import Campaign
 User = get_user_model()
@@ -19,7 +22,7 @@ class CampaignButtonHelper(ButtonHelper):
 
     def send_email_button(self, obj):
         # Define a label for our button
-        text = 'Send Emails'
+        text = _('Send Emails')
         return {
             # decide where the button links to
             'url': self.url_helper.get_action_url('send', obj.id),
@@ -63,12 +66,13 @@ class SendCampaignView(InstanceSpecificView):
 
     def textAppendUnsubscribeLink(self, request, email, text):
         fullurl = self.getUnsubscriptionLink(request, email)
-        text += "\nLink to unsubscribe: "+fullurl
+        text += "\n" + _("Link to unsubscribe: ") + fullurl
         return text
 
     def htmlAppendUnsubscribeLink(self, request, email, html):
         fullurl = self.getUnsubscriptionLink(request, email)
-        html += '<br><a href="' + fullurl + '" target="_blank">Unsubscribe</a>'
+        html += '<br><a href="' + fullurl + \
+            '" target="_blank">' + _('Unsubscribe') + '</a>'
         return html
 
     def send_emails(self, request):

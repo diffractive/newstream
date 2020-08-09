@@ -1,20 +1,16 @@
 {% extends "base.html" %}
-{% load static common_tags %}
+{% load static common_tags i18n %}
 
-{% block title %}My Donations{% endblock %}
+{% block title %}{% trans 'My Donations' %}{% endblock %}
 {% block body_class %}my-donations-page{% endblock %}
 
 {% block content %}
 <div class="w-full bg-primary-dark">
     <div class="container">
-        <h1 class="mb-4 text-white">My donations</h1>
-        <p class="text-primary-light lg:w-3/4">View and manage your donations here. We thank you so much for your
-            support.
-            Every contribution, however big or small, is
-            valuable for our future and our ability to deliver quality journalism that’s independent, not-for-profit,
-            and
-            free of
-            charge.</p>
+        <h1 class="mb-4 text-white">{% trans 'My donations' %}</h1>
+        <p class="text-primary-light lg:w-3/4">
+            {% trans 'View and manage your donations here. We thank you so much for your support. Every contribution, however big or small, is valuable for our future and our ability to deliver quality journalism that’s independent, not-for-profit, and free of charge.' %}
+        </p>
     </div>
 </div>
 <div class="container">
@@ -35,11 +31,11 @@
                             <span class="three-dots-icon"></span>
                             <div class="more-dropdown-menu flex flex-col items-stretch">
                                 {% if request.user.is_email_verified %}
-                                <a href="#">View all renewals</a>
-                                <a href="#">Edit donation</a>
-                                <a href="#">Cancel donation</a>
+                                <a href="#">{% trans 'View all renewals' %}</a>
+                                <a href="#">{% trans 'Edit donation' %}</a>
+                                <a href="#">{% trans 'Cancel donation' %}</a>
                                 {% else %}
-                                <a class="actions-locked" href="#">Actions locked (Email unverified)</a>
+                                <a class="actions-locked" href="#">{% trans 'Actions locked (Email unverified)' %}</a>
                                 {% endif %}
                             </div>
                         </div>
@@ -63,11 +59,11 @@
     <table class="w-full my-donations-table hidden lg:block">
         <thead>
             <tr>
-                <th>Donation Amount</th>
-                <th>Donation Frequency</th>
-                <th>Order Number</th>
-                <th>Date</th>
-                <th>Payment Method</th>
+                <th>{% trans 'Donation Amount' %}</th>
+                <th>{% trans 'Donation Frequency' %}</th>
+                <th>{% trans 'Order Number' %}</th>
+                <th>{% trans 'Date' %}</th>
+                <th>{% trans 'Payment Method' %}</th>
                 <th></th>
             </tr>
         </thead>
@@ -88,13 +84,13 @@
                         <label for="m_dropdown-toggle-checkbox{{forloop.counter}}"
                             class="dropdown-toggle-label"></label>
                         <span class="three-dots-icon"></span>
-                        <div class="more-dropdown-menu flex flex-col items-stretch">
+                        <div class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
                             {% if request.user.is_email_verified %}
-                            <a href="#">View all renewals</a>
-                            <a href="#">Edit donation</a>
-                            <a href="#">Cancel donation</a>
+                            <a href="#">{% trans 'View all renewals' %}</a>
+                            <a href="#">{% trans 'Edit donation' %}</a>
+                            <a href="#">{% trans 'Cancel donation' %}</a>
                             {% else %}
-                            <a class="actions-locked" href="#">Actions locked (Email unverified)</a>
+                            <a class="actions-locked" href="#">{% trans 'Actions locked (Email unverified)' %}</a>
                             {% endif %}
                         </div>
                     </div>
@@ -104,7 +100,7 @@
             {% endfor %}
             {% else %}
             <tr>
-                <td colspan="5">No Donation History.</td>
+                <td colspan="5">{% trans 'No Donation History.' %}</td>
             </tr>
             {% endif %}
         </tbody>

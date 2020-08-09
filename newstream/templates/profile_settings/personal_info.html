@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static widget_tweaks %}
+{% load static widget_tweaks i18n %}
 
-{% block title %}Personal Info Settings{% endblock %}
+{% block title %}{% trans 'Personal Info Settings' %}{% endblock %}
 
 {% block body_class %}newstream-personal-info{% endblock %}
 
@@ -9,7 +9,7 @@
 <div class="container grid grid-cols-1 gap-4 lg:grid-cols-3">
     {% include 'profile_settings/sidebar.html' %}
     <div class="settings-div w-full flex flex-col lg:col-span-2">
-        <h1 class="mb-5">Personal Info</h1>
+        <h1 class="mb-5">{% trans 'Personal Info' %}</h1>
         {% include 'common/form_errors.html' %}
         <form method='POST'>
             {% csrf_token %}
@@ -26,7 +26,7 @@
                     {{ field }}
                     {% if field|widget_type == 'emailinput' %}
                     <div class="mt-3 flex">
-                        <a class="ns-dark-btn" href="{% url 'account_email' %}">Manage Email Addresses</a>
+                        <a class="ns-dark-btn" href="{% url 'account_email' %}">{% trans 'Manage Email Addresses' %}</a>
                     </div>
                     {% endif %}
                 </div>
@@ -36,7 +36,8 @@
             {% endfor %}
 
             {% include "common/usermeta_fields.html" %}
-            <button class="ns-wide-btn right-arrow-btn" type="submit">Submit<span class="icon"></span></button>
+            <button class="ns-wide-btn right-arrow-btn" type="submit">{% trans 'Submit' %}<span
+                    class="icon"></span></button>
         </form>
     </div>
 </div>

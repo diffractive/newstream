@@ -1,3 +1,5 @@
+from django.utils.translation import gettext_lazy as _
+
 from wagtail.core.blocks import StructBlock, StreamBlock, RichTextBlock, ChoiceBlock, IntegerBlock, CharBlock, RawHTMLBlock, URLBlock, ListBlock, RawHTMLBlock
 from wagtail.images.blocks import ImageChooserBlock
 
@@ -6,13 +8,13 @@ class LinkButtonBlock(StructBlock):
     button_text = CharBlock()
     button_link = URLBlock()
     target_window = ChoiceBlock(choices=[
-        ('_blank', 'New Tab'),
-        ('_self', 'Same Tab'),
+        ('_blank', _('New Tab')),
+        ('_self', _('Same Tab')),
     ])
 
     class Meta:
         icon = 'link'
-        label = 'Link Button'
+        label = _('Link Button')
         template = 'pages/blocks/link_button.html'
 
 
@@ -30,7 +32,7 @@ class HeadingBlock(StructBlock):
     class Meta:
         icon = 'title'
         template = 'pages/blocks/heading_block.html'
-        label = "Heading"
+        label = _("Heading")
 
 
 class AccordionItem(StructBlock):
@@ -46,7 +48,7 @@ class AccordionBlock(StructBlock):
     class Meta:
         icon = 'list-ul'
         template = 'pages/blocks/accordion_block.html'
-        label = 'Accordion'
+        label = _('Accordion')
 
 
 class PageBreaker(StructBlock):
@@ -60,25 +62,25 @@ class PageBreaker(StructBlock):
     class Meta:
         icon = "horizontalrule"
         template = 'pages/blocks/page_breaker_block.html'
-        label = 'Page Breaker'
+        label = _('Page Breaker')
 
 
 class ResponsiveVideoIframeBlock(StructBlock):
     iframe_embed = RawHTMLBlock(
-        help_text='Currently only youtube/vimeo embeds can be responsive')
+        help_text=_('Currently only youtube/vimeo embeds can be responsive'))
 
     class Meta:
         icon = "media"
         template = 'pages/blocks/responsive_video_iframe_block.html'
-        label = 'Responsive Video iFrame'
+        label = _('Responsive Video iFrame')
 
 
 class ColumnContentBlock(StreamBlock):
     heading_block = HeadingBlock()
     text_block = RichTextBlock(
-        template="pages/blocks/text_block.html", label="Text")
+        template="pages/blocks/text_block.html", label=_("Text"))
     buttons_block = ListBlock(
-        LinkButtonBlock(), template="pages/blocks/link_buttons_list.html", label="Action Buttons")
+        LinkButtonBlock(), template="pages/blocks/link_buttons_list.html", label=_("Action Buttons"))
     html_block = RawHTMLBlock(
         template="pages/blocks/raw_html.html", label="HTML")
     accordion_block = AccordionBlock()
@@ -87,15 +89,15 @@ class ColumnContentBlock(StreamBlock):
 
     class Meta:
         icon = 'form'
-        label = 'Column Content'
+        label = _('Column Content')
 
 
 class ColumnBlock(StructBlock):
     alignment_css = ChoiceBlock(choices=[
-        ('column-horz-align-center', 'center'),
-        ('column-horz-align-start', 'left'),
-        ('column-horz-align-end', 'right'),
-    ], label="Horizontal Alignment of Column Content")
+        ('column-horz-align-center', _('center')),
+        ('column-horz-align-start', _('left')),
+        ('column-horz-align-end', _('right')),
+    ], label=_("Horizontal Alignment of Column Content"))
 
     class Meta:
         icon = 'placeholder'
@@ -105,26 +107,26 @@ class SingleColumnBlock(ColumnBlock):
     content = ColumnContentBlock()
 
     class Meta:
-        label = 'Single-Column Block'
+        label = _('Single-Column Block')
         template = 'pages/blocks/single_column.html'
 
 
 class TwoColumnBlock(ColumnBlock):
-    column_1 = ColumnContentBlock(label="Column 1 Content")
-    column_2 = ColumnContentBlock(label="Column 2 Content")
+    column_1 = ColumnContentBlock(label=_("Column 1 Content"))
+    column_2 = ColumnContentBlock(label=_("Column 2 Content"))
 
     class Meta:
-        label = 'Two-Column Block'
+        label = _('Two-Column Block')
         template = 'pages/blocks/two_column.html'
 
 
 class ThreeColumnBlock(ColumnBlock):
-    column_1 = ColumnContentBlock(label="Column 1 Content")
-    column_2 = ColumnContentBlock(label="Column 2 Content")
-    column_3 = ColumnContentBlock(label="Column 3 Content")
+    column_1 = ColumnContentBlock(label=_("Column 1 Content"))
+    column_2 = ColumnContentBlock(label=_("Column 2 Content"))
+    column_3 = ColumnContentBlock(label=_("Column 3 Content"))
 
     class Meta:
-        label = 'Three-Column Block'
+        label = _('Three-Column Block')
         template = 'pages/blocks/three_column.html'
 
 
@@ -135,48 +137,48 @@ class SectionContentBlock(StreamBlock):
 
     class Meta:
         icon = 'form'
-        label = 'Section Content'
+        label = _('Section Content')
 
 
 class FullWidthImageSectionBlock(StructBlock):
     width_css = ChoiceBlock(choices=[
-        ('container-tight', 'tight'),
-        ('container', 'standard'),
-        ('container-wide', 'wide'),
-    ], icon='cog', label='Width of Inner Container')
+        ('container-tight', _('tight')),
+        ('container', _('standard')),
+        ('container-wide', _('wide')),
+    ], icon='cog', label=_('Width of Inner Container'))
     min_height = IntegerBlock(
-        min_value=0, help_text='Minimum height of this section(pixels)')
-    banner = ImageChooserBlock(label='Background Image')
+        min_value=0, help_text=_('Minimum height of this section(pixels)'))
+    banner = ImageChooserBlock(label=_('Background Image'))
     text_color = ChoiceBlock(choices=[
-        ('text-white', 'White'),
-        ('text-black', 'Black'),
-    ], label='Text Color of Inner Container')
+        ('text-white', _('White')),
+        ('text-black', _('Black')),
+    ], label=_('Text Color of Inner Container'))
     content = SectionContentBlock(required=False)
 
     class Meta:
         icon = 'image'
-        label = 'Full-width Image Block'
-        admin_text = '{label}: image that extends to fit the screen width'.format(
-            label=label)
+        label = _('Full-width Image Block')
+        admin_text = _('%(label)s: image that extends to fit the screen width') % {
+            'label': label}
         template = 'pages/blocks/full_width_image.html'
 
 
 class FullWidthSectionBlock(StructBlock):
     width_css = ChoiceBlock(choices=[
-        ('container-tight', 'tight'),
-        ('container', 'standard'),
-        ('container-wide', 'wide'),
-    ], icon='cog', label='Width of Inner Container')
+        ('container-tight', _('tight')),
+        ('container', _('standard')),
+        ('container-wide', _('wide')),
+    ], icon='cog', label=_('Width of Inner Container'))
     background_color_css = ChoiceBlock(choices=[
-        ('bg-primary', 'Primary Colour'),
-        ('bg-primary-light', 'Primary Light Colour'),
-        ('bg-primary-dark', 'Primary Dark Colour'),
-    ], icon='view', label='Section Background Colour', required=False)
+        ('bg-primary', _('Primary Colour')),
+        ('bg-primary-light', _('Primary Light Colour')),
+        ('bg-primary-dark', _('Primary Dark Colour')),
+    ], icon='view', label=_('Section Background Colour'), required=False)
     content = SectionContentBlock()
 
     class Meta:
         icon = 'placeholder'
-        label = 'Full-width Section'
-        admin_text = '{label}: full-width section that can contains many more child blocks'.format(
-            label=label)
+        label = _('Full-width Section')
+        admin_text = _(
+            '%(label)s: full-width section that can contains many more child blocks') % {'label': label}
         template = 'pages/blocks/full_width_section.html'

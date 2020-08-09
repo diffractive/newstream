@@ -1,11 +1,11 @@
+{% load i18n %}
+
 {% with id=widget.attrs.id %}
 <ul class="actions" style="list-style-type: none; margin-bottom: 1rem;">
     <li style="display: inline-block;"><button type="button" class="button button-small button-secondary"
-            id="checkall-btn">Check
-            All</button></li>
+            id="checkall-btn">{% trans 'Check All' %}</button></li>
     <li style="display: inline-block;"><button type="button" class="button button-small button-secondary"
-            id="uncheckall-btn">Uncheck
-            All</button></li>
+            id="uncheckall-btn">{% trans 'Uncheck All' %}</button></li>
 </ul>
 <ul{% if id %} id="{{ id }}" {% endif %}{% if widget.attrs.class %} class="{{ widget.attrs.class }}" {% endif %}>
     {% for group, options, index in widget.optgroups %}{% if group %}

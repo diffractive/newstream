@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.utils.translation import gettext_lazy as _
 
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
@@ -21,6 +22,8 @@ class UserMeta(models.Model):
 
     class Meta:
         ordering = ['-id']
+        verbose_name = _('User Meta')
+        verbose_name_plural = _('User Metas')
 
     def __str__(self):
         return self.field_key
@@ -32,8 +35,8 @@ class User(AbstractUser, ClusterableModel):
 
     def email_verification_status(self):
         if self.is_email_verified:
-            return '(Verified)'
-        return '(Unverified)'
+            return _('(Verified)')
+        return _('(Unverified)')
 
     @property
     def is_email_verified(self):
@@ -42,7 +45,7 @@ class User(AbstractUser, ClusterableModel):
             user=self, primary=True, verified=True).exists()
 
     def optInMailing(self):
-        return 'Yes' if self.opt_in_mailing_list else 'No'
+        return _('Yes') if self.opt_in_mailing_list else _('No')
 
     def optInMailingIcon(self):
         return '<span class="yes-icon block"></span>' if self.opt_in_mailing_list else '<span class="no-icon block"></span>'
@@ -61,3 +64,5 @@ class User(AbstractUser, ClusterableModel):
 
     class Meta:
         ordering = ['-date_joined']
+        verbose_name = _('User')
+        verbose_name_plural = _('Users')

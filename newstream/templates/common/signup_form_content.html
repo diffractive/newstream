@@ -1,41 +1,39 @@
-{% load static widget_tweaks %}
+{% load static widget_tweaks i18n %}
 
 {# Include the hidden fields #}
 {% for hidden in form.hidden_fields %}
 {{ hidden }}
 {% endfor %}
-<div class="personal-info-section">
-    <h2 class="mb-4">Personal info</h2>
-    {% for field in form.visible_fields %}
-    {% if field.html_name in form.personal_info_fields %}
-    <div class="mb-4">
-        <div class="label-div">{{ field.label_tag }}</div>
-        <div class="field-div widget_{{ field|widget_type }}">
-            {{ field }}
-        </div>
-    </div>
-    {% endif %}
-    {% endfor %}
 
-    {# Other Fields #}
-    {% for field in form.visible_fields %}
-    {% if field.html_name in form.other_fields %}
-    {% if field|widget_type == 'checkboxinput' %}
-    <div class="mb-4 widget_checkboxinput flex items-center">
-        {{ field }} {{ field.label_tag }}
+{% for field in form.visible_fields %}
+{% if field.html_name in form.personal_info_fields %}
+<div class="mb-4">
+    <div class="label-div">{{ field.label_tag }}</div>
+    <div class="field-div widget_{{ field|widget_type }}">
+        {{ field }}
     </div>
-    {% else %}
-    <div class="mb-4">
-        <div class="label-div">{{ field.label_tag }}</div>
-        <div class="field-div widget_{{ field|widget_type }}">
-            {{ field }}
-        </div>
-    </div>
-    {% endif %}
-    {% endif %}
-    {% endfor %}
-
-    {% include "common/usermeta_fields.html" %}
-    <button class="ns-wide-btn right-arrow-btn" type="submit">Continue<span class="icon"></span></button>
-    <div class="form-footer-text">{{ form.footer_html|safe }}</div>
 </div>
+{% endif %}
+{% endfor %}
+
+{# Other Fields #}
+{% for field in form.visible_fields %}
+{% if field.html_name in form.other_fields %}
+{% if field|widget_type == 'checkboxinput' %}
+<div class="mb-4 widget_checkboxinput flex items-center">
+    {{ field }} {{ field.label_tag }}
+</div>
+{% else %}
+<div class="mb-4">
+    <div class="label-div">{{ field.label_tag }}</div>
+    <div class="field-div widget_{{ field|widget_type }}">
+        {{ field }}
+    </div>
+</div>
+{% endif %}
+{% endif %}
+{% endfor %}
+
+{% include "common/usermeta_fields.html" %}
+<button class="ns-wide-btn right-arrow-btn" type="submit">{% trans 'Continue' %}<span class="icon"></span></button>
+<div class="form-footer-text">{{ form.footer_html|safe }}</div>

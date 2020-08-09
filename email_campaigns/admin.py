@@ -1,5 +1,8 @@
+from django.utils.translation import gettext_lazy as _
+
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
+
 from newstream.functions import raiseObjectNone
 from .models import EmailTemplate, TargetGroup, Campaign
 from .custom_classes import SendCampaignMAMixin
@@ -7,7 +10,7 @@ from .custom_classes import SendCampaignMAMixin
 
 class EmailTemplateAdmin(ModelAdmin):
     model = EmailTemplate
-    menu_label = 'Email Templates'
+    menu_label = _('Email Templates')
     menu_icon = 'pilcrow'
     menu_order = 100
     add_to_settings_menu = False
@@ -18,7 +21,7 @@ class EmailTemplateAdmin(ModelAdmin):
 
 class TargetGroupAdmin(ModelAdmin):
     model = TargetGroup
-    menu_label = 'Target Groups'
+    menu_label = _('Target Groups')
     menu_icon = 'pilcrow'
     menu_order = 200
     add_to_settings_menu = False
@@ -29,7 +32,7 @@ class TargetGroupAdmin(ModelAdmin):
 
 class CampaignAdmin(SendCampaignMAMixin, ModelAdmin):
     model = Campaign
-    menu_label = 'Campaigns'
+    menu_label = _('Campaigns')
     menu_icon = 'pilcrow'
     menu_order = 300
     add_to_settings_menu = False
@@ -39,7 +42,7 @@ class CampaignAdmin(SendCampaignMAMixin, ModelAdmin):
 
 
 class CampaignGroup(ModelAdminGroup):
-    menu_label = 'Email Campaigns'
+    menu_label = _('Email Campaigns')
     menu_icon = 'folder-open-inverse'
     menu_order = 300
     items = (EmailTemplateAdmin, TargetGroupAdmin, CampaignAdmin)

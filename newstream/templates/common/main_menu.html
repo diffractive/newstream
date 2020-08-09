@@ -1,12 +1,12 @@
-{% load menu_tags %}
+{% load common_tags wagtailcore_tags %}
 
 <div id="newstream-mainmenu" class="w-auto hidden lg:flex items-center ">
-    {% for item in menu_items %}
+    {% for page in homepage.get_children.specific %}
     <div class="menu-item-wrapper">
-        <a href="{{ item.href }}" class="{{ item.active_class }} menu-item">{{ item.text }}</a>
-        {% if item.has_children_in_menu %}
+        <a href="{% pageurl page %}" class="menu-item">{{ page.title }}</a>
+        {% if page.get_children.specific %}
         <div class="hidden submenu">
-            {% sub_menu item %}
+            {% include "common/main_sub_menu.html" with page=page %}
         </div>
         {% endif %}
     </div>

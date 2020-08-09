@@ -30,9 +30,9 @@
                 {{ model_name }} list{% endblocktrans %}</a></p>
 
         {% block fields_output %}
-        <p>{{mails_sent}}/{{mails_tobe_sent}} Emails are sent.</p>
+        <p>{{mails_sent}}/{{mails_tobe_sent}} {% trans 'Emails are sent.' %}</p>
         {% if mails_sent < mails_tobe_sent %}
-        <p>The following recipients are rejected:</p>
+        <p>{% trans 'The following recipients are rejected:' %}</p>
         <ul>
             {% for recipient in refused_list %}
             <li>{{ recipient }}</li>
@@ -40,7 +40,7 @@
         </ul>
         {% endif %}
         {% if mails_sent == mails_tobe_sent and mails_sent > 0 %}
-        <p>All Emails sent successfully.</p>
+        <p>{% trans 'All Emails sent successfully.' %}</p>
         {% endif %}
         {% endblock %}
     </div>

@@ -6,7 +6,7 @@ from django.urls import reverse
 from django.utils.safestring import mark_safe
 
 from donations.functions import getCurrencyDictAt
-from newstream.functions import getSiteName, pickleprint, getSiteSettings
+from newstream.functions import getSiteName, printvars, getSiteSettings
 
 register = template.Library()
 
@@ -109,10 +109,28 @@ def displayDonationAmountWithCurrency(donation):
     return mark_safe(html.unescape(currency_set['symbol']+" "+str(donation.donation_amount)))
 
 
-@register.filter(name='pickleprint')
-def _pickleprint(obj):
-    pickleprint(obj)
+@register.filter(name='printvars')
+def _printvars(obj):
+    printvars(obj)
     return ''
+
+
+# @register.filter(name='translate_href')
+# def translate_href(request, menuitem):
+#     lang_code = request.LANGUAGE_CODE
+#     if menuitem.link_page_id:
+#         page = menuitem.link_page
+#         if page.+:
+#             trans_page = page.+
+#             printvars(trans_page)
+#             if trans_page.language.code == lang_code:
+#                 # no need to translate href
+#                 return menuitem.href
+#             else:
+#                 if lang_code == 'en':
+#                     translated_page = TranslatablePage.objects.live().specific().filter(translatable_page_ptr_id=trans_page.canonical_page_id)
+#     else:
+#         return menuitem.href
 
 
 @register.filter(name='remember_filter')

@@ -4,6 +4,7 @@ import secrets
 from django import forms
 from django.contrib.auth import get_user_model, login
 from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 from wagtail.contrib.forms.forms import FormBuilder
 
@@ -35,8 +36,8 @@ OTHER_FIELDS = [
 
 class DonationDetailsForm(forms.Form):
     donation_frequency = forms.ChoiceField(choices=[
-        ('monthly', 'Monthly'),
-        ('onetime', 'One-time'),
+        ('monthly', _('Monthly')),
+        ('onetime', _('One-time')),
     ])
     currency = forms.CharField(widget=forms.HiddenInput())
 
@@ -55,24 +56,26 @@ class DonationDetailsForm(forms.Form):
         # construct payment gateway field
         gateways = form.allowed_gateways.all()
         self.fields["payment_gateway"] = forms.ChoiceField(
-            choices=[(x.id, x.frontend_label) for x in gateways], label="Payment method")
+            choices=[(x.id, x.frontend_label) for x in gateways], label=_("Payment method"))
 
         # construct donation amount field
         currency_set = getCurrencyDictAt(self.global_settings.currency)
         if form.isAmountFixed():
             self.fields["donation_amount"] = forms.DecimalField(
-                initial=form.fixed_amount)
+                initial=form.fixed_amount, label=_('Donation Amount'))
             self.fields["donation_amount"].widget.attrs['readonly'] = True
         elif form.isAmountStepped():
             amountSteps = form.amount_steps.all()
             self.fields["donation_amount"] = forms.ChoiceField(
-                choices=[(x.step, html.unescape(currency_set['symbol']) + ' ' + str(x.step)) for x in amountSteps])
+                choices=[(x.step, html.unescape(currency_set['symbol']) + ' ' + str(x.step)) for x in amountSteps], label=_('Donation Amount'))
         elif form.isAmountCustom():
-            self.fields["donation_amount"] = forms.DecimalField()
+            self.fields["donation_amount"] = forms.DecimalField(
+                label=_('Donation Amount'))
         self.fields["donation_amount"].label = "Donation amount in " + html.unescape(
             currency_set['admin_label'])
 
         # construct donation meta fields from form configuration
+        # todo: translations: how to translate donationmeta fields
         donationmetafields = form.donation_meta_fields.all()
         fb = FormBuilder(donationmetafields)
         for key, val in fb.formfields.items():

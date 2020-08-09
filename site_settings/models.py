@@ -1,5 +1,6 @@
 import html
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList, RichTextField
 from wagtail.images.edit_handlers import ImageChooserPanel
@@ -37,8 +38,8 @@ class AdminEmails(models.Model):
         'SiteSettings', on_delete=models.CASCADE, related_name='admin_emails')
 
     panels = [
-        FieldPanel('title'),
-        FieldPanel('email'),
+        FieldPanel('title', heading=_('Title')),
+        FieldPanel('email', heading=_('Email')),
     ]
 
     def __str__(self):
@@ -54,16 +55,16 @@ class UserMetaField(AbstractFormField):
 class SiteSettings(BaseSetting, ClusterableModel):
     default_from_email = models.EmailField()
     general_general_panels = [
-        FieldPanel('default_from_email'),
-        InlinePanel('admin_emails', label="Admin Email", heading="List of Admins' Emails",
-                    help_text='Email notifications such as new donations will be sent to this list.')
+        FieldPanel('default_from_email', heading=_('Default From Email')),
+        InlinePanel('admin_emails', label=_("Admin Email"), heading=_("List of Admins' Emails"),
+                    help_text=_('Email notifications such as new donations will be sent to this list.'))
     ]
     signup_footer_text = RichTextField(blank=True)
     general_signup_panels = [
         FieldPanel('signup_footer_text',
-                   heading='Footer Text(Under Signup Form)'),
-        InlinePanel('user_meta_fields', label='User Meta Fields',
-                    help_text='Add extra fields for the user signup form for additional data you want to collect from them.'),
+                   heading=_('Footer Text(Under Signup Form)')),
+        InlinePanel('user_meta_fields', label=_('User Meta Fields'),
+                    help_text=_('Add extra fields for the user signup form for additional data you want to collect from them.')),
     ]
 
     # todo: make supported currencies for each payment gateway
@@ -73,23 +74,23 @@ class SiteSettings(BaseSetting, ClusterableModel):
         val['admin_label'])) for key, val in currency_dict.items()])
 
     gateways_general_panels = [
-        FieldPanel('sandbox_mode'),
-        FieldPanel('currency')
+        FieldPanel('sandbox_mode', heading=_('Sandbox Mode')),
+        FieldPanel('currency', heading=_('Currency'))
     ]
 
     _2c2p_merchant_id = models.CharField(
-        max_length=255, blank=True, null=True, help_text="Merchant ID")
+        max_length=255, blank=True, null=True, help_text=_("Merchant ID"))
     _2c2p_secret_key = models.CharField(
-        max_length=255, blank=True, null=True, help_text="Secret Key")
+        max_length=255, blank=True, null=True, help_text=_("Secret Key"))
     _2c2p_log_filename = models.CharField(
-        max_length=255, blank=True, null=True, help_text="Log Filename")
+        max_length=255, blank=True, null=True, help_text=_("Log Filename"))
 
     gateways_2c2p_panels = [
         MultiFieldPanel([
-            FieldPanel("_2c2p_merchant_id"),
-            FieldPanel("_2c2p_secret_key"),
-            FieldPanel("_2c2p_log_filename"),
-        ], heading="2C2P API Sandbox Settings")
+            FieldPanel("_2c2p_merchant_id", heading=_("2C2P Merchant ID")),
+            FieldPanel("_2c2p_secret_key", heading=_("2C2P Secret Key")),
+            FieldPanel("_2c2p_log_filename", heading=_("2C2P Log Filename")),
+        ], heading=_("2C2P API Sandbox Settings"))
     ]
 
     brand_logo = models.ForeignKey(
@@ -108,59 +109,63 @@ class SiteSettings(BaseSetting, ClusterableModel):
     )
 
     appearance_general_panels = [
-        ImageChooserPanel('brand_logo'),
-        ImageChooserPanel('site_icon'),
+        ImageChooserPanel('brand_logo', heading=('Brand Logo')),
+        ImageChooserPanel('site_icon', heading=('Site Icon')),
     ]
 
     social_login_enabled = models.BooleanField(default=True)
     social_skip_signup = models.BooleanField(default=False)
     social_general_panels = [
         FieldPanel('social_login_enabled',
-                   heading='Enable Social Login for this site ?'),
+                   heading=_('Enable Social Login for this site ?')),
         FieldPanel('social_skip_signup',
-                   heading='Allow Firsttime Social Logins bypass Signup Form ?'),
+                   heading=_('Allow Firsttime Social Logins bypass Signup Form ?')),
     ]
     google_login_enabled = models.BooleanField(default=True)
     social_google_panels = [
         FieldPanel('google_login_enabled',
-                   heading='Enable Google Login ? (Only if Social Login is enabled)'),
+                   heading=_('Enable Google Login ? (Only if Social Login is enabled)')),
     ]
     facebook_login_enabled = models.BooleanField(default=True)
     social_facebook_panels = [
         FieldPanel('facebook_login_enabled',
-                   heading='Enable Facebook Login ? (Only if Social Login is enabled)'),
+                   heading=_('Enable Facebook Login ? (Only if Social Login is enabled)')),
     ]
     twitter_login_enabled = models.BooleanField(default=True)
     social_twitter_panels = [
         FieldPanel('twitter_login_enabled',
-                   heading='Enable Twitter Login ? (Only if Social Login is enabled)'),
+                   heading=_('Enable Twitter Login ? (Only if Social Login is enabled)')),
     ]
 
     edit_handler = TopTabbedInterface([
         SubTabbedInterface([
             SubObjectList(general_general_panels, slug='general-general',
-                          heading='General'),
+                          heading=_('General')),
             SubObjectList(general_signup_panels, slug='general-signup',
-                          heading='User Signup'),
-        ], heading="General"),
+                          heading=_('User Signup')),
+        ], heading=_("General")),
         SubTabbedInterface([
             SubObjectList(social_general_panels, slug='social-general',
-                          heading='General'),
+                          heading=_('General')),
             SubObjectList(social_google_panels, slug='social-google',
-                          heading='Google'),
+                          heading=_('Google')),
             SubObjectList(social_facebook_panels, slug='social-facebook',
-                          heading='Facebook'),
+                          heading=_('Facebook')),
             SubObjectList(social_twitter_panels, slug='social-twitter',
-                          heading='Twitter'),
-        ], heading="Social Logins"),
+                          heading=_('Twitter')),
+        ], heading=_("Social Logins")),
         SubTabbedInterface([
             SubObjectList(gateways_general_panels,
-                          heading='General', slug='gateways-general'),
+                          heading=_('General'), slug='gateways-general'),
             SubObjectList(gateways_2c2p_panels,
-                          heading='2C2P(Credit Card)', slug='gateways-2c2p'),
-        ], heading="Gateways"),
+                          heading=_('2C2P(Credit Card)'), slug='gateways-2c2p'),
+        ], heading=_("Gateways")),
         SubTabbedInterface([
             SubObjectList(appearance_general_panels,
-                          heading='General', slug='appearance-general'),
-        ], heading="Appearance"),
+                          heading=_('General'), slug='appearance-general'),
+        ], heading=_("Appearance")),
     ])
+
+    class Meta:
+        verbose_name = _('Site Setting')
+        verbose_name_plural = _('Site Settings')

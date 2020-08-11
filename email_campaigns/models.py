@@ -40,7 +40,7 @@ class EmailTemplate(models.Model):
 class TargetGroup(ClusterableModel):
     title = models.CharField(max_length=255)
     users = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name='target_groups', limit_choices_to={'is_email_verified': True, 'opt_in_mailing_list': True})
+        settings.AUTH_USER_MODEL, related_name='target_groups', limit_choices_to={'opt_in_mailing_list': True})
 
     panels = [
         FieldPanel('title', heading=_('Title')),

@@ -6,12 +6,11 @@ from wagtail.core import blocks
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel
-from wagtailtrans.models import TranslatablePage
 
 from pages.blocks import FullWidthImageSectionBlock, FullWidthSectionBlock
 
 
-class StaticPage(TranslatablePage):
+class StaticPage(Page):
     body = StreamField([
         ('full_width_image', FullWidthImageSectionBlock()),
         ('full_width_section', FullWidthSectionBlock()),
@@ -21,14 +20,13 @@ class StaticPage(TranslatablePage):
     content_panels = Page.content_panels + [
         StreamFieldPanel('body', heading=_('Page Body')),
     ]
-    show_in_menus_default = True
 
     class Meta:
         verbose_name = _('Static Page')
         verbose_name_plural = _('Static Pages')
 
 
-class HomePage(TranslatablePage):
+class HomePage(Page):
     body = StreamField([
         ('full_width_image', FullWidthImageSectionBlock()),
         ('full_width_section', FullWidthSectionBlock()),

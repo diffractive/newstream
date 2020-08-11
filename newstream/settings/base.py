@@ -48,12 +48,13 @@ WAGTAIL_USER_CUSTOM_FIELDS = ['opt_in_mailing_list']
 # Application definition
 
 INSTALLED_APPS = [
+    # custom_user
     'newstream_user',
-    'pages',
-    'search',
-    'site_settings',
-    'donations',
-    'email_campaigns',
+
+    # make sure them before all apps that you want to translate
+    'wagtail_modeltranslation',
+    'wagtail_modeltranslation.makemigrations',
+    'wagtail_modeltranslation.migrate',
 
     'wagtail.contrib.forms',
     'wagtail.contrib.redirects',
@@ -70,7 +71,6 @@ INSTALLED_APPS = [
     'wagtail.core',
     'wagtail.contrib.styleguide',
 
-    'wagtailtrans',
     'modelcluster',
     'taggit',
     'wagtailautocomplete',
@@ -89,13 +89,20 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+
+    # newstream apps
+    'pages',
+    'search',
+    'site_settings',
+    'donations',
+    'email_campaigns',
 ]
 
 MIDDLEWARE = [
     # Recommended order from https://www.accordbox.com/blog/how-support-multi-language-wagtail-cms/
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'wagtail.core.middleware.SiteMiddleware',
-    'wagtailtrans.middleware.TranslationMiddleware',
     'django.middleware.common.CommonMiddleware',
     # 'django.middleware.csrf.CsrfViewMiddleware',
     'newstream.csrf_middleware.CustomCsrfViewMiddleware',
@@ -159,8 +166,6 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-# wagtailtrans
-
 LANGUAGE_CODE = 'en'
 
 LANGUAGES = [
@@ -170,8 +175,6 @@ LANGUAGES = [
     ('id-id', _('Indonesian (Indonesia)')),
     ('tl-ph', _('Tagalog (Philippines)')),
 ]
-
-WAGTAILTRANS_SYNC_TREE = False
 
 TIME_ZONE = 'UTC'
 

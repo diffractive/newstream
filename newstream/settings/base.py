@@ -13,7 +13,9 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import django
+import django.conf.locale
 from django.utils.translation import gettext_lazy as _
+from django.conf import global_settings
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
@@ -132,6 +134,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.i18n',
                 'pages.context_processors.homepage',
             ],
             'libraries': {
@@ -170,11 +173,39 @@ LANGUAGE_CODE = 'en'
 
 LANGUAGES = [
     ('en', _('English')),
-    ('zh-tw', _('Chinese (Traditional)')),
-    ('ms-my', _('Malay (Malaysia)')),
-    ('id-id', _('Indonesian (Indonesia)')),
-    ('tl-ph', _('Tagalog (Philippines)')),
+    ('zh-hant', _('Traditional Chinese')),
+    ('ms', _('Malay')),
+    ('ind', _('Indonesian')),
+    ('tl', _('Tagalog')),
 ]
+
+EXTRA_LANG_INFO = {
+    'ms': {
+        'bidi': True,  # bi-directional
+        'code': 'ms',
+        'name': 'Bahasa Melayu',
+        'name_local': u'Bahasa Melayu',  # unicode codepoints here
+    },
+    'tl': {
+        'bidi': False,
+        'code': 'tl',
+        'name': 'Tagalog',
+        'name_local': u'Tagalog',  # unicode codepoints here
+    },
+    'ind': {
+        'bidi': False,
+        'code': 'ind',
+        'name': 'Bahasa Indonesia',
+        'name_local': u'Bahasa Indonesia',
+    }
+}
+
+# Add custom languages not provided by Django
+LANG_INFO = dict(django.conf.locale.LANG_INFO, **EXTRA_LANG_INFO)
+django.conf.locale.LANG_INFO = LANG_INFO
+
+# Languages using BiDi (right-to-left) layout
+LANGUAGES_BIDI = global_settings.LANGUAGES_BIDI + ["ms"]
 
 TIME_ZONE = 'UTC'
 

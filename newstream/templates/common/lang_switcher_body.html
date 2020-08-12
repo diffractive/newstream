@@ -1,7 +1,4 @@
-{% load i18n common_tags wagtailcore_tags wagtailtrans_tags %}
-{% if 'get_site' in page.attrs.class %}
-{% get_translations page homepage_fallback=False include_self=False as translations %}
-{% endif %}
+{% load i18n common_tags wagtailcore_tags wagtail_modeltranslation %}
 
 <!-- this html must be wrapped by .dropdown-div-wrapper in parent file for the dropdown popup to work  -->
 <input type="checkbox" name="{{prefix}}_multilang-dropdown-toggle-checkbox"
@@ -10,7 +7,20 @@
 <span class="language-code">{{ request.LANGUAGE_CODE }}</span>
 <span class="multilang-icon"></span>
 <div class="multilang-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
-    {% for language, page in translations.items %}
-    <a href="{{ page.full_url }}"><span>{{ language.code }}</span></a>
-    {% endfor %}
+    <form action="{% url 'set_language' %}" method="post" id="{{prefix}}-switch-lang-form">
+        {% csrf_token %}
+        <input name="next" type="hidden" value="{{ redirect_to }}">
+        <select name="language" class="language-switcher-select"
+                                onchange="document.getElementById('{{prefix}}-switch-lang-form').submit();">
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            {% get_language_info_list for LANGUAGES as languages %}
+            {% for language in languages %}
+            <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected{% endif %}>
+                {{ language.name_local }} ({{ language.code }})
+            </option>
+            {% endfor %}
+        </select>
+        <input type="submit" value="Go" class="hidden">
+    </form>
 </div>

@@ -103,6 +103,14 @@ def returnIsActivePage(request, urlname):
     return ''
 
 
+@register.filter(name='trans_url')
+def trans_url(request, lang_code):
+    current_url = request.path
+    parts = current_url.split('/')
+    parts[1] = lang_code
+    return '/'.join(parts)
+
+
 @register.filter(name='amount_with_currency')
 def displayDonationAmountWithCurrency(donation):
     currency_set = getCurrencyDictAt(donation.currency)

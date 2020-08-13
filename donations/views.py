@@ -23,6 +23,9 @@ def verify_gateway_response(request):
     if gatewayManager:
         isVerified = gatewayManager.verify_gateway_response()
         if isVerified:
+            # set default language for admins' emails
+            translation.activate(settings.LANGUAGE_CODE)
+
             # email new donation notification to admin list
             # only when the donation is brand new, not counting in recurring renewals
             if not gatewayManager.donation.parent_donation:

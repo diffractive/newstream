@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-14 04:00+0800\n"
+"POT-Creation-Date: 2020-08-13 20:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -206,7 +206,7 @@ msgstr ""
 msgid "Confirm E-mail Address"
 msgstr ""
 
-#: newstream/templates/account/email_confirm.html:16
+#: newstream/templates/account/email_confirm.html:18
 #, python-format
 msgid ""
 "Please\n"
@@ -216,11 +216,11 @@ msgid ""
 "        %(user_display)s."
 msgstr ""
 
-#: newstream/templates/account/email_confirm.html:24
+#: newstream/templates/account/email_confirm.html:26
 msgid "Confirm"
 msgstr ""
 
-#: newstream/templates/account/email_confirm.html:31
+#: newstream/templates/account/email_confirm.html:33
 #, python-format
 msgid ""
 "This e-mail confirmation link expired or is invalid. Please <a\n"

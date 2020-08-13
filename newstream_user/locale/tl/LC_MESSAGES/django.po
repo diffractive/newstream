@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-12 11:59+0000\n"
+"POT-Creation-Date: 2020-08-14 04:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,38 +17,38 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: newstream_user/forms.py:10 newstream_user/forms.py:15
+#: newstream_user/forms.py:11 newstream_user/forms.py:18
 msgid "Opt in Mailing List"
 msgstr ""
 
-#: newstream_user/models.py:25
+#: newstream_user/models.py:26
 msgid "User Meta"
 msgstr ""
 
-#: newstream_user/models.py:26
+#: newstream_user/models.py:27
 msgid "User Metas"
 msgstr ""
 
-#: newstream_user/models.py:38
+#: newstream_user/models.py:41
 msgid "(Verified)"
 msgstr ""
 
-#: newstream_user/models.py:39
+#: newstream_user/models.py:42
 msgid "(Unverified)"
 msgstr ""
 
-#: newstream_user/models.py:48
+#: newstream_user/models.py:51
 msgid "Yes"
 msgstr ""
 
-#: newstream_user/models.py:48
+#: newstream_user/models.py:51
 msgid "No"
 msgstr ""
 
-#: newstream_user/models.py:67
+#: newstream_user/models.py:70
 msgid "User"
 msgstr ""
 
-#: newstream_user/models.py:68
+#: newstream_user/models.py:71
 msgid "Users"
 msgstr ""

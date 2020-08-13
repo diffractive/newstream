@@ -1,6 +1,8 @@
 import re
 from django import forms
 from django.utils.translation import gettext_lazy as _
+from django.utils import translation
+from django.conf import settings
 
 from wagtail.contrib.forms.forms import FormBuilder
 
@@ -13,6 +15,8 @@ class BaseSignupForm(forms.Form):
     last_name = forms.CharField(label=_('Last Name'), max_length=255)
     opt_in_mailing_list = forms.BooleanField(
         label=_('Opt in Mailing List?'), required=False)
+    language_preference = forms.ChoiceField(label=_('Language Preference'),
+                                            required=False, choices=settings.LANGUAGES)
     personal_info_fields = [
         'first_name',
         'last_name',
@@ -21,16 +25,18 @@ class BaseSignupForm(forms.Form):
         'password2'
     ]
     other_fields = [
+        'language_preference',
         'opt_in_mailing_list'
     ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         site_settings = getSiteSettings_from_default_site()
+        # todo: translations: how to translate signup footer (no idea how to fix yet)
         self.footer_html = site_settings.signup_footer_text
 
         # construct user meta fields from site settings configuration
-        # todo: translations: how to translate user meta fields
+        # todo: translations: how to translate user meta fields (no idea how to fix yet)
         usermetafields = site_settings.user_meta_fields.all()
         fb = FormBuilder(usermetafields)
         for key, val in fb.formfields.items():
@@ -47,8 +53,14 @@ class BaseSignupForm(forms.Form):
         user.first_name = self.cleaned_data['first_name']
         user.last_name = self.cleaned_data['last_name']
         user.opt_in_mailing_list = self.cleaned_data['opt_in_mailing_list']
+        user.language_preference = self.cleaned_data['language_preference']
         user.metas = user_metas
         user.save()
+
+        # set language for email_confirmation_subject/message.txt
+        # todo: translation: tested but email message does not seem to translate
+        if user.language_preference:
+            translation.activate(user.language_preference)
 
         # save to session to remember user's registration
         request.session['first_time_registration'] = True

@@ -3,6 +3,7 @@ from django import forms
 from django.contrib.auth.forms import PasswordChangeForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 from wagtail.contrib.forms.forms import FormBuilder
 
@@ -24,11 +25,14 @@ class PersonalInfoForm(forms.Form):
     last_name = forms.CharField(label=_('Last Name'), max_length=255)
     opt_in_mailing_list = forms.BooleanField(
         label=_('Opt in Mailing List?'), required=False)
+    language_preference = forms.ChoiceField(
+        label=_('Language Preference'), choices=settings.LANGUAGES)
     personal_info_fields = [
         'first_name',
         'last_name',
         'email',
         'opt_in_mailing_list',
+        'language_preference'
     ]
 
     def __init__(self, *args, request=None, **kwargs):
@@ -59,8 +63,9 @@ class PersonalInfoForm(forms.Form):
         self.fields["email"].widget.attrs['value'] = request.user.email
         self.fields["email"].widget.attrs['disabled'] = True
         self.fields["email"].label += ' ' + \
-            request.user.email_verification_status()
+            str(request.user.email_verification_status())
         self.fields["opt_in_mailing_list"].initial = request.user.opt_in_mailing_list
+        self.fields["language_preference"].initial = request.user.language_preference
 
 
 class NewstreamSAAdapter(DefaultSocialAccountAdapter):

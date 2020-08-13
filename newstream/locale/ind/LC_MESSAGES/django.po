@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-12 11:59+0000\n"
+"POT-Creation-Date: 2020-08-14 04:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,36 +17,40 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: newstream/forms.py:21
+#: newstream/forms.py:22
 msgid "Primary Email Address"
 msgstr ""
 
-#: newstream/forms.py:23 newstream/forms_signup.py:12
+#: newstream/forms.py:24 newstream/forms_signup.py:14
 msgid "First Name"
 msgstr ""
 
-#: newstream/forms.py:24 newstream/forms_signup.py:13
+#: newstream/forms.py:25 newstream/forms_signup.py:15
 msgid "Last Name"
 msgstr ""
 
-#: newstream/forms.py:26 newstream/forms_signup.py:15
+#: newstream/forms.py:27 newstream/forms_signup.py:17
 msgid "Opt in Mailing List?"
 msgstr ""
 
-#: newstream/forms.py:37
+#: newstream/forms.py:29 newstream/forms_signup.py:18
+msgid "Language Preference"
+msgstr ""
+
+#: newstream/forms.py:41
 msgid "Please provide request object"
 msgstr ""
 
-#: newstream/forms.py:109
+#: newstream/forms.py:114
 msgid "Enter Confirmation Text"
 msgstr ""
 
-#: newstream/forms.py:114
+#: newstream/forms.py:119
 #, python-format
 msgid "Your confirmation text is incorrect, please enter exactly %(target)s"
 msgstr ""
 
-#: newstream/functions.py:87 newstream/functions.py:95
+#: newstream/functions.py:98 newstream/functions.py:106
 msgid "Superuser not found"
 msgstr ""
 
@@ -148,9 +152,72 @@ msgstr ""
 msgid "Do you really want to remove the selected e-mail address?"
 msgstr ""
 
+#: newstream/templates/account/email/email_confirmation_message.txt:1
+#, python-format
+msgid ""
+"Hello from %(site_name)s!\n"
+"\n"
+"You're receiving this e-mail because user %(user_display)s has given yours "
+"as an e-mail address to connect their account.\n"
+"\n"
+"To confirm this is correct, go to %(activate_url)s\n"
+msgstr ""
+
+#: newstream/templates/account/email/email_confirmation_message.txt:7
+#, python-format
+msgid ""
+"Thank you from %(site_name)s!\n"
+"%(site_domain)s"
+msgstr ""
+"Terima kasih dari %(site_name)s!\n"
+"%(site_domain)s"
+
+#: newstream/templates/account/email/email_confirmation_subject.txt:3
+#, fuzzy
+#| msgid "Confirm E-mail Address"
+msgid "Please Confirm Your E-mail Address"
+msgstr "Konfirmasi alamat email"
+
+#: newstream/templates/account/email/password_reset_key_message.txt:1
+#, python-format
+msgid ""
+"Hello from %(site_name)s!\n"
+"\n"
+"You're receiving this e-mail because you or someone else has requested a "
+"password for your user account.\n"
+"It can be safely ignored if you did not request a password reset. Click the "
+"link below to reset your password."
+msgstr ""
+
+#: newstream/templates/account/email/password_reset_key_message.txt:8
+#, python-format
+msgid "In case you forgot, your username is %(username)s."
+msgstr ""
+
+#: newstream/templates/account/email/password_reset_key_message.txt:10
+#, python-format
+msgid ""
+"Thank you for using %(site_name)s!\n"
+"%(site_domain)s"
+msgstr ""
+
+#: newstream/templates/account/email/password_reset_key_subject.txt:3
+msgid "Password Reset E-mail"
+msgstr ""
+
 #: newstream/templates/account/email_confirm.html:5
 #: newstream/templates/account/email_confirm.html:11
 msgid "Confirm E-mail Address"
+msgstr "Konfirmasi alamat email"
+
+#: newstream/templates/account/email_confirm.html:16
+#, python-format
+msgid ""
+"Please\n"
+"        confirm that\n"
+"        <a href=\"mailto:%(email)s\">%(email)s</a> is an e-mail address for "
+"user\n"
+"        %(user_display)s."
 msgstr ""
 
 #: newstream/templates/account/email_confirm.html:24
@@ -166,24 +233,42 @@ msgid ""
 msgstr ""
 
 #: newstream/templates/account/login.html:4
-#: newstream/templates/account/login.html:8
 #, python-format
-msgid "Login to %(request|site_name)s"
+msgid ""
+"Login to\n"
+"%(sitename)s"
 msgstr ""
 
-#: newstream/templates/account/login.html:35
+#: newstream/templates/account/login.html:9
+#, python-format
+msgid "Login to %(sitename)s"
+msgstr ""
+
+#: newstream/templates/account/login.html:16
+msgid "Sign in with Google"
+msgstr ""
+
+#: newstream/templates/account/login.html:22
+msgid "Sign in with Facebook"
+msgstr ""
+
+#: newstream/templates/account/login.html:29
+msgid "Sign in with Twitter"
+msgstr ""
+
+#: newstream/templates/account/login.html:67
 msgid "Login"
 msgstr ""
 
-#: newstream/templates/account/login.html:38
+#: newstream/templates/account/login.html:70
 msgid "Forgot Password?"
 msgstr ""
 
-#: newstream/templates/account/login.html:39
+#: newstream/templates/account/login.html:71
 msgid "Not yet a member?"
 msgstr ""
 
-#: newstream/templates/account/login.html:40
+#: newstream/templates/account/login.html:72
 msgid "Donate and Join Now"
 msgstr ""
 
@@ -419,14 +504,16 @@ msgstr ""
 
 #: newstream/templates/registration/logged_out.html:4
 #, python-format
-msgid "Logged out from %(request|site_name)s"
+msgid ""
+"Logged out from\n"
+"%(sitename)s"
 msgstr ""
 
-#: newstream/templates/registration/logged_out.html:8
+#: newstream/templates/registration/logged_out.html:9
 msgid "Goodbye!"
 msgstr ""
 
-#: newstream/templates/registration/logged_out.html:10
+#: newstream/templates/registration/logged_out.html:11
 #, python-format
 msgid "Log back in <a href=\"%(loginurl)s\">Here</a>"
 msgstr ""
@@ -463,27 +550,30 @@ msgstr ""
 msgid "Personal info"
 msgstr ""
 
-#: newstream/templates/socialaccount/signup.html:20
+#: newstream/templates/socialaccount/signup.html:21
 #, python-format
 msgid ""
-"You are\n"
+"You\n"
+"                    are\n"
 "                    about to use your\n"
 "                    %(provider_name)s\n"
-"                    account to login to %(request|site_name)s. Please "
-"complete the following form to complete user\n"
+"                    account to login to %(sitename)s. Please complete the "
+"following form to complete user\n"
 "                    registration:"
 msgstr ""
 
 #: newstream/templates/unsubscription.html:4
 #, python-format
-msgid "Unsubscribe from %(request|site_name)s"
-msgstr ""
-
-#: newstream/templates/unsubscription.html:9
-msgid "Failed to unsubscribe"
+msgid ""
+"Unsubscribe from\n"
+"%(sitename)s"
 msgstr ""
 
 #: newstream/templates/unsubscription.html:10
+msgid "Failed to unsubscribe"
+msgstr ""
+
+#: newstream/templates/unsubscription.html:11
 #, python-format
 msgid ""
 "We failed to unsubscribe you <span class=\"font-bold\">(%(email)s)</span>\n"
@@ -491,11 +581,11 @@ msgid ""
 "        unsubscription link is invalid."
 msgstr ""
 
-#: newstream/templates/unsubscription.html:15
+#: newstream/templates/unsubscription.html:16
 msgid "Successful"
 msgstr ""
 
-#: newstream/templates/unsubscription.html:16
+#: newstream/templates/unsubscription.html:17
 #, python-format
 msgid ""
 "You <span class=\"font-bold\">(%(email)s)</span> have unsubscribed from\n"
@@ -504,10 +594,10 @@ msgid ""
 "        by checking the opt in mailing box in your personal info settings."
 msgstr ""
 
-#: newstream/views.py:52
+#: newstream/views.py:57
 msgid "Personal Info Updated."
 msgstr ""
 
-#: newstream/views.py:80
+#: newstream/views.py:89
 msgid "Your account is deleted."
 msgstr ""

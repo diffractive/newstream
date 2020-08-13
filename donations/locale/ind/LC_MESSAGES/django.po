@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-12 11:59+0000\n"
+"POT-Creation-Date: 2020-08-14 04:00+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,7 +21,7 @@ msgstr ""
 msgid "No reference to Donation instance in overridden DonationInspectView"
 msgstr ""
 
-#: donations/admin.py:39 donations/admin.py:83 donations/models.py:199
+#: donations/admin.py:39 donations/admin.py:83 donations/models.py:198
 msgid "Donations"
 msgstr ""
 
@@ -50,7 +50,7 @@ msgid "Payment method"
 msgstr ""
 
 #: donations/forms.py:65 donations/forms.py:70 donations/forms.py:73
-#: donations/models.py:185
+#: donations/models.py:184
 #: donations/templates/donations/email_templates/donation_receipt.html:37
 #: donations/templates/donations/email_templates/new_donation.html:42
 #: donations/templates/donations/my_donations.html:62
@@ -153,63 +153,63 @@ msgstr ""
 msgid "Donation Form"
 msgstr ""
 
-#: donations/models.py:184
+#: donations/models.py:183
 #: donations/templates/donations/email_templates/donation_receipt.html:25
 #: donations/templates/donations/email_templates/new_donation.html:30
 #: donations/templates/donations/my_donations.html:64
 msgid "Order Number"
 msgstr ""
 
-#: donations/models.py:186
+#: donations/models.py:185
 msgid "Is Recurring"
 msgstr ""
 
-#: donations/models.py:187
+#: donations/models.py:186
 #: donations/templates/donations/email_templates/donation_receipt.html:33
 #: donations/templates/donations/email_templates/new_donation.html:38
 #: donations/templates/donations/thankyou.html:36
 msgid "Currency"
 msgstr ""
 
-#: donations/models.py:188
+#: donations/models.py:187
 #: donations/templates/donations/email_templates/donation_receipt.html:45
 #: donations/templates/donations/email_templates/new_donation.html:50
 msgid "Payment Status"
-msgstr ""
+msgstr "Status pembayaran"
 
-#: donations/models.py:189
+#: donations/models.py:188
 msgid "Recurring Status"
 msgstr ""
 
-#: donations/models.py:190 donations/models.py:233
+#: donations/models.py:189 donations/models.py:232
 msgid "Donation Meta"
 msgstr ""
 
-#: donations/models.py:190
+#: donations/models.py:189
 msgid "Donation Meta Data"
 msgstr ""
 
-#: donations/models.py:191
+#: donations/models.py:190
 msgid "Meta data about this donation is recorded here"
 msgstr ""
 
-#: donations/models.py:193
+#: donations/models.py:192
 msgid "Linked User Account Deleted?"
 msgstr ""
 
-#: donations/models.py:198
+#: donations/models.py:197
 msgid "Donation"
 msgstr ""
 
-#: donations/models.py:234
+#: donations/models.py:233
 msgid "Donation Metas"
 msgstr ""
 
-#: donations/models.py:254
+#: donations/models.py:253
 msgid "Donation Payment Meta"
 msgstr ""
 
-#: donations/models.py:255
+#: donations/models.py:254
 msgid "Donation Payment Metas"
 msgstr ""
 
@@ -225,14 +225,16 @@ msgstr ""
 
 #: donations/templates/donations/donation_details_form.html:30
 #, python-format
-msgid "Logged in as %(request.user|display_username)s."
+msgid ""
+"Logged in as\n"
+"                        %(username)s."
 msgstr ""
 
-#: donations/templates/donations/donation_details_form.html:31
+#: donations/templates/donations/donation_details_form.html:32
 msgid "Logout"
 msgstr ""
 
-#: donations/templates/donations/donation_details_form.html:63
+#: donations/templates/donations/donation_details_form.html:64
 msgid "Continue"
 msgstr ""
 
@@ -488,7 +490,7 @@ msgstr ""
 
 #: donations/templates/donations/thankyou.html:48
 msgid "Payment status"
-msgstr ""
+msgstr "Status pembayaran"
 
 #: donations/templates/modeladmin/donations/donation/inspect.html:29
 #, python-format
@@ -497,14 +499,14 @@ msgid ""
 "                %(model_name)s list"
 msgstr ""
 
-#: donations/views.py:48
+#: donations/views.py:54
 msgid "Results returned from gateway is invalid."
 msgstr ""
 
-#: donations/views.py:51
+#: donations/views.py:57
 msgid "Could not determine payment gateway from request"
 msgstr ""
 
-#: donations/views.py:66
+#: donations/views.py:72
 msgid "No Payment Data is received."
 msgstr ""

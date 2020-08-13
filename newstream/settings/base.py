@@ -40,7 +40,7 @@ DEFAULT_FROM_EMAIL = 'franky@uxcodified.com'
 AUTH_USER_MODEL = 'newstream_user.User'
 WAGTAIL_USER_EDIT_FORM = 'newstream_user.forms.NewstreamUserEditForm'
 WAGTAIL_USER_CREATION_FORM = 'newstream_user.forms.NewstreamUserCreationForm'
-WAGTAIL_USER_CUSTOM_FIELDS = ['opt_in_mailing_list']
+WAGTAIL_USER_CUSTOM_FIELDS = ['opt_in_mailing_list', 'language_preference']
 
 
 # Quick-start development settings - unsuitable for production
@@ -51,7 +51,7 @@ WAGTAIL_USER_CUSTOM_FIELDS = ['opt_in_mailing_list']
 
 INSTALLED_APPS = [
     # custom_user
-    'newstream_user',
+    'newstream_user.apps.NewstreamUserConfig',
 
     # make sure them before all apps that you want to translate
     'wagtail_modeltranslation',

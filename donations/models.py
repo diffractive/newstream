@@ -135,7 +135,6 @@ class DonationForm(ClusterableModel):
 
 
 class Donation(ClusterableModel):
-    # todo: translations: Notice variables aren't picked up by makemessages
     PAYMENT_STATUS_CHOICES = [
         (STATUS_COMPLETE, _(STATUS_COMPLETE.capitalize())),
         (STATUS_PENDING, _(STATUS_PENDING.capitalize())),

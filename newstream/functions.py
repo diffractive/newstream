@@ -56,6 +56,17 @@ def getSiteSettings_from_default_site():
     return SiteSettings.for_site(site)
 
 
+def trans_next_url(next_url, lang_code):
+    parts = next_url.split('/')
+    lang_codes = [x[0] for x in settings.LANGUAGES]
+    if parts[1] in lang_codes:
+        parts[1] = lang_code
+    else:
+        parts.insert(1, lang_code)
+    trans_url = '/'.join(parts)
+    return trans_url
+
+
 def process_user_meta(request):
     user_metas = []
     for key, val in request.POST.items():

@@ -1,11 +1,43 @@
 {% extends "base.html" %}
 {% load common_tags widget_tweaks account socialaccount i18n %}
 
-{% block title %}{% blocktrans %}Login to {{ request|site_name }}{% endblocktrans %}{% endblock %}
+{% block title %}{% blocktrans with sitename=request|site_name %}Login to
+{{ sitename }}{% endblocktrans %}{% endblock %}
 
 {% block content %}
 <div class="container-tight flex flex-col items-center">
-    <h1 class="mb-5">{% blocktrans %}Login to {{ request|site_name }}{% endblocktrans %}</h1>
+    <h1 class="mb-5">{% blocktrans with sitename=request|site_name %}Login to {{ sitename }}{% endblocktrans %}</h1>
+    {% with sociallogin_enabled=request|sociallogin_enabled %}
+    {% if sociallogin_enabled %}
+    <div class="social-signin-div w-full">
+        {% with googlelogin_enabled=request|googlelogin_enabled %}
+        {% if googlelogin_enabled %}
+        <a href="{% provider_login_url 'google' %}"
+            class="ns-wide-btn right-google-btn block">{% trans 'Sign in with Google' %}<span class="icon"></span></a>
+        {% endif %}
+        {% endwith %}
+        {% with facebooklogin_enabled=request|facebooklogin_enabled %}
+        {% if facebooklogin_enabled %}
+        <a href="{% provider_login_url 'facebook' %}"
+            class="ns-wide-btn right-facebook-btn block">{% trans 'Sign in with Facebook' %}<span
+                class="icon"></span></a>
+        {% endif %}
+        {% endwith %}
+        {% with twitterlogin_enabled=request|twitterlogin_enabled %}
+        {% if twitterlogin_enabled %}
+        <a href="{% provider_login_url 'twitter' %}"
+            class="ns-wide-btn right-twitter-btn block">{% trans 'Sign in with Twitter' %}<span class="icon"></span></a>
+        {% endif %}
+        {% endwith %}
+    </div>
+    {% include "socialaccount/snippets/login_extra.html" %}
+    <div class="or-separator w-1/2 my-6 flex justify-between items-center">
+        <div class="ns-page-breaker flex-1"></div>
+        <div class="or-text-div p-2">OR</div>
+        <div class="ns-page-breaker flex-1"></div>
+    </div>
+    {% endif %}
+    {% endwith %}
     <form method="post" action="{% url 'account_login' %}">
         {% csrf_token %}
         {% for hidden in form.hidden_fields %}

@@ -75,7 +75,6 @@ class DonationDetailsForm(forms.Form):
             currency_set['admin_label'])
 
         # construct donation meta fields from form configuration
-        # todo: translations: how to translate donationmeta fields
         donationmetafields = form.donation_meta_fields.all()
         fb = FormBuilder(donationmetafields)
         for key, val in fb.formfields.items():

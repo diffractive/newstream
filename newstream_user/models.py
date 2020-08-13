@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
 from modelcluster.fields import ParentalKey
@@ -32,6 +33,8 @@ class UserMeta(models.Model):
 class User(AbstractUser, ClusterableModel):
     # todo: let admin view/edit user meta at admin panel
     opt_in_mailing_list = models.BooleanField(default=False)
+    language_preference = models.CharField(
+        max_length=10, choices=settings.LANGUAGES, blank=True)
 
     def email_verification_status(self):
         if self.is_email_verified:

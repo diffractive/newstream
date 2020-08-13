@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.utils.encoding import force_text
 from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
+from django.utils import translation
 
 from newstream_user.models import UserMeta
 from donations.models import Donation
@@ -46,11 +48,18 @@ def personal_info(request):
             user.first_name = form.cleaned_data['first_name']
             user.last_name = form.cleaned_data['last_name']
             user.opt_in_mailing_list = form.cleaned_data['opt_in_mailing_list']
+            user.language_preference = form.cleaned_data['language_preference']
+            translation.activate(user.language_preference)
+            request.LANGUAGE_CODE = translation.get_language()
             user.metas = user_metas
             user.save()
             messages.add_message(request, messages.SUCCESS,
                                  _('Personal Info Updated.'))
-            return redirect('personal-info')
+
+            response = redirect('personal-info')
+            response.set_cookie(
+                settings.LANGUAGE_COOKIE_NAME, user.language_preference)
+            return response
     else:
         form = PersonalInfoForm(request=request)
     return render(request, 'profile_settings/personal_info.html', {'form': form})

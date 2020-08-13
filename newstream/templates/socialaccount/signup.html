@@ -17,10 +17,12 @@
             {% csrf_token %}
             <div class="personal-info-section w-full">
                 <h2 class="mb-4">{% trans 'Personal info' %}</h2>
-                <p class="my-6 font-bold">{% with provider_name=account.get_provider.name %}{% blocktrans %}You are
+                <p class="my-6 font-bold">
+                    {% with provider_name=account.get_provider.name %}{% blocktrans with sitename=request|site_name %}You
+                    are
                     about to use your
                     {{provider_name}}
-                    account to login to {{ request|site_name }}. Please complete the following form to complete user
+                    account to login to {{ sitename }}. Please complete the following form to complete user
                     registration:{% endblocktrans %}{% endwith %}</p>
                 {% include 'common/signup_form_content.html' %}
             </div>

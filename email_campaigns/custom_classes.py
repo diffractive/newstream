@@ -1,11 +1,13 @@
 import datetime
 from django.shortcuts import get_object_or_404
 from django.conf.urls import url
+from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
+from django.utils import translation
 
 from wagtail.contrib.modeladmin.views import InstanceSpecificView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper, AdminURLHelper
@@ -66,39 +68,47 @@ class SendCampaignView(InstanceSpecificView):
 
     def textAppendUnsubscribeLink(self, request, email, text):
         fullurl = self.getUnsubscriptionLink(request, email)
-        text += "\n" + _("Link to unsubscribe: ") + fullurl
+        text += "\n" + str(_("Link to unsubscribe: ")) + fullurl
         return text
 
     def htmlAppendUnsubscribeLink(self, request, email, html):
         fullurl = self.getUnsubscriptionLink(request, email)
         html += '<br><a href="' + fullurl + \
-            '" target="_blank">' + _('Unsubscribe') + '</a>'
+            '" target="_blank">' + str(_('Unsubscribe')) + '</a>'
         return html
 
     def send_emails(self, request):
         if isinstance(self.instance, Campaign):
+            original_lang = translation.get_language()
+
             model = self.instance
             template = model.template
             email_list = []
             target_groups = model.recipients.all()
             for grp in target_groups:
-                email_list += [x.email for x in grp.users.all()]
+                email_list += [(x.email, x.language_preference)
+                               for x in grp.users.all()]
             unique_list = list(set(email_list))
             self.mails_tobe_sent = len(unique_list)
 
             self.mails_sent = 0
             self.refused_list = []
-            for recipient in unique_list:
+            for recipient, lang_pref in unique_list:
+                if lang_pref:
+                    translation.activate(lang_pref)
+                else:
+                    translation.activate(settings.LANGUAGE_CODE)
                 num = send_mail(template.subject, self.textAppendUnsubscribeLink(request, recipient, template.plain_text), model.from_address, [
                                 recipient], html_message=self.htmlAppendUnsubscribeLink(request, recipient, template.html_body))
                 if num == 0:
                     self.refused_list.append(recipient)
                 self.mails_sent += num
 
-            # email_datatuple = (template.subject, template.plain_text,
-            #                    template.html_body, model.from_address, unique_list)
-            # self.mails_sent, self.errdict_list = send_mass_html_mail(
-            #     (email_datatuple,))
+            # reactivate original lang
+            if original_lang:
+                translation.activate(original_lang)
+            else:
+                translation.activate(settings.LANGUAGE_CODE)
 
             if self.mails_sent > 0:
                 model.sent = True

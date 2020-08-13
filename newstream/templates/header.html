@@ -2,9 +2,6 @@
 {% image request|brand_logo max-120x120 as brand_logo %}
 
 {% include "common/mobile_main_menu.html" %}
-{% with settings.LANGUAGE_SESSION_KEY as langkey %}
-<p>Lang: {{ request.session.langkey }} {{ langkey }}</p>
-{% endwith %}
 <div id="newstream-header" class='z-50 bg-white fixed'>
     <div id="newstream-topnav"
         class="flex justify-end lg:justify-between items-center w-screen py-6 px-8 lg:py-10 lg:px-10 xl:px-16">

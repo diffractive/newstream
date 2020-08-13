@@ -23,11 +23,12 @@
             {% for hidden in form.hidden_fields %}
             {{ hidden }}
             {% endfor %}
-            <div class="donation-details-section">
+            <div class="donation-details-section w-full">
                 <h2 class="mb-2">{% trans 'Donation Details' %}</h2>
                 {% if request.user.is_authenticated %}
                 <div class="mb-6">
-                    <p>{% blocktrans %}Logged in as {{ request.user|display_username }}.{% endblocktrans %} <a
+                    <p>{% blocktrans with username=request.user|display_username %}Logged in as
+                        {{ username }}.{% endblocktrans %} <a
                             href="{% url 'account_logout' %}?next={{request.path}}">{% trans 'Logout' %}</a></p>
                 </div>
                 {% endif %}
@@ -62,7 +63,6 @@
 
                 <button class="ns-wide-btn right-arrow-btn" type="submit">{% trans 'Continue' %}<span
                         class="icon"></span></button>
-                <!-- todo: translations: how to translate footer_html? -->
                 <div class="form-footer-text">{{ form.footer_html|safe }}</div>
             </div>
         </div>

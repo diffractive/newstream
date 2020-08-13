@@ -8,6 +8,7 @@ from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetView
 from django.utils.translation import gettext_lazy as _
+from django.utils import translation
 
 from newstream.functions import getFullReverseUrl
 from .models import *
@@ -26,6 +27,11 @@ def verify_gateway_response(request):
             # only when the donation is brand new, not counting in recurring renewals
             if not gatewayManager.donation.parent_donation:
                 sendDonationNotifToAdmins(request, gatewayManager.donation)
+
+            # set language for donation_receipt.html
+            user = gatewayManager.donation.user
+            if user.language_preference:
+                translation.activate(user.language_preference)
 
             # email thank you receipt to user
             sendDonationReceipt(request, gatewayManager.donation)

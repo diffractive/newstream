@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-13 20:38+0000\n"
+"POT-Creation-Date: 2020-08-14 13:50+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -499,14 +499,14 @@ msgid ""
 "                %(model_name)s list"
 msgstr ""
 
-#: donations/views.py:60
+#: donations/views.py:57
 msgid "Results returned from gateway is invalid."
 msgstr ""
 
-#: donations/views.py:63
+#: donations/views.py:60
 msgid "Could not determine payment gateway from request"
 msgstr ""
 
-#: donations/views.py:78
+#: donations/views.py:75
 msgid "No Payment Data is received."
 msgstr ""

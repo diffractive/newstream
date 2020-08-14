@@ -175,7 +175,7 @@ LANGUAGES = [
     ('en', _('English')),
     ('zh-hant', _('Traditional Chinese')),
     ('ms', _('Malay')),
-    ('ind', _('Indonesian')),
+    ('id-id', _('Indonesian')),
     ('tl', _('Tagalog')),
 ]
 
@@ -192,12 +192,12 @@ EXTRA_LANG_INFO = {
         'name': 'Tagalog',
         'name_local': u'Tagalog',  # unicode codepoints here
     },
-    'ind': {
+    'id-id': {
         'bidi': False,
-        'code': 'ind',
-        'name': 'Bahasa Indonesia',
+        'code': 'id-id',
+        'name': 'Indonesian',
         'name_local': u'Bahasa Indonesia',
-    }
+    },
 }
 
 # Add custom languages not provided by Django

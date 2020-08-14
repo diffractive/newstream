@@ -1,0 +1,159 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2020-08-14 13:50+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: site_settings/models.py:41
+msgid "Title"
+msgstr ""
+
+#: site_settings/models.py:42
+msgid "Email"
+msgstr ""
+
+#: site_settings/models.py:58
+msgid "Default From Email"
+msgstr ""
+
+#: site_settings/models.py:59
+msgid "Admin Email"
+msgstr ""
+
+#: site_settings/models.py:59
+msgid "List of Admins' Emails"
+msgstr ""
+
+#: site_settings/models.py:60
+msgid "Email notifications such as new donations will be sent to this list."
+msgstr ""
+
+#: site_settings/models.py:65
+msgid "Footer Text(Under Signup Form)"
+msgstr ""
+
+#: site_settings/models.py:66
+msgid "User Meta Fields"
+msgstr ""
+
+#: site_settings/models.py:67
+msgid ""
+"Add extra fields for the user signup form for additional data you want to "
+"collect from them."
+msgstr ""
+
+#: site_settings/models.py:77
+msgid "Sandbox Mode"
+msgstr ""
+
+#: site_settings/models.py:78
+msgid "Currency"
+msgstr ""
+
+#: site_settings/models.py:82
+msgid "Merchant ID"
+msgstr ""
+
+#: site_settings/models.py:84
+msgid "Secret Key"
+msgstr ""
+
+#: site_settings/models.py:86
+msgid "Log Filename"
+msgstr ""
+
+#: site_settings/models.py:90
+msgid "2C2P Merchant ID"
+msgstr ""
+
+#: site_settings/models.py:91
+msgid "2C2P Secret Key"
+msgstr ""
+
+#: site_settings/models.py:92
+msgid "2C2P Log Filename"
+msgstr ""
+
+#: site_settings/models.py:93
+msgid "2C2P API Sandbox Settings"
+msgstr ""
+
+#: site_settings/models.py:120
+msgid "Enable Social Login for this site ?"
+msgstr ""
+
+#: site_settings/models.py:122
+msgid "Allow Firsttime Social Logins bypass Signup Form ?"
+msgstr ""
+
+#: site_settings/models.py:127
+msgid "Enable Google Login ? (Only if Social Login is enabled)"
+msgstr ""
+
+#: site_settings/models.py:132
+msgid "Enable Facebook Login ? (Only if Social Login is enabled)"
+msgstr ""
+
+#: site_settings/models.py:137
+msgid "Enable Twitter Login ? (Only if Social Login is enabled)"
+msgstr ""
+
+#: site_settings/models.py:143 site_settings/models.py:146
+#: site_settings/models.py:149 site_settings/models.py:159
+#: site_settings/models.py:165
+msgid "General"
+msgstr ""
+
+#: site_settings/models.py:145
+msgid "User Signup"
+msgstr ""
+
+#: site_settings/models.py:151
+msgid "Google"
+msgstr ""
+
+#: site_settings/models.py:153
+msgid "Facebook"
+msgstr ""
+
+#: site_settings/models.py:155
+msgid "Twitter"
+msgstr ""
+
+#: site_settings/models.py:156
+msgid "Social Logins"
+msgstr ""
+
+#: site_settings/models.py:161
+msgid "2C2P(Credit Card)"
+msgstr ""
+
+#: site_settings/models.py:162
+msgid "Gateways"
+msgstr ""
+
+#: site_settings/models.py:166
+msgid "Appearance"
+msgstr ""
+
+#: site_settings/models.py:170
+msgid "Site Setting"
+msgstr ""
+
+#: site_settings/models.py:171
+msgid "Site Settings"
+msgstr ""

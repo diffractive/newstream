@@ -24,12 +24,16 @@ for (wrapper of document.getElementsByClassName("dropdown-toggle-label")) {
 // Hide the messages after 3 seconds
 (() => {
     setTimeout(() => {
-        for (msg of document.getElementsByClassName('messages')) {
+        for (let msg of document.getElementsByClassName('messages')) {
             msg.classList.add('opacity-0');
         }
     }, 3000);
     setTimeout(() => {
-        for (msg of document.getElementsByClassName('messages')) {
+        let msgwrapper = document.getElementById('messages-wrapper');
+        msgwrapper.classList.add('out-of-sight');
+    }, 4000); // invisible transition is 1s
+    setTimeout(() => {
+        for (let msg of document.getElementsByClassName('messages')) {
             msg.classList.add('hidden');
         }
     }, 4000); // invisible transition is 1s
@@ -39,6 +43,9 @@ function pushContentDownFromHeader() {
     // calculate drop distance for content below fixed header
     headerHeight = document.getElementById('newstream-topnav').offsetHeight;
     document.getElementById('base-content-wrapper').style.paddingTop = headerHeight + 'px';
+    // if (document.getElementById('messages-wrapper')) {
+    //     document.getElementById('messages-wrapper').style.top = (headerHeight + 16) + 'px';
+    // }
 }
 function resizeVideoIframe() {
     // Resizing JS for responsive video iframe block

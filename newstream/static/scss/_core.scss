@@ -4,11 +4,6 @@
 @import 'core_elements';
 @import 'core_components';
 
-.newstream-nav {
-    display: flex;
-    justify-content: center;
-
-    h2 {
-        display: inline-block;
-    }
+.out-of-sight {
+    top: -1000px;
 }

@@ -30,7 +30,9 @@ for (wrapper of document.getElementsByClassName("dropdown-toggle-label")) {
     }, 3000);
     setTimeout(() => {
         let msgwrapper = document.getElementById('messages-wrapper');
-        msgwrapper.classList.add('out-of-sight');
+        if (msgwrapper) {
+            msgwrapper.classList.add('out-of-sight');
+        }
     }, 4000); // invisible transition is 1s
     setTimeout(() => {
         for (let msg of document.getElementsByClassName('messages')) {

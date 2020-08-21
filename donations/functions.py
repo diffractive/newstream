@@ -50,6 +50,8 @@ def isTestMode(request):
 
 def get2C2PSettings(request):
     siteSettings = getSiteSettings(request)
+    if (siteSettings.sandbox_mode):
+        return Settings2C2P(siteSettings._2c2p_testing_merchant_id, siteSettings._2c2p_testing_secret_key)
     return Settings2C2P(siteSettings._2c2p_merchant_id, siteSettings._2c2p_secret_key)
 
 

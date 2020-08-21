@@ -32,11 +32,9 @@ class BaseSignupForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         site_settings = getSiteSettings_from_default_site()
-        # todo: translations: how to translate signup footer (no idea how to fix yet)
         self.footer_html = site_settings.signup_footer_text
 
         # construct user meta fields from site settings configuration
-        # todo: translations: how to translate user meta fields (no idea how to fix yet)
         usermetafields = site_settings.user_meta_fields.all()
         fb = FormBuilder(usermetafields)
         for key, val in fb.formfields.items():

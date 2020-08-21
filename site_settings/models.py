@@ -77,15 +77,22 @@ class SiteSettings(BaseSetting, ClusterableModel):
         max_length=255, blank=True, null=True, help_text=_("Merchant ID"))
     _2c2p_secret_key = models.CharField(
         max_length=255, blank=True, null=True, help_text=_("Secret Key"))
-    _2c2p_log_filename = models.CharField(
-        max_length=255, blank=True, null=True, help_text=_("Log Filename"))
+    _2c2p_testing_merchant_id = models.CharField(
+        max_length=255, blank=True, null=True, help_text=_("Testing Merchant ID"))
+    _2c2p_testing_secret_key = models.CharField(
+        max_length=255, blank=True, null=True, help_text=_("Testing Secret Key"))
 
     gateways_2c2p_panels = [
         MultiFieldPanel([
+            FieldPanel("_2c2p_testing_merchant_id",
+                       heading=_("2C2P Testing Merchant ID")),
+            FieldPanel("_2c2p_testing_secret_key",
+                       heading=_("2C2P Testing Secret Key")),
+        ], heading=_("2C2P API Sandbox Settings")),
+        MultiFieldPanel([
             FieldPanel("_2c2p_merchant_id", heading=_("2C2P Merchant ID")),
             FieldPanel("_2c2p_secret_key", heading=_("2C2P Secret Key")),
-            FieldPanel("_2c2p_log_filename", heading=_("2C2P Log Filename")),
-        ], heading=_("2C2P API Sandbox Settings"))
+        ], heading=_("2C2P API Live Settings"))
     ]
 
     brand_logo = models.ForeignKey(

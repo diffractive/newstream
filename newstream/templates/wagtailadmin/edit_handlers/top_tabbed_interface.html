@@ -29,6 +29,14 @@
     .tab-content section.active .tab-content section.active {
         background-color: white;
     }
+
+    .top-tabbed-content .locale-picker {
+        background-color: #e6e6e6;
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-top: 1.5em;
+        padding-bottom: 0.5em;
+    }
 </style>
 
 <script>
@@ -47,4 +55,23 @@
     }
 </script>
 
-{% extends "wagtailadmin/edit_handlers/tabbed_interface.html" %}
+{% load wagtailadmin_tags %}
+<ul class="tab-nav merged" role="tablist">
+    {% for child in self.children %}
+    <li class="{{ child.classes|join:" " }} {% if forloop.first %}active{% endif %}" role="tab"
+        aria-controls="tab-{{ child.heading|cautious_slugify }}">
+        <a href="#tab-{{ child.heading|cautious_slugify }}"
+            class="{% if forloop.first %}active{% endif %}">{{ child.heading }}</a>
+    </li>
+    {% endfor %}
+</ul>
+
+<div class="tab-content top-tabbed-content">
+    {% for child in self.children %}
+    <section id="tab-{{ child.heading|cautious_slugify }}"
+        class="{{ child.classes|join:" " }} {% if forloop.first %}active{% endif %}" role="tabpanel"
+        aria-labelledby="tab-label-{{ child.heading|cautious_slugify }}">
+        {{ child.render_as_object }}
+    </section>
+    {% endfor %}
+</div>

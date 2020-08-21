@@ -20,15 +20,10 @@ class SubTabbedInterface(TabbedInterface):
     template = "wagtailadmin/edit_handlers/sub_tabbed_interface.html"
 
 
+# had to use classname attribute for the section id in sub_tabbed_interface.html
+# since source code in wagtail-modeltranslation only transfers heading and classname as extra attributes to the localized panels
 class SubObjectList(ObjectList):
-    def __init__(self, *args, **kwargs):
-        self.slug = kwargs.pop('slug', None)
-        super().__init__(*args, **kwargs)
-
-    def clone_kwargs(self):
-        kwargs = super().clone_kwargs()
-        kwargs['slug'] = self.slug
-        return kwargs
+    pass
 
 
 class AdminEmails(models.Model):
@@ -139,30 +134,30 @@ class SiteSettings(BaseSetting, ClusterableModel):
 
     edit_handler = TopTabbedInterface([
         SubTabbedInterface([
-            SubObjectList(general_general_panels, slug='general-general',
+            SubObjectList(general_general_panels, classname='general-general',
                           heading=_('General')),
-            SubObjectList(general_signup_panels, slug='general-signup',
+            SubObjectList(general_signup_panels, classname='general-signup',
                           heading=_('User Signup')),
         ], heading=_("General")),
         SubTabbedInterface([
-            SubObjectList(social_general_panels, slug='social-general',
+            SubObjectList(social_general_panels, classname='social-general',
                           heading=_('General')),
-            SubObjectList(social_google_panels, slug='social-google',
+            SubObjectList(social_google_panels, classname='social-google',
                           heading=_('Google')),
-            SubObjectList(social_facebook_panels, slug='social-facebook',
+            SubObjectList(social_facebook_panels, classname='social-facebook',
                           heading=_('Facebook')),
-            SubObjectList(social_twitter_panels, slug='social-twitter',
+            SubObjectList(social_twitter_panels, classname='social-twitter',
                           heading=_('Twitter')),
         ], heading=_("Social Logins")),
         SubTabbedInterface([
             SubObjectList(gateways_general_panels,
-                          heading=_('General'), slug='gateways-general'),
+                          heading=_('General'), classname='gateways-general'),
             SubObjectList(gateways_2c2p_panels,
-                          heading=_('2C2P(Credit Card)'), slug='gateways-2c2p'),
+                          heading=_('2C2P(Credit Card)'), classname='gateways-2c2p'),
         ], heading=_("Gateways")),
         SubTabbedInterface([
             SubObjectList(appearance_general_panels,
-                          heading=_('General'), slug='appearance-general'),
+                          heading=_('General'), classname='appearance-general'),
         ], heading=_("Appearance")),
     ])
 

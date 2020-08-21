@@ -8,6 +8,9 @@ from .models import UserMetaField, SiteSettings
 class SiteSettingsTrans(TranslationOptions):
     fields = (
         'signup_footer_text',
+        '_2c2p_frontend_label',
+        'paypal_frontend_label',
+        'stripe_frontend_label',
     )
 
 
@@ -19,4 +22,3 @@ class UserMetaFieldTrans(TranslationOptions):
         'choices',
         'default_value',
     )
-

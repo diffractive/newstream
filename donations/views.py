@@ -58,6 +58,7 @@ def return_from_gateway(request):
     else:
         request.session['thankyou-error'] = _(
             "Could not determine payment gateway from request")
+    # todo: should distinguish response like cancelled or errored from thankyou
     return redirect('donations:thank-you')
 
 

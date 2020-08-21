@@ -15,10 +15,6 @@ from newstream.edit_handlers import ReadOnlyPanel
 
 User = get_user_model()
 
-GATEWAY_2C2P = '2C2P'
-GATEWAY_PAYPAL = 'PayPal'
-GATEWAY_STRIPE = 'Stripe'
-
 STATUS_ONGOING = 'on-going'
 STATUS_COMPLETE = 'complete'
 STATUS_PENDING = 'pending'
@@ -27,35 +23,6 @@ STATUS_REVOKED = 'revoked'
 STATUS_FAILED = 'failed'
 STATUS_CANCELLED = 'cancelled'
 STATUS_NONRECURRING = 'non-recurring'
-
-
-class PaymentGateway(models.Model):
-    title = models.CharField(max_length=255, unique=True)
-    frontend_label = models.CharField(max_length=255)
-    list_order = models.IntegerField(default=0)
-
-    panels = [
-        FieldPanel('title', heading=_('Title')),
-        FieldPanel('frontend_label', heading=_('Frontend Label')),
-        FieldPanel('list_order', heading=_('List Order')),
-    ]
-
-    class Meta:
-        ordering = ['list_order']
-        verbose_name = _('Payment Gateway')
-        verbose_name_plural = _('Payment Gateways')
-
-    def __str__(self):
-        return self.title
-
-    def is_2c2p(self):
-        return self.title == GATEWAY_2C2P
-
-    def is_paypal(self):
-        return self.title == GATEWAY_PAYPAL
-
-    def is_stripe(self):
-        return self.title == GATEWAY_STRIPE
 
 
 class DonationMetaField(AbstractFormField):
@@ -91,7 +58,7 @@ class DonationForm(ClusterableModel):
         max_length=20, choices=AMOUNT_TYPE_CHOICES)
     fixed_amount = models.FloatField(blank=True, null=True,
                                      help_text=_('Define fixed donation amount if you chose "Fixed Amount" for your Amount Type'))
-    allowed_gateways = models.ManyToManyField('PaymentGateway')
+    # allowed_gateways = models.ManyToManyField('PaymentGateway')
     # todo: implement this logic at wagtail backend: there should only be one active form in use at a time
     is_active = models.BooleanField(default=False)
     donation_footer_text = RichTextField(blank=True)
@@ -108,8 +75,8 @@ class DonationForm(ClusterableModel):
             'fixed_amount', heading=_('Define Fixed Donation Amount'), help_text=_('Define your fixed donation amount if you chose "Fixed Amount" for your Amount Type.')),
         InlinePanel('amount_steps', label=_('Fixed Amount Steps'), heading=_('Define Fixed Donation Amount Steps'),
                     help_text=_('Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type.')),
-        AutocompletePanel('allowed_gateways', heading=_(
-            'Allowed Payment Gateways')),
+        # AutocompletePanel('allowed_gateways', heading=_(
+        #     'Allowed Payment Gateways')),
         InlinePanel('donation_meta_fields', label=_(
             'Donation Meta Fields'), heading=_('Donation Meta Fields')),
         FieldPanel('donation_footer_text', heading=_('Footer Text(Under Donation Details Form)'),
@@ -158,11 +125,11 @@ class Donation(ClusterableModel):
         on_delete=models.SET_NULL,
         null=True
     )
-    gateway = models.ForeignKey(
-        'PaymentGateway',
-        on_delete=models.SET_NULL,
-        null=True
-    )
+    # gateway = models.ForeignKey(
+    #     'PaymentGateway',
+    #     on_delete=models.SET_NULL,
+    #     null=True
+    # )
     parent_donation = models.ForeignKey(
         'self', on_delete=models.CASCADE, blank=True, null=True)
     order_number = models.CharField(max_length=255, unique=True)

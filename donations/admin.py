@@ -6,7 +6,7 @@ from wagtail.contrib.modeladmin.options import (
 from wagtail.contrib.modeladmin.views import InspectView
 
 from newstream.functions import raiseObjectNone
-from .models import Donation, PaymentGateway, DonationForm, DonationMeta, DonationPaymentMeta
+from .models import Donation, DonationForm, DonationMeta, DonationPaymentMeta
 from .payment_gateways._2c2p import Gateway_2C2P
 
 
@@ -57,17 +57,6 @@ class DonationAdmin(ModelAdmin):
     user_column.short_description = _('User Email')  # Renames column head
 
 
-class PaymentGatewayAdmin(ModelAdmin):
-    model = PaymentGateway
-    menu_label = _('Payment Gateways')
-    menu_icon = 'pilcrow'
-    menu_order = 200
-    add_to_settings_menu = False
-    exclude_from_explorer = False
-    list_display = ('title',)
-    search_fields = ('title',)
-
-
 class DonationFormAdmin(ModelAdmin):
     model = DonationForm
     menu_label = _('Donation Forms')
@@ -83,7 +72,7 @@ class DonationGroup(ModelAdminGroup):
     menu_label = _('Donations')
     menu_icon = 'folder-open-inverse'
     menu_order = 200
-    items = (DonationAdmin, PaymentGatewayAdmin, DonationFormAdmin)
+    items = (DonationAdmin, DonationFormAdmin)
 
 
 modeladmin_register(DonationGroup)

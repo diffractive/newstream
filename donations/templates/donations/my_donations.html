@@ -29,7 +29,7 @@
                             <label for="md_dropdown-toggle-checkbox{{forloop.counter}}"
                                 class="dropdown-toggle-label"></label>
                             <span class="three-dots-icon"></span>
-                            <div class="more-dropdown-menu flex flex-col items-stretch">
+                            <div class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
                                 {% if request.user.is_email_verified %}
                                 <a href="#">{% trans 'View all renewals' %}</a>
                                 <a href="#">{% trans 'Edit donation' %}</a>

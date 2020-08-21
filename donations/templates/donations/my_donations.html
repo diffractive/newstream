@@ -44,7 +44,7 @@
                 </tr>
                 <tr>
                     <td width="120">{{ donation|amount_with_currency }}</td>
-                    <td>{{ donation.gateway.frontend_label }}</td>
+                    <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
                     <td>&nbsp;</td>
                 <tr>
                     <td>{{ donation.donation_frequency }}</td>
@@ -75,7 +75,7 @@
                 <td>{{ donation.donation_frequency }}</td>
                 <td>{{ donation.order_number }}</td>
                 <td>{{ donation.created_at|date:'j M Y' }}</td>
-                <td>{{ donation.gateway.frontend_label }}</td>
+                <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
                 <td>
                     {% if donation.is_recurring %}
                     <div class="more-dropdown-div flex items-center dropdown-div-wrapper">

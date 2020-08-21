@@ -58,7 +58,7 @@ class DonationForm(ClusterableModel):
         max_length=20, choices=AMOUNT_TYPE_CHOICES)
     fixed_amount = models.FloatField(blank=True, null=True,
                                      help_text=_('Define fixed donation amount if you chose "Fixed Amount" for your Amount Type'))
-    # allowed_gateways = models.ManyToManyField('PaymentGateway')
+    allowed_gateways = models.ManyToManyField('site_settings.PaymentGateway')
     # todo: implement this logic at wagtail backend: there should only be one active form in use at a time
     is_active = models.BooleanField(default=False)
     donation_footer_text = RichTextField(blank=True)
@@ -75,8 +75,8 @@ class DonationForm(ClusterableModel):
             'fixed_amount', heading=_('Define Fixed Donation Amount'), help_text=_('Define your fixed donation amount if you chose "Fixed Amount" for your Amount Type.')),
         InlinePanel('amount_steps', label=_('Fixed Amount Steps'), heading=_('Define Fixed Donation Amount Steps'),
                     help_text=_('Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type.')),
-        # AutocompletePanel('allowed_gateways', heading=_(
-        #     'Allowed Payment Gateways')),
+        AutocompletePanel('allowed_gateways', heading=_(
+            'Allowed Payment Gateways')),
         InlinePanel('donation_meta_fields', label=_(
             'Donation Meta Fields'), heading=_('Donation Meta Fields')),
         FieldPanel('donation_footer_text', heading=_('Footer Text(Under Donation Details Form)'),
@@ -125,11 +125,11 @@ class Donation(ClusterableModel):
         on_delete=models.SET_NULL,
         null=True
     )
-    # gateway = models.ForeignKey(
-    #     'PaymentGateway',
-    #     on_delete=models.SET_NULL,
-    #     null=True
-    # )
+    gateway = models.ForeignKey(
+        'site_settings.PaymentGateway',
+        on_delete=models.SET_NULL,
+        null=True
+    )
     parent_donation = models.ForeignKey(
         'self', on_delete=models.CASCADE, blank=True, null=True)
     order_number = models.CharField(max_length=255, unique=True)

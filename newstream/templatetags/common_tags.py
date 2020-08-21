@@ -51,6 +51,16 @@ def startswith(text, starts):
     return False
 
 
+@register.filter(name='get_item')
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+
+@register.filter(name='get_attr')
+def get_attr(object, key):
+    return getattr(object, key, '')
+
+
 @register.filter(name='domain')
 def domain(req):
     return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + req.get_host()

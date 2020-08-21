@@ -56,7 +56,7 @@ class DonationDetailsForm(forms.Form):
         # construct payment gateway field
         gateways = form.allowed_gateways.all()
         self.fields["payment_gateway"] = forms.ChoiceField(
-            choices=[(x.id, x.frontend_label) for x in gateways], label=_("Payment method"))
+            choices=[(x.id, getattr(self.global_settings, x.frontend_label_attr_name)) for x in gateways], label=_("Payment method"))
 
         # construct donation amount field
         currency_set = getCurrencyDictAt(self.global_settings.currency)

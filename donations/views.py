@@ -10,7 +10,8 @@ from django.contrib.auth.views import PasswordResetView
 from django.utils.translation import gettext_lazy as _
 from django.utils import translation
 
-from newstream.functions import getFullReverseUrl
+from newstream.functions import getFullReverseUrl, getSiteSettings
+from site_settings.models import PaymentGateway
 from .models import *
 from .forms import *
 from .functions import *
@@ -149,4 +150,5 @@ def my_donations(request):
     # todo: handle updating/cancelling recurring payments
     donations = Donation.objects.filter(
         user=request.user).order_by('-created_at')
-    return render(request, 'donations/my_donations.html', {'donations': donations})
+    siteSettings = getSiteSettings(request)
+    return render(request, 'donations/my_donations.html', {'donations': donations, 'siteSettings': siteSettings})

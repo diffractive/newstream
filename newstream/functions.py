@@ -1,6 +1,7 @@
 import re
 import os
 import json
+import uuid
 from pprint import pprint
 from hashlib import blake2b
 import django.conf as conf
@@ -32,6 +33,10 @@ evTokenGenerator = EmailVerificationTokenGenerator()
 
 def getFullReverseUrl(request, urlname, kwargs=None):
     return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + request.get_host() + reverse(urlname, kwargs=kwargs)
+
+
+def uuid4_str():
+    return str(uuid.uuid4())
 
 
 def getSiteName(request):

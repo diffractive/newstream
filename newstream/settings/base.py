@@ -106,8 +106,7 @@ MIDDLEWARE = [
     'django.middleware.locale.LocaleMiddleware',
     'wagtail.core.middleware.SiteMiddleware',
     'django.middleware.common.CommonMiddleware',
-    # 'django.middleware.csrf.CsrfViewMiddleware',
-    'newstream.csrf_middleware.CustomCsrfViewMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -168,7 +167,8 @@ AUTH_PASSWORD_VALIDATORS = [
 # Wagtail ModelTranslation Settings
 # This setting is essential for the displaying of translated fields in site_settings,
 # if not specified, the translated fields in panels under SubObjectList will not be displayed
-WAGTAILMODELTRANSLATION_CUSTOM_COMPOSED_PANELS = ['site_settings.models.SubObjectList']
+WAGTAILMODELTRANSLATION_CUSTOM_COMPOSED_PANELS = [
+    'site_settings.models.SubObjectList']
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/

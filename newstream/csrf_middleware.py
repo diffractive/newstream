@@ -1,7 +1,8 @@
 from django.middleware.csrf import CsrfViewMiddleware
-from donations.functions import get2C2PSettings
+from donations.payment_gateways.setting_classes import get2C2PSettings
 
 
+# This class is now useless; I moved towards the @csrf_exempt approach at donations.views
 class CustomCsrfViewMiddleware(CsrfViewMiddleware):
 
     def process_view(self, request, callback, callback_args, callback_kwargs):

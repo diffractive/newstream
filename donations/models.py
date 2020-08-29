@@ -56,8 +56,9 @@ class DonationForm(ClusterableModel):
     # is_recurring = models.BooleanField(default=False)
     amount_type = models.CharField(
         max_length=20, choices=AMOUNT_TYPE_CHOICES)
+    # todo: implement validation for amount fields to round to current currency decimal places
     fixed_amount = models.FloatField(blank=True, null=True,
-                                     help_text=_('Define fixed donation amount if you chose "Fixed Amount" for your Amount Type'))
+                                     help_text=_('Define fixed donation amount if you chose "Fixed Amount" for your Amount Type. Decimal places should be no more than allowed for your current currency.'))
     allowed_gateways = models.ManyToManyField('site_settings.PaymentGateway')
     # todo: implement this logic at wagtail backend: there should only be one active form in use at a time
     is_active = models.BooleanField(default=False)
@@ -72,9 +73,9 @@ class DonationForm(ClusterableModel):
         FieldPanel('is_active', heading=_('Is Active')),
         FieldPanel('amount_type', heading=_('Donation Amount Type')),
         FieldPanel(
-            'fixed_amount', heading=_('Define Fixed Donation Amount'), help_text=_('Define your fixed donation amount if you chose "Fixed Amount" for your Amount Type.')),
+            'fixed_amount', heading=_('Define Fixed Donation Amount')),
         InlinePanel('amount_steps', label=_('Fixed Amount Steps'), heading=_('Define Fixed Donation Amount Steps'),
-                    help_text=_('Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type.')),
+                    help_text=_('Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type. Decimal places should be no more than allowed for your current currency.')),
         AutocompletePanel('allowed_gateways', heading=_(
             'Allowed Payment Gateways')),
         InlinePanel('donation_meta_fields', label=_(

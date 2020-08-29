@@ -15,15 +15,9 @@ from allauth.account.utils import send_email_confirmation
 from .includes.currency_dictionary import currency_dict
 from .templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text
 from newstream.functions import getSiteSettings, getDefaultFromEmail, setDefaultFromEmail, getSuperUserTimezone
-from newstream.functions import evTokenGenerator, raiseObjectNone, getFullReverseUrl, getSiteName
+from newstream.functions import evTokenGenerator, raiseObjectNone, getSiteName
 from newstream.templates.registration.email_templates.plain_texts import get_verify_your_email_text
 from donations.models import DonationMeta
-
-
-class Settings2C2P:
-    def __init__(self, merchant_id, secret_key):
-        self.merchant_id = merchant_id
-        self.secret_key = secret_key
 
 
 def getCurrencyDict():
@@ -48,11 +42,16 @@ def isTestMode(request):
     return siteSettings.sandbox_mode
 
 
-def get2C2PSettings(request):
-    siteSettings = getSiteSettings(request)
-    if (siteSettings.sandbox_mode):
-        return Settings2C2P(siteSettings._2c2p_testing_merchant_id, siteSettings._2c2p_testing_secret_key)
-    return Settings2C2P(siteSettings._2c2p_merchant_id, siteSettings._2c2p_secret_key)
+def formatAmountCentsDecimal(amount_cents, currency_code):
+    if amount_cents.is_integer():
+        formatted_str = str(int(amount_cents))
+        return formatted_str
+    currency = getCurrencyDictAt(currency_code)
+    decimal_places = (currency['setting']['number_decimals'] -
+                      2) if currency and currency['setting']['number_decimals'] >= 2 else 0
+    formatted_str = '{:.{decimals}f}'.format(
+        amount_cents, decimals=decimal_places)
+    return formatted_str
 
 
 def gen_order_id(gateway=None):

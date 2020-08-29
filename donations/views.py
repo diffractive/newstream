@@ -1,6 +1,7 @@
 import re
 import secrets
 from pprint import pprint
+from django.conf import settings
 from django.db import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
@@ -9,8 +10,9 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetView
 from django.utils.translation import gettext_lazy as _
 from django.utils import translation
+from django.views.decorators.csrf import csrf_exempt
 
-from newstream.functions import getFullReverseUrl, getSiteSettings
+from newstream.functions import getSiteSettings
 from site_settings.models import PaymentGateway
 from .models import *
 from .forms import *
@@ -19,6 +21,7 @@ from .payment_gateways.gateway_factory import PaymentGatewayFactory
 User = get_user_model()
 
 
+@csrf_exempt
 def verify_gateway_response(request):
     gatewayManager = PaymentGatewayFactory.initGatewayByVerification(request)
     if gatewayManager:
@@ -47,6 +50,7 @@ def verify_gateway_response(request):
         return HttpResponse(status=400)
 
 
+@csrf_exempt
 def return_from_gateway(request):
     gatewayManager = PaymentGatewayFactory.initGatewayByVerification(request)
     if gatewayManager:
@@ -54,11 +58,11 @@ def return_from_gateway(request):
         if isVerified:
             request.session['thankyou-donation-id'] = gatewayManager.donation.id
         else:
-            request.session['thankyou-error'] = _(
-                "Results returned from gateway is invalid.")
+            request.session['thankyou-error'] = str(_(
+                "Results returned from gateway is invalid."))
     else:
-        request.session['thankyou-error'] = _(
-            "Could not determine payment gateway from request")
+        request.session['thankyou-error'] = str(_(
+            "Could not determine payment gateway from request"))
     # todo: should distinguish response like cancelled or errored from thankyou
     return redirect('donations:thank-you')
 

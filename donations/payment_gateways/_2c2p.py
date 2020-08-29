@@ -1,12 +1,15 @@
-from django.shortcuts import render
-from donations.payment_gateways.core import PaymentGatewayManager
-from donations.functions import get2C2PSettings, getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
-from donations.models import DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
-from newstream.functions import raiseObjectNone, getFullReverseUrl, getSiteName, getSiteSettings
-from urllib.parse import urlencode
 import hmac
 import hashlib
 import re
+from urllib.parse import urlencode
+from django.shortcuts import render
+from django.utils.translation import gettext_lazy as _
+
+from newstream.functions import raiseObjectNone, getFullReverseUrl, getSiteName, getSiteSettings
+from donations.payment_gateways.core import PaymentGatewayManager
+from donations.functions import getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
+from donations.models import DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
+from donations.payment_gateways.setting_classes import get2C2PSettings
 
 REDIRECT_API_VERSION = '8.5'
 RPP_API_VERSION = '2.3'
@@ -48,8 +51,8 @@ class Gateway_2C2P(PaymentGatewayManager):
         data['user_defined_1'] = str(self.donation.id)
 
         if self.donation.is_recurring:
-            data['payment_description'] = 'Recurring Donation for {}'.format(
-                getSiteName(self.request))
+            data['payment_description'] = _('Recurring Donation for %(site)s') % {
+                'site': getSiteName(self.request)}
             data['request_3ds'] = 'Y'
             data['recurring'] = 'Y'
             data['order_prefix'] = gen_order_prefix_2c2p()
@@ -76,8 +79,8 @@ class Gateway_2C2P(PaymentGatewayManager):
                 donation=self.donation, field_key='order_prefix', field_value=data['order_prefix'])
             dpmeta.save()
         else:
-            data['payment_description'] = 'Onetime Donation for {}'.format(
-                getSiteName(self.request))
+            data['payment_description'] = _('Onetime Donation for %(site)s') % {
+                'site': getSiteName(self.request)}
 
         params = ''
         for key in Gateway_2C2P.getRequestParamOrder():
@@ -88,11 +91,6 @@ class Gateway_2C2P(PaymentGatewayManager):
         data['hash_value'] = hmac.new(
             bytes(self.settings.secret_key, 'utf-8'),
             bytes(params, 'utf-8'), hashlib.sha256).hexdigest()
-
-        # append hash_value to donation metas for checking purposes
-        # dpmeta = DonationPaymentMeta(
-        #     donation=self.donation, field_key='hash_value', field_value=data['hash_value'])
-        # dpmeta.save()
 
         return render(self.request, 'donations/redirection_2c2p_form.html', {'action': self.base_gateway_redirect_url, 'data': data})
 
@@ -130,10 +128,6 @@ class Gateway_2C2P(PaymentGatewayManager):
                 else:
                     self.donation.recurring_status = STATUS_NONRECURRING
                 self.donation.save()
-                # add checkHash to donation metas for checking purposes
-                # dpmeta = DonationPaymentMeta(
-                #     donation=self.donation, field_key='checkHash', field_value=checkHash)
-                # dpmeta.save()
                 # add recurring_unique_id to donation metas for hooking up future recurring payments
                 if 'recurring_unique_id' in data and data['recurring_unique_id'] != '':
                     dpmeta = DonationPaymentMeta(

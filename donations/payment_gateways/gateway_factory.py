@@ -1,10 +1,11 @@
+from django.db.models import Q
+
+from newstream.functions import raiseObjectNone
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.payment_gateways._2c2p import Gateway_2C2P
 from donations.payment_gateways.paypal import Gateway_Paypal
-from newstream.functions import raiseObjectNone
+from donations.payment_gateways.stripe import Gateway_Stripe
 from donations.models import Donation, STATUS_PENDING
-from django.db.models import Q
-# todo: Add Stripe's payment gateway import
 
 
 class PaymentGatewayFactory(object):
@@ -19,7 +20,8 @@ class PaymentGatewayFactory(object):
             return Gateway_2C2P(request, donation)
         elif donation.gateway.is_paypal():
             return Gateway_Paypal(request, donation)
-        # todo: Add Stripe's Gateway init line
+        elif donation.gateway.is_stripe():
+            return Gateway_Stripe(request, donation)
         else:
             raiseObjectNone(
                 'The Provided gateway has not been implemented yet')

@@ -137,10 +137,37 @@ class SiteSettings(BaseSetting, ClusterableModel):
 
     stripe_frontend_label = models.CharField(
         max_length=255, default=_("Stripe"), help_text=_("The Gateway name to be shown on public-facing website."))
+    stripe_webhook_secret = models.CharField(
+        max_length=255, blank=True, help_text=_("The Secret for the Webhook used by the server for payment verification"))
+    stripe_product_id = models.CharField(max_length=255, blank=False, null=True, help_text=_(
+        "Product ID accessible on your Stripe Dashboard"))
+    stripe_testing_api_publishable_key = models.CharField(
+        max_length=255, blank=True, help_text=_("The Testing API publishable key"))
+    stripe_testing_api_secret_key = models.CharField(
+        max_length=255, blank=True, help_text=_("The Testing API secret key"))
+    stripe_api_publishable_key = models.CharField(
+        max_length=255, blank=True, help_text=_("The Live API publishable key"))
+    stripe_api_secret_key = models.CharField(
+        max_length=255, blank=True, help_text=_("The Live API secret key"))
 
     gateways_stripe_panels = [
         FieldPanel("stripe_frontend_label", heading=_(
             "Stripe Gateway public-facing label")),
+        FieldPanel("stripe_webhook_secret",
+                   heading=_("Stripe Webhook Secret")),
+        FieldPanel("stripe_product_id", heading=_("Stripe Product ID")),
+        MultiFieldPanel([
+            FieldPanel("stripe_testing_api_publishable_key",
+                       heading=_("Stripe Testing API Publishable Key")),
+            FieldPanel("stripe_testing_api_secret_key",
+                       heading=_("Stripe Testing API Secret Key")),
+        ], heading=_("Stripe API Sandbox Settings")),
+        MultiFieldPanel([
+            FieldPanel("stripe_api_publishable_key",
+                       heading=_("Stripe Live API Publishable Key")),
+            FieldPanel("stripe_api_secret_key",
+                       heading=_("Stripe Live API Secret Key")),
+        ], heading=_("Stripe API Live Settings")),
     ]
 
     brand_logo = models.ForeignKey(

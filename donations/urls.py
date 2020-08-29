@@ -1,5 +1,7 @@
 from django.urls import path
+
 from . import views
+from .payment_gateways.stripe import create_checkout_session, verify_stripe_response, return_from_stripe
 
 app_name = 'donations'
 urlpatterns = [
@@ -7,10 +9,16 @@ urlpatterns = [
          name='donate'),
     path('donation-details/', views.donation_details,
          name='donation-details'),
+    path('create-stripe-session/', create_checkout_session,
+         name='create-stripe-session'),
     path('verify-gateway-response/', views.verify_gateway_response,
          name='verify-gateway-response'),
     path('return-from-gateway/', views.return_from_gateway,
          name='return-from-gateway'),
+    path('verify-stripe-response/', verify_stripe_response,
+         name='verify-stripe-response'),
+    path('return-from-stripe/', return_from_stripe,
+         name='return-from-stripe'),
     path('thank-you/', views.thank_you, name='thank-you'),
     path('my-donations/', views.my_donations, name='my-donations'),
 ]

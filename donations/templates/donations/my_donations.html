@@ -51,6 +51,9 @@
                     <td>{{ donation.created_at|date:'j M Y' }}</td>
                     <td>&nbsp;</td>
                 </tr>
+                <tr>
+                    <td colspan="3">{{ donation.payment_status|title }}</td>
+                </tr>
             </table>
         </div>
         {% endfor %}
@@ -64,6 +67,7 @@
                 <th>{% trans 'Order Number' %}</th>
                 <th>{% trans 'Date' %}</th>
                 <th>{% trans 'Payment Method' %}</th>
+                <th>{% trans 'Status' %}</th>
                 <th></th>
             </tr>
         </thead>
@@ -76,6 +80,7 @@
                 <td>{{ donation.order_number }}</td>
                 <td>{{ donation.created_at|date:'j M Y' }}</td>
                 <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
+                <td>{{ donation.payment_status|title }}</td>
                 <td>
                     {% if donation.is_recurring %}
                     <div class="more-dropdown-div flex items-center dropdown-div-wrapper">

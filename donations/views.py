@@ -56,29 +56,45 @@ def return_from_gateway(request):
     if gatewayManager:
         isVerified = gatewayManager.verify_gateway_response()
         if isVerified:
-            request.session['thankyou-donation-id'] = gatewayManager.donation.id
+            request.session['return-donation-id'] = gatewayManager.donation.id
         else:
-            request.session['thankyou-error'] = str(_(
+            request.session['return-error'] = str(_(
                 "Results returned from gateway is invalid."))
     else:
-        request.session['thankyou-error'] = str(_(
+        request.session['return-error'] = str(_(
             "Could not determine payment gateway from request"))
     # todo: should distinguish response like cancelled or errored from thankyou
     return redirect('donations:thank-you')
 
 
 def thank_you(request):
-    if 'thankyou-donation-id' in request.session:
+    if 'return-donation-id' in request.session:
         donation = Donation.objects.get(
-            pk=request.session['thankyou-donation-id'])
+            pk=request.session['return-donation-id'])
         # logs user in
         if donation.user:
             login(request, donation.user,
                   backend='django.contrib.auth.backends.ModelBackend')
         return render(request, 'donations/thankyou.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
-    if 'thankyou-error' in request.session:
-        return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': request.session['thankyou-error']})
+    if 'return-error' in request.session:
+        return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': request.session['return-error']})
     return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': _('No Payment Data is received.')})
+
+
+def cancelled(request):
+    if 'return-donation-id' in request.session:
+        donation = Donation.objects.get(
+            pk=request.session['return-donation-id'])
+        donation.payment_status = STATUS_CANCELLED
+        donation.save()
+        # logs user in
+        if donation.user:
+            login(request, donation.user,
+                  backend='django.contrib.auth.backends.ModelBackend')
+        return render(request, 'donations/cancelled.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
+    if 'return-error' in request.session:
+        return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': request.session['return-error']})
+    return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': _('No Payment Data is received.')})
 
 
 def donate(request):

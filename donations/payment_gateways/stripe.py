@@ -21,10 +21,12 @@ def initStripeApiKey(request):
 
 class Gateway_Stripe(PaymentGatewayManager):
 
-    def __init__(self, request, donation):
+    def __init__(self, request, donation, session=None):
         super().__init__(request, donation)
         # set stripe settings object
         self.settings = getStripeSettings(request)
+        # stripe uses a checkout session object, init the property here
+        self.session = session
 
     def base_live_redirect_url(self):
         pass
@@ -107,7 +109,7 @@ class StripeGatewayFactory(object):
                 donation_id = session.metadata['donation_id']
                 try:
                     donation = Donation.objects.get(pk=donation_id)
-                    return Gateway_Stripe(request, donation)
+                    return Gateway_Stripe(request, donation, session)
                 except Donation.DoesNotExist:
                     print('No matching Donation found, donation_id: ' +
                           str(donation_id), flush=True)
@@ -180,7 +182,6 @@ def create_checkout_session(request):
             print('Cannot initialize/get the stripe price instance', flush=True)
             return HttpResponse(status=500)
 
-        # todo: check for discrepancy between currencies in newstream against supported currencies in Stripe
         session = stripe.checkout.Session.create(
             customer_email=donation.user.email,
             payment_method_types=['card'],
@@ -195,7 +196,7 @@ def create_checkout_session(request):
             success_url=getFullReverseUrl(
                 request, 'donations:return-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
             cancel_url=getFullReverseUrl(
-                request, 'donations:return-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
+                request, 'donations:cancel-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
             idempotency_key=uuid4_str()
         )
 
@@ -232,9 +233,23 @@ def verify_stripe_response(request):
 def return_from_stripe(request):
     gatewayManager = StripeGatewayFactory.initGatewayByReturn(request)
     if gatewayManager:
-        request.session['thankyou-donation-id'] = gatewayManager.donation.id
+        request.session['return-donation-id'] = gatewayManager.donation.id
     else:
-        request.session['thankyou-error'] = str(_(
+        request.session['return-error'] = str(_(
             "Results returned from gateway is invalid."))
-        # todo: should distinguish response like cancelled or errored from thankyou
     return redirect('donations:thank-you')
+
+
+@csrf_exempt
+def cancel_from_stripe(request):
+    gatewayManager = StripeGatewayFactory.initGatewayByReturn(request)
+    if gatewayManager:
+        request.session['return-donation-id'] = gatewayManager.donation.id
+
+        if gatewayManager.session:
+            # todo: nicer reception for the returned paymentIntent object
+            stripe.PaymentIntent.cancel(gatewayManager.session.payment_intent)
+    else:
+        request.session['return-error'] = str(_(
+            "Results returned from gateway is invalid."))
+    return redirect('donations:cancelled')

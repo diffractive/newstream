@@ -1,15 +1,15 @@
 {% extends "base.html" %}
 {% load static common_tags i18n %}
 
-{% block title %}{% trans 'Thank You for your donation' %}{% endblock %}
+{% block title %}{% trans 'Donation cancelled' %}{% endblock %}
 
-{% block body_class %}newstream-thankyou-page{% endblock %}
+{% block body_class %}newstream-cancelled-page{% endblock %}
 
 {% block content %}
 <div class="container-tight flex flex-col items-center">
     {% if isValid %}
-    <h1 class="mb-5">{% trans 'Thank you!' %}</h1>
-    <p class="mb-1 text-center">{% trans 'Your payment is successful.' %}
+    <h1 class="mb-5">{% trans 'Donation Cancelled' %}</h1>
+    <p class="mb-1 text-center">{% trans 'Your payment is cancelled.' %}
         {% with has_socialaccount=donation.user|has_socialaccount %}
         {% if isFirstTime and not has_socialaccount %}
         <span>
@@ -17,7 +17,7 @@
         {% endif %}
         {% endwith %}
     </p>
-    <p class="mb-5 text-center">{% trans 'We are so grateful for your support.' %}</p>
+    <p class="mb-5 text-center">{% trans 'Please consider donating to us again. Your support means a lot to us.' %}</p>
     <div class="p-1 sm:p-2 md:p-4 lg:py-8 lg:px-24 border-2 rounded border-gray-200">
         <table class="thankyou-table">
             <tr>

@@ -1,7 +1,7 @@
 from django.urls import path
 
 from . import views
-from .payment_gateways.stripe import create_checkout_session, verify_stripe_response, return_from_stripe
+from .payment_gateways.stripe import create_checkout_session, verify_stripe_response, return_from_stripe, cancel_from_stripe
 
 app_name = 'donations'
 urlpatterns = [
@@ -19,6 +19,9 @@ urlpatterns = [
          name='verify-stripe-response'),
     path('return-from-stripe/', return_from_stripe,
          name='return-from-stripe'),
+    path('cancel-from-stripe/', cancel_from_stripe,
+         name='cancel-from-stripe'),
     path('thank-you/', views.thank_you, name='thank-you'),
+    path('cancelled/', views.cancelled, name='cancelled'),
     path('my-donations/', views.my_donations, name='my-donations'),
 ]

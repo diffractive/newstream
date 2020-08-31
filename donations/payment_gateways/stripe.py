@@ -156,37 +156,20 @@ def create_checkout_session(request):
             print('Cannot initialize/get the stripe product instance', flush=True)
             return HttpResponse(status=500)
 
-        # Prices should be reused if found, if not create a new price object
-        price_list = stripe.Price.list(active=True)
-        print("Number of active Stripe prices: " +
-              str(len(price_list['data'])), flush=True)
-        price = None
-        # Loop through the price list to find a reusable price
-        for pItem in price_list['data']:
-            amount_str = formatAmountCentsDecimal(
-                donation.donation_amount*100, donation.currency)
-            if pItem.unit_amount_decimal == amount_str and pItem.currency == donation.currency.lower() and pItem.product == product.id:
-                price = pItem
-        # create new price here if no reusable price found
-        if price == None:
-            price = stripe.Price.create(
-                # this param is received in cents
-                unit_amount_decimal=formatAmountCentsDecimal(
-                    donation.donation_amount*100, donation.currency),
-                currency=donation.currency.lower(),
-                # recurring={"interval": "month"},
-                product=product.id,
-                idempotency_key=uuid4_str()
-            )
-        if price == None:
-            print('Cannot initialize/get the stripe price instance', flush=True)
-            return HttpResponse(status=500)
+        # ad-hoc price is used
+        amount_str = formatAmountCentsDecimal(
+            donation.donation_amount*100, donation.currency)
+        adhoc_price = {
+            'unit_amount_decimal': amount_str,
+            'currency': donation.currency.lower(),
+            'product': product.id
+        }
 
         session = stripe.checkout.Session.create(
             customer_email=donation.user.email,
             payment_method_types=['card'],
             line_items=[{
-                'price': price.id,
+                'price_data': adhoc_price,
                 'quantity': 1,
             }],
             mode='payment',

@@ -179,6 +179,14 @@ class Donation(ClusterableModel):
     def donation_frequency(self, val):
         pass
 
+    @property
+    def donation_type_stripe(self):
+        return 'recurring' if self.is_recurring else 'one_time'
+
+    @donation_type_stripe.setter
+    def donation_type_stripe(self, val):
+        pass
+
     def isOnGoing(self):
         return 'Yes' if self.recurring_status == STATUS_ONGOING else 'No'
 

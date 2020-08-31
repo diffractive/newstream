@@ -26,6 +26,7 @@ class Gateway_Stripe(PaymentGatewayManager):
         # set stripe settings object
         self.settings = getStripeSettings(request)
         # stripe uses a checkout session object, init the property here
+        # the paymentIntent object's id is referenced in session.payment_intent
         self.session = session
 
     def base_live_redirect_url(self):
@@ -81,15 +82,17 @@ class StripeGatewayFactory(object):
             session_id = session.id
             if session_id:
                 session = stripe.checkout.Session.retrieve(session_id)
+                payment_intent = stripe.PaymentIntent.retrieve(
+                    session.payment_intent)
 
-                if 'donation_id' in session.metadata:
-                    donation_id = session.metadata['donation_id']
+                if 'donation_id' in payment_intent.metadata:
+                    donation_id = payment_intent.metadata['donation_id']
                     try:
                         donation = Donation.objects.get(pk=donation_id)
                         # update payment status
                         donation.payment_status = STATUS_COMPLETE
                         donation.save()
-                        return Gateway_Stripe(request, donation)
+                        return Gateway_Stripe(request, donation, session)
                     except Donation.DoesNotExist:
                         print('No matching Donation found, donation_id: ' +
                               str(donation_id), flush=True)
@@ -104,9 +107,11 @@ class StripeGatewayFactory(object):
         session_id = request.GET.get("stripe_session_id", None)
         if session_id:
             session = stripe.checkout.Session.retrieve(session_id)
+            payment_intent = stripe.PaymentIntent.retrieve(
+                session.payment_intent)
 
-            if 'donation_id' in session.metadata:
-                donation_id = session.metadata['donation_id']
+            if 'donation_id' in payment_intent.metadata:
+                donation_id = payment_intent.metadata['donation_id']
                 try:
                     donation = Donation.objects.get(pk=donation_id)
                     return Gateway_Stripe(request, donation, session)
@@ -173,8 +178,10 @@ def create_checkout_session(request):
                 'quantity': 1,
             }],
             mode='payment',
-            metadata={
-                'donation_id': donation.id
+            payment_intent_data={
+                'metadata': {
+                    'donation_id': donation.id
+                }
             },
             success_url=getFullReverseUrl(
                 request, 'donations:return-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',

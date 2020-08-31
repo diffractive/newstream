@@ -77,11 +77,8 @@ class StripeGatewayFactory(object):
         # Handle the checkout.session.completed event
         if event['type'] == 'checkout.session.completed':
             session = event['data']['object']
-
             # Fulfill the purchase...
-            session_id = session.id
-            if session_id:
-                session = stripe.checkout.Session.retrieve(session_id)
+            if session:
                 payment_intent = stripe.PaymentIntent.retrieve(
                     session.payment_intent)
 
@@ -141,8 +138,6 @@ def create_checkout_session(request):
         # if no product exists, create one here(double safety net)
         # todo: make sure the product_id in site_settings has been set by some kind of configuration enforcement before site is launched
         product_list = stripe.Product.list(active=True)
-        print("Number of active Stripe products: " +
-              str(len(product_list['data'])), flush=True)
         product = None
         if len(product_list['data']) == 0:
             # create new product here

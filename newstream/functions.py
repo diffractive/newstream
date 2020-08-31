@@ -1,4 +1,5 @@
 import re
+import sys
 import os
 import json
 import uuid
@@ -157,3 +158,4 @@ def generateIDSecretHash(id):
 def printvars(obj):
     print("---Vars(obj)---", flush=True)
     pprint(vars(obj))
+    sys.stdout.flush()

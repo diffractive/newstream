@@ -302,7 +302,8 @@ span.multilang-icon {
 }
 
 /* Redirection Page */
-.redirect-loading-div {
+.redirect-loading-div,
+.error-div {
     min-height: 20rem;
     @screen lg {
         min-height: 30rem;

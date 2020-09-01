@@ -7,7 +7,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
-from donations.models import Donation, STATUS_COMPLETE
+from donations.models import Donation, STATUS_COMPLETE, STATUS_ACTIVE
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.functions import formatAmountCentsDecimal, sendDonationNotifToAdmins, sendDonationReceipt
@@ -21,13 +21,17 @@ def initStripeApiKey(request):
 
 class Gateway_Stripe(PaymentGatewayManager):
 
-    def __init__(self, request, donation, session=None):
+    def __init__(self, request, donation, session=None, event=None, **kwargs):
         super().__init__(request, donation)
         # set stripe settings object
         self.settings = getStripeSettings(request)
         # stripe uses a checkout session object, init the property here
         # the paymentIntent object's id is referenced in session.payment_intent
         self.session = session
+        # saves also the event emitted from Stripe to decide what actions to take next
+        self.event = event
+        # saves all remaining kwargs into the manager
+        self.__dict__.update(kwargs)
 
     def base_live_redirect_url(self):
         pass
@@ -59,7 +63,10 @@ class StripeGatewayFactory(object):
 
         payload = request.body
         sig_header = request.META['HTTP_STRIPE_SIGNATURE']
+        donation_id = None
         event = None
+        session = None
+        kwargs = {}
 
         try:
             event = stripe.Webhook.construct_event(
@@ -74,27 +81,46 @@ class StripeGatewayFactory(object):
             print(e, flush=True)
             return None
 
-        # Handle the checkout.session.completed event
+        # Intercept the checkout.session.completed event
         if event['type'] == 'checkout.session.completed':
             session = event['data']['object']
             # Fulfill the purchase...
             if session:
-                payment_intent = stripe.PaymentIntent.retrieve(
-                    session.payment_intent)
-
-                if 'donation_id' in payment_intent.metadata:
-                    donation_id = payment_intent.metadata['donation_id']
-                    try:
-                        donation = Donation.objects.get(pk=donation_id)
-                        # update payment status
-                        donation.payment_status = STATUS_COMPLETE
-                        donation.save()
-                        return Gateway_Stripe(request, donation, session)
-                    except Donation.DoesNotExist:
-                        print('No matching Donation found, donation_id: ' +
-                              str(donation_id), flush=True)
+                if session.mode == 'payment' and session.payment_intent:
+                    payment_intent = stripe.PaymentIntent.retrieve(
+                        session.payment_intent)
+                    if 'donation_id' in payment_intent.metadata:
+                        donation_id = payment_intent.metadata['donation_id']
+                    else:
+                        return None
+                elif session.mode == 'subscription' and session.subscription:
+                    subscription = stripe.Subscription.retrieve(
+                        session.subscription)
+                    if 'donation_id' in subscription.metadata:
+                        donation_id = subscription.metadata['donation_id']
+                    else:
                         return None
 
+        # Intercept the subscription updated event
+        if event['type'] == 'customer.subscription.updated':
+            subscription = event['data']['object']
+
+            if subscription:
+                if 'donation_id' in subscription.metadata:
+                    donation_id = subscription.metadata['donation_id']
+                    kwargs['subscription'] = subscription
+                else:
+                    return None
+
+        # Finally init and return the Stripe Gateway Manager
+        if donation_id:
+            try:
+                donation = Donation.objects.get(pk=donation_id)
+                return Gateway_Stripe(request, donation, session, event, **kwargs)
+            except Donation.DoesNotExist:
+                print('No matching Donation found, donation_id: ' +
+                      str(donation_id), flush=True)
+                return None
         return None
 
     @staticmethod
@@ -104,19 +130,28 @@ class StripeGatewayFactory(object):
         session_id = request.GET.get("stripe_session_id", None)
         if session_id:
             session = stripe.checkout.Session.retrieve(session_id)
-            payment_intent = stripe.PaymentIntent.retrieve(
-                session.payment_intent)
-
-            if 'donation_id' in payment_intent.metadata:
-                donation_id = payment_intent.metadata['donation_id']
-                try:
-                    donation = Donation.objects.get(pk=donation_id)
-                    return Gateway_Stripe(request, donation, session)
-                except Donation.DoesNotExist:
-                    print('No matching Donation found, donation_id: ' +
-                          str(donation_id), flush=True)
+            if session.mode == 'payment' and session.payment_intent:
+                payment_intent = stripe.PaymentIntent.retrieve(
+                    session.payment_intent)
+                if 'donation_id' in payment_intent.metadata:
+                    donation_id = payment_intent.metadata['donation_id']
+                else:
                     return None
-            return None
+            elif session.mode == 'subscription' and session.subscription:
+                subscription = stripe.Subscription.retrieve(
+                    session.subscription)
+                if 'donation_id' in subscription.metadata:
+                    donation_id = subscription.metadata['donation_id']
+                else:
+                    return None
+
+            try:
+                donation = Donation.objects.get(pk=donation_id)
+                return Gateway_Stripe(request, donation, session)
+            except Donation.DoesNotExist:
+                print('No matching Donation found, donation_id: ' +
+                      str(donation_id), flush=True)
+                return None
         else:
             print('No returned Stripe session found', flush=True)
             return None
@@ -164,6 +199,32 @@ def create_checkout_session(request):
             'currency': donation.currency.lower(),
             'product': product.id
         }
+        if donation.is_recurring:
+            adhoc_price['recurring'] = {
+                'interval': 'day',
+                'interval_count': 1
+            }
+
+        # set session mode
+        session_mode = 'payment'
+        if donation.is_recurring:
+            session_mode = 'subscription'
+
+        # set metadata
+        payment_intent_data = None
+        subscription_data = None
+        if donation.is_recurring:
+            subscription_data = {
+                'metadata': {
+                    'donation_id': donation.id
+                }
+            }
+        else:
+            payment_intent_data = {
+                'metadata': {
+                    'donation_id': donation.id
+                }
+            }
 
         session = stripe.checkout.Session.create(
             customer_email=donation.user.email,
@@ -172,12 +233,9 @@ def create_checkout_session(request):
                 'price_data': adhoc_price,
                 'quantity': 1,
             }],
-            mode='payment',
-            payment_intent_data={
-                'metadata': {
-                    'donation_id': donation.id
-                }
-            },
+            mode=session_mode,
+            payment_intent_data=payment_intent_data,
+            subscription_data=subscription_data,
             success_url=getFullReverseUrl(
                 request, 'donations:return-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
             cancel_url=getFullReverseUrl(
@@ -191,25 +249,44 @@ def create_checkout_session(request):
 
 @csrf_exempt
 def verify_stripe_response(request):
+    # Set up gateway manager object with its linking donation, session, etc...
     gatewayManager = StripeGatewayFactory.initGatewayByVerification(request)
+
+    # Decide what actions to perform on Newstream's side according to the results/events from the Stripe notifications
     if gatewayManager:
-        # set default language for admins' emails
-        translation.activate(settings.LANGUAGE_CODE)
+        # Event: checkout.session.completed
+        if gatewayManager.event['type'] == 'checkout.session.completed':
+            # Update payment status
+            gatewayManager.donation.payment_status = STATUS_COMPLETE
+            gatewayManager.donation.save()
 
-        # email new donation notification to admin list
-        # only when the donation is brand new, not counting in recurring renewals
-        if not gatewayManager.donation.parent_donation:
-            sendDonationNotifToAdmins(request, gatewayManager.donation)
+            # set default language for admins' emails
+            translation.activate(settings.LANGUAGE_CODE)
 
-        # set language for donation_receipt.html
-        user = gatewayManager.donation.user
-        if user.language_preference:
-            translation.activate(user.language_preference)
+            # email new donation notification to admin list
+            # only when the donation is brand new, not counting in recurring renewals
+            if not gatewayManager.donation.parent_donation:
+                sendDonationNotifToAdmins(request, gatewayManager.donation)
 
-        # email thank you receipt to user
-        sendDonationReceipt(request, gatewayManager.donation)
+            # set language for donation_receipt.html
+            user = gatewayManager.donation.user
+            if user.language_preference:
+                translation.activate(user.language_preference)
 
-        return HttpResponse(status=200)
+            # email thank you receipt to user
+            sendDonationReceipt(request, gatewayManager.donation)
+
+            return HttpResponse(status=200)
+
+        # Event: customer.subscription.updated
+        if gatewayManager.event['type'] == 'customer.subscription.updated' and hasattr(gatewayManager, 'subscription'):
+            # Subscription active after invoice paid
+            if gatewayManager.subscription.status == 'active':
+                gatewayManager.donation.recurring_status = STATUS_ACTIVE
+                gatewayManager.donation.save()
+
+                return HttpResponse(status=200)
+            return HttpResponse(status=400)
     else:
         return HttpResponse(status=400)
 
@@ -232,8 +309,11 @@ def cancel_from_stripe(request):
         request.session['return-donation-id'] = gatewayManager.donation.id
 
         if gatewayManager.session:
-            # todo: nicer reception for the returned paymentIntent object
-            stripe.PaymentIntent.cancel(gatewayManager.session.payment_intent)
+            if gatewayManager.session.mode == 'payment':
+                # todo: nicer reception for the returned paymentIntent object
+                stripe.PaymentIntent.cancel(
+                    gatewayManager.session.payment_intent)
+            # todo: cover the route for subscription
     else:
         request.session['return-error'] = str(_(
             "Results returned from gateway is invalid."))

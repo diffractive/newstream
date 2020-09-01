@@ -15,7 +15,7 @@ from newstream.edit_handlers import ReadOnlyPanel
 
 User = get_user_model()
 
-STATUS_ONGOING = 'on-going'
+STATUS_ACTIVE = 'active'
 STATUS_COMPLETE = 'complete'
 STATUS_PENDING = 'pending'
 STATUS_REFUNDED = 'refunded'
@@ -112,7 +112,7 @@ class Donation(ClusterableModel):
         (STATUS_CANCELLED, _(STATUS_CANCELLED.capitalize())),
     ]
     RECURRING_STATUS_CHOICES = [
-        (STATUS_ONGOING, _(STATUS_ONGOING.capitalize())),
+        (STATUS_ACTIVE, _(STATUS_ACTIVE.capitalize())),
         (STATUS_CANCELLED, _(STATUS_CANCELLED.capitalize())),
         (STATUS_NONRECURRING, _(STATUS_NONRECURRING.capitalize())),
     ]
@@ -188,7 +188,7 @@ class Donation(ClusterableModel):
         pass
 
     def isOnGoing(self):
-        return 'Yes' if self.recurring_status == STATUS_ONGOING else 'No'
+        return 'Yes' if self.recurring_status == STATUS_ACTIVE else 'No'
 
 
 class DonationMeta(models.Model):

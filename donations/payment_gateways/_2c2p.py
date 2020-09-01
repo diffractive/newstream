@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from newstream.functions import raiseObjectNone, getFullReverseUrl, getSiteName, getSiteSettings
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.functions import getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
-from donations.models import DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ONGOING, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
+from donations.models import DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ACTIVE, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
 from donations.payment_gateways.setting_classes import get2C2PSettings
 
 REDIRECT_API_VERSION = '8.5'
@@ -124,7 +124,7 @@ class Gateway_2C2P(PaymentGatewayManager):
                     self.donation.payment_status = STATUS_PENDING
 
                 if self.donation.is_recurring:
-                    self.donation.recurring_status = STATUS_ONGOING
+                    self.donation.recurring_status = STATUS_ACTIVE
                 else:
                     self.donation.recurring_status = STATUS_NONRECURRING
                 self.donation.save()

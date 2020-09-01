@@ -25,11 +25,11 @@
                 <td>{{ donation.user.fullname }}</td>
             </tr>
             <tr>
-                <td>{% trans 'Order number' %}</td>
+                <td>{% trans 'Order Number' %}</td>
                 <td>{{ donation.order_number }}</td>
             </tr>
             <tr>
-                <td>{% trans 'Donation frequency' %}</td>
+                <td>{% trans 'Donation Frequency' %}</td>
                 <td>{{ donation.donation_frequency }}</td>
             </tr>
             <tr>
@@ -37,7 +37,7 @@
                 <td>{{ donation.currency }}</td>
             </tr>
             <tr>
-                <td>{% trans 'Donation amount' %}</td>
+                <td>{% trans 'Donation Amount' %}</td>
                 <td>{{ donation|amount_with_currency }}</td>
             </tr>
             <tr>
@@ -45,9 +45,15 @@
                 <td>{{ donation.user.optInMailingIcon|safe }}</td>
             </tr>
             <tr>
-                <td>{% trans 'Payment status' %}</td>
+                <td>{% trans 'Payment Status' %}</td>
                 <td>{{ donation.payment_status|title }}</td>
             </tr>
+            {% if donation.is_recurring %}
+            <tr>
+                <td>{% trans 'Recurring Payment Status' %}</td>
+                <td>{{ donation.recurring_status|title }}</td>
+            </tr>
+            {% endif %}
         </table>
     </div>
     <br>

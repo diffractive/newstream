@@ -59,7 +59,7 @@ class User(AbstractUser, ClusterableModel):
 
     @property
     def fullname(self):
-        return ' '.join([self.first_name, self.last_name])
+        return ' '.join([self.first_name, self.last_name]) if self.first_name and self.last_name else self.email
 
     @fullname.setter
     def fullname(self, val):

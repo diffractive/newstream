@@ -21,6 +21,12 @@
     <p>{% trans 'Redirecting to Payment Gateway Page...' %}</p>
 </div>
 
+<div class="container-tight error-div flex flex-col justify-center items-center hidden">
+    <img src="{% static 'img/warning.png' %}" class="w-10 h-10 lg:w-16 lg:h-16 mb-3" alt="something went wrong">
+    <h2 class="mb-4">{% trans 'Something went wrong...' %}</h2>
+    <p id='error-msg-stripe'></p>
+</div>
+
 <script type="text/javascript">
     // Create an instance of the Stripe object with your publishable API key
     var stripe = Stripe('{{ publishable_key }}');
@@ -41,11 +47,16 @@
                 // error, you should display the localized error message to your
                 // customer using `error.message`.
                 if (result.error) {
-                    alert(result.error.message);
+                    document.getElementsByClassName('redirect-loading-div')[0].classList.add('hidden');
+                    document.getElementsByClassName('error-div')[0].classList.remove('hidden');
+                    document.getElementById('error-msg-stripe').innerHTML = result.error.message;
                 }
             })
             .catch(function (error) {
                 console.error('Error:', error);
+                document.getElementsByClassName('redirect-loading-div')[0].classList.add('hidden');
+                document.getElementsByClassName('error-div')[0].classList.remove('hidden');
+                document.getElementById('error-msg-stripe').innerHTML = error;
             });
     }, 100);
 </script>

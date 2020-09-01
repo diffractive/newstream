@@ -16,6 +16,7 @@
     </tr>
     <tr>
         <td style="width: 100%;">
+            <!-- todo: user fullname no display  -->
             <p>{% blocktrans %}Dear {{ donation.user.fullname }},{% endblocktrans %}</p>
             <p>
                 {% trans "Thank you for your generosity! Your support means a lot to us. Here are the details of your donation:" %}
@@ -43,8 +44,14 @@
                 </tr>
                 <tr>
                     <td style="font-weight: bold;">{% trans "Payment Status" %}</td>
-                    <td>{{ donation.payment_status }}</td>
+                    <td>{{ donation.payment_status|title }}</td>
                 </tr>
+                {% if donation.is_recurring %}
+                <tr>
+                    <td style="font-weight: bold;">{% trans 'Recurring Payment Status' %}</td>
+                    <td>{{ donation.recurring_status|title }}</td>
+                </tr>
+                {% endif %}
             </table>
             <p>{% trans "Thank you," %}</p>
             <p>{{ request|site_name }}</p>

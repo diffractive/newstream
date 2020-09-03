@@ -7,10 +7,10 @@ from django.http import HttpResponse, JsonResponse
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
-from donations.models import Donation, STATUS_COMPLETE, STATUS_ACTIVE
+from donations.models import Donation, DonationPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
-from donations.functions import formatAmountCentsDecimal, sendDonationNotifToAdmins, sendDonationReceipt
+from donations.functions import formatAmountCentsDecimal, sendDonationNotifToAdmins, sendDonationReceipt, gen_order_id
 from newstream.functions import uuid4_str, getSiteName, getSiteSettings, getFullReverseUrl, printvars
 
 
@@ -100,6 +100,22 @@ class StripeGatewayFactory(object):
                         donation_id = subscription.metadata['donation_id']
                     else:
                         return None
+
+        # Intercept the invoice paid event for subscriptions
+        if event['type'] == 'invoice.paid':
+            invoice = event['data']['object']
+            subscription_id = invoice.subscription
+
+            if subscription_id:
+                subscription = stripe.Subscription.retrieve(subscription_id)
+                if 'donation_id' in subscription.metadata:
+                    donation_id = subscription.metadata['donation_id']
+                    kwargs['invoice'] = invoice
+                    kwargs['subscription'] = subscription
+                else:
+                    return None
+            else:
+                return None
 
         # Intercept the subscription updated event
         if event['type'] == 'customer.subscription.updated':
@@ -278,6 +294,50 @@ def verify_stripe_response(request):
 
             return HttpResponse(status=200)
 
+        # Event: invoice.paid (for subscriptions)
+        if gatewayManager.event['type'] == 'invoice.paid' and hasattr(gatewayManager, 'subscription') and hasattr(gatewayManager, 'invoice'):
+            if gatewayManager.invoice.status == 'paid':
+                # check if invoice is first or recurring
+                invoice_num_parts = gatewayManager.invoice.number.split('-')
+                invoice_num = int(invoice_num_parts[len(invoice_num_parts)-1])
+                if invoice_num == 1:
+                    dpmeta = DonationPaymentMeta(
+                        donation=gatewayManager.donation, field_key='stripe_invoice_number', field_value=gatewayManager.invoice.number)
+                    dpmeta.save()
+                elif invoice_num > 1:
+                    # create a new donation record + then send donation receipt to user
+                    donation = Donation(
+                        order_number=gen_order_id(gatewayManager),
+                        user=gatewayManager.donation.user,
+                        form=gatewayManager.donation.form,
+                        gateway=gatewayManager.donation.gateway,
+                        is_recurring=True,
+                        donation_amount=(
+                            float(gatewayManager.invoice.amount_paid)/100),
+                        currency=gatewayManager.donation.currency,
+                        payment_status=STATUS_COMPLETE,
+                        parent_donation=gatewayManager.donation
+                    )
+                    try:
+                        donation.save()
+
+                        dpmeta = DonationPaymentMeta(
+                            donation=donation, field_key='stripe_invoice_number', field_value=gatewayManager.invoice.number)
+                        dpmeta.save()
+                    except Exception as e:
+                        # Should rarely happen, but in case some bugs or order id repeats itself
+                        print(str(e))
+                        return HttpResponse(status=500)
+
+                    # set language for donation_receipt.html
+                    user = donation.user
+                    if user.language_preference:
+                        translation.activate(user.language_preference)
+                    # email thank you receipt to user
+                    sendDonationReceipt(request, donation)
+
+                return HttpResponse(status=200)
+
         # Event: customer.subscription.updated
         if gatewayManager.event['type'] == 'customer.subscription.updated' and hasattr(gatewayManager, 'subscription'):
             # Subscription active after invoice paid
@@ -285,8 +345,13 @@ def verify_stripe_response(request):
                 gatewayManager.donation.recurring_status = STATUS_ACTIVE
                 gatewayManager.donation.save()
 
+                dpmeta = DonationPaymentMeta(
+                    donation=gatewayManager.donation, field_key='stripe_subscription_period', field_value=str(gatewayManager.subscription.current_period_start)+'-'+str(gatewayManager.subscription.current_period_end))
+                dpmeta.save()
+
                 return HttpResponse(status=200)
             return HttpResponse(status=400)
+
     else:
         return HttpResponse(status=400)
 

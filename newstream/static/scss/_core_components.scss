@@ -361,10 +361,12 @@ span.multilang-icon {
         position: absolute;
         top: 2.5rem;
         right: 0rem;
-        a {
+        a,
+        button {
             display: block;
             padding: 0.5rem 1rem;
             width: 100%;
+            white-space: nowrap;
             &:hover {
                 @apply bg-gray-200;
             }

@@ -1,10 +1,13 @@
 import re
 import secrets
+import json
 from pprint import pprint
 from django.conf import settings
 from django.db import IntegrityError
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
+from django.db.models import Q
+from django.urls import reverse
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetView
@@ -12,7 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import translation
 from django.views.decorators.csrf import csrf_exempt
 
-from newstream.functions import getSiteSettings
+from newstream.functions import getSiteSettings, printvars
 from site_settings.models import PaymentGateway
 from .models import *
 from .forms import *
@@ -86,6 +89,8 @@ def cancelled(request):
         donation = Donation.objects.get(
             pk=request.session['return-donation-id'])
         donation.payment_status = STATUS_CANCELLED
+        if donation.is_recurring:
+            donation.recurring_status = STATUS_CANCELLED
         donation.save()
         # logs user in
         if donation.user:
@@ -104,6 +109,27 @@ def donate(request):
     else:
         # show login or sign-up options page
         return render(request, 'donations/signin_method.html')
+
+
+@login_required
+@csrf_exempt
+def cancel_recurring(request):
+    if request.method == 'POST':
+        json_data = json.loads(request.body)
+        if 'donation_id' not in json_data:
+            print("No donation_id in JSON body", flush=True)
+            return HttpResponse(status=400)
+        donation_id = int(json_data['donation_id'])
+        donation = get_object_or_404(Donation, id=donation_id)
+        gatewayManager = PaymentGatewayFactory.initGateway(
+                    request, donation)
+        resultSet = gatewayManager.cancel_recurring_payment()
+        if resultSet['status']:
+            return JsonResponse({'status': 'success', 'button-html': str(_('View all renewals')), 'button-href': reverse('donations:my-renewals', kwargs={'id': donation_id})})
+        else:
+            return JsonResponse({'status': 'failure', 'reason': resultSet['reason']})
+    else:
+        return HttpResponse(400)
 
 
 def donation_details(request):
@@ -134,15 +160,19 @@ def donation_details(request):
                 form=form_blueprint,
                 gateway=payment_gateway,
                 is_recurring=True if form.cleaned_data['donation_frequency'] == 'monthly' else False,
-                is_user_first_donation=request.session[
-                    'first_time_registration'] if 'first_time_registration' in request.session else False,
                 donation_amount=form.cleaned_data['donation_amount'],
                 currency=form.cleaned_data['currency'],
                 payment_status=STATUS_PENDING,
-                metas=donation_metas
+                metas=donation_metas,
+                recurring_status=STATUS_PROCESSING if form.cleaned_data['donation_frequency'] == 'monthly' else STATUS_NONRECURRING
             )
             try:
                 donation.save()
+
+                if 'first_time_registration' in request.session:
+                    dpmeta = DonationPaymentMeta(
+                        donation=donation, field_key='is_user_first_donation', field_value=request.session['first_time_registration'])
+                    dpmeta.save()
             except Exception as e:
                 # Should rarely happen, but in case some bugs or order id repeats itself
                 print(str(e), flush=True)
@@ -169,6 +199,16 @@ def donation_details(request):
 def my_donations(request):
     # todo: handle updating/cancelling recurring payments
     donations = Donation.objects.filter(
-        user=request.user).order_by('-created_at')
+        user=request.user, parent_donation=None).order_by('-created_at')
     siteSettings = getSiteSettings(request)
     return render(request, 'donations/my_donations.html', {'donations': donations, 'siteSettings': siteSettings})
+
+
+@login_required
+def my_renewals(request, id):
+    renewals = Donation.objects.filter(Q(id=id) | Q(parent_donation_id=id)).order_by('-created_at')
+    parentDonation = None
+    if len(renewals) > 0:
+        parentDonation = renewals[len(renewals) - 1]
+    siteSettings = getSiteSettings(request)
+    return render(request, 'donations/my_renewals.html', {'parentDonation': parentDonation, 'renewals': renewals, 'siteSettings': siteSettings})

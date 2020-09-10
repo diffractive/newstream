@@ -123,6 +123,7 @@ class Gateway_2C2P(PaymentGatewayManager):
                 else:
                     self.donation.payment_status = STATUS_PENDING
 
+                # todo: use STATUS_RENEWALPAYMENT if payment is a renewal payment
                 if self.donation.is_recurring:
                     self.donation.recurring_status = STATUS_ACTIVE
                 else:

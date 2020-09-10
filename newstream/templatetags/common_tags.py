@@ -158,7 +158,4 @@ def remember_filter(html):
 
 @register.filter(name='display_username')
 def display_username(user):
-    if user.first_name and user.last_name:
-        return user.first_name + ' ' + user.last_name
-    else:
-        return user.email
+    return user.fullname

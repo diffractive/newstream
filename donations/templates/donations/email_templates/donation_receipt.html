@@ -16,8 +16,7 @@
     </tr>
     <tr>
         <td style="width: 100%;">
-            <!-- todo: user fullname no display  -->
-            <p>{% blocktrans %}Dear {{ donation.user.fullname }},{% endblocktrans %}</p>
+            <p>{% trans "Dear" %} {{ donation.user.fullname }},</p>
             <p>
                 {% trans "Thank you for your generosity! Your support means a lot to us. Here are the details of your donation:" %}
             </p>

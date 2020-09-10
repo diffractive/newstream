@@ -7,7 +7,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
-from donations.models import Donation, DonationPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE
+from donations.models import Donation, DonationPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_RENEWALPAYMENT, STATUS_CANCELLED
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.functions import formatAmountCentsDecimal, sendDonationNotifToAdmins, sendDonationReceipt, gen_order_id
@@ -52,6 +52,29 @@ class Gateway_Stripe(PaymentGatewayManager):
 
     def verify_gateway_response(self):
         pass
+
+    def cancel_recurring_payment(self):
+        initStripeApiKey(self.request)
+        # need to return a resultSet dictionary with status == 'success' / 'failure', reason if failure, button-html if success
+        donationMetas = DonationPaymentMeta.objects.filter(donation_id=self.donation.id, field_key='stripe_subscription_id')
+        if len(donationMetas) == 1:
+            donationMeta = donationMetas[0]
+            subscription_id = donationMeta.field_value
+            # cancel subscription via stripe API
+            cancelled_subscription = stripe.Subscription.delete(subscription_id)
+            if cancelled_subscription and cancelled_subscription.status == 'canceled':
+                return {
+                    'status': 'success'
+                }
+            return {
+                'status': 'failure',
+                'reason': 'Subscription object returned from stripe having status '+cancelled_subscription.status+' instead of canceled'
+            }
+        return {
+            'status': 'failure',
+            'reason': 'DonationPaymentMeta returning '+len(donationMetas)+' instead of a single result'
+        }
+
 
 
 class StripeGatewayFactory(object):
@@ -128,6 +151,17 @@ class StripeGatewayFactory(object):
                 else:
                     return None
 
+        # Intercept the subscription deleted event
+        if event['type'] == 'customer.subscription.deleted':
+            subscription = event['data']['object']
+
+            if subscription:
+                if 'donation_id' in subscription.metadata:
+                    donation_id = subscription.metadata['donation_id']
+                    kwargs['subscription'] = subscription
+                else:
+                    return None
+
         # Finally init and return the Stripe Gateway Manager
         if donation_id:
             try:
@@ -143,23 +177,15 @@ class StripeGatewayFactory(object):
     def initGatewayByReturn(request):
         initStripeApiKey(request)
 
+        donation_id = None
         session_id = request.GET.get("stripe_session_id", None)
         if session_id:
             session = stripe.checkout.Session.retrieve(session_id)
-            if session.mode == 'payment' and session.payment_intent:
-                payment_intent = stripe.PaymentIntent.retrieve(
-                    session.payment_intent)
-                if 'donation_id' in payment_intent.metadata:
-                    donation_id = payment_intent.metadata['donation_id']
-                else:
-                    return None
-            elif session.mode == 'subscription' and session.subscription:
-                subscription = stripe.Subscription.retrieve(
-                    session.subscription)
-                if 'donation_id' in subscription.metadata:
-                    donation_id = subscription.metadata['donation_id']
-                else:
-                    return None
+            # no matter 'payment' or 'subscription', metadata also saved at checkout session level
+            if 'donation_id' in session.metadata:
+                donation_id = session.metadata['donation_id']
+            else:
+                return None
 
             try:
                 donation = Donation.objects.get(pk=donation_id)
@@ -250,6 +276,9 @@ def create_checkout_session(request):
                 'quantity': 1,
             }],
             mode=session_mode,
+            metadata={
+                'donation_id': donation.id
+            },
             payment_intent_data=payment_intent_data,
             subscription_data=subscription_data,
             success_url=getFullReverseUrl(
@@ -307,7 +336,7 @@ def verify_stripe_response(request):
                 elif invoice_num > 1:
                     # create a new donation record + then send donation receipt to user
                     donation = Donation(
-                        order_number=gen_order_id(gatewayManager),
+                        order_number=gen_order_id(gatewayManager.donation.gateway),
                         user=gatewayManager.donation.user,
                         form=gatewayManager.donation.form,
                         gateway=gatewayManager.donation.gateway,
@@ -316,7 +345,8 @@ def verify_stripe_response(request):
                             float(gatewayManager.invoice.amount_paid)/100),
                         currency=gatewayManager.donation.currency,
                         payment_status=STATUS_COMPLETE,
-                        parent_donation=gatewayManager.donation
+                        parent_donation=gatewayManager.donation,
+                        recurring_status=STATUS_RENEWALPAYMENT
                     )
                     try:
                         donation.save()
@@ -336,6 +366,11 @@ def verify_stripe_response(request):
                     # email thank you receipt to user
                     sendDonationReceipt(request, donation)
 
+                # save subscription id no matter first or recurrnig payment
+                dpmeta = DonationPaymentMeta(
+                    donation=gatewayManager.donation, field_key='stripe_subscription_id', field_value=gatewayManager.invoice.subscription)
+                dpmeta.save()
+
                 return HttpResponse(status=200)
 
         # Event: customer.subscription.updated
@@ -351,6 +386,14 @@ def verify_stripe_response(request):
 
                 return HttpResponse(status=200)
             return HttpResponse(status=400)
+
+        # Event: customer.subscription.deleted
+        if gatewayManager.event['type'] == 'customer.subscription.deleted' and hasattr(gatewayManager, 'subscription'):
+            # update donation recurring_status
+            gatewayManager.donation.recurring_status = STATUS_CANCELLED
+            gatewayManager.donation.save()
+
+            return HttpResponse(status=200)
 
     else:
         return HttpResponse(status=400)
@@ -378,7 +421,7 @@ def cancel_from_stripe(request):
                 # todo: nicer reception for the returned paymentIntent object
                 stripe.PaymentIntent.cancel(
                     gatewayManager.session.payment_intent)
-            # todo: cover the route for subscription
+            # for subscription mode, payment_intent is not yet created, so no need to cancel
     else:
         request.session['return-error'] = str(_(
             "Results returned from gateway is invalid."))

@@ -31,11 +31,23 @@
                             <span class="three-dots-icon"></span>
                             <div class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
                                 {% if request.user.is_email_verified %}
-                                <a href="#">{% trans 'View all renewals' %}</a>
-                                <a href="#">{% trans 'Edit donation' %}</a>
-                                <a href="#">{% trans 'Cancel donation' %}</a>
+                                {% if donation.isRecurringCancelled %}
+                                <div class="payment-cancelled-options-div" data-id="{{ donation.id }}">
+                                    <button class="view-recurring-donation" data-id="{{ donation.id }}"
+                                        data-href="{% url 'donations:my-renewals' donation.id %}">{% trans 'View all renewals' %}</button>
+                                </div>
                                 {% else %}
-                                <a class="actions-locked" href="#">{% trans 'Actions locked (Email unverified)' %}</a>
+                                <div class="payment-recurring-options-div" data-id="{{ donation.id }}">
+                                    <button class="view-recurring-donation" data-id="{{ donation.id }}"
+                                        data-href="{% url 'donations:my-renewals' donation.id %}">{% trans 'View all renewals' %}</button>
+                                    <button class="edit-recurring-donation"
+                                        data-id="{{ donation.id }}">{% trans 'Edit donation' %}</button>
+                                    <button class="cancel-recurring-donation"
+                                        data-id="{{ donation.id }}">{% trans 'Cancel recurring donation' %}</button>
+                                </div>
+                                {% endif %}
+                                {% else %}
+                                <button class="actions-locked">{% trans 'Actions locked (Email unverified)' %}</button>
                                 {% endif %}
                             </div>
                         </div>
@@ -52,7 +64,9 @@
                     <td>&nbsp;</td>
                 </tr>
                 <tr>
-                    <td colspan="3">{{ donation.payment_status|title }}</td>
+                    <td colspan="3">
+                        {% if donation.is_recurring %}{{ donation.recurring_status|title }}{% else %}{{ donation.payment_status|title }}{% endif %}
+                    </td>
                 </tr>
             </table>
         </div>
@@ -80,7 +94,8 @@
                 <td>{{ donation.order_number }}</td>
                 <td>{{ donation.created_at|date:'j M Y' }}</td>
                 <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
-                <td>{{ donation.payment_status|title }}</td>
+                <td>{% if donation.is_recurring %}{{ donation.recurring_status|title }}{% else %}{{ donation.payment_status|title }}{% endif %}
+                </td>
                 <td>
                     {% if donation.is_recurring %}
                     <div class="more-dropdown-div flex items-center dropdown-div-wrapper">
@@ -91,11 +106,23 @@
                         <span class="three-dots-icon"></span>
                         <div class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
                             {% if request.user.is_email_verified %}
-                            <a href="#">{% trans 'View all renewals' %}</a>
-                            <a href="#">{% trans 'Edit donation' %}</a>
-                            <a href="#">{% trans 'Cancel donation' %}</a>
+                            {% if donation.isRecurringCancelled %}
+                            <div class="payment-cancelled-options-div" data-id="{{ donation.id }}">
+                                <button class="view-recurring-donation" data-id="{{ donation.id }}"
+                                    data-href="{% url 'donations:my-renewals' donation.id %}">{% trans 'View all renewals' %}</button>
+                            </div>
                             {% else %}
-                            <a class="actions-locked" href="#">{% trans 'Actions locked (Email unverified)' %}</a>
+                            <div class="payment-recurring-options-div" data-id="{{ donation.id }}">
+                                <button class="view-recurring-donation" data-id="{{ donation.id }}"
+                                    data-href="{% url 'donations:my-renewals' donation.id %}">{% trans 'View all renewals' %}</button>
+                                <button class="edit-recurring-donation"
+                                    data-id="{{ donation.id }}">{% trans 'Edit donation' %}</button>
+                                <button class="cancel-recurring-donation"
+                                    data-id="{{ donation.id }}">{% trans 'Cancel recurring donation' %}</button>
+                            </div>
+                            {% endif %}
+                            {% else %}
+                            <button class="actions-locked">{% trans 'Actions locked (Email unverified)' %}</button>
                             {% endif %}
                         </div>
                     </div>
@@ -112,3 +139,54 @@
     </table>
 </div>
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+    // Example POST method implementation:
+    async function postData(url = '', data = {}) {
+        // Default options are marked with *
+        const response = await fetch(url, {
+            method: 'POST', // *GET, POST, PUT, DELETE, etc.
+            mode: 'same-origin', // no-cors, *cors, same-origin
+            cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+            credentials: 'same-origin', // include, *same-origin, omit
+            headers: {
+                'Content-Type': 'application/json'
+                // 'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            redirect: 'follow', // manual, *follow, error
+            // referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+            body: JSON.stringify(data) // body data type must match "Content-Type" header
+        });
+        return response.json(); // parses JSON response into native JavaScript objects
+    }
+
+    window.addEventListener('load', function () {
+        for (let wrapper of document.getElementsByClassName("cancel-recurring-donation")) {
+            wrapper.addEventListener("click", function (event) {
+                let donation_id = wrapper.getAttribute('data-id');
+                // todo: beautify the confirm dialog + better error handling
+                if (confirm('Confirm Cancel Recurring Payment?')) {
+                    postData('{% url "donations:cancel-recurring" %}', { donation_id: donation_id })
+                        .then(data => {
+                            if (data['status'] == 'success') {
+                                alert('Recurring donation cancelled!');
+                                for (let buttonsDiv of document.querySelectorAll(`div.payment-recurring-options-div[data-id='${donation_id}']`)) {
+                                    buttonsDiv.innerHTML = `<button class="view-recurring-donation" data-id="${donation_id}" data-href="${data['button-href']}">${data['button-html']}</button>`;
+                                }
+                            } else {
+                                alert(data['reason']);
+                            }
+                        });
+                }
+            });
+        }
+        for (let wrapper of document.getElementsByClassName("view-recurring-donation")) {
+            wrapper.addEventListener("click", function (event) {
+                let href = wrapper.getAttribute('data-href');
+                window.location.href = href;
+            })
+        }
+    });
+</script>
+{% endblock %}

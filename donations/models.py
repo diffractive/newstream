@@ -23,6 +23,8 @@ STATUS_REVOKED = 'revoked'
 STATUS_FAILED = 'failed'
 STATUS_CANCELLED = 'cancelled'
 STATUS_NONRECURRING = 'non-recurring'
+STATUS_RENEWALPAYMENT = 'renewal-payment'
+STATUS_PROCESSING = 'processing'
 
 
 class DonationMetaField(AbstractFormField):
@@ -102,95 +104,6 @@ class DonationForm(ClusterableModel):
         return self.amount_type == 'custom'
 
 
-class Donation(ClusterableModel):
-    PAYMENT_STATUS_CHOICES = [
-        (STATUS_COMPLETE, _(STATUS_COMPLETE.capitalize())),
-        (STATUS_PENDING, _(STATUS_PENDING.capitalize())),
-        (STATUS_REFUNDED, _(STATUS_REFUNDED.capitalize())),
-        (STATUS_REVOKED, _(STATUS_REVOKED.capitalize())),
-        (STATUS_FAILED, _(STATUS_FAILED.capitalize())),
-        (STATUS_CANCELLED, _(STATUS_CANCELLED.capitalize())),
-    ]
-    RECURRING_STATUS_CHOICES = [
-        (STATUS_ACTIVE, _(STATUS_ACTIVE.capitalize())),
-        (STATUS_CANCELLED, _(STATUS_CANCELLED.capitalize())),
-        (STATUS_NONRECURRING, _(STATUS_NONRECURRING.capitalize())),
-    ]
-    user = models.ForeignKey(
-        'newstream_user.User',
-        on_delete=models.SET_NULL,
-        null=True
-    )
-    form = models.ForeignKey(
-        'DonationForm',
-        on_delete=models.SET_NULL,
-        null=True
-    )
-    gateway = models.ForeignKey(
-        'site_settings.PaymentGateway',
-        on_delete=models.SET_NULL,
-        null=True
-    )
-    parent_donation = models.ForeignKey(
-        'self', on_delete=models.CASCADE, blank=True, null=True)
-    order_number = models.CharField(max_length=255, unique=True)
-    donation_amount = models.FloatField()
-    is_recurring = models.BooleanField(default=False)
-    is_user_first_donation = models.BooleanField(default=False)
-    currency = models.CharField(max_length=20)
-    payment_status = models.CharField(
-        max_length=255, choices=PAYMENT_STATUS_CHOICES)
-    recurring_status = models.CharField(
-        max_length=255, choices=RECURRING_STATUS_CHOICES, default=STATUS_NONRECURRING, blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    linked_user_deleted = models.BooleanField(default=False)
-    deleted = models.BooleanField(default=False)
-
-    panels = [
-        FieldPanel('order_number', heading=_('Order Number')),
-        FieldPanel('donation_amount', heading=_('Donation Amount')),
-        FieldPanel('is_recurring', heading=_('Is Recurring')),
-        FieldPanel('currency', heading=_('Currency')),
-        FieldPanel('payment_status', heading=_('Payment Status')),
-        FieldPanel('recurring_status', heading=_('Recurring Status')),
-        InlinePanel('metas', label=_('Donation Meta'), heading=_('Donation Meta Data'),
-                    help_text=_('Meta data about this donation is recorded here')),
-        ReadOnlyPanel('linked_user_deleted',
-                      heading=_("Linked User Account Deleted?")),
-    ]
-
-    class Meta:
-        ordering = ['-created_at']
-        verbose_name = _('Donation')
-        verbose_name_plural = _('Donations')
-
-    def __str__(self):
-        return '#'+str(self.id)+' - '+str(self.user)
-
-    def isRecurring(self):
-        return 'Yes' if self.is_recurring else 'No'
-
-    @property
-    def donation_frequency(self):
-        return 'Monthly' if self.is_recurring else 'One-time'
-
-    @donation_frequency.setter
-    def donation_frequency(self, val):
-        pass
-
-    @property
-    def donation_type_stripe(self):
-        return 'recurring' if self.is_recurring else 'one_time'
-
-    @donation_type_stripe.setter
-    def donation_type_stripe(self, val):
-        pass
-
-    def isOnGoing(self):
-        return 'Yes' if self.recurring_status == STATUS_ACTIVE else 'No'
-
-
 class DonationMeta(models.Model):
     donation = ParentalKey(
         'Donation',
@@ -231,6 +144,111 @@ class DonationPaymentMeta(models.Model):
 
     def __str__(self):
         return self.field_key
+
+
+class Donation(ClusterableModel):
+    PAYMENT_STATUS_CHOICES = [
+        (STATUS_COMPLETE, _(STATUS_COMPLETE.capitalize())),
+        (STATUS_PENDING, _(STATUS_PENDING.capitalize())),
+        (STATUS_PROCESSING, _(STATUS_PROCESSING.capitalize())),
+        (STATUS_REFUNDED, _(STATUS_REFUNDED.capitalize())),
+        (STATUS_REVOKED, _(STATUS_REVOKED.capitalize())),
+        (STATUS_FAILED, _(STATUS_FAILED.capitalize())),
+        (STATUS_CANCELLED, _(STATUS_CANCELLED.capitalize())),
+    ]
+    RECURRING_STATUS_CHOICES = [
+        (STATUS_ACTIVE, _(STATUS_ACTIVE.capitalize())),
+        (STATUS_PROCESSING, _(STATUS_PROCESSING.capitalize())),
+        (STATUS_RENEWALPAYMENT, _(STATUS_RENEWALPAYMENT.capitalize())),
+        (STATUS_CANCELLED, _(STATUS_CANCELLED.capitalize())),
+        (STATUS_NONRECURRING, _(STATUS_NONRECURRING.capitalize())),
+    ]
+    user = models.ForeignKey(
+        'newstream_user.User',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    form = models.ForeignKey(
+        'DonationForm',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    gateway = models.ForeignKey(
+        'site_settings.PaymentGateway',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    parent_donation = models.ForeignKey(
+        'self', on_delete=models.CASCADE, blank=True, null=True)
+    order_number = models.CharField(max_length=255, unique=True)
+    donation_amount = models.FloatField()
+    is_recurring = models.BooleanField(default=False)
+    currency = models.CharField(max_length=20)
+    payment_status = models.CharField(
+        max_length=255, choices=PAYMENT_STATUS_CHOICES)
+    recurring_status = models.CharField(
+        max_length=255, choices=RECURRING_STATUS_CHOICES, default=STATUS_NONRECURRING, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    linked_user_deleted = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False)
+
+    panels = [
+        FieldPanel('order_number', heading=_('Order Number')),
+        FieldPanel('donation_amount', heading=_('Donation Amount')),
+        FieldPanel('is_recurring', heading=_('Is Recurring')),
+        FieldPanel('currency', heading=_('Currency')),
+        FieldPanel('payment_status', heading=_('Payment Status')),
+        FieldPanel('recurring_status', heading=_('Recurring Status')),
+        InlinePanel('metas', label=_('Donation Meta'), heading=_('Donation Meta Data'),
+                    help_text=_('Meta data about this donation is recorded here')),
+        ReadOnlyPanel('linked_user_deleted',
+                      heading=_("Linked User Account Deleted?")),
+    ]
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _('Donation')
+        verbose_name_plural = _('Donations')
+
+    def __str__(self):
+        return '#'+str(self.id)+' - '+str(self.user)
+
+    def isRecurring(self):
+        return 'Yes' if self.is_recurring else 'No'
+
+    def isRecurringCancelled(self):
+        return True if self.is_recurring and self.recurring_status == STATUS_CANCELLED else False
+
+    @property
+    def is_user_first_donation(self):
+        resultSet = DonationPaymentMeta.objects.filter(donation_id=self.id, field_key='is_user_first_donation')
+        if len(resultSet) == 1:
+            return resultSet[0].field_value
+        return False
+
+    @is_user_first_donation.setter
+    def is_user_first_donation(self, val):
+        pass
+
+    @property
+    def donation_frequency(self):
+        return 'Monthly' if self.is_recurring else 'One-time'
+
+    @donation_frequency.setter
+    def donation_frequency(self, val):
+        pass
+
+    @property
+    def donation_type_stripe(self):
+        return 'recurring' if self.is_recurring else 'one_time'
+
+    @donation_type_stripe.setter
+    def donation_type_stripe(self, val):
+        pass
+
+    def isOnGoing(self):
+        return 'Yes' if self.recurring_status == STATUS_ACTIVE else 'No'
 
 
 @receiver(pre_delete, sender=User)

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% load static common_tags i18n %}
+
+{% block title %}{% trans 'My Renewals' %}{% endblock %}
+{% block body_class %}my-renewals-page{% endblock %}
+
+{% block content %}
+<div class="w-full bg-primary-dark">
+    <div class="container">
+        <div class="mb-4 w-64">
+            <a href="{% url 'donations:my-donations' %}"
+                class="ns-wide-btn left-chevron-btn block">{% trans 'Back to My Donations' %}<span
+                    class="icon"></span></a>
+        </div>
+        <h1 class="mb-4 text-white">{% trans 'My renewals' %}</h1>
+        <h3 class="mb-2 text-white">{% trans 'Parent donation order number:' %} {{parentDonation.order_number}}</h3>
+        <h3 class="mb-4 text-white">{% trans 'Parent donation recurring status:' %} <span
+                class="font-bold text-primary">{{parentDonation.recurring_status|title}}</span></h3>
+        <p class="text-primary-light lg:w-3/4">
+            {% blocktrans %}View all your renewals here. The last transaction on this page is the parent donation
+            itself. {% endblocktrans %}
+        </p>
+    </div>
+</div>
+<div class="container">
+    <div class="lg:hidden flex flex-col">
+        {% if renewals %}
+        {% for donation in renewals %}
+        <div class="donation-record p-4 rounded-lg bg-primary-light mb-4">
+            <table class="w-full">
+                <tr>
+                    <td colspan="2"><span class="font-bold">#&nbsp;</span>{{ donation.order_number }}</td>
+                </tr>
+                <tr>
+                    <td width="120">{{ donation|amount_with_currency }}</td>
+                    <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
+                <tr>
+                    <td>{{ donation.donation_frequency }}</td>
+                    <td>{{ donation.created_at|date:'j M Y' }}</td>
+                </tr>
+                <tr>
+                    <td colspan="2">{{ donation.payment_status|title }}</td>
+                </tr>
+            </table>
+        </div>
+        {% endfor %}
+        {% endif %}
+    </div>
+    <table class="w-full my-donations-table hidden lg:block">
+        <thead>
+            <tr>
+                <th>{% trans 'Donation Amount' %}</th>
+                <th>{% trans 'Donation Frequency' %}</th>
+                <th>{% trans 'Order Number' %}</th>
+                <th>{% trans 'Date' %}</th>
+                <th>{% trans 'Payment Method' %}</th>
+                <th>{% trans 'Status' %}</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if renewals %}
+            {% for donation in renewals %}
+            <tr>
+                <td>{{ donation|amount_with_currency }}</td>
+                <td>{{ donation.donation_frequency }}</td>
+                <td>{{ donation.order_number }}</td>
+                <td>{{ donation.created_at|date:'j M Y' }}</td>
+                <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
+                <td>{{ donation.payment_status|title }}</td>
+            </tr>
+            {% endfor %}
+            {% else %}
+            <tr>
+                <td colspan="5">{% trans 'No Renewal History.' %}</td>
+            </tr>
+            {% endif %}
+        </tbody>
+    </table>
+</div>
+{% endblock content %}

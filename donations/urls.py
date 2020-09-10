@@ -7,6 +7,8 @@ app_name = 'donations'
 urlpatterns = [
     path('donate/', views.donate,
          name='donate'),
+    path('cancel-recurring/', views.cancel_recurring,
+         name='cancel-recurring'),
     path('donation-details/', views.donation_details,
          name='donation-details'),
     path('create-stripe-session/', create_checkout_session,
@@ -24,4 +26,5 @@ urlpatterns = [
     path('thank-you/', views.thank_you, name='thank-you'),
     path('cancelled/', views.cancelled, name='cancelled'),
     path('my-donations/', views.my_donations, name='my-donations'),
+    path('my-renewals/<int:id>/', views.my_renewals, name='my-renewals'),
 ]

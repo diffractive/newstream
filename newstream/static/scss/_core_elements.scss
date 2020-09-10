@@ -44,6 +44,18 @@ a {
         transform: translateY(-50%);
     }
 }
+.left-svg-icon-btn {
+    @extend .svg-icon-btn;
+    padding-left: 4rem !important;
+    span.icon {
+        background-image: url("../svg/left-chevron.svg");
+        left: 1.25rem;
+        right: initial;
+    }
+}
+.left-chevron-btn {
+    @extend .left-svg-icon-btn;
+}
 .right-arrow-btn {
     @extend .svg-icon-btn;
     span.icon {

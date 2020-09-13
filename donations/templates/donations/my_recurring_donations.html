@@ -1,28 +1,28 @@
 {% extends "base.html" %}
 {% load static common_tags i18n %}
 
-{% block title %}{% trans 'My Donations' %}{% endblock %}
-{% block body_class %}my-donations-page{% endblock %}
+{% block title %}{% trans 'My Recurring Donations' %}{% endblock %}
+{% block body_class %}my-recurring-donations-page{% endblock %}
 
 {% block content %}
 <div class="w-full bg-primary-dark">
     <div class="container">
-        <h1 class="mb-4 text-white">{% trans 'My donations' %}</h1>
+        <h1 class="mb-4 text-white">{% trans 'My recurring donations' %}</h1>
         <p class="text-primary-light lg:w-3/4">
-            {% trans 'View and manage your donations here. We thank you so much for your support. Every contribution, however big or small, is valuable for our future and our ability to deliver quality journalism that’s independent, not-for-profit, and free of charge.' %}
+            {% trans 'View and manage your recurring donations here. We thank you so much for your support. Every contribution, however big or small, is valuable for our future and our ability to deliver quality journalism that’s independent, not-for-profit, and free of charge.' %}
         </p>
     </div>
 </div>
 <div class="container">
+    {% include "donations/donation_view_switcher.html" %}
     <div class="lg:hidden flex flex-col">
-        {% if donations %}
-        {% for donation in donations %}
+        {% if subscriptions %}
+        {% for subscription in subscriptions %}
         <div class="donation-record p-4 rounded-lg bg-primary-light mb-4">
             <table class="w-full">
                 <tr>
-                    <td colspan="2"><span class="font-bold">#&nbsp;</span>{{ donation.order_number }}</td>
+                    <td colspan="2"><span class="font-bold">#&nbsp;</span>{{ subscription.object_id }}</td>
                     <td width="50">
-                        {% if donation.is_recurring %}
                         <div class="more-dropdown-div flex items-center dropdown-div-wrapper">
                             <input type="checkbox" name="md_dropdown-toggle-checkbox"
                                 id="md_dropdown-toggle-checkbox{{forloop.counter}}" class="dropdown-toggle-checkbox">
@@ -31,19 +31,19 @@
                             <span class="three-dots-icon"></span>
                             <div class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
                                 {% if request.user.is_email_verified %}
-                                {% if donation.isRecurringCancelled %}
-                                <div class="payment-cancelled-options-div" data-id="{{ donation.id }}">
-                                    <button class="view-recurring-donation" data-id="{{ donation.id }}"
-                                        data-href="{% url 'donations:my-renewals' donation.id %}">{% trans 'View all renewals' %}</button>
+                                {% if subscription.isRecurringCancelled %}
+                                <div class="payment-cancelled-options-div" data-id="{{ subscription.id }}">
+                                    <button class="view-recurring-donation" data-id="{{ subscription.id }}"
+                                        data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
                                 </div>
                                 {% else %}
-                                <div class="payment-recurring-options-div" data-id="{{ donation.id }}">
-                                    <button class="view-recurring-donation" data-id="{{ donation.id }}"
-                                        data-href="{% url 'donations:my-renewals' donation.id %}">{% trans 'View all renewals' %}</button>
+                                <div class="payment-recurring-options-div" data-id="{{ subscription.id }}">
+                                    <button class="view-recurring-donation" data-id="{{ subscription.id }}"
+                                        data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
                                     <button class="edit-recurring-donation"
-                                        data-id="{{ donation.id }}">{% trans 'Edit Recurring donation' %}</button>
+                                        data-id="{{ subscription.id }}">{% trans 'Edit Recurring donation' %}</button>
                                     <button class="cancel-recurring-donation"
-                                        data-id="{{ donation.id }}">{% trans 'Cancel recurring donation' %}</button>
+                                        data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}</button>
                                 </div>
                                 {% endif %}
                                 {% else %}
@@ -51,22 +51,20 @@
                                 {% endif %}
                             </div>
                         </div>
-                        {% endif %}
                     </td>
                 </tr>
                 <tr>
-                    <td width="120">{{ donation|amount_with_currency }}</td>
-                    <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
+                    <td width="120">{{ subscription|recurring_amount_with_currency }}</td>
+                    <td>{{ siteSettings|get_attr:subscription.gateway.frontend_label_attr_name }}</td>
                     <td>&nbsp;</td>
                 <tr>
-                    <td>{{ donation.donation_frequency }}</td>
-                    <td>{{ donation.created_at|date:'j M Y' }}</td>
+                    <td>{% trans 'Monthly' %}</td>
+                    <td>{{ subscription.created_at|date:'j M Y' }}</td>
                     <td>&nbsp;</td>
                 </tr>
                 <tr>
-                    <td colspan="3">
-                        {% if donation.is_recurring %}{{ donation.recurring_status|title }}{% else %}{{ donation.payment_status|title }}{% endif %}
-                    </td>
+                    <td colspan="3" class="recurring-status-td" data-id="{{ subscription.id }}">
+                        {{ subscription.recurring_status|title }}</td>
                 </tr>
             </table>
         </div>
@@ -76,9 +74,9 @@
     <table class="w-full my-donations-table hidden lg:block">
         <thead>
             <tr>
-                <th>{% trans 'Donation Amount' %}</th>
-                <th>{% trans 'Donation Frequency' %}</th>
-                <th>{% trans 'Order Number' %}</th>
+                <th>{% trans 'Recurring Donation Amount' %}</th>
+                <th>{% trans 'Recurring Frequency' %}</th>
+                <th>{% trans 'Identifier' %}</th>
                 <th>{% trans 'Date' %}</th>
                 <th>{% trans 'Payment Method' %}</th>
                 <th>{% trans 'Status' %}</th>
@@ -86,18 +84,17 @@
             </tr>
         </thead>
         <tbody>
-            {% if donations %}
-            {% for donation in donations %}
+            {% if subscriptions %}
+            {% for subscription in subscriptions %}
             <tr>
-                <td>{{ donation|amount_with_currency }}</td>
-                <td>{{ donation.donation_frequency }}</td>
-                <td>{{ donation.order_number }}</td>
-                <td>{{ donation.created_at|date:'j M Y' }}</td>
-                <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
-                <td>{% if donation.is_recurring %}{{ donation.recurring_status|title }}{% else %}{{ donation.payment_status|title }}{% endif %}
-                </td>
+                <td>{{ subscription|recurring_amount_with_currency }}</td>
+                <td>{% trans 'Monthly' %}</td>
+                <td>{{ subscription.object_id }}</td>
+                <td>{{ subscription.created_at|date:'j M Y' }}</td>
+                <td>{{ siteSettings|get_attr:subscription.gateway.frontend_label_attr_name }}</td>
+                <td class="recurring-status-td" data-id="{{ subscription.id }}">
+                    {{ subscription.recurring_status|title }}</td>
                 <td>
-                    {% if donation.is_recurring %}
                     <div class="more-dropdown-div flex items-center dropdown-div-wrapper">
                         <input type="checkbox" name="md2_dropdown-toggle-checkbox"
                             id="md2_dropdown-toggle-checkbox{{forloop.counter}}" class="dropdown-toggle-checkbox">
@@ -106,19 +103,19 @@
                         <span class="three-dots-icon"></span>
                         <div class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
                             {% if request.user.is_email_verified %}
-                            {% if donation.isRecurringCancelled %}
-                            <div class="payment-cancelled-options-div" data-id="{{ donation.id }}">
-                                <button class="view-recurring-donation" data-id="{{ donation.id }}"
-                                    data-href="{% url 'donations:my-renewals' donation.id %}">{% trans 'View all renewals' %}</button>
+                            {% if subscription.isRecurringCancelled %}
+                            <div class="payment-cancelled-options-div" data-id="{{ subscription.id }}">
+                                <button class="view-recurring-donation" data-id="{{ subscription.id }}"
+                                    data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
                             </div>
                             {% else %}
-                            <div class="payment-recurring-options-div" data-id="{{ donation.id }}">
-                                <button class="view-recurring-donation" data-id="{{ donation.id }}"
-                                    data-href="{% url 'donations:my-renewals' donation.id %}">{% trans 'View all renewals' %}</button>
+                            <div class="payment-recurring-options-div" data-id="{{ subscription.id }}">
+                                <button class="view-recurring-donation" data-id="{{ subscription.id }}"
+                                    data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
                                 <button class="edit-recurring-donation"
-                                    data-id="{{ donation.id }}">{% trans 'Edit Recurring donation' %}</button>
+                                    data-id="{{ subscription.id }}">{% trans 'Edit Recurring donation' %}</button>
                                 <button class="cancel-recurring-donation"
-                                    data-id="{{ donation.id }}">{% trans 'Cancel recurring donation' %}</button>
+                                    data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}</button>
                             </div>
                             {% endif %}
                             {% else %}
@@ -126,13 +123,12 @@
                             {% endif %}
                         </div>
                     </div>
-                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
             {% else %}
             <tr>
-                <td colspan="5">{% trans 'No Donation History.' %}</td>
+                <td colspan="7">{% trans 'No Recurring Donation History.' %}</td>
             </tr>
             {% endif %}
         </tbody>
@@ -164,15 +160,21 @@
     window.addEventListener('load', function () {
         for (let wrapper of document.getElementsByClassName("cancel-recurring-donation")) {
             wrapper.addEventListener("click", function (event) {
-                let donation_id = wrapper.getAttribute('data-id');
+                let subscription_id = wrapper.getAttribute('data-id');
                 // todo: beautify the confirm dialog + better error handling
                 if (confirm('Confirm Cancel Recurring Payment?')) {
-                    postData('{% url "donations:cancel-recurring" %}', { donation_id: donation_id })
+                    postData('{% url "donations:cancel-recurring" %}', { subscription_id: subscription_id })
                         .then(data => {
                             if (data['status'] == 'success') {
                                 alert('Recurring donation cancelled!');
-                                for (let buttonsDiv of document.querySelectorAll(`div.payment-recurring-options-div[data-id='${donation_id}']`)) {
-                                    buttonsDiv.innerHTML = `<button class="view-recurring-donation" data-id="${donation_id}" data-href="${data['button-href']}">${data['button-html']}</button>`;
+                                for (let buttonsDiv of document.querySelectorAll(`div.payment-recurring-options-div[data-id='${subscription_id}']`)) {
+                                    buttonsDiv.innerHTML = `<button class="view-recurring-donation" data-id="${subscription_id}" data-href="${data['button-href']}">${data['button-html']}</button>`;
+                                    buttonsDiv.querySelector('button.view-recurring-donation').addEventListener("click", function (event) {
+                                        window.location.href = data['button-href'];
+                                    });
+                                }
+                                for (let statusTd of document.querySelectorAll(`td.recurring-status-td[data-id='${subscription_id}']`)) {
+                                    statusTd.innerHTML = data['recurring-status'];
                                 }
                             } else {
                                 alert(data['reason']);

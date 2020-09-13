@@ -6,7 +6,7 @@ from wagtail.contrib.modeladmin.options import (
 from wagtail.contrib.modeladmin.views import InspectView
 
 from newstream.functions import raiseObjectNone
-from .models import Donation, DonationForm, DonationMeta, DonationPaymentMeta
+from .models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta
 from .payment_gateways._2c2p import Gateway_2C2P
 
 
@@ -57,6 +57,27 @@ class DonationAdmin(ModelAdmin):
     user_column.short_description = _('User Email')  # Renames column head
 
 
+class SubscriptionAdmin(ModelAdmin):
+    model = Subscription
+    menu_label = _('Subscriptions')
+    menu_icon = 'pilcrow'
+    menu_order = 200
+    add_to_settings_menu = False
+    exclude_from_explorer = False
+    # todo: format donation amount upon display according the currency_dict
+    list_display = ('recurring_amount', 'gateway', 'recurring_status', 'user_column', 'created_at',)
+    list_filter = ('recurring_status', 'created_at',)
+    search_fields = ('object_id', 'recurring_amount',
+                     'recurring_status', 'created_at',)
+    inspect_view_enabled = True
+
+    def user_column(self, obj):
+        return obj.user.email if obj.user else '-'
+
+    user_column.admin_order_field = 'user'  # Allows column order sorting
+    user_column.short_description = _('User Email')  # Renames column head
+
+
 class DonationFormAdmin(ModelAdmin):
     model = DonationForm
     menu_label = _('Donation Forms')
@@ -72,7 +93,7 @@ class DonationGroup(ModelAdminGroup):
     menu_label = _('Donations')
     menu_icon = 'folder-open-inverse'
     menu_order = 200
-    items = (DonationAdmin, DonationFormAdmin)
+    items = (DonationAdmin, SubscriptionAdmin, DonationFormAdmin)
 
 
 modeladmin_register(DonationGroup)

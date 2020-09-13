@@ -33,10 +33,11 @@ def verify_gateway_response(request):
             # set default language for admins' emails
             translation.activate(settings.LANGUAGE_CODE)
 
+            # todo: should make this an option toggle in site_settings
             # email new donation notification to admin list
             # only when the donation is brand new, not counting in recurring renewals
-            if not gatewayManager.donation.parent_donation:
-                sendDonationNotifToAdmins(request, gatewayManager.donation)
+            # if not gatewayManager.donation.parent_donation:
+            sendDonationNotifToAdmins(request, gatewayManager.donation)
 
             # set language for donation_receipt.html
             user = gatewayManager.donation.user
@@ -89,8 +90,7 @@ def cancelled(request):
         donation = Donation.objects.get(
             pk=request.session['return-donation-id'])
         donation.payment_status = STATUS_CANCELLED
-        if donation.is_recurring:
-            donation.recurring_status = STATUS_CANCELLED
+        # No need to update recurring_status as no subscription object has been created yet
         donation.save()
         # logs user in
         if donation.user:
@@ -116,16 +116,16 @@ def donate(request):
 def cancel_recurring(request):
     if request.method == 'POST':
         json_data = json.loads(request.body)
-        if 'donation_id' not in json_data:
-            print("No donation_id in JSON body", flush=True)
+        if 'subscription_id' not in json_data:
+            print("No subscription_id in JSON body", flush=True)
             return HttpResponse(status=400)
-        donation_id = int(json_data['donation_id'])
-        donation = get_object_or_404(Donation, id=donation_id)
+        subscription_id = int(json_data['subscription_id'])
+        subscription = get_object_or_404(Subscription, id=subscription_id)
         gatewayManager = PaymentGatewayFactory.initGateway(
-                    request, donation)
+                    request, subscription=subscription)
         resultSet = gatewayManager.cancel_recurring_payment()
         if resultSet['status']:
-            return JsonResponse({'status': 'success', 'button-html': str(_('View all renewals')), 'button-href': reverse('donations:my-renewals', kwargs={'id': donation_id})})
+            return JsonResponse({'status': 'success', 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
         else:
             return JsonResponse({'status': 'failure', 'reason': resultSet['reason']})
     else:
@@ -164,8 +164,8 @@ def donation_details(request):
                 currency=form.cleaned_data['currency'],
                 payment_status=STATUS_PENDING,
                 metas=donation_metas,
-                recurring_status=STATUS_PROCESSING if form.cleaned_data['donation_frequency'] == 'monthly' else STATUS_NONRECURRING
             )
+
             try:
                 donation.save()
 
@@ -181,7 +181,7 @@ def donation_details(request):
 
             # redirect to payment_gateway
             gatewayManager = PaymentGatewayFactory.initGateway(
-                request, donation)
+                request, donation=donation)
             return gatewayManager.redirect_to_gateway_url()
         else:
             pprint(form.errors)
@@ -196,19 +196,25 @@ def donation_details(request):
 
 
 @login_required
-def my_donations(request):
-    # todo: handle updating/cancelling recurring payments
+def my_onetime_donations(request):
+    # todo: separate one-time and recurring donations, with a sidebar like in my profile
     donations = Donation.objects.filter(
-        user=request.user, parent_donation=None).order_by('-created_at')
+        user=request.user, is_recurring=False).order_by('-created_at')
     siteSettings = getSiteSettings(request)
-    return render(request, 'donations/my_donations.html', {'donations': donations, 'siteSettings': siteSettings})
+    return render(request, 'donations/my_onetime_donations.html', {'donations': donations, 'siteSettings': siteSettings})
+
+
+@login_required
+def my_recurring_donations(request):
+    # todo: separate one-time and recurring donations, with a sidebar like in my profile
+    subscriptions = Subscription.objects.filter(user=request.user).order_by('-created_at')
+    siteSettings = getSiteSettings(request)
+    return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'siteSettings': siteSettings})
 
 
 @login_required
 def my_renewals(request, id):
-    renewals = Donation.objects.filter(Q(id=id) | Q(parent_donation_id=id)).order_by('-created_at')
-    parentDonation = None
-    if len(renewals) > 0:
-        parentDonation = renewals[len(renewals) - 1]
+    subscription = get_object_or_404(Subscription, id=id)
+    renewals = Donation.objects.filter(subscription=subscription).order_by('-created_at')
     siteSettings = getSiteSettings(request)
-    return render(request, 'donations/my_renewals.html', {'parentDonation': parentDonation, 'renewals': renewals, 'siteSettings': siteSettings})
+    return render(request, 'donations/my_renewals.html', {'subscription': subscription, 'renewals': renewals, 'siteSettings': siteSettings})

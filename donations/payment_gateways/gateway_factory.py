@@ -11,17 +11,18 @@ from donations.models import Donation, STATUS_PENDING
 class PaymentGatewayFactory(object):
 
     @staticmethod
-    def initGateway(request, donation):
+    def initGateway(request, donation=None, subscription=None):
         """ Instantiate the specific type of payment gateway manager with current request and specified gateway and donation record """
-        if not donation:
+        if not donation and not subscription:
             raiseObjectNone(
-                'Donation object cannot be none while initializing BasePaymentGateway class')
-        if donation.gateway.is_2c2p():
-            return Gateway_2C2P(request, donation)
-        elif donation.gateway.is_paypal():
-            return Gateway_Paypal(request, donation)
-        elif donation.gateway.is_stripe():
-            return Gateway_Stripe(request, donation)
+                'Either one of donation or subscription has to be defined while initializing BasePaymentGateway class')
+        paymentObj = donation or subscription
+        if paymentObj.gateway.is_2c2p():
+            return Gateway_2C2P(request, donation=donation, subscription=subscription)
+        elif paymentObj.gateway.is_paypal():
+            return Gateway_Paypal(request, donation=donation, subscription=subscription)
+        elif paymentObj.gateway.is_stripe():
+            return Gateway_Stripe(request, donation=donation, subscription=subscription)
         else:
             raiseObjectNone(
                 'The Provided gateway has not been implemented yet')
@@ -59,7 +60,7 @@ class PaymentGatewayFactory(object):
                     print(str(e))
                     raise e
 
-                return Gateway_2C2P(request, donation)
+                return Gateway_2C2P(request, donation=donation)
 
         # case two: standard payment response from 2C2P(either onetime or recurring payment's initial donation)
         if 'user_defined_1' in request.POST and request.POST['user_defined_1'] != '':
@@ -69,6 +70,6 @@ class PaymentGatewayFactory(object):
                 raiseObjectNone(
                     'Donation id - {} from user_defined_1 is not found in the omp database.'.format(request.POST['user_defined_1']))
             else:
-                return Gateway_2C2P(request, donation)
+                return Gateway_2C2P(request, donation=donation)
 
         # todo: Add Stripe's and PayPal's verification listener logic

@@ -25,6 +25,7 @@ urlpatterns = [
          name='cancel-from-stripe'),
     path('thank-you/', views.thank_you, name='thank-you'),
     path('cancelled/', views.cancelled, name='cancelled'),
-    path('my-donations/', views.my_donations, name='my-donations'),
+    path('my-onetime-donations/', views.my_onetime_donations, name='my-onetime-donations'),
+    path('my-recurring-donations/', views.my_recurring_donations, name='my-recurring-donations'),
     path('my-renewals/<int:id>/', views.my_renewals, name='my-renewals'),
 ]

@@ -6,14 +6,15 @@ from abc import ABC, abstractmethod
 
 class PaymentGatewayManager(ABC):
 
-    def __init__(self, request, donation):
+    def __init__(self, request, donation, subscription):
         # stores the request object from django
         self.request = request
-        # stores the donation object
-        if not donation:
+        # either one of the donation or subscription object cannot be None
+        if not donation and not subscription:
             raiseObjectNone(
-                'Donation object cannot be none while initializing BasePaymentGateway class')
+                'Either one of donation or subscription has to be defined while initializing BasePaymentGateway class')
         self.donation = donation
+        self.subscription = subscription
         # stores whether current app is in test mode or not
         self.testing_mode = isTestMode(self.request)
         # set global settings object

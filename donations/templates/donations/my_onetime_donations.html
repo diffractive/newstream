@@ -1,34 +1,23 @@
 {% extends "base.html" %}
 {% load static common_tags i18n %}
 
-{% block title %}{% trans 'My Renewals' %}{% endblock %}
-{% block body_class %}my-renewals-page{% endblock %}
+{% block title %}{% trans 'My One-time Donations' %}{% endblock %}
+{% block body_class %}my-onetime-donations-page{% endblock %}
 
 {% block content %}
 <div class="w-full bg-primary-dark">
     <div class="container">
-        <div class="mb-4 w-64">
-            <a href="{% url 'donations:my-recurring-donations' %}"
-                class="ns-wide-btn left-chevron-btn block">{% trans 'Back to My Donations' %}<span
-                    class="icon"></span></a>
-        </div>
-        <h1 class="mb-4 text-white">{% trans 'My renewals' %}</h1>
-        <h4 class="mb-2 text-white">{% trans 'Recurring Donation identifier:' %} {{ subscription.object_id }}</h4>
-        <h4 class="mb-2 text-white">{% trans 'Recurring Donation start date:' %}
-            {{ subscription.created_at|date:'j M Y' }}</h4>
-        <h4 class="mb-2 text-white">{% trans 'Recurring Donation interval:' %} {% trans 'Monthly' %}</h4>
-        <!-- todo: different text-color for different recurring_status -->
-        <h4 class="mb-4 text-white">{% trans 'Recurring Donation status:' %} <span
-                class="font-bold text-primary">{{subscription.recurring_status|title}}</span></h4>
+        <h1 class="mb-4 text-white">{% trans 'My one-time donations' %}</h1>
         <p class="text-primary-light lg:w-3/4">
-            {% blocktrans %}View all your renewals here. {% endblocktrans %}
+            {% trans 'View and manage your one-time donations here. We thank you so much for your support. Every contribution, however big or small, is valuable for our future and our ability to deliver quality journalism that’s independent, not-for-profit, and free of charge.' %}
         </p>
     </div>
 </div>
 <div class="container">
+    {% include "donations/donation_view_switcher.html" %}
     <div class="lg:hidden flex flex-col">
-        {% if renewals %}
-        {% for donation in renewals %}
+        {% if donations %}
+        {% for donation in donations %}
         <div class="donation-record p-4 rounded-lg bg-primary-light mb-4">
             <table class="w-full">
                 <tr>
@@ -42,7 +31,9 @@
                     <td>{{ donation.created_at|date:'j M Y' }}</td>
                 </tr>
                 <tr>
-                    <td colspan="2">{{ donation.payment_status|title }}</td>
+                    <td colspan="2">
+                        {{ donation.payment_status|title }}
+                    </td>
                 </tr>
             </table>
         </div>
@@ -61,8 +52,8 @@
             </tr>
         </thead>
         <tbody>
-            {% if renewals %}
-            {% for donation in renewals %}
+            {% if donations %}
+            {% for donation in donations %}
             <tr>
                 <td>{{ donation|amount_with_currency }}</td>
                 <td>{{ donation.donation_frequency }}</td>
@@ -74,7 +65,7 @@
             {% endfor %}
             {% else %}
             <tr>
-                <td colspan="5">{% trans 'No Renewal History.' %}</td>
+                <td colspan="6">{% trans 'No Donation History.' %}</td>
             </tr>
             {% endif %}
         </tbody>

@@ -16,14 +16,14 @@ from newstream.edit_handlers import ReadOnlyPanel
 User = get_user_model()
 
 STATUS_ACTIVE = 'active'
+STATUS_INACTIVE = 'inactive'
 STATUS_COMPLETE = 'complete'
 STATUS_PENDING = 'pending'
 STATUS_REFUNDED = 'refunded'
 STATUS_REVOKED = 'revoked'
 STATUS_FAILED = 'failed'
 STATUS_CANCELLED = 'cancelled'
-STATUS_NONRECURRING = 'non-recurring'
-STATUS_RENEWALPAYMENT = 'renewal-payment'
+STATUS_PAUSED = 'paused'
 STATUS_PROCESSING = 'processing'
 
 
@@ -105,6 +105,9 @@ class DonationForm(ClusterableModel):
 
 
 class DonationMeta(models.Model):
+    '''
+    DonationMeta is used for storing meta data entered by the donor in the frontend, which is defined by the website admin at first.
+    '''
     donation = ParentalKey(
         'Donation',
         related_name='metas',
@@ -126,6 +129,9 @@ class DonationMeta(models.Model):
 
 
 class DonationPaymentMeta(models.Model):
+    '''
+    DonationPaymentMeta is used for storing meta data mainly used by the code or system itself.
+    '''
     donation = ParentalKey(
         'Donation',
         related_name='payment_metas',
@@ -146,6 +152,76 @@ class DonationPaymentMeta(models.Model):
         return self.field_key
 
 
+class SubscriptionPaymentMeta(models.Model):
+    '''
+    SubscriptionPaymentMeta is used for storing meta data mainly used by the code or system itself.
+    '''
+    subscription = ParentalKey(
+        'Subscription',
+        related_name='payment_metas',
+        on_delete=models.CASCADE,
+    )
+    field_key = models.CharField(max_length=255)
+    field_value = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = _('Subscription Payment Meta')
+        verbose_name_plural = _('Subscription Payment Metas')
+
+    def __str__(self):
+        return self.field_key
+
+
+class Subscription(ClusterableModel):
+    RECURRING_STATUS_CHOICES = [
+        (STATUS_ACTIVE, _(STATUS_ACTIVE.capitalize())),
+        (STATUS_PROCESSING, _(STATUS_PROCESSING.capitalize())),
+        (STATUS_PAUSED, _(STATUS_PAUSED.capitalize())),
+        (STATUS_CANCELLED, _(STATUS_CANCELLED.capitalize())),
+        (STATUS_INACTIVE, _(STATUS_INACTIVE.capitalize())),
+    ]
+    user = models.ForeignKey(
+        'newstream_user.User',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    gateway = models.ForeignKey(
+        'site_settings.PaymentGateway',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    object_id = models.CharField(max_length=255, unique=True)
+    recurring_amount = models.FloatField()
+    currency = models.CharField(max_length=20)
+    recurring_status = models.CharField(
+        max_length=255, choices=RECURRING_STATUS_CHOICES, default=STATUS_INACTIVE, blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    linked_user_deleted = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False)
+
+    panels = [
+        ReadOnlyPanel('object_id', heading=_('Object ID')),
+        FieldPanel('recurring_amount', heading=_('Recurring Donation Amount')),
+        FieldPanel('currency', heading=_('Currency')),
+        FieldPanel('recurring_status', heading=_('Recurring Status')),
+        ReadOnlyPanel('linked_user_deleted',
+                      heading=_("Linked User Account Deleted?")),
+    ]
+
+    def isRecurringCancelled(self):
+        return True if self.recurring_status == STATUS_CANCELLED else False
+
+    class Meta:
+        ordering = ['-created_at']
+        verbose_name = _('Subscription')
+        verbose_name_plural = _('Subscriptions')
+
+
 class Donation(ClusterableModel):
     PAYMENT_STATUS_CHOICES = [
         (STATUS_COMPLETE, _(STATUS_COMPLETE.capitalize())),
@@ -155,13 +231,6 @@ class Donation(ClusterableModel):
         (STATUS_REVOKED, _(STATUS_REVOKED.capitalize())),
         (STATUS_FAILED, _(STATUS_FAILED.capitalize())),
         (STATUS_CANCELLED, _(STATUS_CANCELLED.capitalize())),
-    ]
-    RECURRING_STATUS_CHOICES = [
-        (STATUS_ACTIVE, _(STATUS_ACTIVE.capitalize())),
-        (STATUS_PROCESSING, _(STATUS_PROCESSING.capitalize())),
-        (STATUS_RENEWALPAYMENT, _(STATUS_RENEWALPAYMENT.capitalize())),
-        (STATUS_CANCELLED, _(STATUS_CANCELLED.capitalize())),
-        (STATUS_NONRECURRING, _(STATUS_NONRECURRING.capitalize())),
     ]
     user = models.ForeignKey(
         'newstream_user.User',
@@ -178,16 +247,19 @@ class Donation(ClusterableModel):
         on_delete=models.SET_NULL,
         null=True
     )
-    parent_donation = models.ForeignKey(
-        'self', on_delete=models.CASCADE, blank=True, null=True)
+    subscription = models.ForeignKey(
+        'Subscription',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    # parent_donation = models.ForeignKey(
+    #     'self', on_delete=models.CASCADE, blank=True, null=True)
     order_number = models.CharField(max_length=255, unique=True)
     donation_amount = models.FloatField()
     is_recurring = models.BooleanField(default=False)
     currency = models.CharField(max_length=20)
     payment_status = models.CharField(
         max_length=255, choices=PAYMENT_STATUS_CHOICES)
-    recurring_status = models.CharField(
-        max_length=255, choices=RECURRING_STATUS_CHOICES, default=STATUS_NONRECURRING, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     linked_user_deleted = models.BooleanField(default=False)
@@ -199,7 +271,6 @@ class Donation(ClusterableModel):
         FieldPanel('is_recurring', heading=_('Is Recurring')),
         FieldPanel('currency', heading=_('Currency')),
         FieldPanel('payment_status', heading=_('Payment Status')),
-        FieldPanel('recurring_status', heading=_('Recurring Status')),
         InlinePanel('metas', label=_('Donation Meta'), heading=_('Donation Meta Data'),
                     help_text=_('Meta data about this donation is recorded here')),
         ReadOnlyPanel('linked_user_deleted',
@@ -216,9 +287,6 @@ class Donation(ClusterableModel):
 
     def isRecurring(self):
         return 'Yes' if self.is_recurring else 'No'
-
-    def isRecurringCancelled(self):
-        return True if self.is_recurring and self.recurring_status == STATUS_CANCELLED else False
 
     @property
     def is_user_first_donation(self):
@@ -248,7 +316,7 @@ class Donation(ClusterableModel):
         pass
 
     def isOnGoing(self):
-        return 'Yes' if self.recurring_status == STATUS_ACTIVE else 'No'
+        return 'Yes' if self.is_recurring and self.subscription.recurring_status == STATUS_ACTIVE else 'No'
 
 
 @receiver(pre_delete, sender=User)

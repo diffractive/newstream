@@ -5,10 +5,12 @@ import traceback
 from pprint import pprint
 from datetime import datetime, timedelta
 from pytz import timezone
+from django.conf import settings
 from django.core.mail import send_mail
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.template.loader import render_to_string
+from django.utils import translation
 
 from allauth.account.utils import send_email_confirmation
 
@@ -150,3 +152,22 @@ def sendVerificationEmail(request, user):
     setDefaultFromEmail(request)
     # allauth's email confirmation uses DEFAULT_FROM_EMAIL
     send_email_confirmation(request, user, True)
+
+
+def sendReceiptAndNotification(request, gatewayManager):
+    # set default language for admins' emails
+    translation.activate(settings.LANGUAGE_CODE)
+
+    # todo: should make this an option toggle in site_settings
+    # email new donation notification to admin list
+    # only when the donation is brand new, not counting in recurring renewals
+    # if not gatewayManager.donation.parent_donation:
+    sendDonationNotifToAdmins(request, gatewayManager.donation)
+
+    # set language for donation_receipt.html
+    user = gatewayManager.donation.user
+    if user.language_preference:
+        translation.activate(user.language_preference)
+
+    # email thank you receipt to user
+    sendDonationReceipt(request, gatewayManager.donation)

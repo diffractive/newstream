@@ -127,6 +127,12 @@ def displayDonationAmountWithCurrency(donation):
     return mark_safe(html.unescape(currency_set['symbol']+" "+str(donation.donation_amount)))
 
 
+@register.filter(name='recurring_amount_with_currency')
+def displayRecurringAmountWithCurrency(subscription):
+    currency_set = getCurrencyDictAt(subscription.currency)
+    return mark_safe(html.unescape(currency_set['symbol']+" "+str(subscription.recurring_amount)))
+
+
 @register.filter(name='printvars')
 def _printvars(obj):
     printvars(obj)

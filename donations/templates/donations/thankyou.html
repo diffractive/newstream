@@ -51,7 +51,7 @@
             {% if donation.is_recurring %}
             <tr>
                 <td>{% trans 'Recurring Payment Status' %}</td>
-                <td>{{ donation.recurring_status|title }}</td>
+                <td>{{ donation.subscription.recurring_status|title }}</td>
             </tr>
             {% endif %}
         </table>

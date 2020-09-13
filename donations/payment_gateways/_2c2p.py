@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from newstream.functions import raiseObjectNone, getFullReverseUrl, getSiteName, getSiteSettings
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.functions import getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
-from donations.models import DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ACTIVE, STATUS_NONRECURRING, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
+from donations.models import DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ACTIVE, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
 from donations.payment_gateways.setting_classes import get2C2PSettings
 
 REDIRECT_API_VERSION = '8.5'
@@ -17,8 +17,8 @@ RPP_API_VERSION = '2.3'
 
 class Gateway_2C2P(PaymentGatewayManager):
 
-    def __init__(self, request, donation):
-        super().__init__(request, donation)
+    def __init__(self, request, donation=None, subscription=None):
+        super().__init__(request, donation, subscription)
         # set 2c2p settings object
         self.settings = get2C2PSettings(request)
 
@@ -123,11 +123,11 @@ class Gateway_2C2P(PaymentGatewayManager):
                 else:
                     self.donation.payment_status = STATUS_PENDING
 
-                # todo: use STATUS_RENEWALPAYMENT if payment is a renewal payment
-                if self.donation.is_recurring:
-                    self.donation.recurring_status = STATUS_ACTIVE
-                else:
-                    self.donation.recurring_status = STATUS_NONRECURRING
+                # 13/09/2020 recurring_status is migrated to the Subscription Model
+                # if self.donation.is_recurring:
+                #     self.donation.recurring_status = STATUS_ACTIVE
+                # else:
+                #     self.donation.recurring_status = STATUS_NONRECURRING
                 self.donation.save()
                 # add recurring_unique_id to donation metas for hooking up future recurring payments
                 if 'recurring_unique_id' in data and data['recurring_unique_id'] != '':

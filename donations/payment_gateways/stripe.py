@@ -7,10 +7,10 @@ from django.http import HttpResponse, JsonResponse
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
-from donations.models import Donation, DonationPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_RENEWALPAYMENT, STATUS_CANCELLED
+from donations.models import Donation, DonationPaymentMeta, Subscription, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_CANCELLED, STATUS_PROCESSING
 from donations.payment_gateways.core import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
-from donations.functions import formatAmountCentsDecimal, sendDonationNotifToAdmins, sendDonationReceipt, gen_order_id
+from donations.functions import formatAmountCentsDecimal, sendDonationReceipt, sendReceiptAndNotification, gen_order_id
 from newstream.functions import uuid4_str, getSiteName, getSiteSettings, getFullReverseUrl, printvars
 
 
@@ -21,16 +21,19 @@ def initStripeApiKey(request):
 
 class Gateway_Stripe(PaymentGatewayManager):
 
-    def __init__(self, request, donation, session=None, event=None, **kwargs):
-        super().__init__(request, donation)
+    def __init__(self, request, donation=None, subscription=None, **kwargs):
+        '''
+        Note that the subscription parameter passed here can be either a newstream model or a stripe subscription object.
+
+        Other stripe objects are to be passed in kwargs, including session, event and invoice
+        session: this is the stripe checkout session object, stores also the donation_id in the metadata
+        event: this is the stripe event object when stripe webhooks are triggered and emitted to our server
+        invoice: this is the stripe invoice object sent to our server when a payment has succeeded or failed
+        '''
+        super().__init__(request, donation, subscription)
         # set stripe settings object
         self.settings = getStripeSettings(request)
-        # stripe uses a checkout session object, init the property here
-        # the paymentIntent object's id is referenced in session.payment_intent
-        self.session = session
-        # saves also the event emitted from Stripe to decide what actions to take next
-        self.event = event
-        # saves all remaining kwargs into the manager
+        # saves all remaining kwargs into the manager, e.g. session, event, invoice
         self.__dict__.update(kwargs)
 
     def base_live_redirect_url(self):
@@ -55,26 +58,16 @@ class Gateway_Stripe(PaymentGatewayManager):
 
     def cancel_recurring_payment(self):
         initStripeApiKey(self.request)
-        # need to return a resultSet dictionary with status == 'success' / 'failure', reason if failure, button-html if success
-        donationMetas = DonationPaymentMeta.objects.filter(donation_id=self.donation.id, field_key='stripe_subscription_id')
-        if len(donationMetas) == 1:
-            donationMeta = donationMetas[0]
-            subscription_id = donationMeta.field_value
-            # cancel subscription via stripe API
-            cancelled_subscription = stripe.Subscription.delete(subscription_id)
-            if cancelled_subscription and cancelled_subscription.status == 'canceled':
-                return {
-                    'status': 'success'
-                }
+        # cancel subscription via stripe API
+        cancelled_subscription = stripe.Subscription.delete(self.subscription.object_id)
+        if cancelled_subscription and cancelled_subscription.status == 'canceled':
             return {
-                'status': 'failure',
-                'reason': 'Subscription object returned from stripe having status '+cancelled_subscription.status+' instead of canceled'
+                'status': 'success'
             }
         return {
             'status': 'failure',
-            'reason': 'DonationPaymentMeta returning '+len(donationMetas)+' instead of a single result'
+            'reason': 'Subscription object returned from stripe having status '+cancelled_subscription.status+' instead of canceled'
         }
-
 
 
 class StripeGatewayFactory(object):
@@ -140,6 +133,9 @@ class StripeGatewayFactory(object):
             else:
                 return None
 
+        # The subscription created event is not to be used for subscription model init, so as to prevent race condition with the subscription model init in updated event
+        # That is because there is no guarantee which event hits first, it's better to let one event handles the model init as well.
+
         # Intercept the subscription updated event
         if event['type'] == 'customer.subscription.updated':
             subscription = event['data']['object']
@@ -166,7 +162,9 @@ class StripeGatewayFactory(object):
         if donation_id:
             try:
                 donation = Donation.objects.get(pk=donation_id)
-                return Gateway_Stripe(request, donation, session, event, **kwargs)
+                kwargs['session'] = session
+                kwargs['event'] = event
+                return Gateway_Stripe(request, donation=donation, **kwargs)
             except Donation.DoesNotExist:
                 print('No matching Donation found, donation_id: ' +
                       str(donation_id), flush=True)
@@ -189,7 +187,9 @@ class StripeGatewayFactory(object):
 
             try:
                 donation = Donation.objects.get(pk=donation_id)
-                return Gateway_Stripe(request, donation, session)
+                kwargs = {}
+                kwargs['session'] = session
+                return Gateway_Stripe(request, donation=donation, **kwargs)
             except Donation.DoesNotExist:
                 print('No matching Donation found, donation_id: ' +
                       str(donation_id), flush=True)
@@ -305,21 +305,9 @@ def verify_stripe_response(request):
             gatewayManager.donation.payment_status = STATUS_COMPLETE
             gatewayManager.donation.save()
 
-            # set default language for admins' emails
-            translation.activate(settings.LANGUAGE_CODE)
-
-            # email new donation notification to admin list
-            # only when the donation is brand new, not counting in recurring renewals
-            if not gatewayManager.donation.parent_donation:
-                sendDonationNotifToAdmins(request, gatewayManager.donation)
-
-            # set language for donation_receipt.html
-            user = gatewayManager.donation.user
-            if user.language_preference:
-                translation.activate(user.language_preference)
-
-            # email thank you receipt to user
-            sendDonationReceipt(request, gatewayManager.donation)
+            # Since for recurring payment, subscription.updated event might lag behind checkout.session.completed
+            if not gatewayManager.donation.is_recurring:
+                sendReceiptAndNotification(request, gatewayManager)
 
             return HttpResponse(status=200)
 
@@ -336,6 +324,7 @@ def verify_stripe_response(request):
                 elif invoice_num > 1:
                     # create a new donation record + then send donation receipt to user
                     donation = Donation(
+                        subscription=gatewayManager.donation.subscription,
                         order_number=gen_order_id(gatewayManager.donation.gateway),
                         user=gatewayManager.donation.user,
                         form=gatewayManager.donation.form,
@@ -345,8 +334,6 @@ def verify_stripe_response(request):
                             float(gatewayManager.invoice.amount_paid)/100),
                         currency=gatewayManager.donation.currency,
                         payment_status=STATUS_COMPLETE,
-                        parent_donation=gatewayManager.donation,
-                        recurring_status=STATUS_RENEWALPAYMENT
                     )
                     try:
                         donation.save()
@@ -366,23 +353,39 @@ def verify_stripe_response(request):
                     # email thank you receipt to user
                     sendDonationReceipt(request, donation)
 
-                # save subscription id no matter first or recurrnig payment
-                dpmeta = DonationPaymentMeta(
-                    donation=gatewayManager.donation, field_key='stripe_subscription_id', field_value=gatewayManager.invoice.subscription)
-                dpmeta.save()
-
                 return HttpResponse(status=200)
 
         # Event: customer.subscription.updated
         if gatewayManager.event['type'] == 'customer.subscription.updated' and hasattr(gatewayManager, 'subscription'):
             # Subscription active after invoice paid
             if gatewayManager.subscription.status == 'active':
-                gatewayManager.donation.recurring_status = STATUS_ACTIVE
-                gatewayManager.donation.save()
+                if gatewayManager.donation.subscription == None:
+                    # create new Subscription object
+                    subscription = Subscription(
+                        object_id=gatewayManager.subscription.id,
+                        user=gatewayManager.donation.user,
+                        gateway=gatewayManager.donation.gateway,
+                        recurring_amount=gatewayManager.donation.donation_amount,
+                        currency=gatewayManager.donation.currency,
+                        recurring_status=STATUS_ACTIVE,
+                    )
+                    try:
+                        subscription.save()
+                        # link subscription to the donation
+                        gatewayManager.donation.subscription = subscription
+                        gatewayManager.donation.save()
+                    except Exception as e:
+                        return HttpResponse(500)
 
-                dpmeta = DonationPaymentMeta(
-                    donation=gatewayManager.donation, field_key='stripe_subscription_period', field_value=str(gatewayManager.subscription.current_period_start)+'-'+str(gatewayManager.subscription.current_period_end))
-                dpmeta.save()
+                    # send the donation receipt to donor and notification to admins if subscription is just created
+                    sendReceiptAndNotification(request, gatewayManager)
+                else:
+                    gatewayManager.donation.subscription.recurring_status = STATUS_ACTIVE
+                    gatewayManager.donation.subscription.save()
+
+                spmeta = SubscriptionPaymentMeta(
+                    subscription=gatewayManager.donation.subscription, field_key='stripe_subscription_period', field_value=str(gatewayManager.subscription.current_period_start)+'-'+str(gatewayManager.subscription.current_period_end))
+                spmeta.save()
 
                 return HttpResponse(status=200)
             return HttpResponse(status=400)
@@ -390,8 +393,8 @@ def verify_stripe_response(request):
         # Event: customer.subscription.deleted
         if gatewayManager.event['type'] == 'customer.subscription.deleted' and hasattr(gatewayManager, 'subscription'):
             # update donation recurring_status
-            gatewayManager.donation.recurring_status = STATUS_CANCELLED
-            gatewayManager.donation.save()
+            gatewayManager.donation.subscription.recurring_status = STATUS_CANCELLED
+            gatewayManager.donation.subscription.save()
 
             return HttpResponse(status=200)
 

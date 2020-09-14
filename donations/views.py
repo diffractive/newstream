@@ -20,7 +20,7 @@ from site_settings.models import PaymentGateway
 from .models import *
 from .forms import *
 from .functions import *
-from donations.payment_gateways import InitPaymentGateway
+from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml
 User = get_user_model()
 
 
@@ -83,6 +83,20 @@ def cancel_recurring(request):
             return JsonResponse({'status': 'failure', 'reason': resultSet['reason']})
     else:
         return HttpResponse(400)
+
+
+@login_required
+def edit_recurring(request, id):
+    subscription = get_object_or_404(Subscription, id=id)
+    # Form object is initialized according to the specific gateway and if request.method=='POST'
+    form = InitEditRecurringPaymentForm(request, subscription)
+    if request.method == 'POST':
+        if form.is_valid():
+            # process the data in form.cleaned_data as required
+            # ...
+            return redirect('donations:edit-recurring', id=id)
+
+    return render(request, getEditRecurringPaymentHtml(subscription), {'form': form})
 
 
 def donation_details(request):

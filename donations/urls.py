@@ -1,7 +1,8 @@
 from django.urls import path
 
-from . import views
-from .payment_gateways.stripe import create_checkout_session, verify_stripe_response, return_from_stripe, cancel_from_stripe
+from donations import views
+from donations.payment_gateways._2c2p.views import verify_2c2p_response, return_from_2c2p
+from donations.payment_gateways.stripe.views import create_checkout_session, verify_stripe_response, return_from_stripe, cancel_from_stripe
 
 app_name = 'donations'
 urlpatterns = [
@@ -11,12 +12,12 @@ urlpatterns = [
          name='cancel-recurring'),
     path('donation-details/', views.donation_details,
          name='donation-details'),
+    path('verify-2c2p-response/', verify_2c2p_response,
+         name='verify-2c2p-response'),
+    path('return-from-2c2p/', return_from_2c2p,
+         name='return-from-2c2p'),
     path('create-stripe-session/', create_checkout_session,
          name='create-stripe-session'),
-    path('verify-gateway-response/', views.verify_gateway_response,
-         name='verify-gateway-response'),
-    path('return-from-gateway/', views.return_from_gateway,
-         name='return-from-gateway'),
     path('verify-stripe-response/', verify_stripe_response,
          name='verify-stripe-response'),
     path('return-from-stripe/', return_from_stripe,

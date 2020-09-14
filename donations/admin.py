@@ -7,7 +7,7 @@ from wagtail.contrib.modeladmin.views import InspectView
 
 from newstream.functions import raiseObjectNone
 from .models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta
-from .payment_gateways._2c2p import Gateway_2C2P
+from .payment_gateways._2c2p.gateway import Gateway_2C2P
 
 
 class DonationInspectView(InspectView):

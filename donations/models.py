@@ -1,3 +1,4 @@
+from decimal import *
 from django.db import models
 from django.conf import settings
 from django.dispatch import receiver
@@ -35,7 +36,7 @@ class DonationMetaField(AbstractFormField):
 class AmountStep(models.Model):
     form = ParentalKey('DonationForm', on_delete=models.CASCADE,
                        related_name='amount_steps')
-    step = models.FloatField(default=0)
+    step = models.DecimalField(default=Decimal(0), max_digits=20, decimal_places=2)
 
     panels = [
         FieldPanel('step', heading=_('Step')),
@@ -59,8 +60,8 @@ class DonationForm(ClusterableModel):
     amount_type = models.CharField(
         max_length=20, choices=AMOUNT_TYPE_CHOICES)
     # todo: implement validation for amount fields to round to current currency decimal places
-    fixed_amount = models.FloatField(blank=True, null=True,
-                                     help_text=_('Define fixed donation amount if you chose "Fixed Amount" for your Amount Type. Decimal places should be no more than allowed for your current currency.'))
+    fixed_amount = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=2,
+                                     help_text=_('Define fixed donation amount if you chose "Fixed Amount" for your Amount Type.'))
     allowed_gateways = models.ManyToManyField('site_settings.PaymentGateway')
     # todo: implement this logic at wagtail backend: there should only be one active form in use at a time
     is_active = models.BooleanField(default=False)
@@ -77,7 +78,7 @@ class DonationForm(ClusterableModel):
         FieldPanel(
             'fixed_amount', heading=_('Define Fixed Donation Amount')),
         InlinePanel('amount_steps', label=_('Fixed Amount Steps'), heading=_('Define Fixed Donation Amount Steps'),
-                    help_text=_('Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type. Decimal places should be no more than allowed for your current currency.')),
+                    help_text=_('Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type.')),
         AutocompletePanel('allowed_gateways', heading=_(
             'Allowed Payment Gateways')),
         InlinePanel('donation_meta_fields', label=_(
@@ -195,7 +196,7 @@ class Subscription(ClusterableModel):
         null=True
     )
     object_id = models.CharField(max_length=255, unique=True)
-    recurring_amount = models.FloatField()
+    recurring_amount = models.DecimalField(max_digits=20, decimal_places=2)
     currency = models.CharField(max_length=20)
     recurring_status = models.CharField(
         max_length=255, choices=RECURRING_STATUS_CHOICES, default=STATUS_INACTIVE, blank=True, null=True)
@@ -255,7 +256,7 @@ class Donation(ClusterableModel):
     # parent_donation = models.ForeignKey(
     #     'self', on_delete=models.CASCADE, blank=True, null=True)
     order_number = models.CharField(max_length=255, unique=True)
-    donation_amount = models.FloatField()
+    donation_amount = models.DecimalField(max_digits=20, decimal_places=2)
     is_recurring = models.BooleanField(default=False)
     currency = models.CharField(max_length=20)
     payment_status = models.CharField(

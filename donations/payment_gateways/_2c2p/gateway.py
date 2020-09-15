@@ -1,6 +1,7 @@
 import hmac
 import hashlib
 import re
+from decimal import *
 from urllib.parse import urlencode
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
@@ -165,7 +166,7 @@ class Gateway_2C2P(PaymentGatewayManager):
         """ when submitting a new payment, use the donation's currency to format the donation amount """
         decnum = getCurrencyDictAt(self.donation.currency)[
             'setting']['number_decimals']
-        new_amount = str(int(float(amount) * 10**decnum)
+        new_amount = str(int(Decimal(amount) * 10**decnum)
                          ) if decnum > 0 else str(int(amount))
         # 2c2p amount param has to be formatted into 12 digit format with leading zero.
         formatted = "{:0>12}".format(new_amount)
@@ -183,7 +184,7 @@ class Gateway_2C2P(PaymentGatewayManager):
         decPlaces = getCurrencyFromCode(currency_code)[
             'setting']['number_decimals']
         majorAmount = int(term[:-decPlaces])
-        minorAmount = float('0.{}'.format(term[-decPlaces:]))
+        minorAmount = Decimal('0.{}'.format(term[-decPlaces:]))
         return majorAmount+minorAmount
 
     @staticmethod

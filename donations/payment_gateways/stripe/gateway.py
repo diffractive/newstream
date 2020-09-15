@@ -1,8 +1,10 @@
 import stripe
+from decimal import *
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
@@ -11,7 +13,7 @@ from donations.models import Donation, DonationPaymentMeta, Subscription, Subscr
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.functions import formatAmountCentsDecimal, sendDonationReceipt, sendReceiptAndNotification, gen_order_id
-from newstream.functions import uuid4_str, getSiteName, getSiteSettings, getFullReverseUrl, printvars
+from newstream.functions import uuid4_str, getSiteName, getSiteSettings, getFullReverseUrl, printvars, raiseObjectNone
 from .functions import initStripeApiKey
 
 
@@ -74,7 +76,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                         gateway=self.donation.gateway,
                         is_recurring=True,
                         donation_amount=(
-                            float(self.invoice.amount_paid)/100),
+                            Decimal(str(self.invoice.amount_paid))/100),
                         currency=self.donation.currency,
                         payment_status=STATUS_COMPLETE,
                     )
@@ -108,7 +110,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                         object_id=self.subscription.id,
                         user=self.donation.user,
                         gateway=self.donation.gateway,
-                        recurring_amount=self.donation.donation_amount,
+                        recurring_amount=Decimal(self.subscription['items']['data'][0]['price']['unit_amount_decimal'])/100,
                         currency=self.donation.currency,
                         recurring_status=STATUS_ACTIVE,
                     )
@@ -142,8 +144,64 @@ class Gateway_Stripe(PaymentGatewayManager):
             return HttpResponse(status=200)
         return HttpResponse(status=400)
 
-    def update_recurring_payment(self):
-        pass
+    def update_recurring_payment(self, form_data):
+        if not self.subscription:
+            raiseObjectNone('Subscription object is None. Cannot update recurring payment.')
+        initStripeApiKey(self.request)
+        stripeSettings = getStripeSettings(self.request)
+        # update donation amount if it is different from database
+        if form_data['recurring_amount'] != self.subscription.recurring_amount:
+            # ad-hoc price is used
+            amount_str = formatAmountCentsDecimal(
+                form_data['recurring_amount']*100, self.subscription.currency)
+            adhoc_price = {
+                'unit_amount_decimal': amount_str,
+                'currency': self.subscription.currency.lower(),
+                'product': stripeSettings.product_id,
+                'recurring' : {
+                    'interval': 'day', # todo: change day to month after testing
+                    'interval_count': 1
+                }
+            }
+            # call stripe api to get the SubscriptionItem
+            stripeRes = stripe.SubscriptionItem.list(
+                subscription=self.subscription.object_id,
+            )
+            if len(stripeRes['data']) == 1:
+                printvars(stripeRes['data'][0])
+                subItemId = stripeRes['data'][0].id
+                # call stripe api to update SubscriptionItem
+                updateRes = stripe.SubscriptionItem.modify(
+                    subItemId,
+                    proration_behavior='none',
+                    price_data=adhoc_price,
+                    quantity=1
+                )
+                # update newstream model
+                if updateRes:
+                    self.subscription.recurring_amount = Decimal(updateRes['price']['unit_amount_decimal'])/100
+                    self.subscription.save()
+                    messages.add_message(self.request, messages.SUCCESS , _('Your recurring donation amount at Stripe is updated successfully.'))
+                else:
+                    messages.add_message(self.request, messages.ERROR ,
+                                    _('Cannot update stripe subscription. Stripe API returned none.'))
+            else:
+                messages.add_message(self.request, messages.ERROR ,
+                                    _('Cannot update stripe subscription. SubscriptionItem more or less than 1.'))
+
+        # update billing_cycle_anchor if user checked yes
+        if form_data['billing_cycle_now']:
+            updateRes = stripe.Subscription.modify(
+                self.subscription.object_id,
+                proration_behavior='none',
+                billing_cycle_anchor='now',
+            )
+            if updateRes:
+                messages.add_message(self.request, messages.SUCCESS , _('Your recurring donation at Stripe is set to bill on today\'s date every month.'))
+            else:
+                messages.add_message(self.request, messages.ERROR ,
+                                 _('Cannot update stripe subscription. Stripe API returned none.'))
+            
 
     def cancel_recurring_payment(self):
         initStripeApiKey(self.request)

@@ -28,11 +28,11 @@ def InitEditRecurringPaymentForm(request, subscription):
     if not subscription:
         raiseObjectNone('Needs subscription to init the edit form for the recurring payment')
     if subscription.gateway.is_2c2p():
-        return RecurringPaymentForm_2C2P(request.POST, subscription=subscription) if request.method == 'POST' else RecurringPaymentForm_2C2P(subscription=subscription)
+        return RecurringPaymentForm_2C2P(request.POST, request=request, subscription=subscription, label_suffix='') if request.method == 'POST' else RecurringPaymentForm_2C2P(request=request, subscription=subscription, label_suffix='')
     elif subscription.gateway.is_paypal():
-        return RecurringPaymentForm_Paypal(request.POST, subscription=subscription) if request.method == 'POST' else RecurringPaymentForm_Paypal(subscription=subscription)
+        return RecurringPaymentForm_Paypal(request.POST, request=request, subscription=subscription, label_suffix='') if request.method == 'POST' else RecurringPaymentForm_Paypal(request=request, subscription=subscription, label_suffix='')
     elif subscription.gateway.is_stripe():
-        return RecurringPaymentForm_Stripe(request.POST, subscription=subscription) if request.method == 'POST' else RecurringPaymentForm_Stripe(subscription=subscription)
+        return RecurringPaymentForm_Stripe(request.POST, request=request, subscription=subscription, label_suffix='') if request.method == 'POST' else RecurringPaymentForm_Stripe(request=request, subscription=subscription, label_suffix='')
     else:
         raiseObjectNone('The Provided gateway has not been implemented yet')
 
@@ -41,10 +41,10 @@ def getEditRecurringPaymentHtml(subscription):
     if not subscription:
         raiseObjectNone('Needs subscription to init the edit form for the recurring payment')
     if subscription.gateway.is_2c2p():
-        return 'edit_2c2p_recurring_payment_form.html'
+        return 'donations/edit_2c2p_recurring_payment_form.html'
     elif subscription.gateway.is_paypal():
-        return 'edit_paypal_recurring_payment_form.html'
+        return 'donations/edit_paypal_recurring_payment_form.html'
     elif subscription.gateway.is_stripe():
-        return 'edit_stripe_recurring_payment_form.html'
+        return 'donations/edit_stripe_recurring_payment_form.html'
     else:
         raiseObjectNone('The Provided gateway has not been implemented yet')

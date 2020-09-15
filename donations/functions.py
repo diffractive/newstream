@@ -45,7 +45,7 @@ def isTestMode(request):
 
 
 def formatAmountCentsDecimal(amount_cents, currency_code):
-    if amount_cents.is_integer():
+    if amount_cents % 1 == 0:
         formatted_str = str(int(amount_cents))
         return formatted_str
     currency = getCurrencyDictAt(currency_code)

@@ -1,13 +1,26 @@
+import html
+from decimal import *
 from django import forms
+from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
+from donations.functions import getCurrencyDictAt
 
 class RecurringPaymentForm_Stripe(forms.Form):
-    recurring_amount = forms.DecimalField(label=_('Recurring Donation Amount'))
-    billing_cycle_now = forms.BooleanField(label=_('Change Billing Cycle to Now'))
+    subscription_id = forms.CharField(label=_('Recurring Donation Identifier(fixed)'), required=False)
+    currency = forms.CharField(label=('Donation Currency(fixed)'), required=False)
+    recurring_amount = forms.DecimalField(label=_('Recurring Donation Amount'), validators=[MinValueValidator(Decimal('0.01'))])
+    billing_cycle_now = forms.BooleanField(label=_('Change Billing Cycle to Now'), required=False)
 
-    def __init__(self, *args, subscription=None, **kwargs):
+    def __init__(self, *args, request=None, subscription=None, **kwargs):
         super().__init__(*args, **kwargs)
+        if not request:
+            raiseObjectNone('Please provide a request object')
         if not subscription:
             raiseObjectNone('Please provide a subscription object')
+        self.fields["subscription_id"].initial = subscription.object_id
+        self.fields["subscription_id"].widget.attrs['disabled'] = True
+        self.fields["currency"].initial = html.unescape(getCurrencyDictAt(subscription.currency)['admin_label'])
+        self.fields["currency"].widget.attrs['disabled'] = True
+        self.fields["currency"].decimal_places = getCurrencyDictAt(subscription.currency)['setting']['number_decimals']
         self.fields["recurring_amount"].initial = subscription.recurring_amount

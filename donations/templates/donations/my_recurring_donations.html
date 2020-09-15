@@ -40,8 +40,8 @@
                                 <div class="payment-recurring-options-div" data-id="{{ subscription.id }}">
                                     <button class="view-recurring-donation" data-id="{{ subscription.id }}"
                                         data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
-                                    <button class="edit-recurring-donation"
-                                        data-id="{{ subscription.id }}">{% trans 'Edit Recurring donation' %}</button>
+                                    <button class="edit-recurring-donation" data-id="{{ subscription.id }}"
+                                        data-href="{% url 'donations:edit-recurring' subscription.id %}">{% trans 'Edit Recurring donation' %}</button>
                                     <button class="cancel-recurring-donation"
                                         data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}</button>
                                 </div>
@@ -112,8 +112,8 @@
                             <div class="payment-recurring-options-div" data-id="{{ subscription.id }}">
                                 <button class="view-recurring-donation" data-id="{{ subscription.id }}"
                                     data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
-                                <button class="edit-recurring-donation"
-                                    data-id="{{ subscription.id }}">{% trans 'Edit Recurring donation' %}</button>
+                                <button class="edit-recurring-donation" data-id="{{ subscription.id }}"
+                                    data-href="{% url 'donations:edit-recurring' subscription.id %}">{% trans 'Edit Recurring donation' %}</button>
                                 <button class="cancel-recurring-donation"
                                     data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}</button>
                             </div>
@@ -184,6 +184,12 @@
             });
         }
         for (let wrapper of document.getElementsByClassName("view-recurring-donation")) {
+            wrapper.addEventListener("click", function (event) {
+                let href = wrapper.getAttribute('data-href');
+                window.location.href = href;
+            })
+        }
+        for (let wrapper of document.getElementsByClassName("edit-recurring-donation")) {
             wrapper.addEventListener("click", function (event) {
                 let href = wrapper.getAttribute('data-href');
                 window.location.href = href;

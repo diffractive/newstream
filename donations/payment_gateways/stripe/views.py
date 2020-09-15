@@ -56,7 +56,7 @@ def create_checkout_session(request):
         }
         if donation.is_recurring:
             adhoc_price['recurring'] = {
-                'interval': 'day',
+                'interval': 'day', # todo: change day to month after testing
                 'interval_count': 1
             }
 

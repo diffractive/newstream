@@ -77,10 +77,13 @@ def cancel_recurring(request):
         gatewayManager = InitPaymentGateway(
                     request, subscription=subscription)
         resultSet = gatewayManager.cancel_recurring_payment()
-        if resultSet['status']:
-            return JsonResponse({'status': 'success', 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
+        if resultSet['status'] == 'success':
+            # update newstream model
+            subscription.recurring_status = STATUS_CANCELLED
+            subscription.save()
+            return JsonResponse({'status': resultSet['status'], 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
         else:
-            return JsonResponse({'status': 'failure', 'reason': resultSet['reason']})
+            return JsonResponse({'status': resultSet['status'], 'reason': resultSet['reason']})
     else:
         return HttpResponse(400)
 
@@ -92,11 +95,13 @@ def edit_recurring(request, id):
     form = InitEditRecurringPaymentForm(request, subscription)
     if request.method == 'POST':
         if form.is_valid():
-            # process the data in form.cleaned_data as required
-            # ...
+            # use gatewayManager to process the data in form.cleaned_data as required
+            gatewayManager = InitPaymentGateway(request, subscription=subscription)
+            gatewayManager.update_recurring_payment(form.cleaned_data)
+
             return redirect('donations:edit-recurring', id=id)
 
-    return render(request, getEditRecurringPaymentHtml(subscription), {'form': form})
+    return render(request, getEditRecurringPaymentHtml(subscription), {'form': form, 'subscription': subscription})
 
 
 def donation_details(request):

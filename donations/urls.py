@@ -12,6 +12,8 @@ urlpatterns = [
          name='donation-details'),
     path('edit-recurring/<int:id>/', views.edit_recurring,
          name='edit-recurring'),
+    path('toggle-recurring/', views.toggle_recurring,
+         name='toggle-recurring'),
     path('cancel-recurring/', views.cancel_recurring,
          name='cancel-recurring'),
     path('verify-2c2p-response/', verify_2c2p_response,

@@ -41,10 +41,6 @@
                 <td>{{ donation|amount_with_currency }}</td>
             </tr>
             <tr>
-                <td>{% trans 'Opt in Mailing List?' %}</td>
-                <td>{{ donation.user.optInMailingIcon|safe }}</td>
-            </tr>
-            <tr>
                 <td>{% trans 'Payment status' %}</td>
                 <td>{{ donation.payment_status|title }}</td>
             </tr>

@@ -5,7 +5,7 @@ from django import template
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from donations.functions import getCurrencyDictAt
+from donations.functions import getCurrencyDictAt, displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
 from newstream.functions import getSiteName, printvars, getSiteSettings
 
 register = template.Library()
@@ -122,15 +122,13 @@ def returnIsActivePage(request, urlname):
 
 
 @register.filter(name='amount_with_currency')
-def displayDonationAmountWithCurrency(donation):
-    currency_set = getCurrencyDictAt(donation.currency)
-    return mark_safe(html.unescape(currency_set['symbol']+" "+str(donation.donation_amount)))
+def amount_with_currency(donation):
+    return displayDonationAmountWithCurrency(donation)
 
 
 @register.filter(name='recurring_amount_with_currency')
-def displayRecurringAmountWithCurrency(subscription):
-    currency_set = getCurrencyDictAt(subscription.currency)
-    return mark_safe(html.unescape(currency_set['symbol']+" "+str(subscription.recurring_amount)))
+def recurring_amount_with_currency(subscription):
+    return displayRecurringAmountWithCurrency(subscription)
 
 
 @register.filter(name='printvars')

@@ -1,0 +1,35 @@
+{% extends "base_email.html" %}
+{% load common_tags i18n %}
+
+{% block title %}
+{% trans 'A Donor Account is created' %}
+{% endblock %}
+
+{% block content %}
+<table cellpadding="10" cellspacing="0" style="width: 100%;">
+    <tr>
+        <th style="width: 100%;text-align: left;">
+            <h2 style="font-weight: bold;">
+                {% trans "A Donor Account is created" %}
+            </h2>
+        </th>
+    </tr>
+    <tr>
+        <td style="width: 100%;">
+            <p>{% trans 'Hi Admins,' %}</p>
+            <p>
+                {% trans 'This email is to inform you that a donor account has been created on your website:' %}<br>
+                <a href=" {{ request|domain }}" target="_blank">{{ request|domain }}</a>
+            </p>
+            <table cellpadding="10">
+                <tr>
+                    <td style="font-weight: bold;">{% trans 'Donor' %}</td>
+                    <td>{{ user.fullname }}</td>
+                </tr>
+            </table>
+            <p>{% trans "Thank you," %}</p>
+            <p>{{ request|site_name }}</p>
+        </td>
+    </tr>
+</table>
+{% endblock %}

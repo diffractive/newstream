@@ -1,0 +1,28 @@
+{% extends "base_email.html" %}
+{% load common_tags i18n %}
+
+{% block title %}
+{% trans 'Your Account is deleted' %}
+{% endblock %}
+
+{% block content %}
+<table cellpadding="10" cellspacing="0" style="width: 100%;">
+    <tr>
+        <th style="width: 100%;text-align: left;">
+            <h2 style="font-weight: bold;">
+                {% trans "Your Account is deleted" %}
+            </h2>
+        </th>
+    </tr>
+    <tr>
+        <td style="width: 100%;">
+            <p>{% trans "Dear" %} {{ user.fullname }},</p>
+            <p>
+                {% trans "You have just deleted your account. Thank you for your support all the way!" %}
+            </p>
+            <p>{% trans "Thank you," %}</p>
+            <p>{{ request|site_name }}</p>
+        </td>
+    </tr>
+</table>
+{% endblock %}

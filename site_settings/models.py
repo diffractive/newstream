@@ -76,18 +76,46 @@ class UserMetaField(AbstractFormField):
 
 @register_setting
 class SiteSettings(BaseSetting, ClusterableModel):
-    default_from_email = models.EmailField()
-    general_general_panels = [
-        FieldPanel('default_from_email', heading=_('Default From Email')),
-        InlinePanel('admin_emails', label=_("Admin Email"), heading=_("List of Admins' Emails"),
-                    help_text=_('Email notifications such as new donations will be sent to this list.'))
-    ]
     signup_footer_text = RichTextField(blank=True)
     general_signup_panels = [
         FieldPanel('signup_footer_text',
                    heading=_('Footer Text(Under Signup Form)')),
         InlinePanel('user_meta_fields', label=_('User Meta Fields'),
                     help_text=_('Add extra fields for the user signup form for additional data you want to collect from them.')),
+    ]
+
+    default_from_email = models.EmailField()
+    email_general_panels = [
+        FieldPanel('default_from_email', heading=_('Default From Email')),
+        InlinePanel('admin_emails', label=_("Admin Email"), heading=_("List of Admins' Emails"),
+                    help_text=_('Email notifications such as new donations will be sent to this list.'))
+    ]
+
+    admin_receive_account_created_emails = models.BooleanField(default=True)
+    admin_receive_account_deleted_emails = models.BooleanField(default=True)
+    admin_receive_checkout_emails = models.BooleanField(default=True)
+    admin_receive_renewal_emails = models.BooleanField(default=False)
+    admin_receive_update_recurring_emails = models.BooleanField(default=True)
+    admin_receive_pause_recurring_emails = models.BooleanField(default=True)
+    admin_receive_resume_recurring_emails = models.BooleanField(default=True)
+    admin_receive_cancel_recurring_emails = models.BooleanField(default=True)
+    email_admin_panels = [
+        FieldPanel('admin_receive_account_created_emails',
+                   heading=_('Allow admins receive notifications of donor accounts being created?')),
+        FieldPanel('admin_receive_account_deleted_emails',
+                   heading=_('Allow admins receive notifications of donor accounts being deleted?')),
+        FieldPanel('admin_receive_checkout_emails',
+                   heading=_('Allow admins receive notifications of donation completions? (donor returning from gateway page)')),
+        FieldPanel('admin_receive_renewal_emails',
+                   heading=_('Allow admins receive notifications of recurring donation renewals?')),
+        FieldPanel('admin_receive_update_recurring_emails',
+                   heading=_('Allow admins receive notifications of recurring donations being updated?')),
+        FieldPanel('admin_receive_pause_recurring_emails',
+                   heading=_('Allow admins receive notifications of recurring donations being paused?')),
+        FieldPanel('admin_receive_resume_recurring_emails',
+                   heading=_('Allow admins receive notifications of recurring donations being resumed?')),
+        FieldPanel('admin_receive_cancel_recurring_emails',
+                   heading=_('Allow admins receive notifications of recurring donations being cancelled?')),
     ]
 
     # todo: make supported currencies for each payment gateway
@@ -216,11 +244,15 @@ class SiteSettings(BaseSetting, ClusterableModel):
 
     edit_handler = TopTabbedInterface([
         SubTabbedInterface([
-            SubObjectList(general_general_panels, classname='general-general',
-                          heading=_('General')),
             SubObjectList(general_signup_panels, classname='general-signup',
                           heading=_('User Signup')),
         ], heading=_("General")),
+        SubTabbedInterface([
+            SubObjectList(email_general_panels, classname='email-general',
+                          heading=_('General')),
+            SubObjectList(email_admin_panels, classname='email-admin',
+                          heading=_('Admin Emails')),
+        ], heading=_("Emails")),
         SubTabbedInterface([
             SubObjectList(social_general_panels, classname='social-general',
                           heading=_('General')),

@@ -1,0 +1,50 @@
+{% extends "base_email.html" %}
+{% load common_tags i18n %}
+
+{% block title %}
+{% trans 'Your Recurring Donation is paused' %}
+{% endblock %}
+
+{% block content %}
+<table cellpadding="10" cellspacing="0" style="width: 100%;">
+    <tr>
+        <th style="width: 100%;text-align: left;">
+            <h2 style="font-weight: bold;">
+                {% trans "Your Recurring Donation is paused" %}
+            </h2>
+        </th>
+    </tr>
+    <tr>
+        <td style="width: 100%;">
+            <p>{% trans "Dear" %} {{ subscription.user.fullname }},</p>
+            <p>
+                {% trans "You have just paused your recurring donation. You can resume it anytime in your account. Here are the details of your recurring donation:" %}
+            </p>
+            <table cellpadding="10">
+                <tr>
+                    <td style="font-weight: bold;">{% trans 'Donor' %}</td>
+                    <td>{{ subscription.user.fullname }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">{% trans "Recurring Donation Identifier" %}</td>
+                    <td>{{ subscription.object_id }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">{% trans "Currency" %}</td>
+                    <td>{{ subscription.currency }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">{% trans "Recurring Donation Amount" %}</td>
+                    <td>{{ subscription|recurring_amount_with_currency }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">{% trans 'Recurring Donation Status' %}</td>
+                    <td>{{ subscription.recurring_status|title }}</td>
+                </tr>
+            </table>
+            <p>{% trans "Thank you," %}</p>
+            <p>{{ request|site_name }}</p>
+        </td>
+    </tr>
+</table>
+{% endblock %}

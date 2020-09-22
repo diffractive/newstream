@@ -1,24 +1,18 @@
 import os
 import secrets
 import re
-import traceback
+import html
 from pprint import pprint
 from datetime import datetime, timedelta
 from pytz import timezone
+from django.utils.safestring import mark_safe
 from django.conf import settings
-from django.core.mail import send_mail
-from django.utils.encoding import force_bytes
-from django.utils.http import urlsafe_base64_encode
-from django.template.loader import render_to_string
 from django.utils import translation
-
-from allauth.account.utils import send_email_confirmation
+from django.utils.translation import gettext_lazy as _
 
 from .includes.currency_dictionary import currency_dict
-from .templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text
-from newstream.functions import getSiteSettings, getDefaultFromEmail, setDefaultFromEmail, getSuperUserTimezone
+from newstream.functions import getSiteSettings, getSuperUserTimezone
 from newstream.functions import evTokenGenerator, raiseObjectNone, getSiteName
-from newstream.templates.registration.email_templates.plain_texts import get_verify_your_email_text
 from donations.models import DonationMeta
 
 
@@ -115,59 +109,11 @@ def process_donation_meta(request):
     return donation_metas
 
 
-def sendDonationNotifToAdmins(request, donation):
-    siteSettings = getSiteSettings(request)
-    admin_list = [
-        admin_email.email for admin_email in siteSettings.admin_emails.all()]
-    try:
-        send_mail(
-            "New Donation",
-            get_new_donation_text(
-                request, donation),
-            getDefaultFromEmail(request),
-            admin_list,  # requires admin list to be set in siteSettings
-            html_message=render_to_string('donations/email_templates/new_donation.html', context={
-                'donation': donation}, request=request)
-        )
-    except Exception as e:
-        print("Cannot send emails to admins: "+str(e), flush=True)
+def displayDonationAmountWithCurrency(donation):
+    currency_set = getCurrencyDictAt(donation.currency)
+    return mark_safe(html.unescape(currency_set['symbol']+" "+str(donation.donation_amount)))
 
 
-def sendDonationReceipt(request, donation):
-    try:
-        send_mail(
-            "Donation Receipt",
-            get_donation_receipt_text(
-                request, donation),
-            getDefaultFromEmail(request),
-            [donation.user.email],
-            html_message=render_to_string('donations/email_templates/donation_receipt.html', context={
-                'donation': donation}, request=request)
-        )
-    except Exception as e:
-        print("Cannot send receipt to user: "+str(e), flush=True)
-
-
-def sendVerificationEmail(request, user):
-    setDefaultFromEmail(request)
-    # allauth's email confirmation uses DEFAULT_FROM_EMAIL
-    send_email_confirmation(request, user, True)
-
-
-def sendReceiptAndNotification(request, gatewayManager):
-    # set default language for admins' emails
-    translation.activate(settings.LANGUAGE_CODE)
-
-    # todo: should make this an option toggle in site_settings
-    # email new donation notification to admin list
-    # only when the donation is brand new, not counting in recurring renewals
-    # if not gatewayManager.donation.parent_donation:
-    sendDonationNotifToAdmins(request, gatewayManager.donation)
-
-    # set language for donation_receipt.html
-    user = gatewayManager.donation.user
-    if user.language_preference:
-        translation.activate(user.language_preference)
-
-    # email thank you receipt to user
-    sendDonationReceipt(request, gatewayManager.donation)
+def displayRecurringAmountWithCurrency(subscription):
+    currency_set = getCurrencyDictAt(subscription.currency)
+    return mark_safe(html.unescape(currency_set['symbol']+" "+str(subscription.recurring_amount)))

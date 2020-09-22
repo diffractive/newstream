@@ -75,13 +75,31 @@ def cancel_recurring(request):
         subscription_id = int(json_data['subscription_id'])
         subscription = get_object_or_404(Subscription, id=subscription_id)
         gatewayManager = InitPaymentGateway(
-                    request, subscription=subscription)
+            request, subscription=subscription)
         resultSet = gatewayManager.cancel_recurring_payment()
         if resultSet['status'] == 'success':
-            # update newstream model
-            subscription.recurring_status = STATUS_CANCELLED
-            subscription.save()
             return JsonResponse({'status': resultSet['status'], 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
+        else:
+            return JsonResponse({'status': resultSet['status'], 'reason': resultSet['reason']})
+    else:
+        return HttpResponse(400)
+
+
+@login_required
+@csrf_exempt
+def toggle_recurring(request):
+    if request.method == 'POST':
+        json_data = json.loads(request.body)
+        if 'subscription_id' not in json_data:
+            print("No subscription_id in JSON body", flush=True)
+            return HttpResponse(status=400)
+        subscription_id = int(json_data['subscription_id'])
+        subscription = get_object_or_404(Subscription, id=subscription_id)
+        gatewayManager = InitPaymentGateway(
+            request, subscription=subscription)
+        resultSet = gatewayManager.toggle_recurring_payment()
+        if resultSet['status'] == 'success':
+            return JsonResponse({'status': resultSet['status'], 'button-html': resultSet['button-html'], 'recurring-status': str(_(resultSet['recurring-status'].capitalize())), 'success-message': resultSet['success-message']})
         else:
             return JsonResponse({'status': resultSet['status'], 'reason': resultSet['reason']})
     else:
@@ -96,7 +114,8 @@ def edit_recurring(request, id):
     if request.method == 'POST':
         if form.is_valid():
             # use gatewayManager to process the data in form.cleaned_data as required
-            gatewayManager = InitPaymentGateway(request, subscription=subscription)
+            gatewayManager = InitPaymentGateway(
+                request, subscription=subscription)
             gatewayManager.update_recurring_payment(form.cleaned_data)
 
             return redirect('donations:edit-recurring', id=id)
@@ -179,7 +198,8 @@ def my_onetime_donations(request):
 @login_required
 def my_recurring_donations(request):
     # todo: separate one-time and recurring donations, with a sidebar like in my profile
-    subscriptions = Subscription.objects.filter(user=request.user).order_by('-created_at')
+    subscriptions = Subscription.objects.filter(
+        user=request.user).order_by('-created_at')
     siteSettings = getSiteSettings(request)
     return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'siteSettings': siteSettings})
 
@@ -187,6 +207,7 @@ def my_recurring_donations(request):
 @login_required
 def my_renewals(request, id):
     subscription = get_object_or_404(Subscription, id=id)
-    renewals = Donation.objects.filter(subscription=subscription).order_by('-created_at')
+    renewals = Donation.objects.filter(
+        subscription=subscription).order_by('-created_at')
     siteSettings = getSiteSettings(request)
     return render(request, 'donations/my_renewals.html', {'subscription': subscription, 'renewals': renewals, 'siteSettings': siteSettings})

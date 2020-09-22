@@ -12,7 +12,7 @@ from django.utils import translation
 
 from newstream_user.models import UserMeta
 from donations.models import Donation
-from donations.functions import sendVerificationEmail
+from donations.email_functions import sendVerificationEmail, sendAccountDeletedNotifToAdmins, sendAccountDeletedNotifToDonor
 from newstream.functions import evTokenGenerator, generateIDSecretHash, process_user_meta
 from newstream.forms import PersonalInfoForm, DeleteAccountForm
 User = get_user_model()
@@ -80,9 +80,13 @@ def delete_account(request):
     if request.method == 'POST':
         form = DeleteAccountForm(request.POST)
         if form.is_valid():
+            user = request.user
+            # email notifications
+            sendAccountDeletedNotifToAdmins(request, user)
+            sendAccountDeletedNotifToDonor(request, user)
+
             # proceed to logout user
             # lastly, deletes the account
-            user = request.user
             logout(request)
             user.delete()
             messages.add_message(request, messages.SUCCESS,

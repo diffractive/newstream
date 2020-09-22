@@ -2,7 +2,7 @@
 {% load common_tags i18n %}
 
 {% block title %}
-{% trans 'Donation Receipt' %}
+{% trans 'Renewal Donation Receipt' %}
 {% endblock %}
 
 {% block content %}
@@ -10,7 +10,7 @@
     <tr>
         <th style="width: 100%;text-align: left;">
             <h2 style="font-weight: bold;">
-                {% trans "Donation Receipt" %}
+                {% trans "Renewal Donation Receipt" %}
             </h2>
         </th>
     </tr>
@@ -18,7 +18,7 @@
         <td style="width: 100%;">
             <p>{% trans "Dear" %} {{ donation.user.fullname }},</p>
             <p>
-                {% trans "Thank you for your generosity! Your support means a lot to us. Here are the details of your donation:" %}
+                {% trans "Thank you for your generosity! Your support means a lot to us. Here are the details of your renewal donation:" %}
             </p>
             <table cellpadding="10">
                 <tr>

@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, printvars
 from donations.models import Donation
-from donations.functions import formatAmountCentsDecimal, sendDonationReceipt, sendReceiptAndNotification, gen_order_id
+from donations.functions import formatAmountCentsDecimal, gen_order_id
 from donations.payment_gateways.setting_classes import getStripeSettings
 from .functions import initStripeApiKey
 from .factory import Factory_Stripe
@@ -56,7 +56,7 @@ def create_checkout_session(request):
         }
         if donation.is_recurring:
             adhoc_price['recurring'] = {
-                'interval': 'day', # todo: change day to month after testing
+                'interval': 'day',  # todo: change day to month after testing
                 'interval_count': 1
             }
 
@@ -112,7 +112,7 @@ def verify_stripe_response(request):
 
     if gatewayManager:
         return gatewayManager.process_webhook_response()
-    return HttpResponse(status=400)    
+    return HttpResponse(status=400)
 
 
 @csrf_exempt

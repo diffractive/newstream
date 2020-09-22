@@ -43,16 +43,12 @@
                     <td>{{ donation|amount_with_currency }}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold;">{% trans 'Opt in Mailing List?' %}</td>
-                    <td>{{ donation.user.optInMailing }}</td>
-                </tr>
-                <tr>
                     <td style="font-weight: bold;">{% trans 'Payment Status' %}</td>
                     <td>{{ donation.payment_status|title }}</td>
                 </tr>
                 {% if donation.is_recurring %}
                 <tr>
-                    <td style="font-weight: bold;">{% trans 'Recurring Payment Status' %}</td>
+                    <td style="font-weight: bold;">{% trans 'Recurring Donation Status' %}</td>
                     <td>{{ donation.subscription.recurring_status|title }}</td>
                 </tr>
                 {% endif %}

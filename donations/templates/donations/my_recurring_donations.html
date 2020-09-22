@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static common_tags i18n %}
+{% load static common_tags donation_tags i18n %}
 
 {% block title %}{% trans 'My Recurring Donations' %}{% endblock %}
 {% block body_class %}my-recurring-donations-page{% endblock %}
@@ -42,6 +42,8 @@
                                         data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
                                     <button class="edit-recurring-donation" data-id="{{ subscription.id }}"
                                         data-href="{% url 'donations:edit-recurring' subscription.id %}">{% trans 'Edit Recurring donation' %}</button>
+                                    <button class="toggle-recurring-donation"
+                                        data-id="{{ subscription.id }}">{{ subscription|toggle_text }}</button>
                                     <button class="cancel-recurring-donation"
                                         data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}</button>
                                 </div>
@@ -114,6 +116,8 @@
                                     data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
                                 <button class="edit-recurring-donation" data-id="{{ subscription.id }}"
                                     data-href="{% url 'donations:edit-recurring' subscription.id %}">{% trans 'Edit Recurring donation' %}</button>
+                                <button class="toggle-recurring-donation"
+                                    data-id="{{ subscription.id }}">{{ subscription|toggle_text }}</button>
                                 <button class="cancel-recurring-donation"
                                     data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}</button>
                             </div>
@@ -162,7 +166,7 @@
             wrapper.addEventListener("click", function (event) {
                 let subscription_id = wrapper.getAttribute('data-id');
                 // todo: beautify the confirm dialog + better error handling
-                if (confirm('Confirm Cancel Recurring Payment?')) {
+                if (confirm('Confirm Cancel Recurring Donation?')) {
                     postData('{% url "donations:cancel-recurring" %}', { subscription_id: subscription_id })
                         .then(data => {
                             if (data['status'] == 'success') {
@@ -172,6 +176,29 @@
                                     buttonsDiv.querySelector('button.view-recurring-donation').addEventListener("click", function (event) {
                                         window.location.href = data['button-href'];
                                     });
+                                }
+                                for (let statusTd of document.querySelectorAll(`td.recurring-status-td[data-id='${subscription_id}']`)) {
+                                    statusTd.innerHTML = data['recurring-status'];
+                                }
+                            } else {
+                                alert(data['reason']);
+                            }
+                        });
+                }
+            });
+        }
+        for (let wrapper of document.getElementsByClassName("toggle-recurring-donation")) {
+            wrapper.addEventListener("click", function (event) {
+                let subscription_id = wrapper.getAttribute('data-id');
+                let innerHTML = wrapper.innerHTML;
+                // todo: beautify the confirm dialog + better error handling
+                if (confirm('Confirm ' + innerHTML + '?')) {
+                    postData('{% url "donations:toggle-recurring" %}', { subscription_id: subscription_id })
+                        .then(data => {
+                            if (data['status'] == 'success') {
+                                alert(data['success-message']);
+                                for (let toggleBtn of document.querySelectorAll(`button.toggle-recurring-donation[data-id='${subscription_id}']`)) {
+                                    toggleBtn.innerHTML = data['button-html'];
                                 }
                                 for (let statusTd of document.querySelectorAll(`td.recurring-status-td[data-id='${subscription_id}']`)) {
                                     statusTd.innerHTML = data['recurring-status'];

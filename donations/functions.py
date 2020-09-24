@@ -38,18 +38,6 @@ def isTestMode(request):
     return siteSettings.sandbox_mode
 
 
-def formatAmountCentsDecimal(amount_cents, currency_code):
-    if amount_cents % 1 == 0:
-        formatted_str = str(int(amount_cents))
-        return formatted_str
-    currency = getCurrencyDictAt(currency_code)
-    decimal_places = (currency['setting']['number_decimals'] -
-                      2) if currency and currency['setting']['number_decimals'] >= 2 else 0
-    formatted_str = '{:.{decimals}f}'.format(
-        amount_cents, decimals=decimal_places)
-    return formatted_str
-
-
 def gen_order_id(gateway=None):
     if not gateway:
         raiseObjectNone('Please provide a payment gateway object')
@@ -111,9 +99,9 @@ def process_donation_meta(request):
 
 def displayDonationAmountWithCurrency(donation):
     currency_set = getCurrencyDictAt(donation.currency)
-    return mark_safe(html.unescape(currency_set['symbol']+" "+str(donation.donation_amount)))
+    return mark_safe(html.unescape(currency_set['symbol']+" "+str(donation.donation_amount if currency_set['setting']['number_decimals'] != 0 else int(donation.donation_amount))))
 
 
 def displayRecurringAmountWithCurrency(subscription):
     currency_set = getCurrencyDictAt(subscription.currency)
-    return mark_safe(html.unescape(currency_set['symbol']+" "+str(subscription.recurring_amount)))
+    return mark_safe(html.unescape(currency_set['symbol']+" "+str(subscription.recurring_amount if currency_set['setting']['number_decimals'] != 0 else int(subscription.recurring_amount))))

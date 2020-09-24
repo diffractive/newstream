@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static common_tags widget_tweaks i18n %}
+{% load static common_tags donation_tags widget_tweaks i18n %}
 
 {% block title %}{% trans 'Donation Details' %}{% endblock %}
 
@@ -15,9 +15,9 @@
         </div>
         <h1 class="mb-4 text-white">{% trans 'Edit Recurring Donation' %}</h1>
         <h4 class="mb-4 text-white">{% trans 'Recurring Donation Identifier: ' %}{{subscription.object_id}}</h4>
-        <!-- todo: different text-color for different recurring_status -->
         <h4 class="mb-4 text-white">{% trans 'Recurring Donation status:' %} <span
-                class="font-bold text-primary">{{subscription.recurring_status|title}}</span></h4>
+                class="font-bold {{subscription.recurring_status|recurring_status_color}}">{{subscription.recurring_status|title}}</span>
+        </h4>
         <p class="text-primary-light lg:w-3/4">
             {% trans 'Edit your recurring donation by submitting this form.' %}
         </p>
@@ -27,7 +27,7 @@
     {% include 'common/form_errors.html' %}
 
     {# Form Area #}
-    <form method='POST' action=''>
+    <form method='POST' action='' class="action-form">
         <div class="flex flex-row justify-center mb-4">
             {% csrf_token %}
             {# Include the hidden fields #}
@@ -37,9 +37,8 @@
             <div class="donation-details-section w-full">
                 <h2 class="mb-2">{% trans 'Recurring Donation Details' %}</h2>
                 {% include 'common/form_visible_fields.html' %}
-                <!-- todo: if form not changed, update button should be unclickable -->
-                <button class="ns-wide-btn right-arrow-btn" type="submit">{% trans 'Update Recurring Donation' %}<span
-                        class="icon"></span></button>
+                <button class="ns-wide-btn right-arrow-btn need-white-loading-btn"
+                    type="submit">{% trans 'Update Recurring Donation' %}<span class="icon"></span></button>
             </div>
         </div>
     </form>

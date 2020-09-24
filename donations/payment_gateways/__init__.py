@@ -32,7 +32,10 @@ def InitEditRecurringPaymentForm(request, subscription):
     elif subscription.gateway.is_paypal():
         return RecurringPaymentForm_Paypal(request.POST, request=request, subscription=subscription, label_suffix='') if request.method == 'POST' else RecurringPaymentForm_Paypal(request=request, subscription=subscription, label_suffix='')
     elif subscription.gateway.is_stripe():
-        return RecurringPaymentForm_Stripe(request.POST, request=request, subscription=subscription, label_suffix='') if request.method == 'POST' else RecurringPaymentForm_Stripe(request=request, subscription=subscription, label_suffix='')
+        form = RecurringPaymentForm_Stripe(request.POST, request=request, subscription=subscription, label_suffix='') if request.method == 'POST' else RecurringPaymentForm_Stripe(request=request, subscription=subscription, label_suffix='')
+        form.order_fields(
+            ['subscription_id', 'currency', 'recurring_amount', 'billing_cycle_now'])
+        return form
     else:
         raiseObjectNone('The Provided gateway has not been implemented yet')
 

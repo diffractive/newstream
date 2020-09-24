@@ -9,7 +9,7 @@
 <div class="complete-registration-form-div container-tight">
     {% include 'common/form_errors.html' %}
     {# Form Area #}
-    <form method='POST' action="{% url 'socialaccount_signup' %}">
+    <form method='POST' action="{% url 'socialaccount_signup' %}" class="action-form">
         {% if redirect_field_value %}
         <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
         {% endif %}

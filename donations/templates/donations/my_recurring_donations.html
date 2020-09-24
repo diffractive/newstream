@@ -29,7 +29,8 @@
                             <label for="md_dropdown-toggle-checkbox{{forloop.counter}}"
                                 class="dropdown-toggle-label"></label>
                             <span class="three-dots-icon"></span>
-                            <div class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
+                            <div
+                                class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch recurring-donation-menu">
                                 {% if request.user.is_email_verified %}
                                 {% if subscription.isRecurringCancelled %}
                                 <div class="payment-cancelled-options-div" data-id="{{ subscription.id }}">
@@ -42,10 +43,13 @@
                                         data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
                                     <button class="edit-recurring-donation" data-id="{{ subscription.id }}"
                                         data-href="{% url 'donations:edit-recurring' subscription.id %}">{% trans 'Edit Recurring donation' %}</button>
-                                    <button class="toggle-recurring-donation"
-                                        data-id="{{ subscription.id }}">{{ subscription|toggle_text }}</button>
-                                    <button class="cancel-recurring-donation"
-                                        data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}</button>
+                                    <button class="toggle-recurring-donation need-black-loading-btn adhoc-right-pad"
+                                        data-id="{{ subscription.id }}"><span
+                                            class="btn-text">{{ subscription|toggle_text }}</span><span
+                                            class="icon"></span></button>
+                                    <button class="cancel-recurring-donation need-black-loading-btn adhoc-right-pad"
+                                        data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}<span
+                                            class="icon"></span></button>
                                 </div>
                                 {% endif %}
                                 {% else %}
@@ -103,7 +107,8 @@
                         <label for="md2_dropdown-toggle-checkbox{{forloop.counter}}"
                             class="dropdown-toggle-label"></label>
                         <span class="three-dots-icon"></span>
-                        <div class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
+                        <div
+                            class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch recurring-donation-menu">
                             {% if request.user.is_email_verified %}
                             {% if subscription.isRecurringCancelled %}
                             <div class="payment-cancelled-options-div" data-id="{{ subscription.id }}">
@@ -116,10 +121,13 @@
                                     data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
                                 <button class="edit-recurring-donation" data-id="{{ subscription.id }}"
                                     data-href="{% url 'donations:edit-recurring' subscription.id %}">{% trans 'Edit Recurring donation' %}</button>
-                                <button class="toggle-recurring-donation"
-                                    data-id="{{ subscription.id }}">{{ subscription|toggle_text }}</button>
-                                <button class="cancel-recurring-donation"
-                                    data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}</button>
+                                <button class="toggle-recurring-donation need-black-loading-btn adhoc-right-pad"
+                                    data-id="{{ subscription.id }}"><span
+                                        class="btn-text">{{ subscription|toggle_text }}</span><span
+                                        class="icon"></span></button>
+                                <button class="cancel-recurring-donation need-black-loading-btn adhoc-right-pad"
+                                    data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}<span
+                                        class="icon"></span></button>
                             </div>
                             {% endif %}
                             {% else %}
@@ -165,10 +173,13 @@
         for (let wrapper of document.getElementsByClassName("cancel-recurring-donation")) {
             wrapper.addEventListener("click", function (event) {
                 let subscription_id = wrapper.getAttribute('data-id');
-                // todo: beautify the confirm dialog + better error handling
                 if (confirm('Confirm Cancel Recurring Donation?')) {
                     postData('{% url "donations:cancel-recurring" %}', { subscription_id: subscription_id })
                         .then(data => {
+                            // remove loading state
+                            wrapper.classList.remove('black-loading-btn');
+                            wrapper.style.paddingRight = '1rem';
+                            wrapper.disabled = false;
                             if (data['status'] == 'success') {
                                 alert('Recurring donation cancelled!');
                                 for (let buttonsDiv of document.querySelectorAll(`div.payment-recurring-options-div[data-id='${subscription_id}']`)) {
@@ -190,11 +201,14 @@
         for (let wrapper of document.getElementsByClassName("toggle-recurring-donation")) {
             wrapper.addEventListener("click", function (event) {
                 let subscription_id = wrapper.getAttribute('data-id');
-                let innerHTML = wrapper.innerHTML;
-                // todo: beautify the confirm dialog + better error handling
+                let innerHTML = wrapper.getElementsByClassName("btn-text")[0].innerHTML;
                 if (confirm('Confirm ' + innerHTML + '?')) {
                     postData('{% url "donations:toggle-recurring" %}', { subscription_id: subscription_id })
                         .then(data => {
+                            // remove loading state
+                            wrapper.classList.remove('black-loading-btn');
+                            wrapper.style.paddingRight = '1rem';
+                            wrapper.disabled = false;
                             if (data['status'] == 'success') {
                                 alert(data['success-message']);
                                 for (let toggleBtn of document.querySelectorAll(`button.toggle-recurring-donation[data-id='${subscription_id}']`)) {

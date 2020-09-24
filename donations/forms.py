@@ -22,7 +22,8 @@ User = get_user_model()
 DONATION_DETAILS_FIELDS = [
     'payment_gateway',
     'donation_frequency',
-    'donation_amount'
+    'donation_amount',
+    'donation_amount_custom',
 ]
 PERSONAL_INFO_FIELDS = [
     'first_name',
@@ -60,19 +61,26 @@ class DonationDetailsForm(forms.Form):
 
         # construct donation amount field
         currency_set = getCurrencyDictAt(self.global_settings.currency)
+        amount_label = _('Donation Amount in ') + html.unescape(currency_set['admin_label'])
+        custom_amount_label = _('Custom Donation Amount in ') + html.unescape(currency_set['admin_label'])
         if form.isAmountFixed():
             self.fields["donation_amount"] = forms.DecimalField(
-                initial=form.fixed_amount, label=_('Donation Amount'))
+                initial=form.fixed_amount, label=amount_label)
             self.fields["donation_amount"].widget.attrs['readonly'] = True
         elif form.isAmountStepped():
             amountSteps = form.amount_steps.all()
             self.fields["donation_amount"] = forms.ChoiceField(
-                choices=[(x.step, html.unescape(currency_set['symbol']) + ' ' + str(x.step)) for x in amountSteps], label=_('Donation Amount'))
+                choices=[(x.step, html.unescape(currency_set['symbol']) + ' ' + str(x.step)) for x in amountSteps], label=amount_label)
         elif form.isAmountCustom():
             self.fields["donation_amount"] = forms.DecimalField(
-                label=_('Donation Amount'))
-        self.fields["donation_amount"].label = "Donation amount in " + html.unescape(
-            currency_set['admin_label'])
+                label=custom_amount_label, decimal_places=currency_set['setting']['number_decimals'])
+        elif form.isAmountSteppedCustom():
+            amountSteps = form.amount_steps.all()
+            select_choices = [*[(x.step, html.unescape(
+                currency_set['symbol']) + ' ' + str(x.step)) for x in amountSteps], ('custom', _('Custom Amount'))]
+            self.fields["donation_amount"] = forms.ChoiceField(
+                choices=select_choices, label=amount_label)
+            self.fields["donation_amount_custom"] = forms.DecimalField(required=False, label=custom_amount_label, decimal_places=currency_set['setting']['number_decimals'])
 
         # construct donation meta fields from form configuration
         donationmetafields = form.donation_meta_fields.all()

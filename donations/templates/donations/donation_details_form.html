@@ -16,7 +16,7 @@
     {% include 'common/form_errors.html' %}
 
     {# Form Area #}
-    <form method='POST' action=''>
+    <form method='POST' action='' class="action-form">
         <div class="flex flex-row justify-center mb-4">
             {% csrf_token %}
             {# Include the hidden fields #}
@@ -61,11 +61,32 @@
                 {% endif %}
                 {% endfor %}
 
-                <button class="ns-wide-btn right-arrow-btn" type="submit">{% trans 'Continue' %}<span
-                        class="icon"></span></button>
+                <button class="ns-wide-btn right-arrow-btn need-white-loading-btn"
+                    type="submit">{% trans 'Continue' %}<span class="icon"></span></button>
                 <div class="form-footer-text">{{ form.footer_html|safe }}</div>
             </div>
         </div>
     </form>
 </div>
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+    window.addEventListener('load', function () {
+        let amountSelect = document.getElementById('id_donation_amount');
+        let customAmount = document.getElementById('id_donation_amount_custom');
+        let customAmountDiv = document.getElementById('id_donation_amount_custom').parentNode.parentNode;
+        amountSelect.onchange = (event) => {
+            if (event.target.value == 'custom') {
+                customAmountDiv.classList.remove('hidden');
+                customAmount.required = true;
+            } else {
+                customAmountDiv.classList.add('hidden');
+                customAmount.value = '';
+                customAmount.required = false;
+            }
+        };
+        amountSelect.dispatchEvent(new Event("change"));
+    });
+</script>
+{% endblock extra_js %}

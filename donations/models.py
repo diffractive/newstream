@@ -11,6 +11,7 @@ from wagtail.contrib.forms.models import AbstractFormField
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
+from wagtailmodelchooser import register_model_chooser
 
 from newstream.edit_handlers import ReadOnlyPanel
 
@@ -36,7 +37,8 @@ class DonationMetaField(AbstractFormField):
 class AmountStep(models.Model):
     form = ParentalKey('DonationForm', on_delete=models.CASCADE,
                        related_name='amount_steps')
-    step = models.DecimalField(default=Decimal(0), max_digits=20, decimal_places=2)
+    step = models.DecimalField(default=Decimal(
+        0), max_digits=20, decimal_places=2)
 
     panels = [
         FieldPanel('step', heading=_('Step')),
@@ -46,25 +48,21 @@ class AmountStep(models.Model):
         unique_together = ['form', 'step']
 
 
+@register_model_chooser
 class DonationForm(ClusterableModel):
     AMOUNT_TYPE_CHOICES = [
         ('fixed', _('Fixed Amount')),
         ('stepped', _('Fixed Steps')),
         ('custom', _('Custom Amount')),
+        ('stepped_custom', _('Fixed Steps with Custom Amount Option')),
     ]
     title = models.CharField(max_length=191, unique=True)
     description = models.TextField(blank=True)
-    # no need to differentiate is_recurring at the form blueprint level
-    # should allow users with the flexibility to choose one-time/monthly within the same form
-    # is_recurring = models.BooleanField(default=False)
     amount_type = models.CharField(
         max_length=20, choices=AMOUNT_TYPE_CHOICES)
-    # todo: implement validation for amount fields to round to current currency decimal places
     fixed_amount = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=2,
-                                     help_text=_('Define fixed donation amount if you chose "Fixed Amount" for your Amount Type.'))
+                                       help_text=_('Define fixed donation amount if you chose "Fixed Amount" for your Amount Type.'))
     allowed_gateways = models.ManyToManyField('site_settings.PaymentGateway')
-    # todo: implement this logic at wagtail backend: there should only be one active form in use at a time
-    is_active = models.BooleanField(default=False)
     donation_footer_text = RichTextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -73,7 +71,6 @@ class DonationForm(ClusterableModel):
     panels = [
         FieldPanel('title', heading=_('Title')),
         FieldPanel('description', heading=_('Description')),
-        FieldPanel('is_active', heading=_('Is Active')),
         FieldPanel('amount_type', heading=_('Donation Amount Type')),
         FieldPanel(
             'fixed_amount', heading=_('Define Fixed Donation Amount')),
@@ -103,6 +100,9 @@ class DonationForm(ClusterableModel):
 
     def isAmountCustom(self):
         return self.amount_type == 'custom'
+
+    def isAmountSteppedCustom(self):
+        return self.amount_type == 'stepped_custom'
 
 
 class DonationMeta(models.Model):
@@ -291,7 +291,8 @@ class Donation(ClusterableModel):
 
     @property
     def is_user_first_donation(self):
-        resultSet = DonationPaymentMeta.objects.filter(donation_id=self.id, field_key='is_user_first_donation')
+        resultSet = DonationPaymentMeta.objects.filter(
+            donation_id=self.id, field_key='is_user_first_donation')
         if len(resultSet) == 1:
             return resultSet[0].field_value
         return False
@@ -322,8 +323,11 @@ class Donation(ClusterableModel):
 
 @receiver(pre_delete, sender=User)
 def update_deleted_users_donations(sender, instance, using, **kwargs):
-    # todo: cancel all recurring payments
     donations = Donation.objects.filter(user=instance).all()
     for donation in donations:
         donation.linked_user_deleted = True
         donation.save()
+    subscriptions = Subscription.objects.filter(user=instance).all()
+    for subscription in subscriptions:
+        subscription.linked_user_deleted = True
+        subscription.save()

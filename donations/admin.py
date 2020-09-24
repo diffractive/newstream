@@ -41,7 +41,6 @@ class DonationAdmin(ModelAdmin):
     menu_order = 100
     add_to_settings_menu = False
     exclude_from_explorer = False
-    # todo: format donation amount upon display according the currency_dict
     list_display = ('donation_amount', 'gateway',
                     'is_recurring', 'payment_status', 'user_column', 'created_at',)
     list_filter = ('is_recurring', 'payment_status', 'created_at',)
@@ -64,8 +63,8 @@ class SubscriptionAdmin(ModelAdmin):
     menu_order = 200
     add_to_settings_menu = False
     exclude_from_explorer = False
-    # todo: format donation amount upon display according the currency_dict
-    list_display = ('recurring_amount', 'gateway', 'recurring_status', 'user_column', 'created_at',)
+    list_display = ('recurring_amount', 'gateway',
+                    'recurring_status', 'user_column', 'created_at',)
     list_filter = ('recurring_status', 'created_at',)
     search_fields = ('object_id', 'recurring_amount',
                      'recurring_status', 'created_at',)
@@ -85,7 +84,7 @@ class DonationFormAdmin(ModelAdmin):
     menu_order = 300
     add_to_settings_menu = False
     exclude_from_explorer = False
-    list_display = ('title', 'description', 'is_active')
+    list_display = ('title', 'description')
     search_fields = ('title', 'description')
 
 

@@ -6,9 +6,9 @@ from django.views.decorators.csrf import csrf_exempt
 
 from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, printvars
 from donations.models import Donation
-from donations.functions import formatAmountCentsDecimal, gen_order_id
+from donations.functions import gen_order_id
 from donations.payment_gateways.setting_classes import getStripeSettings
-from .functions import initStripeApiKey
+from .functions import initStripeApiKey, formatDonationAmount
 from .factory import Factory_Stripe
 
 
@@ -47,8 +47,8 @@ def create_checkout_session(request):
             return HttpResponse(status=500)
 
         # ad-hoc price is used
-        amount_str = formatAmountCentsDecimal(
-            donation.donation_amount*100, donation.currency)
+        amount_str = formatDonationAmount(
+            donation.donation_amount, donation.currency)
         adhoc_price = {
             'unit_amount_decimal': amount_str,
             'currency': donation.currency.lower(),
@@ -81,25 +81,29 @@ def create_checkout_session(request):
                 }
             }
 
-        session = stripe.checkout.Session.create(
-            customer_email=donation.user.email,
-            payment_method_types=['card'],
-            line_items=[{
-                'price_data': adhoc_price,
-                'quantity': 1,
-            }],
-            mode=session_mode,
-            metadata={
-                'donation_id': donation.id
-            },
-            payment_intent_data=payment_intent_data,
-            subscription_data=subscription_data,
-            success_url=getFullReverseUrl(
-                request, 'donations:return-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
-            cancel_url=getFullReverseUrl(
-                request, 'donations:cancel-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
-            idempotency_key=uuid4_str()
-        )
+        try:
+            session = stripe.checkout.Session.create(
+                customer_email=donation.user.email,
+                payment_method_types=['card'],
+                line_items=[{
+                    'price_data': adhoc_price,
+                    'quantity': 1,
+                }],
+                mode=session_mode,
+                metadata={
+                    'donation_id': donation.id
+                },
+                payment_intent_data=payment_intent_data,
+                subscription_data=subscription_data,
+                success_url=getFullReverseUrl(
+                    request, 'donations:return-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
+                cancel_url=getFullReverseUrl(
+                    request, 'donations:cancel-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
+                idempotency_key=uuid4_str()
+            )
+        except Exception as e:
+            print('Cannot create stripe checkout session: '+str(e), flush=True)
+            return HttpResponse(status=500)
 
         return JsonResponse({'id': session.id})
     return HttpResponse(status=500)
@@ -134,9 +138,11 @@ def cancel_from_stripe(request):
 
         if gatewayManager.session:
             if gatewayManager.session.mode == 'payment':
-                # todo: nicer reception for the returned paymentIntent object
-                stripe.PaymentIntent.cancel(
-                    gatewayManager.session.payment_intent)
+                try:
+                    stripe.PaymentIntent.cancel(
+                        gatewayManager.session.payment_intent)
+                except Exception as e:
+                    request.session['return-error'] = str(e)
             # for subscription mode, payment_intent is not yet created, so no need to cancel
     else:
         request.session['return-error'] = str(_(

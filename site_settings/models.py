@@ -4,6 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList, RichTextField
 from wagtail.images.edit_handlers import ImageChooserPanel
+from wagtailmodelchooser.edit_handlers import ModelChooserPanel
 from wagtail.contrib.settings.models import BaseSetting, register_setting
 from wagtail.contrib.forms.models import AbstractFormField
 from modelcluster.models import ClusterableModel
@@ -76,14 +77,6 @@ class UserMetaField(AbstractFormField):
 
 @register_setting
 class SiteSettings(BaseSetting, ClusterableModel):
-    signup_footer_text = RichTextField(blank=True)
-    general_signup_panels = [
-        FieldPanel('signup_footer_text',
-                   heading=_('Footer Text(Under Signup Form)')),
-        InlinePanel('user_meta_fields', label=_('User Meta Fields'),
-                    help_text=_('Add extra fields for the user signup form for additional data you want to collect from them.')),
-    ]
-
     default_from_email = models.EmailField()
     email_general_panels = [
         FieldPanel('default_from_email', heading=_('Default From Email')),
@@ -118,15 +111,49 @@ class SiteSettings(BaseSetting, ClusterableModel):
                    heading=_('Allow admins receive notifications of recurring donations being cancelled?')),
     ]
 
-    # todo: make supported currencies for each payment gateway
-    # todo: check against being-in-use gateways' supported currencies with this setting
+    social_login_enabled = models.BooleanField(default=True)
+    social_skip_signup = models.BooleanField(default=False)
+    signup_footer_text = RichTextField(blank=True)
+    signup_general_panels = [
+        FieldPanel('social_login_enabled',
+                   heading=_('Enable Social Login for this site ?')),
+        FieldPanel('social_skip_signup',
+                   heading=_('Allow Firsttime Social Logins bypass Signup Form ?')),
+        InlinePanel('user_meta_fields', label=_('User Meta Fields'),
+                    help_text=_('Add extra fields for the user signup form for additional data you want to collect from them.')),
+        FieldPanel('signup_footer_text',
+                   heading=_('Footer Text(Under Signup Form)')),
+    ]
+    google_login_enabled = models.BooleanField(default=True)
+    signup_google_panels = [
+        FieldPanel('google_login_enabled',
+                   heading=_('Enable Google Login ? (Only if Social Login is enabled)')),
+    ]
+    facebook_login_enabled = models.BooleanField(default=True)
+    signup_facebook_panels = [
+        FieldPanel('facebook_login_enabled',
+                   heading=_('Enable Facebook Login ? (Only if Social Login is enabled)')),
+    ]
+    twitter_login_enabled = models.BooleanField(default=True)
+    signup_twitter_panels = [
+        FieldPanel('twitter_login_enabled',
+                   heading=_('Enable Twitter Login ? (Only if Social Login is enabled)')),
+    ]
+
     sandbox_mode = models.BooleanField(default=True)
     currency = models.CharField(default='USD', max_length=10, choices=[(key, html.unescape(
         val['admin_label'])) for key, val in currency_dict.items()])
-
-    gateways_general_panels = [
+    donation_form = models.ForeignKey(
+        'donations.DonationForm',
+        null=True,
+        on_delete=models.SET_NULL,
+        related_name='+'
+    )
+    donations_general_panels = [
         FieldPanel('sandbox_mode', heading=_('Sandbox Mode')),
-        FieldPanel('currency', heading=_('Currency'))
+        FieldPanel('currency', heading=_('Currency')),
+        ModelChooserPanel('donation_form', heading=_(
+            'Donation Form to be used')),
     ]
 
     _2c2p_frontend_label = models.CharField(
@@ -140,7 +167,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     _2c2p_testing_secret_key = models.CharField(
         max_length=255, blank=True, null=True, help_text=_("Testing Secret Key"))
 
-    gateways_2c2p_panels = [
+    donations_2c2p_panels = [
         FieldPanel("_2c2p_frontend_label", heading=_(
             "2C2P Gateway public-facing label")),
         MultiFieldPanel([
@@ -158,7 +185,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     paypal_frontend_label = models.CharField(
         max_length=255, default=_("PayPal"), help_text=_("The Gateway name to be shown on public-facing website."))
 
-    gateways_paypal_panels = [
+    donations_paypal_panels = [
         FieldPanel("paypal_frontend_label", heading=_(
             "PayPal Gateway public-facing label")),
     ]
@@ -178,7 +205,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     stripe_api_secret_key = models.CharField(
         max_length=255, blank=True, help_text=_("The Live API secret key"))
 
-    gateways_stripe_panels = [
+    donations_stripe_panels = [
         FieldPanel("stripe_frontend_label", heading=_(
             "Stripe Gateway public-facing label")),
         FieldPanel("stripe_webhook_secret",
@@ -218,35 +245,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
         ImageChooserPanel('site_icon', heading=('Site Icon')),
     ]
 
-    social_login_enabled = models.BooleanField(default=True)
-    social_skip_signup = models.BooleanField(default=False)
-    social_general_panels = [
-        FieldPanel('social_login_enabled',
-                   heading=_('Enable Social Login for this site ?')),
-        FieldPanel('social_skip_signup',
-                   heading=_('Allow Firsttime Social Logins bypass Signup Form ?')),
-    ]
-    google_login_enabled = models.BooleanField(default=True)
-    social_google_panels = [
-        FieldPanel('google_login_enabled',
-                   heading=_('Enable Google Login ? (Only if Social Login is enabled)')),
-    ]
-    facebook_login_enabled = models.BooleanField(default=True)
-    social_facebook_panels = [
-        FieldPanel('facebook_login_enabled',
-                   heading=_('Enable Facebook Login ? (Only if Social Login is enabled)')),
-    ]
-    twitter_login_enabled = models.BooleanField(default=True)
-    social_twitter_panels = [
-        FieldPanel('twitter_login_enabled',
-                   heading=_('Enable Twitter Login ? (Only if Social Login is enabled)')),
-    ]
-
     edit_handler = TopTabbedInterface([
-        SubTabbedInterface([
-            SubObjectList(general_signup_panels, classname='general-signup',
-                          heading=_('User Signup')),
-        ], heading=_("General")),
         SubTabbedInterface([
             SubObjectList(email_general_panels, classname='email-general',
                           heading=_('General')),
@@ -254,25 +253,25 @@ class SiteSettings(BaseSetting, ClusterableModel):
                           heading=_('Admin Emails')),
         ], heading=_("Emails")),
         SubTabbedInterface([
-            SubObjectList(social_general_panels, classname='social-general',
+            SubObjectList(signup_general_panels, classname='social-general',
                           heading=_('General')),
-            SubObjectList(social_google_panels, classname='social-google',
+            SubObjectList(signup_google_panels, classname='social-google',
                           heading=_('Google')),
-            SubObjectList(social_facebook_panels, classname='social-facebook',
+            SubObjectList(signup_facebook_panels, classname='social-facebook',
                           heading=_('Facebook')),
-            SubObjectList(social_twitter_panels, classname='social-twitter',
+            SubObjectList(signup_twitter_panels, classname='social-twitter',
                           heading=_('Twitter')),
-        ], heading=_("Social Logins")),
+        ], heading=_("Donor Signup")),
         SubTabbedInterface([
-            SubObjectList(gateways_general_panels,
+            SubObjectList(donations_general_panels,
                           heading=_('General'), classname='gateways-general'),
-            SubObjectList(gateways_2c2p_panels,
+            SubObjectList(donations_2c2p_panels,
                           heading=_('2C2P(Credit Card)'), classname='gateways-2c2p'),
-            SubObjectList(gateways_paypal_panels,
+            SubObjectList(donations_paypal_panels,
                           heading=_('PayPal'), classname='gateways-paypal'),
-            SubObjectList(gateways_stripe_panels,
+            SubObjectList(donations_stripe_panels,
                           heading=_('Stripe'), classname='gateways-stripe'),
-        ], heading=_("Gateways")),
+        ], heading=_("Donations")),
         SubTabbedInterface([
             SubObjectList(appearance_general_panels,
                           heading=_('General'), classname='appearance-general'),

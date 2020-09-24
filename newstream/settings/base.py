@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     'modelcluster',
     'taggit',
     'wagtailautocomplete',
+    'wagtailmodelchooser',
     'widget_tweaks',
     'allauth',
     'allauth.account',

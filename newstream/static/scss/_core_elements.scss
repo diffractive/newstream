@@ -62,6 +62,18 @@ a {
         background-image: url("../svg/white-arrow-forward.svg");
     }
 }
+.white-loading-btn {
+    @extend .svg-icon-btn;
+    span.icon {
+        background-image: url("../img/white-loading-spinner.gif") !important;
+    }
+}
+.black-loading-btn {
+    @extend .svg-icon-btn;
+    span.icon {
+        background-image: url("../img/black-loading-spinner.gif") !important;
+    }
+}
 
 .right-facebook-btn {
     @extend .svg-icon-btn;
@@ -409,4 +421,36 @@ span.no-icon {
   left: 0;
   width: 100%;
   height: 100%;
+}
+
+/* donation_view_switcher.html */
+.switcher-wrapper {
+    font-size: 12px;
+    margin-bottom: 2rem;
+
+    @screen sm {
+        font-size: initial;
+    }
+    @screen lg {
+        margin-bottom: 1rem;
+    }
+}
+.switcher-link {
+    border-radius: 5px;
+    border-color: $primary-color;
+    padding: 1rem;
+
+    &.active-page {
+        background-color: $primary-color;
+        color: white;
+    }
+}
+.onetime-donations-link {
+    border-width: 1px 0 1px 1px;
+    border-radius: 5px 0px 0px 5px;
+}
+.recurring-donations-link {
+    border-width: 1px;
+    border-radius: 0px 5px 5px 0px;
+    margin-left: -3px;
 }

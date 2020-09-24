@@ -124,22 +124,25 @@ def edit_recurring(request, id):
 
 
 def donation_details(request):
-    # todo: allow custom value in fixed_steps payment option
+    siteSettings = getSiteSettings(request)
     if not request.user.is_authenticated:
         return redirect('donations:donate')
     form_template = 'donations/donation_details_form.html'
-    try:
-        form_blueprint = DonationForm.objects.get(
-            is_active__exact=True)
-    except Exception as e:
-        print("There should be exactly one active DonationForm.", flush=True)
-        raise e
+    form_blueprint = siteSettings.donation_form
+    if not form_blueprint:
+        raise Exception('Donation Form not yet set.')
     if request.method == 'POST':
         form = DonationDetailsForm(
             request.POST, request=request, blueprint=form_blueprint, label_suffix='')
         if form.is_valid():
             # process meta data
             donation_metas = process_donation_meta(request)
+
+            # process donation amount
+            if 'donation_amount_custom' in form.cleaned_data and form.cleaned_data['donation_amount_custom'] and form.cleaned_data['donation_amount_custom'] > 0:
+                donation_amount = form.cleaned_data['donation_amount_custom']
+            else:
+                donation_amount = form.cleaned_data['donation_amount']
 
             # create pending donation
             payment_gateway = PaymentGateway.objects.get(
@@ -151,7 +154,7 @@ def donation_details(request):
                 form=form_blueprint,
                 gateway=payment_gateway,
                 is_recurring=True if form.cleaned_data['donation_frequency'] == 'monthly' else False,
-                donation_amount=form.cleaned_data['donation_amount'],
+                donation_amount=donation_amount,
                 currency=form.cleaned_data['currency'],
                 payment_status=STATUS_PENDING,
                 metas=donation_metas,
@@ -181,14 +184,17 @@ def donation_details(request):
             request=request, blueprint=form_blueprint, label_suffix='')
 
     # see: https://docs.djangoproject.com/en/3.0/ref/forms/api/#django.forms.Form.field_order
-    form.order_fields(
-        ['donation_amount', 'donation_frequency', 'payment_gateway'])
+    if form_blueprint.isAmountSteppedCustom():
+        form.order_fields(
+            ['donation_amount', 'donation_amount_custom', 'donation_frequency', 'payment_gateway'])
+    else:
+        form.order_fields(
+            ['donation_amount', 'donation_frequency', 'payment_gateway'])
     return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS})
 
 
 @login_required
 def my_onetime_donations(request):
-    # todo: separate one-time and recurring donations, with a sidebar like in my profile
     donations = Donation.objects.filter(
         user=request.user, is_recurring=False).order_by('-created_at')
     siteSettings = getSiteSettings(request)
@@ -197,7 +203,6 @@ def my_onetime_donations(request):
 
 @login_required
 def my_recurring_donations(request):
-    # todo: separate one-time and recurring donations, with a sidebar like in my profile
     subscriptions = Subscription.objects.filter(
         user=request.user).order_by('-created_at')
     siteSettings = getSiteSettings(request)

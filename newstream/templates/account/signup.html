@@ -15,7 +15,7 @@
 <div class="personal-info-form-div container-tight">
     {% include 'common/form_errors.html' %}
     {# Form Area #}
-    <form method='POST' action="{% url 'account_signup' %}?next={{ redirect_field_value }}">
+    <form method='POST' action="{% url 'account_signup' %}?next={{ redirect_field_value }}" class="action-form">
         {% if redirect_field_value %}
         <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
         {% endif %}

@@ -88,12 +88,40 @@ function resizeVideoIframe() {
         }
     })(window, document);
 }
+function whiteLoadingBtnEvent(event) {
+    el = event.currentTarget;
+    el.disabled = true;
+    el.classList.add('white-loading-btn');
+    // submit form
+    el.closest('form.action-form') && el.closest('form.action-form').submit();
+}
+function blackLoadingBtnEvent(event) {
+    el = event.currentTarget;
+    el.disabled = true;
+    if (el.classList.contains('adhoc-right-pad')) {
+        el.style.paddingRight = '3rem'; // reserving space for the loading gif
+    }
+    el.classList.add('black-loading-btn');
+    // submit form
+    el.closest('form.action-form') && el.closest('form.action-form').submit();
+}
+function registerLoadingButtons() {
+    for (let btn of document.getElementsByClassName('need-white-loading-btn')) {
+        btn.addEventListener('click', whiteLoadingBtnEvent);
+    }
+    for (let btn of document.getElementsByClassName('need-black-loading-btn')) {
+        btn.addEventListener('click', blackLoadingBtnEvent);
+    }
+}
 window.addEventListener('load', function () {
     // for fixed header
     pushContentDownFromHeader();
 
     // resize video iframes: currently just support youtube and vimeo
     resizeVideoIframe();
+
+    // register need loading buttons eventlisteners
+    registerLoadingButtons();
 });
 window.addEventListener('resize', function () {
     pushContentDownFromHeader();

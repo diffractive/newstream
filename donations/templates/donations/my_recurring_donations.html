@@ -150,6 +150,12 @@
 
 {% block extra_js %}
 <script>
+    function removeLoadingState(el) {
+        // remove loading state
+        el.classList.remove('black-loading-btn');
+        el.style.paddingRight = '1rem';
+        el.disabled = false;
+    }
     // Example POST method implementation:
     async function postData(url = '', data = {}) {
         // Default options are marked with *
@@ -176,10 +182,7 @@
                 if (confirm('Confirm Cancel Recurring Donation?')) {
                     postData('{% url "donations:cancel-recurring" %}', { subscription_id: subscription_id })
                         .then(data => {
-                            // remove loading state
-                            wrapper.classList.remove('black-loading-btn');
-                            wrapper.style.paddingRight = '1rem';
-                            wrapper.disabled = false;
+                            removeLoadingState(wrapper);
                             if (data['status'] == 'success') {
                                 alert('Recurring donation cancelled!');
                                 for (let buttonsDiv of document.querySelectorAll(`div.payment-recurring-options-div[data-id='${subscription_id}']`)) {
@@ -195,6 +198,8 @@
                                 alert(data['reason']);
                             }
                         });
+                } else {
+                    removeLoadingState(wrapper);
                 }
             });
         }
@@ -205,10 +210,7 @@
                 if (confirm('Confirm ' + innerHTML + '?')) {
                     postData('{% url "donations:toggle-recurring" %}', { subscription_id: subscription_id })
                         .then(data => {
-                            // remove loading state
-                            wrapper.classList.remove('black-loading-btn');
-                            wrapper.style.paddingRight = '1rem';
-                            wrapper.disabled = false;
+                            removeLoadingState(wrapper);
                             if (data['status'] == 'success') {
                                 alert(data['success-message']);
                                 for (let toggleBtn of document.querySelectorAll(`button.toggle-recurring-donation[data-id='${subscription_id}']`)) {
@@ -221,6 +223,8 @@
                                 alert(data['reason']);
                             }
                         });
+                } else {
+                    removeLoadingState(wrapper);
                 }
             });
         }

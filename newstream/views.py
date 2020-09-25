@@ -11,7 +11,7 @@ from django.conf import settings
 from django.utils import translation
 
 from newstream_user.models import UserMeta
-from donations.models import Donation
+from donations.models import Donation, Subscription, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED
 from donations.email_functions import sendVerificationEmail, sendAccountDeletedNotifToAdmins, sendAccountDeletedNotifToDonor
 from newstream.functions import evTokenGenerator, generateIDSecretHash, process_user_meta
 from newstream.forms import PersonalInfoForm, DeleteAccountForm
@@ -72,7 +72,13 @@ def security(request):
 
 @login_required
 def advanced_settings(request):
-    return render(request, 'profile_settings/advanced_settings.html')
+    # check if user can delete account or not
+    subs = Subscription.objects.filter(user=request.user, recurring_status__in=[STATUS_ACTIVE, STATUS_PAUSED, STATUS_PROCESSING])
+    if len(subs) > 0:
+        deletable = False
+    else:
+        deletable = True
+    return render(request, 'profile_settings/advanced_settings.html', {'deletable': deletable})
 
 
 @login_required

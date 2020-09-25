@@ -207,9 +207,9 @@ class Subscription(ClusterableModel):
 
     panels = [
         ReadOnlyPanel('object_id', heading=_('Object ID')),
-        FieldPanel('recurring_amount', heading=_('Recurring Donation Amount')),
-        FieldPanel('currency', heading=_('Currency')),
-        FieldPanel('recurring_status', heading=_('Recurring Status')),
+        ReadOnlyPanel('recurring_amount', heading=_('Recurring Donation Amount')),
+        ReadOnlyPanel('currency', heading=_('Currency')),
+        ReadOnlyPanel('recurring_status', heading=_('Recurring Status')),
         ReadOnlyPanel('linked_user_deleted',
                       heading=_("Linked User Account Deleted?")),
     ]
@@ -268,10 +268,10 @@ class Donation(ClusterableModel):
 
     panels = [
         FieldPanel('order_number', heading=_('Order Number')),
-        FieldPanel('donation_amount', heading=_('Donation Amount')),
-        FieldPanel('is_recurring', heading=_('Is Recurring')),
-        FieldPanel('currency', heading=_('Currency')),
-        FieldPanel('payment_status', heading=_('Payment Status')),
+        ReadOnlyPanel('donation_amount', heading=_('Donation Amount')),
+        ReadOnlyPanel('is_recurring', heading=_('Is Recurring')),
+        ReadOnlyPanel('currency', heading=_('Currency')),
+        ReadOnlyPanel('payment_status', heading=_('Payment Status')),
         InlinePanel('metas', label=_('Donation Meta'), heading=_('Donation Meta Data'),
                     help_text=_('Meta data about this donation is recorded here')),
         ReadOnlyPanel('linked_user_deleted',

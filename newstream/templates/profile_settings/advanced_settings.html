@@ -12,11 +12,28 @@
         <h1 class="mb-5">{% trans 'Advanced Settings' %}</h1>
         <div class="mb-4">
             <div class="label-div">{% trans 'Account Removal' %}</div>
-            <a class="ns-dark-btn inline-block" href="{% url 'delete-account' %}">{% trans 'Delete My Account' %}</a>
+            <button class="ns-dark-btn inline-block" id="delete-account-btn" action-href="{% url 'delete-account' %}"
+                {% if not deletable %}disabled{% endif %}>{% trans 'Delete My Account' %}</button>
         </div>
         <p class="text-red-500">
-            {% trans 'Note that by deleting your account, all recurring payments will be cancelled and your account will be removed from our database.' %}
+            {% if deletable %}
+            {% trans 'Note that by deleting your account, your account will be removed from our database but your previous donation records will be anonymously kept.' %}
+            {% else %}
+            {% trans 'You need to cancel all your recurring donations before you are allowed to delete your account.' %}
+            {% endif %}
         </p>
     </div>
 </div>
 {% endblock content %}
+
+{% block extra_js %}
+{% if deletable %}
+<script>
+    window.addEventListener('load', function () {
+        document.getElementById('delete-account-btn').addEventListener('click', function (e) {
+            window.location.href = e.target.getAttribute('action-href');
+        })
+    });
+</script>
+{% endif %}
+{% endblock %}

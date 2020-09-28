@@ -24,6 +24,26 @@ def create_checkout_session(request):
         # get donation
         donation = get_object_or_404(Donation, id=donation_id)
 
+        # init session_kwargs with common parameters
+        session_kwargs = {
+            'payment_method_types': ['card'],
+            'metadata': {
+                'donation_id': donation.id
+            },
+            'success_url': getFullReverseUrl(
+                    request, 'donations:return-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url': getFullReverseUrl(
+                    request, 'donations:cancel-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
+            'idempotency_key': uuid4_str()
+        }
+
+        # try to get existing stripe customer
+        customers = stripe.Customer.list(email=donation.user.email, limit=1)
+        if len(customers['data']) > 0:
+            session_kwargs['customer'] = customers['data'][0]['id']
+        else:
+            session_kwargs['customer_email'] = donation.user.email
+
         # Product should have been created by admin manually at the dashboard
         # if no product exists, create one here(double safety net)
         # todo: make sure the product_id in site_settings has been set by some kind of configuration enforcement before site is launched
@@ -56,51 +76,36 @@ def create_checkout_session(request):
         }
         if donation.is_recurring:
             adhoc_price['recurring'] = {
-                'interval': 'day',  # todo: change day to month after testing
+                'interval': 'month',
                 'interval_count': 1
             }
+        session_kwargs['line_items'] = [{
+            'price_data': adhoc_price,
+            'quantity': 1,
+        }]
 
         # set session mode
         session_mode = 'payment'
         if donation.is_recurring:
             session_mode = 'subscription'
+        session_kwargs['mode'] = session_mode
 
         # set metadata
-        payment_intent_data = None
-        subscription_data = None
         if donation.is_recurring:
-            subscription_data = {
+            session_kwargs['subscription_data'] = {
                 'metadata': {
                     'donation_id': donation.id
                 }
             }
         else:
-            payment_intent_data = {
+            session_kwargs['payment_intent_data'] = {
                 'metadata': {
                     'donation_id': donation.id
                 }
             }
 
         try:
-            session = stripe.checkout.Session.create(
-                customer_email=donation.user.email,
-                payment_method_types=['card'],
-                line_items=[{
-                    'price_data': adhoc_price,
-                    'quantity': 1,
-                }],
-                mode=session_mode,
-                metadata={
-                    'donation_id': donation.id
-                },
-                payment_intent_data=payment_intent_data,
-                subscription_data=subscription_data,
-                success_url=getFullReverseUrl(
-                    request, 'donations:return-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
-                cancel_url=getFullReverseUrl(
-                    request, 'donations:cancel-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
-                idempotency_key=uuid4_str()
-            )
+            session = stripe.checkout.Session.create(**session_kwargs)
         except Exception as e:
             print('Cannot create stripe checkout session: '+str(e), flush=True)
             return HttpResponse(status=500)

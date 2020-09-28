@@ -24,37 +24,6 @@ from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaym
 User = get_user_model()
 
 
-def thank_you(request):
-    if 'return-donation-id' in request.session:
-        donation = Donation.objects.get(
-            pk=request.session['return-donation-id'])
-        # logs user in
-        if donation.user:
-            login(request, donation.user,
-                  backend='django.contrib.auth.backends.ModelBackend')
-        return render(request, 'donations/thankyou.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
-    if 'return-error' in request.session:
-        return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': request.session['return-error']})
-    return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': _('No Payment Data is received.')})
-
-
-def cancelled(request):
-    if 'return-donation-id' in request.session:
-        donation = Donation.objects.get(
-            pk=request.session['return-donation-id'])
-        donation.payment_status = STATUS_CANCELLED
-        # No need to update recurring_status as no subscription object has been created yet
-        donation.save()
-        # logs user in
-        if donation.user:
-            login(request, donation.user,
-                  backend='django.contrib.auth.backends.ModelBackend')
-        return render(request, 'donations/cancelled.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
-    if 'return-error' in request.session:
-        return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': request.session['return-error']})
-    return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': _('No Payment Data is received.')})
-
-
 def donate(request):
     if request.user.is_authenticated:
         # skip step 1 (personal info) and go to step 2 (donation details)
@@ -62,65 +31,6 @@ def donate(request):
     else:
         # show login or sign-up options page
         return render(request, 'donations/signin_method.html')
-
-
-@login_required
-@csrf_exempt
-def cancel_recurring(request):
-    if request.method == 'POST':
-        json_data = json.loads(request.body)
-        if 'subscription_id' not in json_data:
-            print("No subscription_id in JSON body", flush=True)
-            return HttpResponse(status=400)
-        subscription_id = int(json_data['subscription_id'])
-        subscription = get_object_or_404(Subscription, id=subscription_id)
-        gatewayManager = InitPaymentGateway(
-            request, subscription=subscription)
-        resultSet = gatewayManager.cancel_recurring_payment()
-        if resultSet['status'] == 'success':
-            return JsonResponse({'status': resultSet['status'], 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
-        else:
-            return JsonResponse({'status': resultSet['status'], 'reason': resultSet['reason']})
-    else:
-        return HttpResponse(400)
-
-
-@login_required
-@csrf_exempt
-def toggle_recurring(request):
-    if request.method == 'POST':
-        json_data = json.loads(request.body)
-        if 'subscription_id' not in json_data:
-            print("No subscription_id in JSON body", flush=True)
-            return HttpResponse(status=400)
-        subscription_id = int(json_data['subscription_id'])
-        subscription = get_object_or_404(Subscription, id=subscription_id)
-        gatewayManager = InitPaymentGateway(
-            request, subscription=subscription)
-        resultSet = gatewayManager.toggle_recurring_payment()
-        if resultSet['status'] == 'success':
-            return JsonResponse({'status': resultSet['status'], 'button-html': resultSet['button-html'], 'recurring-status': str(_(resultSet['recurring-status'].capitalize())), 'success-message': resultSet['success-message']})
-        else:
-            return JsonResponse({'status': resultSet['status'], 'reason': resultSet['reason']})
-    else:
-        return HttpResponse(400)
-
-
-@login_required
-def edit_recurring(request, id):
-    subscription = get_object_or_404(Subscription, id=id)
-    # Form object is initialized according to the specific gateway and if request.method=='POST'
-    form = InitEditRecurringPaymentForm(request, subscription)
-    if request.method == 'POST':
-        if form.is_valid():
-            # use gatewayManager to process the data in form.cleaned_data as required
-            gatewayManager = InitPaymentGateway(
-                request, subscription=subscription)
-            gatewayManager.update_recurring_payment(form.cleaned_data)
-
-            return redirect('donations:edit-recurring', id=id)
-
-    return render(request, getEditRecurringPaymentHtml(subscription), {'form': form, 'subscription': subscription})
 
 
 def donation_details(request):
@@ -191,6 +101,96 @@ def donation_details(request):
         form.order_fields(
             ['donation_amount', 'donation_frequency', 'payment_gateway'])
     return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS})
+
+
+def thank_you(request):
+    if 'return-donation-id' in request.session:
+        donation = Donation.objects.get(
+            pk=request.session['return-donation-id'])
+        # logs user in
+        if donation.user:
+            login(request, donation.user,
+                  backend='django.contrib.auth.backends.ModelBackend')
+        return render(request, 'donations/thankyou.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
+    if 'return-error' in request.session:
+        return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': request.session['return-error']})
+    return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': _('No Payment Data is received.')})
+
+
+def cancelled(request):
+    if 'return-donation-id' in request.session:
+        donation = Donation.objects.get(
+            pk=request.session['return-donation-id'])
+        donation.payment_status = STATUS_CANCELLED
+        # No need to update recurring_status as no subscription object has been created yet
+        donation.save()
+        # logs user in
+        if donation.user:
+            login(request, donation.user,
+                  backend='django.contrib.auth.backends.ModelBackend')
+        return render(request, 'donations/cancelled.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
+    if 'return-error' in request.session:
+        return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': request.session['return-error']})
+    return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': _('No Payment Data is received.')})
+
+
+@login_required
+@csrf_exempt
+def cancel_recurring(request):
+    if request.method == 'POST':
+        json_data = json.loads(request.body)
+        if 'subscription_id' not in json_data:
+            print("No subscription_id in JSON body", flush=True)
+            return HttpResponse(status=400)
+        subscription_id = int(json_data['subscription_id'])
+        subscription = get_object_or_404(Subscription, id=subscription_id)
+        gatewayManager = InitPaymentGateway(
+            request, subscription=subscription)
+        resultSet = gatewayManager.cancel_recurring_payment()
+        if resultSet['status'] == 'success':
+            return JsonResponse({'status': resultSet['status'], 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
+        else:
+            return JsonResponse({'status': resultSet['status'], 'reason': resultSet['reason']})
+    else:
+        return HttpResponse(400)
+
+
+@login_required
+@csrf_exempt
+def toggle_recurring(request):
+    if request.method == 'POST':
+        json_data = json.loads(request.body)
+        if 'subscription_id' not in json_data:
+            print("No subscription_id in JSON body", flush=True)
+            return HttpResponse(status=400)
+        subscription_id = int(json_data['subscription_id'])
+        subscription = get_object_or_404(Subscription, id=subscription_id)
+        gatewayManager = InitPaymentGateway(
+            request, subscription=subscription)
+        resultSet = gatewayManager.toggle_recurring_payment()
+        if resultSet['status'] == 'success':
+            return JsonResponse({'status': resultSet['status'], 'button-html': resultSet['button-html'], 'recurring-status': str(_(resultSet['recurring-status'].capitalize())), 'success-message': resultSet['success-message']})
+        else:
+            return JsonResponse({'status': resultSet['status'], 'reason': resultSet['reason']})
+    else:
+        return HttpResponse(400)
+
+
+@login_required
+def edit_recurring(request, id):
+    subscription = get_object_or_404(Subscription, id=id)
+    # Form object is initialized according to the specific gateway and if request.method=='POST'
+    form = InitEditRecurringPaymentForm(request, subscription)
+    if request.method == 'POST':
+        if form.is_valid():
+            # use gatewayManager to process the data in form.cleaned_data as required
+            gatewayManager = InitPaymentGateway(
+                request, subscription=subscription)
+            gatewayManager.update_recurring_payment(form.cleaned_data)
+
+            return redirect('donations:edit-recurring', id=id)
+
+    return render(request, getEditRecurringPaymentHtml(subscription), {'form': form, 'subscription': subscription})
 
 
 @login_required

@@ -58,6 +58,22 @@ class Factory_Stripe(PaymentGatewayFactory):
                     else:
                         return None
 
+        # Intercept the invoice created event for subscriptions(a must for instant invoice finalization)
+        # https://stripe.com/docs/billing/subscriptions/webhooks#understand
+        if event['type'] == 'invoice.created':
+            invoice = event['data']['object']
+            subscription_id = invoice.subscription
+
+            if subscription_id:
+                subscription = stripe.Subscription.retrieve(subscription_id)
+                if 'donation_id' in subscription.metadata:
+                    donation_id = subscription.metadata['donation_id']
+                    kwargs['invoice'] = invoice
+                else:
+                    return None
+            else:
+                return None
+
         # Intercept the invoice paid event for subscriptions
         if event['type'] == 'invoice.paid':
             invoice = event['data']['object']

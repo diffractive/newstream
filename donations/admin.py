@@ -7,7 +7,7 @@ from wagtail.contrib.modeladmin.views import InspectView
 
 from newstream.functions import raiseObjectNone
 from .models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta
-from .payment_gateways._2c2p.gateway import Gateway_2C2P
+from .payment_gateways._2c2p.functions import RPPInquiryRequest
 
 
 class DonationInspectView(InspectView):
@@ -24,7 +24,7 @@ class DonationInspectView(InspectView):
             if len(metaSet) == 1:
                 ruid = metaSet[0].field_value
                 # make RPP Maintenance Request
-                response = Gateway_2C2P.RPPInquiryRequest(ruid)
+                response = RPPInquiryRequest(ruid)
                 context = {
                     'rpp_response': response
                 }

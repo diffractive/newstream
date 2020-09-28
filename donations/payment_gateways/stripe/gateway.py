@@ -58,6 +58,11 @@ class Gateway_Stripe(PaymentGatewayManager):
 
             return HttpResponse(status=200)
 
+        # Event: invoice.created (for subscriptions, just return 200 here and do nothing - to signify to Stripe that it can proceed and finalize the invoice)
+        # https://stripe.com/docs/billing/subscriptions/webhooks#understand
+        if self.event['type'] == 'invoice.created' and hasattr(self, 'subscription') and hasattr(self, 'invoice'):
+            return HttpResponse(status=200)
+
         # Event: invoice.paid (for subscriptions)
         if self.event['type'] == 'invoice.paid' and hasattr(self, 'subscription') and hasattr(self, 'invoice'):
             if self.invoice.status == 'paid':
@@ -70,6 +75,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                     dpmeta.save()
                 elif invoice_num > 1:
                     # create a new donation record + then send donation receipt to user
+                    # self.donation is the first donation made for a subscription
                     donation = Donation(
                         subscription=self.donation.subscription,
                         order_number=gen_order_id(self.donation.gateway),
@@ -89,7 +95,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                         dpmeta.save()
                     except Exception as e:
                         # Should rarely happen, but in case some bugs or order id repeats itself
-                        print(str(e))
+                        print(e, flush=True)
                         return HttpResponse(status=500)
 
                     # email notifications
@@ -116,6 +122,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                         subscription.save()
                         # link subscription to the donation
                         self.donation.subscription = subscription
+                        # set donation payment_status to complete(as this event may be faster than checkout.session.completed)
+                        self.donation.payment_status = STATUS_COMPLETE
                         self.donation.save()
                     except Exception as e:
                         return HttpResponse(500)
@@ -163,7 +171,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 'currency': self.subscription.currency.lower(),
                 'product': stripeSettings.product_id,
                 'recurring': {
-                    'interval': 'day',  # todo: change day to month after testing
+                    'interval': 'month',
                     'interval_count': 1
                 }
             }

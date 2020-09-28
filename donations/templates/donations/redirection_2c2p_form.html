@@ -24,9 +24,14 @@
     {% endfor %}
     <input name="submit-btn" id="submit-btn" type="submit" value="Submit">
 </form>
-<script type="text/javascript">
-    setTimeout(() => {
-        document.getElementById("2c2pform").submit();
-    }, 1000)
-</script>
 {% endblock content %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    window.addEventListener('load', function () {
+        setTimeout(() => {
+            document.getElementById("2c2pform").submit();
+        }, 100)
+    });
+</script>
+{% endblock %}

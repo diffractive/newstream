@@ -1,60 +1,76 @@
-from django.db.models import Q
+import hmac
+import hashlib
 
 from newstream.functions import raiseObjectNone
-from donations.models import Donation, STATUS_PENDING
+from donations.models import Donation, Subscription, STATUS_PENDING
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways._2c2p.gateway import Gateway_2C2P
+from donations.payment_gateways.setting_classes import get2C2PSettings
+from .functions import extract_payment_amount, getResponseParamOrder
 
 
 class Factory_2C2P(PaymentGatewayFactory):
     @staticmethod
-    def initGateway(request, donation, subscription):
-        return Gateway_2C2P(request, donation, subscription)
+    def initGateway(request, donation, subscription, **kwargs):
+        return Gateway_2C2P(request, donation, subscription, **kwargs)
 
     @staticmethod
     def initGatewayByVerification(request):
-        # case one: recurring renewals from 2C2P
-        if 'recurring_unique_id' in request.POST and request.POST['recurring_unique_id'] != '':
-            # First distinguish between initial and renewal payment responses
-            # The parent donation should have both the matching recurring_unique_id and order_prefix, thus producing two records exactly
-            # the -5 position is to cut away the 0000n numbering on the order_id to just match the order prefixx
-            DonationSet = Donation.objects.filter((Q(payment_metas__field_key='recurring_unique_id', payment_metas__field_value=request.POST['recurring_unique_id']) | Q(
-                payment_metas__field_key='order_prefix', payment_metas__field_value=request.POST['order_id'][:-5])) & Q(parent_donation__isnull=True) & Q(id=int(request.POST['user_defined_1'])))
-            if len(DonationSet) == 2:
-                pDonation = DonationSet[0]
+        settings = get2C2PSettings(request)
+        data = {}
+        for key in getResponseParamOrder():
+            if key in self.request.POST:
+                data[key] = self.request.POST[key]
+        if 'hash_value' in self.request.POST and self.request.POST['hash_value']:
+            hash_value = self.request.POST['hash_value']
+            checkHashStr = ''
+            for key in getResponseParamOrder():
+                if key in data:
+                    checkHashStr += data[key]
+            checkHash = hmac.new(
+                bytes(settings.secret_key, 'utf-8'),
+                bytes(checkHashStr, 'utf-8'), hashlib.sha256).hexdigest()
+            if hash_value.lower() == checkHash.lower():
+                # distinguish between various cases
+                # case one: onetime payment response
+                if 'user_defined_1' in request.POST and request.POST['user_defined_1'] and 'recurring_unique_id' not in request.POST:
+                    try:
+                        donation = Donation.objects.get(pk=int(request.POST['user_defined_1']))
+                        return Factory_2C2P.initGateway(request, donation, None, {'data': data})
+                    except Donation.DoesNotExist:
+                        print('Cannot identify donation record from 2C2P request.', flush=True)
+                        return None
+                # case two: either first time subscription or renewal donation
+                elif 'recurring_unique_id' in request.POST and request.POST['recurring_unique_id']:
+                    try:
+                        subscription = Subscription.objects.get(object_id=int(request.POST['recurring_unique_id']))
+                        # subscription object found, indicating this is a renewal request
+                        return Factory_2C2P.initGateway(request, None, subscription, {'data': data})
+                    except Subscription.DoesNotExist:
+                        # Subscription object not created yet, indicating this is the first time subscription
+                        try:
+                            donation = Donation.objects.get(pk=int(request.POST['user_defined_1']))
+                            return Factory_2C2P.initGateway(request, donation, None, {'data': data, 'first_time_subscription': True})
+                        except Donation.DoesNotExist:
+                            print('Cannot identify donation record from 2C2P request.', flush=True)
+                            return None
 
-                # Create new donation record from pDonation
-                donation = Donation(
-                    order_number=request.POST['order_id'],
-                    user=pDonation.user,
-                    form=pDonation.form,
-                    gateway=pDonation.gateway,
-                    is_recurring=True,
-                    donation_amount=Gateway_2C2P.extract_payment_amount(
-                        request.POST['currency'], request.POST['amount']),
-                    currency=pDonation.currency,
-                    payment_status=STATUS_PENDING,
-                    parent_donation=pDonation
-                )
-                try:
-                    donation.save()
-                except Exception as e:
-                    # Should rarely happen, but in case some bugs or order id repeats itself
-                    print(str(e))
-                    raise e
-
-                return Factory_2C2P.initGateway(request, donation, None)
-
-        # case two: standard payment response from 2C2P(either onetime or recurring payment's initial donation)
-        if 'user_defined_1' in request.POST and request.POST['user_defined_1'] != '':
-            donation = Donation.objects.get(
-                pk=int(request.POST['user_defined_1']))
-            if not donation:
-                raiseObjectNone(
-                    'Donation id - {} from user_defined_1 is not found in the omp database.'.format(request.POST['user_defined_1']))
-            else:
-                return Factory_2C2P.initGateway(request, donation, None)
+            print('hash_value does not match with checkHash, cannot verify request from 2C2P.', flush=True)
+            return None
+        else:
+            print('No hash_value in request.POST, cannot verify request from 2C2P.', flush=True)
+            return None
 
     @staticmethod
     def initGatewayByReturn(request):
-        pass
+        # either onetime or recurring, the return request must have 'user_defined_1'
+        # initializing gateway with donation record is enough
+        if 'user_defined_1' in request.POST and request.POST['user_defined_1']:
+            try:
+                donation = Donation.objects.get(pk=int(request.POST['user_defined_1']))
+                return Factory_2C2P.initGateway(request, donation, None)
+            except Donation.DoesNotExist:
+                print('Cannot identify donation record from 2C2P request.', flush=True)
+                return None
+        print('No user_defined_1 in request.POST, cannot initialize gateway from 2C2P request.', flush=True)
+        return None

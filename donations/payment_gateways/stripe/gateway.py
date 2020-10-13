@@ -160,7 +160,6 @@ class Gateway_Stripe(PaymentGatewayManager):
             raiseObjectNone(
                 'Subscription object is None. Cannot update recurring payment.')
         initStripeApiKey(self.request)
-        stripeSettings = getStripeSettings(self.request)
         # update donation amount if it is different from database
         if form_data['recurring_amount'] != self.subscription.recurring_amount:
             # ad-hoc price is used
@@ -169,7 +168,7 @@ class Gateway_Stripe(PaymentGatewayManager):
             adhoc_price = {
                 'unit_amount_decimal': amount_str,
                 'currency': self.subscription.currency.lower(),
-                'product': stripeSettings.product_id,
+                'product': self.settings.product_id,
                 'recurring': {
                     'interval': 'month',
                     'interval_count': 1
@@ -181,7 +180,6 @@ class Gateway_Stripe(PaymentGatewayManager):
                     subscription=self.subscription.object_id,
                 )
                 if len(stripeRes['data']) == 1:
-                    printvars(stripeRes['data'][0])
                     subItemId = stripeRes['data'][0].id
                     # call stripe api to update SubscriptionItem
                     updateRes = stripe.SubscriptionItem.modify(
@@ -238,6 +236,9 @@ class Gateway_Stripe(PaymentGatewayManager):
                 messages.add_message(self.request, messages.ERROR, _('Cannot update stripe subscription: ')+str(e))
 
     def cancel_recurring_payment(self):
+        if not self.subscription:
+            raiseObjectNone(
+                'Subscription object is None. Cannot cancel recurring payment.')
         initStripeApiKey(self.request)
         # cancel subscription via stripe API
         try:

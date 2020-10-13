@@ -1,7 +1,9 @@
 import hmac
 import hashlib
+from datetime import datetime
 
-from newstream.functions import raiseObjectNone
+from site_settings.models import GATEWAY_2C2P
+from newstream.functions import raiseObjectNone, printvars
 from donations.models import Donation, Subscription, STATUS_PENDING
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways._2c2p.gateway import Gateway_2C2P
@@ -19,13 +21,15 @@ class Factory_2C2P(PaymentGatewayFactory):
         settings = get2C2PSettings(request)
         data = {}
         for key in getResponseParamOrder():
-            if key in self.request.POST:
-                data[key] = self.request.POST[key]
-        if 'hash_value' in self.request.POST and self.request.POST['hash_value']:
-            hash_value = self.request.POST['hash_value']
+            if key in request.POST:
+                data[key] = request.POST[key]
+        if 'hash_value' in request.POST and request.POST['hash_value']:
+            hash_value = request.POST['hash_value']
             checkHashStr = ''
+            print(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "(UTC) - Constructing checkHashStr...", flush=True)
             for key in getResponseParamOrder():
-                if key in data:
+                if key in data.keys():
+                    print(key + ': ' + data[key], flush=True)
                     checkHashStr += data[key]
             checkHash = hmac.new(
                 bytes(settings.secret_key, 'utf-8'),
@@ -33,29 +37,33 @@ class Factory_2C2P(PaymentGatewayFactory):
             if hash_value.lower() == checkHash.lower():
                 # distinguish between various cases
                 # case one: onetime payment response
-                if 'user_defined_1' in request.POST and request.POST['user_defined_1'] and 'recurring_unique_id' not in request.POST:
+                if request.POST['user_defined_1'] and not request.POST['recurring_unique_id']:
                     try:
                         donation = Donation.objects.get(pk=int(request.POST['user_defined_1']))
-                        return Factory_2C2P.initGateway(request, donation, None, {'data': data})
+                        return Factory_2C2P.initGateway(request, donation, None, data=data)
                     except Donation.DoesNotExist:
                         print('Cannot identify donation record from 2C2P request.', flush=True)
                         return None
                 # case two: either first time subscription or renewal donation
-                elif 'recurring_unique_id' in request.POST and request.POST['recurring_unique_id']:
+                elif request.POST['recurring_unique_id']:
                     try:
-                        subscription = Subscription.objects.get(object_id=int(request.POST['recurring_unique_id']))
+                        subscription = Subscription.objects.get(object_id=int(request.POST['recurring_unique_id']), gateway__title=GATEWAY_2C2P)
+                        print(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '(UTC)--2C2P initGatewayByVerification: subscription found--', flush=True)
                         # subscription object found, indicating this is a renewal request
-                        return Factory_2C2P.initGateway(request, None, subscription, {'data': data})
+                        return Factory_2C2P.initGateway(request, None, subscription, data=data)
                     except Subscription.DoesNotExist:
                         # Subscription object not created yet, indicating this is the first time subscription
                         try:
                             donation = Donation.objects.get(pk=int(request.POST['user_defined_1']))
-                            return Factory_2C2P.initGateway(request, donation, None, {'data': data, 'first_time_subscription': True})
+                            return Factory_2C2P.initGateway(request, donation, None, data=data, first_time_subscription=True)
                         except Donation.DoesNotExist:
                             print('Cannot identify donation record from 2C2P request.', flush=True)
                             return None
 
-            print('hash_value does not match with checkHash, cannot verify request from 2C2P.', flush=True)
+            print(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '(UTC) - hash_value does not match with checkHash, cannot verify request from 2C2P.', flush=True)
+            print("hash_value: "+hash_value, flush=True)
+            print("checkHash: "+checkHash, flush=True)
+            printvars(data)
             return None
         else:
             print('No hash_value in request.POST, cannot verify request from 2C2P.', flush=True)
@@ -68,7 +76,7 @@ class Factory_2C2P(PaymentGatewayFactory):
         if 'user_defined_1' in request.POST and request.POST['user_defined_1']:
             try:
                 donation = Donation.objects.get(pk=int(request.POST['user_defined_1']))
-                return Factory_2C2P.initGateway(request, donation, None)
+                return Factory_2C2P.initGateway(request, donation, None, data=request.POST)
             except Donation.DoesNotExist:
                 print('Cannot identify donation record from 2C2P request.', flush=True)
                 return None

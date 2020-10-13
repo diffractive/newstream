@@ -134,6 +134,23 @@ def cancelled(request):
     return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': _('No Payment Data is received.')})
 
 
+def revoked(request):
+    if 'return-donation-id' in request.session:
+        donation = Donation.objects.get(
+            pk=request.session['return-donation-id'])
+        donation.payment_status = STATUS_REVOKED
+        # No need to update recurring_status as no subscription object has been created yet
+        donation.save()
+        # logs user in
+        if donation.user:
+            login(request, donation.user,
+                  backend='django.contrib.auth.backends.ModelBackend')
+        return render(request, 'donations/revoked.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
+    if 'return-error' in request.session:
+        return render(request, 'donations/revoked.html', {'isValid': False, 'error_message': request.session['return-error']})
+    return render(request, 'donations/revoked.html', {'isValid': False, 'error_message': _('No Payment Data is received.')})
+
+
 @login_required
 @csrf_exempt
 def cancel_recurring(request):

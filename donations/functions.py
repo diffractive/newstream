@@ -33,6 +33,13 @@ def getCurrencyFromCode(code):
     return None
 
 
+def currencyCodeToKey(code):
+    for key, val in currency_dict.items():
+        if val['code'] == str(code):
+            return key
+    return None
+
+
 def isTestMode(request):
     siteSettings = getSiteSettings(request)
     return siteSettings.sandbox_mode

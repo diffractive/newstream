@@ -2,7 +2,7 @@ from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 
 
 class Gateway_Paypal(PaymentGatewayManager):
-    def __init__(self, request, donation, subscription):
+    def __init__(self, request, donation=None, subscription=None, **kwargs):
         super().__init__(request, donation, subscription)
 
     def redirect_to_gateway_url(self):

@@ -1,15 +1,20 @@
 import hmac
 import hashlib
 import re
+import os
+import traceback
 from decimal import *
+from xml.etree import ElementTree as ET
 from urllib.parse import urlencode
+from subprocess import Popen, STDOUT, PIPE
 from django.http import HttpResponse
+from django.contrib import messages
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
 from newstream.functions import raiseObjectNone, getFullReverseUrl, getSiteName, getSiteSettings
-from donations.functions import getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode
-from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor, sendRenewalNotifToAdmins, sendRenewalReceiptToDonor
+from donations.functions import getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode, currencyCodeToKey
+from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor, sendRenewalNotifToAdmins, sendRenewalReceiptToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringCancelledNotifToAdmins, sendRecurringCancelledNotifToDonor
 from donations.models import Donation, Subscription, DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ACTIVE, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import get2C2PSettings
@@ -36,16 +41,26 @@ class Gateway_2C2P(PaymentGatewayManager):
         self.__dict__.update(kwargs)
 
     def base_live_redirect_url(self):
-        # todo: 2c2p live redirect api url to be confirmed
         return 'https://t.2c2p.com/RedirectV3/payment'
 
     def base_testmode_redirect_url(self):
         return 'https://demo2.2c2p.com/2C2PFrontEnd/RedirectV3/payment'
 
+    def base_live_paymentaction_url(self):
+        return 'https://t.2c2p.com/PaymentActionV2/PaymentAction.aspx'
+
+    def base_testmode_paymentaction_url(self):
+        return 'https://demo2.2c2p.com/2C2PFrontend/PaymentActionV2/PaymentAction.aspx'
+
     def base_gateway_redirect_url(self):
         if not self.testing_mode:
             return self.base_live_redirect_url()
         return self.base_testmode_redirect_url()
+
+    def base_paymentaction_url(self):
+        if not self.testing_mode:
+            return self.base_live_paymentaction_url()
+        return self.base_testmode_paymentaction_url()
 
     def redirect_to_gateway_url(self):
         """ 
@@ -78,8 +93,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             data['recurring_amount'] = format_payment_amount(
                 self.donation.donation_amount, self.donation.currency)
             data['allow_accumulate'] = 'N'
-            # todo: to be changed to 0 for endless loop until cancel
-            data['recurring_count'] = 3
+            data['recurring_count'] = 0
             data['payment_option'] = 'A'
             # - daily recurring for testing
             data['recurring_interval'] = 1
@@ -99,7 +113,7 @@ class Gateway_2C2P(PaymentGatewayManager):
 
         params = ''
         for key in getRequestParamOrder():
-            if key in data:
+            if key in data.keys():
                 params += str(data[key])
 
         # python 3.6 code
@@ -130,11 +144,11 @@ class Gateway_2C2P(PaymentGatewayManager):
             if self.donation.payment_status == STATUS_COMPLETE:
                 # create new Subscription object
                 subscription = Subscription(
-                    object_id=data['recurring_unique_id'],
+                    object_id=self.data['recurring_unique_id'],
                     user=self.donation.user,
                     gateway=self.donation.gateway,
                     recurring_amount=extract_payment_amount(self.data['amount'], self.data['currency']),
-                    currency=self.data['currency'],
+                    currency=currencyCodeToKey(self.data['currency']),
                     recurring_status=STATUS_ACTIVE,
                 )
                 try:
@@ -143,6 +157,7 @@ class Gateway_2C2P(PaymentGatewayManager):
                     self.donation.subscription = subscription
                     self.donation.save()
                 except Exception as e:
+                    print('Cannot create subscription object: '+str(e), flush=True)
                     return HttpResponse(500)
 
                 # send the donation receipt to donor and notification to admins if subscription is just created
@@ -154,7 +169,7 @@ class Gateway_2C2P(PaymentGatewayManager):
                 print("Cannot create subscription object due to donation payment_status: "+self.donation.payment_status, flush=True)
                 return HttpResponse(500)
         # case 3: renewals
-        if self.subscription:
+        if not self.donation and self.subscription:
             # find the first donation made for this subscription
             try:
                 fDonation = Donation.objects.filter(subscription=self.subscription).order_by('id').first()
@@ -170,10 +185,11 @@ class Gateway_2C2P(PaymentGatewayManager):
                 gateway=fDonation.gateway,
                 is_recurring=True,
                 donation_amount=extract_payment_amount(self.data['amount'], self.data['currency']),
-                currency=self.data['currency'],
+                currency=currencyCodeToKey(self.data['currency']),
                 payment_status=map2C2PPaymentStatus(self.data['payment_status']),
             )
             try:
+                print('Save renewal Donation:'+self.data['order_id'], flush=True)
                 donation.save()
             except Exception as e:
                 # Should rarely happen, but in case some bugs or order id repeats itself
@@ -188,8 +204,135 @@ class Gateway_2C2P(PaymentGatewayManager):
         print("Unable to process_webhook_response after verifying 2C2P request", flush=True)
         return HttpResponse(500)
 
-    def update_recurring_payment(self):
-        pass
+    def update_recurring_payment(self, form_data):
+        if not self.subscription:
+            raiseObjectNone(
+                'Subscription object is None. Cannot update recurring payment.')
+        # init the params to the php-bridge script call
+        script_path = os.path.dirname(os.path.realpath(__file__)) + '/php-bridge/payment_action.php'
+        command_list = ['php', script_path, 
+            '--api_url', self.base_paymentaction_url(),
+            '--version', RPP_API_VERSION,
+            '--mid', self.settings.merchant_id,
+            '--secret', self.settings.secret_key,
+            '--ruid', self.subscription.object_id,
+            '--type=U',
+            '--status=Y',
+            '--amount='+format_payment_amount(form_data['recurring_amount'], self.subscription.currency)
+        ]
+        inquire_command_list = ['php', script_path, 
+            '--api_url', self.base_paymentaction_url(),
+            '--version', RPP_API_VERSION,
+            '--mid', self.settings.merchant_id,
+            '--secret', self.settings.secret_key,
+            '--ruid', self.subscription.object_id,
+            '--type=I'
+        ]
+        # make the call only either if donation amount is changed or billing_today is checked
+        if form_data['recurring_amount'] != self.subscription.recurring_amount or form_data['billing_cycle_now']:
+            if form_data['billing_cycle_now']:
+                command_list.append('--bill_today')
+            try:
+                proc = Popen(command_list, stdout=PIPE, stderr=PIPE)
+                output, errors = proc.communicate()
+                if errors:
+                    print('Cannot update 2C2P subscription: '+errors.decode("utf-8") , flush=True)
+                    messages.add_message(self.request, messages.ERROR, _('Cannot update 2C2P subscription: ')+errors.decode("utf-8") )
+                    return None
+                xmlResp = ET.fromstring(output.decode("utf-8"))
+                if xmlResp.find('respCode') != None and xmlResp.find('respCode').text == '00':
+                    # inquire payment record for most update values
+                    inqproc = Popen(inquire_command_list, stdout=PIPE, stderr=PIPE)
+                    output, errors = inqproc.communicate()
+                    if errors:
+                        print('Cannot inquire 2C2P subscription: '+errors.decode("utf-8") , flush=True)
+                        messages.add_message(self.request, messages.ERROR, _('Cannot inquire 2C2P subscription: ')+errors.decode("utf-8") )
+                        return None
+                    xmlResp = ET.fromstring(output.decode("utf-8"))
+                    if xmlResp.find('respCode') != None and xmlResp.find('respCode').text == '00':
+                        # construct email wordings and messages
+                        if form_data['recurring_amount'] != self.subscription.recurring_amount and form_data['billing_cycle_now']:
+                            admin_email_wordings = str(_("A Recurring Donation's billing cycle has been reset to today's date, and has its recurring donation amount updated on your website:"))
+                            donor_email_wordings = str(_("You have just reset your recurring donation's billing cycle to today's date, and updated the recurring donation amount."))
+                            message_wordings = _("You have successfully reset your recurring donation's billing cycle to today's date, and updated the recurring donation amount at 2C2P.")
+                        elif form_data['recurring_amount'] != self.subscription.recurring_amount:
+                            admin_email_wordings = str(_("A Recurring Donation's amount has been updated on your website:"))
+                            donor_email_wordings = str(_("You have just updated your recurring donation amount."))
+                            message_wordings = _("Your recurring donation amount at 2C2P is updated successfully.")
+                        elif form_data['billing_cycle_now']:
+                            admin_email_wordings = str(_("A Recurring Donation's billing cycle has been reset to today's date on your website:"))
+                            donor_email_wordings = str(_("You have just reset your recurring donation's billing cycle to today's date."))
+                            message_wordings = _("Your recurring donation at Stripe is set to bill on today's date every month.")
+                        # update newstream record in database
+                        if form_data['recurring_amount'] != self.subscription.recurring_amount:
+                            self.subscription.recurring_amount = extract_payment_amount(xmlResp.find('amount').text, xmlResp.find('currency').text)
+                            self.subscription.save()
+                        # email notifications
+                        sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, admin_email_wordings)
+                        sendRecurringUpdatedNotifToDonor(self.request, self.subscription, donor_email_wordings)
+                        # add message
+                        messages.add_message(self.request, messages.SUCCESS, message_wordings)
+                        return None
+                    else:
+                        messages.add_message(self.request, messages.ERROR, _("Cannot successfully inquire 2C2P subscription, ")+("respCode is :"+xmlResp.find('respCode').text if xmlResp.find('respCode') else "output is: "+output.decode('utf-8')))
+                        return None
+                else:
+                    messages.add_message(self.request, messages.ERROR, _("Cannot successfully update 2C2P subscription, ")+("respCode is :"+xmlResp.find('respCode').text if xmlResp.find('respCode') else "output is: "+output.decode('utf-8')))
+                    return None
+            except Exception as e:
+                print('(Exception) Cannot update 2C2P subscription: '+str(e), flush=True)
+                print(traceback.format_exc(), flush=True)
+                messages.add_message(self.request, messages.ERROR, _('Cannot update 2C2P subscription: ')+str(e))
+        else:
+            messages.add_message(self.request, messages.INFO, _("Nothing is updated."))
+
 
     def cancel_recurring_payment(self):
-        pass
+        if not self.subscription:
+            raiseObjectNone(
+                'Subscription object is None. Cannot cancel recurring payment.')
+        # init the params to the php-bridge script call
+        script_path = os.path.dirname(os.path.realpath(__file__)) + '/php-bridge/payment_action.php'
+        command_list = ['php', script_path, 
+            '--api_url', self.base_paymentaction_url(),
+            '--version', RPP_API_VERSION,
+            '--mid', self.settings.merchant_id,
+            '--secret', self.settings.secret_key,
+            '--ruid', self.subscription.object_id,
+            '--type=C'
+        ]
+        # cancel subscription via 2c2p payment action call
+        try:
+            proc = Popen(command_list, stdout=PIPE, stderr=PIPE)
+            output, errors = proc.communicate()
+            if errors:
+                print('Cannot cancel 2C2P subscription: '+errors.decode("utf-8") , flush=True)
+                return {
+                    'status': 'failure',
+                    'reason': _('Cannot cancel 2C2P subscription: %(reason)s') % {'reason': errors.decode("utf-8")}
+                }
+            xmlResp = ET.fromstring(output.decode("utf-8"))
+            if xmlResp.find('respCode') != None and xmlResp.find('respCode').text == '00':
+                # update newstream model
+                self.subscription.recurring_status = STATUS_CANCELLED
+                self.subscription.save()
+                # email notifications
+                sendRecurringCancelledNotifToAdmins(
+                    self.request, self.subscription)
+                sendRecurringCancelledNotifToDonor(
+                    self.request, self.subscription)
+                return {
+                    'status': 'success'
+                }
+            else:
+                return {
+                    'status': 'failure',
+                    'reason': _('Cannot cancel 2C2P subscription, ')+("respCode is :"+xmlResp.find('respCode').text if xmlResp.find('respCode') else "output is: "+output.decode('utf-8'))
+                }
+        except Exception as e:
+            print('(Exception) Cannot cancel 2C2P subscription: '+str(e), flush=True)
+            print(traceback.format_exc(), flush=True)
+            return {
+                'status': 'failure',
+                'reason': _('(Exception) Cannot cancel 2C2P subscription: %(errmsg)s') % {'errmsg': str(e)}
+            }

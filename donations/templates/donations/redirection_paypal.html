@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static widget_tweaks i18n %}
+
+{% block title %}{% trans 'Redirecting to PayPal' %}{% endblock %}
+
+{% block body_class %}newstream-redirect-paypal-page{% endblock %}
+
+{% block extra_head %}
+<!-- <script src="https://www.paypal.com/sdk/js?client-id={{ client_id }}&currency={{ currency }}"></script> -->
+{% endblock %}
+
+{% block content %}
+
+<div class="flex donation-header">
+    <div class="step-div w-30 md:w-40 p-6 text-right">{% trans 'Step 3 of 3' %}</div>
+    <div class="step-label-div flex-1 p-6 text-left text-white">{% trans 'Secure Payment' %}</div>
+</div>
+
+<div class="container-tight redirect-loading-div flex flex-col justify-center items-center">
+    <img src="{% static 'img/loading-spinner.gif' %}" class="w-10 h-10 lg:w-16 lg:h-16 mb-4" alt="loading-spinner">
+    <p>{% trans 'Redirecting to Payment Gateway Page...' %}</p>
+    <!-- <div id="paypal-button-container"></div> -->
+</div>
+
+<div class="container-tight error-div flex flex-col justify-center items-center hidden">
+    <img src="{% static 'img/warning.png' %}" class="w-10 h-10 lg:w-16 lg:h-16 mb-3" alt="something went wrong">
+    <h2 class="mb-4">{% trans 'Something went wrong...' %}</h2>
+    <p id='error-msg-stripe'></p>
+</div>
+
+<script>
+    let serverError = false;
+    setTimeout(() => {
+        // Create a new Checkout Session using the server-side endpoint you
+        fetch('{% url "donations:create-paypal-transaction" %}', {
+            method: 'POST',
+        })
+            .then(function (response) {
+                if (!response.ok) { // not 2xx codes
+                    serverError = true;
+                }
+                return response.json();
+            })
+            .then(function (data) {
+                if (serverError) {
+                    throw new Error(`${data['issue']}: ${data['description']}`)
+                }
+                // redirect to approval link in data
+                window.location.href = data.approval_link;
+            })
+            .catch(function (error) {
+                console.error('Error:', error);
+                document.getElementsByClassName('redirect-loading-div')[0].classList.add('hidden');
+                document.getElementsByClassName('error-div')[0].classList.remove('hidden');
+                document.getElementById('error-msg-stripe').innerHTML = error;
+            });
+    }, 100);
+    // paypal.Buttons({
+    //     createOrder: function (data, actions) {
+    //         return fetch('{% url "donations:create-paypal-transaction" %}', {
+    //             method: 'post',
+    //             headers: {
+    //                 'content-type': 'application/json'
+    //             }
+    //         }).then(function (res) {
+    //             return res.json();
+    //         }).then(function (data) {
+    //             return data.id;
+    //         });
+    //     },
+    //     onApprove: function (data, actions) {
+    //         return fetch('{% url "donations:capture-paypal-order" %}', {
+    //             method: 'post',
+    //             headers: {
+    //                 'content-type': 'application/json'
+    //             },
+    //             body: JSON.stringify({
+    //                 orderID: data.orderID
+    //             })
+    //         }).then(function (res) {
+    //             return res.json();
+    //         }).then(function (details) {
+    //             console.log(details);
+    //             // decide what to do next
+    //         })
+    //     }
+    // }).render('#paypal-button-container'); // Display payment options on your web page
+</script>
+{% endblock content %}

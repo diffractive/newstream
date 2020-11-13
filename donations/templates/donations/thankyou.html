@@ -9,7 +9,7 @@
 <div class="container-tight flex flex-col items-center">
     {% if isValid %}
     <h1 class="mb-5">{% trans 'Thank you!' %}</h1>
-    <p class="mb-1 text-center">{% trans 'Your payment is successful.' %}
+    <p class="mb-1 text-center">{% blocktrans with status=donation.payment_status %}Your payment is {{ status }}. {% endblocktrans %}
         {% with has_socialaccount=donation.user|has_socialaccount %}
         {% if isFirstTime and not has_socialaccount %}
         <span>
@@ -54,7 +54,8 @@
     </div>
     <br>
     {% else %}
-    <h1>{{ error_message }}</h1>
+    <h1>{{ error_title }}</h1>
+    <p>{{ error_message }}</p>
     {% endif %}
 </div>
 {% endblock content %}

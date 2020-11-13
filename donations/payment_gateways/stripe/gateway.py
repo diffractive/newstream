@@ -14,7 +14,7 @@ from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.functions import gen_order_id
 from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
-from newstream.functions import uuid4_str, getSiteName, getSiteSettings, getFullReverseUrl, printvars, raiseObjectNone
+from newstream.functions import uuid4_str, getSiteName, getSiteSettings, getFullReverseUrl, printvars, raiseObjectNone, _debug
 from .functions import initStripeApiKey, formatDonationAmount, formatDonationAmountFromGateway
 
 
@@ -44,6 +44,7 @@ class Gateway_Stripe(PaymentGatewayManager):
         return render(self.request, 'donations/redirection_stripe.html', {'publishable_key': self.settings.publishable_key})
 
     def process_webhook_response(self):
+        initStripeApiKey(self.request)
         # Decide what actions to perform on Newstream's side according to the results/events from the Stripe notifications
         # Event: checkout.session.completed
         if self.event['type'] == 'checkout.session.completed':
@@ -66,14 +67,15 @@ class Gateway_Stripe(PaymentGatewayManager):
         # Event: invoice.paid (for subscriptions)
         if self.event['type'] == 'invoice.paid' and hasattr(self, 'subscription') and hasattr(self, 'invoice'):
             if self.invoice.status == 'paid':
-                # check if invoice is first or recurring
-                invoice_num_parts = self.invoice.number.split('-')
-                invoice_num = int(invoice_num_parts[len(invoice_num_parts)-1])
-                if invoice_num == 1:
+                # check if subscription has one or more invoices to determine it's a first time or renewal payment
+                # self.subscription here is the stripe subscription object
+                invoices = stripe.Invoice.list(subscription=self.subscription.id)
+                _debug("Stripe: Subscription {} has {} invoices.".format(self.subscription.id, len(invoices['data'])))
+                if len(invoices['data']) == 1:
                     dpmeta = DonationPaymentMeta(
                         donation=self.donation, field_key='stripe_invoice_number', field_value=self.invoice.number)
                     dpmeta.save()
-                elif invoice_num > 1:
+                elif len(invoices['data']) > 1:
                     # create a new donation record + then send donation receipt to user
                     # self.donation is the first donation made for a subscription
                     donation = Donation(
@@ -87,16 +89,11 @@ class Gateway_Stripe(PaymentGatewayManager):
                         currency=self.donation.currency,
                         payment_status=STATUS_COMPLETE,
                     )
-                    try:
-                        donation.save()
+                    donation.save()
 
-                        dpmeta = DonationPaymentMeta(
-                            donation=donation, field_key='stripe_invoice_number', field_value=self.invoice.number)
-                        dpmeta.save()
-                    except Exception as e:
-                        # Should rarely happen, but in case some bugs or order id repeats itself
-                        print(e, flush=True)
-                        return HttpResponse(status=500)
+                    dpmeta = DonationPaymentMeta(
+                        donation=donation, field_key='stripe_invoice_number', field_value=self.invoice.number)
+                    dpmeta.save()
 
                     # email notifications
                     sendRenewalReceiptToDonor(self.request, donation)
@@ -118,15 +115,12 @@ class Gateway_Stripe(PaymentGatewayManager):
                         currency=self.donation.currency,
                         recurring_status=STATUS_ACTIVE,
                     )
-                    try:
-                        subscription.save()
-                        # link subscription to the donation
-                        self.donation.subscription = subscription
-                        # set donation payment_status to complete(as this event may be faster than checkout.session.completed)
-                        self.donation.payment_status = STATUS_COMPLETE
-                        self.donation.save()
-                    except Exception as e:
-                        return HttpResponse(500)
+                    subscription.save()
+                    # link subscription to the donation
+                    self.donation.subscription = subscription
+                    # set donation payment_status to complete(as this event may be faster than checkout.session.completed)
+                    self.donation.payment_status = STATUS_COMPLETE
+                    self.donation.save()
 
                     # send the donation receipt to donor and notification to admins if subscription is just created
                     sendDonationReceiptToDonor(self.request, self.donation)
@@ -144,7 +138,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                 spmeta.save()
 
                 return HttpResponse(status=200)
-            return HttpResponse(status=400)
+            else:
+                return HttpResponse(status=400)
 
         # Event: customer.subscription.deleted
         if self.event['type'] == 'customer.subscription.deleted' and hasattr(self, 'subscription'):
@@ -153,12 +148,13 @@ class Gateway_Stripe(PaymentGatewayManager):
             self.donation.subscription.save()
 
             return HttpResponse(status=200)
+        
+        # for other events:
         return HttpResponse(status=400)
 
     def update_recurring_payment(self, form_data):
         if not self.subscription:
-            raiseObjectNone(
-                'Subscription object is None. Cannot update recurring payment.')
+            raise ValueError(_('Subscription object is None. Cannot update recurring payment.'))
         initStripeApiKey(self.request)
         # update donation amount if it is different from database
         if form_data['recurring_amount'] != self.subscription.recurring_amount:
@@ -175,96 +171,73 @@ class Gateway_Stripe(PaymentGatewayManager):
                 }
             }
             # call stripe api to get the SubscriptionItem
-            try:
-                stripeRes = stripe.SubscriptionItem.list(
-                    subscription=self.subscription.object_id,
+            stripeRes = stripe.SubscriptionItem.list(
+                subscription=self.subscription.object_id,
+            )
+            if len(stripeRes['data']) == 1:
+                subItemId = stripeRes['data'][0].id
+                # call stripe api to update SubscriptionItem
+                updateRes = stripe.SubscriptionItem.modify(
+                    subItemId,
+                    proration_behavior='none',
+                    price_data=adhoc_price,
+                    quantity=1
                 )
-                if len(stripeRes['data']) == 1:
-                    subItemId = stripeRes['data'][0].id
-                    # call stripe api to update SubscriptionItem
-                    updateRes = stripe.SubscriptionItem.modify(
-                        subItemId,
-                        proration_behavior='none',
-                        price_data=adhoc_price,
-                        quantity=1
-                    )
-                    # update newstream model
-                    if updateRes:
-                        self.subscription.recurring_amount = formatDonationAmountFromGateway(updateRes['price']['unit_amount_decimal'], self.subscription.currency)
-                        self.subscription.save()
+                # update newstream model
+                if updateRes:
+                    self.subscription.recurring_amount = formatDonationAmountFromGateway(updateRes['price']['unit_amount_decimal'], self.subscription.currency)
+                    self.subscription.save()
 
-                        # email notifications
-                        sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, str(
-                            _("A Recurring Donation's amount has been updated on your website:")))
-                        sendRecurringUpdatedNotifToDonor(self.request, self.subscription, str(
-                            _("You have just updated your recurring donation amount.")))
+                    # email notifications
+                    sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, str(
+                        _("A Recurring Donation's amount has been updated on your website:")))
+                    sendRecurringUpdatedNotifToDonor(self.request, self.subscription, str(
+                        _("You have just updated your recurring donation amount.")))
 
-                        messages.add_message(self.request, messages.SUCCESS, _(
-                            'Your recurring donation amount at Stripe is updated successfully.'))
-                    else:
-                        messages.add_message(self.request, messages.ERROR,
-                                            _('Cannot update stripe subscription. Stripe API returned none.'))
+                    messages.add_message(self.request, messages.SUCCESS, _(
+                        'Your recurring donation amount at Stripe is updated successfully.'))
                 else:
-                    messages.add_message(self.request, messages.ERROR,
-                                        _('Cannot update stripe subscription. SubscriptionItem more or less than 1.'))
-            except Exception as e:
-                print('Cannot update stripe subscription: '+str(e))
-                messages.add_message(self.request, messages.ERROR, _('Cannot update stripe subscription: ')+str(e))
+                    raise RuntimeError(_('Cannot update stripe subscription. Stripe API returned none.'))
+            else:
+                raise RuntimeError(_('Cannot update stripe subscription. SubscriptionItem more or less than 1.'))
 
         # update billing_cycle_anchor if user checked yes
         if form_data['billing_cycle_now']:
-            try:
-                updateRes = stripe.Subscription.modify(
-                    self.subscription.object_id,
-                    proration_behavior='none',
-                    billing_cycle_anchor='now',
-                )
-                if updateRes:
-                    # email notifications
-                    sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, str(
-                        _("A Recurring Donation's billing cycle has been reset to today's date on your website:")))
-                    sendRecurringUpdatedNotifToDonor(self.request, self.subscription, str(
-                        _("You have just reset your recurring donation's billing cycle to today's date.")))
+            updateRes = stripe.Subscription.modify(
+                self.subscription.object_id,
+                proration_behavior='none',
+                billing_cycle_anchor='now',
+            )
+            if updateRes:
+                # email notifications
+                sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, str(
+                    _("A Recurring Donation's billing cycle has been reset to today's date on your website:")))
+                sendRecurringUpdatedNotifToDonor(self.request, self.subscription, str(
+                    _("You have just reset your recurring donation's billing cycle to today's date.")))
 
-                    messages.add_message(self.request, messages.SUCCESS, _(
-                        'Your recurring donation at Stripe is set to bill on today\'s date every month.'))
-                else:
-                    messages.add_message(self.request, messages.ERROR,
-                                        _('Cannot update stripe subscription. Stripe API returned none.'))
-            except Exception as e:
-                print('Cannot update stripe subscription: '+str(e))
-                messages.add_message(self.request, messages.ERROR, _('Cannot update stripe subscription: ')+str(e))
+                messages.add_message(self.request, messages.SUCCESS, _(
+                    'Your recurring donation at Stripe is set to bill on today\'s date every month.'))
+            else:
+                raise RuntimeError(_('Cannot update stripe subscription. Stripe API returned none.'))
 
     def cancel_recurring_payment(self):
         if not self.subscription:
-            raiseObjectNone(
-                'Subscription object is None. Cannot cancel recurring payment.')
+            raise ValueError(_('Subscription object is None. Cannot cancel recurring payment.'))
         initStripeApiKey(self.request)
         # cancel subscription via stripe API
-        try:
-            cancelled_subscription = stripe.Subscription.delete(
-                self.subscription.object_id)
-            if cancelled_subscription and cancelled_subscription.status == 'canceled':
-                # update newstream model
-                self.subscription.recurring_status = STATUS_CANCELLED
-                self.subscription.save()
-                # email notifications
-                sendRecurringCancelledNotifToAdmins(
-                    self.request, self.subscription)
-                sendRecurringCancelledNotifToDonor(
-                    self.request, self.subscription)
-                return {
-                    'status': 'success'
-                }
-        except Exception as e:
-            return {
-                'status': 'failure',
-                'reason': _('Cannot cancel stripe subscription: %(errmsg)s') % {'errmsg': str(e)}
-            }
-        return {
-            'status': 'failure',
-            'reason': _('Subscription object returned from stripe having status %(status)s instead of canceled') % {'status': cancelled_subscription.status}
-        }
+        cancelled_subscription = stripe.Subscription.delete(
+            self.subscription.object_id)
+        if cancelled_subscription and cancelled_subscription.status == 'canceled':
+            # update newstream model
+            self.subscription.recurring_status = STATUS_CANCELLED
+            self.subscription.save()
+            # email notifications
+            sendRecurringCancelledNotifToAdmins(
+                self.request, self.subscription)
+            sendRecurringCancelledNotifToDonor(
+                self.request, self.subscription)
+        else:
+            raise RuntimeError(_('Subscription object returned from stripe having status %(status)s instead of canceled') % {'status': cancelled_subscription.status})
 
     def toggle_recurring_payment(self):
         initStripeApiKey(self.request)
@@ -275,50 +248,40 @@ class Gateway_Stripe(PaymentGatewayManager):
         elif self.subscription.recurring_status == STATUS_ACTIVE:
             toggle_obj = {"behavior": "mark_uncollectible"}
         else:
-            return {
-                'status': 'failure',
-                'reason': 'Subscription object is neither Active or Paused'
-            }
+            raise ValueError(_('Subscription object is neither Active or Paused'))
         try:
             updated_subscription = stripe.Subscription.modify(
                 self.subscription.object_id, pause_collection=toggle_obj)
-            if updated_subscription:
-                if toggle_obj and updated_subscription['pause_collection']['behavior'] == 'mark_uncollectible':
-                    # update newstream model
-                    self.subscription.recurring_status = STATUS_PAUSED
-                    self.subscription.save()
-                    # email notifications
-                    sendRecurringPausedNotifToAdmins(
-                        self.request, self.subscription)
-                    sendRecurringPausedNotifToDonor(
-                        self.request, self.subscription)
-                    return {
-                        'status': 'success',
-                        'button-html': '<span class="btn-text">'+str(_('Resume Recurring Donation'))+'</span><span class="icon"></span>',
-                        'recurring-status': STATUS_PAUSED,
-                        'success-message': str(_('Your recurring donation is paused.'))
-                    }
-                if toggle_obj == '' and updated_subscription['pause_collection'] == None:
-                    # update newstream model
-                    self.subscription.recurring_status = STATUS_ACTIVE
-                    self.subscription.save()
-                    # email notifications
-                    sendRecurringResumedNotifToAdmins(
-                        self.request, self.subscription)
-                    sendRecurringResumedNotifToDonor(
-                        self.request, self.subscription)
-                    return {
-                        'status': 'success',
-                        'button-html': '<span class="btn-text">'+str(_('Pause Recurring Donation'))+'</span><span class="icon"></span>',
-                        'recurring-status': STATUS_ACTIVE,
-                        'success-message': str(_('Your recurring donation is resumed.'))
-                    }
         except Exception as e:
-            return {
-                'status': 'failure',
-                'reason': _('Cannot update stripe subscription: %(errmsg)s') % {'errmsg': str(e)}
-            }
-        return {
-            'status': 'failure',
-            'reason': _('Subscription object returned from stripe does not have valid pause_collection value')
-        }
+            raise RuntimeError(_('Cannot update stripe subscription: %(errmsg)s') % {'errmsg': str(e)})
+        if updated_subscription:
+            if toggle_obj and updated_subscription['pause_collection']['behavior'] == 'mark_uncollectible':
+                # update newstream model
+                self.subscription.recurring_status = STATUS_PAUSED
+                self.subscription.save()
+                # email notifications
+                sendRecurringPausedNotifToAdmins(
+                    self.request, self.subscription)
+                sendRecurringPausedNotifToDonor(
+                    self.request, self.subscription)
+                return {
+                    'button-html': '<span class="btn-text">'+str(_('Resume Recurring Donation'))+'</span><span class="icon"></span>',
+                    'recurring-status': STATUS_PAUSED,
+                    'success-message': str(_('Your recurring donation is paused.'))
+                }
+            if toggle_obj == '' and updated_subscription['pause_collection'] == None:
+                # update newstream model
+                self.subscription.recurring_status = STATUS_ACTIVE
+                self.subscription.save()
+                # email notifications
+                sendRecurringResumedNotifToAdmins(
+                    self.request, self.subscription)
+                sendRecurringResumedNotifToDonor(
+                    self.request, self.subscription)
+                return {
+                    'button-html': '<span class="btn-text">'+str(_('Pause Recurring Donation'))+'</span><span class="icon"></span>',
+                    'recurring-status': STATUS_ACTIVE,
+                    'success-message': str(_('Your recurring donation is resumed.'))
+                }
+        else:
+            raise ValueError(_('Subscription object returned from stripe does not have valid pause_collection value'))

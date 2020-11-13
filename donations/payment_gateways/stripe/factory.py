@@ -25,18 +25,9 @@ class Factory_Stripe(PaymentGatewayFactory):
         subscription = None
         kwargs = {}
 
-        try:
-            event = stripe.Webhook.construct_event(
-                payload, sig_header, siteSettings.stripe_webhook_secret
-            )
-        except ValueError as e:
-            # Invalid payload
-            print(e, flush=True)
-            return None
-        except stripe.error.SignatureVerificationError as e:
-            # Invalid signature
-            print(e, flush=True)
-            return None
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, siteSettings.stripe_webhook_secret
+        )
 
         # Intercept the checkout.session.completed event
         if event['type'] == 'checkout.session.completed':
@@ -49,14 +40,14 @@ class Factory_Stripe(PaymentGatewayFactory):
                     if 'donation_id' in payment_intent.metadata:
                         donation_id = payment_intent.metadata['donation_id']
                     else:
-                        return None
+                        raise ValueError(_('Missing donation_id in payment_intent.metadata'))
                 elif session.mode == 'subscription' and session.subscription:
                     subscription = stripe.Subscription.retrieve(
                         session.subscription)
                     if 'donation_id' in subscription.metadata:
                         donation_id = subscription.metadata['donation_id']
                     else:
-                        return None
+                        raise ValueError(_('Missing donation_id in subscription.metadata'))
 
         # Intercept the invoice created event for subscriptions(a must for instant invoice finalization)
         # https://stripe.com/docs/billing/subscriptions/webhooks#understand
@@ -70,9 +61,9 @@ class Factory_Stripe(PaymentGatewayFactory):
                     donation_id = subscription.metadata['donation_id']
                     kwargs['invoice'] = invoice
                 else:
-                    return None
+                    raise ValueError(_('Missing donation_id in subscription.metadata'))
             else:
-                return None
+                raise ValueError(_('Missing subscription_id'))
 
         # Intercept the invoice paid event for subscriptions
         if event['type'] == 'invoice.paid':
@@ -85,9 +76,9 @@ class Factory_Stripe(PaymentGatewayFactory):
                     donation_id = subscription.metadata['donation_id']
                     kwargs['invoice'] = invoice
                 else:
-                    return None
+                    raise ValueError(_('Missing donation_id in subscription.metadata'))
             else:
-                return None
+                raise ValueError(_('Missing subscription_id'))
 
         # The subscription created event is not to be used for subscription model init, so as to prevent race condition with the subscription model init in updated event
         # That is because there is no guarantee which event hits first, it's better to let one event handles the model init as well.
@@ -100,7 +91,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                 if 'donation_id' in subscription.metadata:
                     donation_id = subscription.metadata['donation_id']
                 else:
-                    return None
+                    raise ValueError(_('Missing donation_id in subscription.metadata'))
 
         # Intercept the subscription deleted event
         if event['type'] == 'customer.subscription.deleted':
@@ -110,20 +101,19 @@ class Factory_Stripe(PaymentGatewayFactory):
                 if 'donation_id' in subscription.metadata:
                     donation_id = subscription.metadata['donation_id']
                 else:
-                    return None
+                    raise ValueError(_('Missing donation_id in subscription.metadata'))
 
         # Finally init and return the Stripe Gateway Manager
-        if donation_id:
-            try:
-                donation = Donation.objects.get(pk=donation_id)
-                kwargs['session'] = session
-                kwargs['event'] = event
-                return Factory_Stripe.initGateway(request, donation, subscription, **kwargs)
-            except Donation.DoesNotExist:
-                print('No matching Donation found, donation_id: ' +
-                      str(donation_id), flush=True)
-                return None
-        return None
+        if not donation_id:
+            raise ValueError(_('Missing donation_id'))
+
+        try:
+            donation = Donation.objects.get(pk=donation_id)
+            kwargs['session'] = session
+            kwargs['event'] = event
+            return Factory_Stripe.initGateway(request, donation, subscription, **kwargs)
+        except Donation.DoesNotExist:
+            raise ValueError(_('No matching Donation found, donation_id: ')+str(donation_id))
 
     @staticmethod
     def initGatewayByReturn(request):
@@ -131,23 +121,20 @@ class Factory_Stripe(PaymentGatewayFactory):
 
         donation_id = None
         session_id = request.GET.get("stripe_session_id", None)
-        if session_id:
-            session = stripe.checkout.Session.retrieve(session_id)
-            # no matter 'payment' or 'subscription', metadata also saved at checkout session level
-            if 'donation_id' in session.metadata:
-                donation_id = session.metadata['donation_id']
-            else:
-                return None
+        if not session_id:
+            raise ValueError(_("Missing session_id in request.GET"))
 
-            try:
-                donation = Donation.objects.get(pk=donation_id)
-                kwargs = {}
-                kwargs['session'] = session
-                return Factory_Stripe.initGateway(request, donation, None, **kwargs)
-            except Donation.DoesNotExist:
-                print('No matching Donation found, donation_id: ' +
-                      str(donation_id), flush=True)
-                return None
+        session = stripe.checkout.Session.retrieve(session_id)
+        # no matter 'payment' or 'subscription', metadata also saved at checkout session level
+        if 'donation_id' in session.metadata:
+            donation_id = session.metadata['donation_id']
         else:
-            print('No returned Stripe session found', flush=True)
-            return None
+            raise ValueError(_("Missing donation_id in session.metadata"))
+
+        try:
+            donation = Donation.objects.get(pk=donation_id)
+            kwargs = {}
+            kwargs['session'] = session
+            return Factory_Stripe.initGateway(request, donation, None, **kwargs)
+        except Donation.DoesNotExist:
+            raise ValueError(_('No matching Donation found, donation_id: ')+str(donation_id))

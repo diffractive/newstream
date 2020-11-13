@@ -66,6 +66,11 @@ def domain(req):
     return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + req.get_host()
 
 
+@register.filter(name='fullurl')
+def fullurl(req, relurl):
+    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + req.get_host() + relurl
+
+
 @register.filter(name='brand_logo')
 def getBrandLogo(req):
     settings = getSiteSettings(req)

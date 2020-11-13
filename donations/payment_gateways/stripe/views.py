@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 
-from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, printvars
+from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, printvars, _exception
 from donations.models import Donation
 from donations.functions import gen_order_id
 from donations.payment_gateways.setting_classes import getStripeSettings
@@ -14,15 +14,17 @@ from .factory import Factory_Stripe
 
 @csrf_exempt
 def create_checkout_session(request):
-    initStripeApiKey(request)
-    stripeSettings = getStripeSettings(request)
-    siteSettings = getSiteSettings(request)
+    try:
+        initStripeApiKey(request)
+        stripeSettings = getStripeSettings(request)
+        siteSettings = getSiteSettings(request)
 
-    donation_id = request.session.get('donation_id', None)
+        donation_id = request.session.get('donation_id', None)
+        if not donation_id:
+            raise ValueError(_("No donation_id in session"))
 
-    if donation_id:
-        # get donation
-        donation = get_object_or_404(Donation, id=donation_id)
+        # might throw DoesNotExist error
+        donation = Donation.objects.get(pk=donation_id)
 
         # init session_kwargs with common parameters
         session_kwargs = {
@@ -63,8 +65,7 @@ def create_checkout_session(request):
                 if prod.id == stripeSettings.product_id:
                     product = prod
         if product == None:
-            print('Cannot initialize/get the stripe product instance', flush=True)
-            return HttpResponse(status=500)
+            raise ValueError(_('Cannot initialize/get the stripe product instance'))
 
         # ad-hoc price is used
         amount_str = formatDonationAmount(
@@ -104,52 +105,76 @@ def create_checkout_session(request):
                 }
             }
 
-        try:
-            session = stripe.checkout.Session.create(**session_kwargs)
-        except Exception as e:
-            print('Cannot create stripe checkout session: '+str(e), flush=True)
-            return HttpResponse(status=500)
+        session = stripe.checkout.Session.create(**session_kwargs)
 
         return JsonResponse({'id': session.id})
-    return HttpResponse(status=500)
+    except ValueError as e:
+        _exception(str(e))
+        return HttpResponse(status=500)
+    except Donation.DoesNotExist:
+        _exception("Donation object not found by id: "+str(donation_id))
+        return HttpResponse(status=500)
+    except Exception as e:
+        _exception('Exception occured interfacing with stripe sdk: '+str(e))
+        return HttpResponse(status=500)
 
 
 @csrf_exempt
 def verify_stripe_response(request):
-    # Set up gateway manager object with its linking donation, session, etc...
-    gatewayManager = Factory_Stripe.initGatewayByVerification(request)
+    try:
+        # Set up gateway manager object with its linking donation, session, etc...
+        gatewayManager = Factory_Stripe.initGatewayByVerification(request)
 
-    if gatewayManager:
         return gatewayManager.process_webhook_response()
-    return HttpResponse(status=400)
+    except ValueError as e:
+        # Might be invalid payload from initGatewayByVerification
+        # or missing donation_id/subscription_id or donation object not found
+        _exception(str(e))
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        # Invalid signature from initGatewayByVerification
+        _exception(str(e))
+        return HttpResponse(status=400)
+    except Exception as e:
+        _exception(str(e))
+        return HttpResponse(status=500)
 
 
 @csrf_exempt
 def return_from_stripe(request):
-    gatewayManager = Factory_Stripe.initGatewayByReturn(request)
-    if gatewayManager:
+    try:
+        gatewayManager = Factory_Stripe.initGatewayByReturn(request)
         request.session['return-donation-id'] = gatewayManager.donation.id
-    else:
-        request.session['return-error'] = str(_(
+    except ValueError as e:
+        _exception(str(e))
+        request.session['error-title'] = str(_("ValueError"))
+        request.session['error-message'] = str(e)
+    except Exception as e:
+        _exception(str(e))
+        request.session['error-title'] = str(_("Unknown Exception"))
+        request.session['error-message'] = str(_(
             "Results returned from gateway is invalid."))
     return redirect('donations:thank-you')
 
 
 @csrf_exempt
 def cancel_from_stripe(request):
-    gatewayManager = Factory_Stripe.initGatewayByReturn(request)
-    if gatewayManager:
+    try:
+        gatewayManager = Factory_Stripe.initGatewayByReturn(request)
         request.session['return-donation-id'] = gatewayManager.donation.id
 
         if gatewayManager.session:
             if gatewayManager.session.mode == 'payment':
-                try:
-                    stripe.PaymentIntent.cancel(
-                        gatewayManager.session.payment_intent)
-                except Exception as e:
-                    request.session['return-error'] = str(e)
+                stripe.PaymentIntent.cancel(
+                    gatewayManager.session.payment_intent)
             # for subscription mode, payment_intent is not yet created, so no need to cancel
-    else:
-        request.session['return-error'] = str(_(
+    except ValueError as e:
+        _exception(str(e))
+        request.session['error-title'] = str(_("ValueError"))
+        request.session['error-message'] = str(e)
+    except Exception as e:
+        _exception(str(e))
+        request.session['error-title'] = str(_("Unknown Error"))
+        request.session['error-message'] = str(_(
             "Results returned from gateway is invalid."))
     return redirect('donations:cancelled')

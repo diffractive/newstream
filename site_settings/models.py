@@ -184,10 +184,38 @@ class SiteSettings(BaseSetting, ClusterableModel):
 
     paypal_frontend_label = models.CharField(
         max_length=255, default=_("PayPal"), help_text=_("The Gateway name to be shown on public-facing website."))
+    paypal_sandbox_api_client_id = models.CharField(
+        max_length=255, blank=True, help_text=_("The Sandbox API Client ID"))
+    paypal_sandbox_api_secret_key = models.CharField(
+        max_length=255, blank=True, help_text=_("The Sandbox API secret key"))
+    paypal_sandbox_api_webhook_id = models.CharField(
+        max_length=255, blank=True, help_text=_("The Sandbox API Webhook ID"))
+    paypal_api_client_id = models.CharField(
+        max_length=255, blank=True, help_text=_("The Live API Client ID"))
+    paypal_api_secret_key = models.CharField(
+        max_length=255, blank=True, help_text=_("The Live API secret key"))
+    paypal_api_webhook_id = models.CharField(
+        max_length=255, blank=True, help_text=_("The Live API Webhook ID"))
 
     donations_paypal_panels = [
         FieldPanel("paypal_frontend_label", heading=_(
             "PayPal Gateway public-facing label")),
+        MultiFieldPanel([
+            FieldPanel("paypal_sandbox_api_client_id",
+                       heading=_("PayPal Sandbox API Client ID")),
+            FieldPanel("paypal_sandbox_api_secret_key",
+                       heading=_("PayPal Sandbox API Secret Key")),
+            FieldPanel("paypal_sandbox_api_webhook_id",
+                       heading=_("PayPal Sandbox API Webhook ID")),
+        ], heading=_("PayPal API Sandbox Settings")),
+        MultiFieldPanel([
+            FieldPanel("paypal_api_client_id",
+                       heading=_("PayPal Live API Client ID")),
+            FieldPanel("paypal_api_secret_key",
+                       heading=_("PayPal Live API Secret Key")),
+            FieldPanel("paypal_api_webhook_id",
+                       heading=_("PayPal Live API Webhook ID")),
+        ], heading=_("PayPal API Live Settings")),
     ]
 
     stripe_frontend_label = models.CharField(

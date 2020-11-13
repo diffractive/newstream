@@ -3,6 +3,8 @@ import sys
 import os
 import json
 import uuid
+import logging
+logger = logging.getLogger('newstream')
 from pprint import pprint
 from hashlib import blake2b
 import django.conf as conf
@@ -30,6 +32,47 @@ class EmailVerificationTokenGenerator(PasswordResetTokenGenerator):
 
 
 evTokenGenerator = EmailVerificationTokenGenerator()
+
+
+def _debug(msg):
+    logger.debug(msg)
+
+
+def _error(msg):
+    logger.error(msg)
+
+
+def _exception(msg):
+    logger.exception(msg)
+
+
+def object_to_json(json_data):
+    """
+    Function to print all json data in an organized readable manner
+    """
+    result = {}
+    itr = json_data.__dict__.items() if not isinstance(json_data, dict) else json_data.items()
+    for key,value in itr:
+        # Skip internal attributes.
+        if key.startswith("__"):
+            continue
+        result[key] = array_to_json_array(value) if isinstance(value, list) else\
+                    object_to_json(value) if not is_primittive(value) else\
+                        value
+    return result
+
+
+def array_to_json_array(json_array):
+    result =[]
+    if isinstance(json_array, list):
+        for item in json_array:
+            result.append(object_to_json(item) if  not is_primittive(item) \
+                            else array_to_json_array(item) if isinstance(item, list) else item)
+    return result
+
+
+def is_primittive(data):
+    return isinstance(data, str) or isinstance(data, int)
 
 
 def getFullReverseUrl(request, urlname, kwargs=None):

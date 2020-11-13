@@ -3,7 +3,7 @@ import hashlib
 from datetime import datetime
 
 from site_settings.models import GATEWAY_2C2P
-from newstream.functions import raiseObjectNone, printvars
+from newstream.functions import raiseObjectNone, printvars, _debug
 from donations.models import Donation, Subscription, STATUS_PENDING
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways._2c2p.gateway import Gateway_2C2P
@@ -42,8 +42,7 @@ class Factory_2C2P(PaymentGatewayFactory):
                         donation = Donation.objects.get(pk=int(request.POST['user_defined_1']))
                         return Factory_2C2P.initGateway(request, donation, None, data=data)
                     except Donation.DoesNotExist:
-                        print('Cannot identify donation record from 2C2P request.', flush=True)
-                        return None
+                        raise ValueError(_('Cannot identify donation record from 2C2P request, id: %(id)s') % {'id': request.POST['user_defined_1']})
                 # case two: either first time subscription or renewal donation
                 elif request.POST['recurring_unique_id']:
                     try:
@@ -57,17 +56,14 @@ class Factory_2C2P(PaymentGatewayFactory):
                             donation = Donation.objects.get(pk=int(request.POST['user_defined_1']))
                             return Factory_2C2P.initGateway(request, donation, None, data=data, first_time_subscription=True)
                         except Donation.DoesNotExist:
-                            print('Cannot identify donation record from 2C2P request.', flush=True)
-                            return None
-
-            print(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '(UTC) - hash_value does not match with checkHash, cannot verify request from 2C2P.', flush=True)
-            print("hash_value: "+hash_value, flush=True)
-            print("checkHash: "+checkHash, flush=True)
-            printvars(data)
-            return None
+                            raise ValueError(_('Cannot identify donation record from 2C2P request, id: %(id)s') % {'id': request.POST['user_defined_1']})
+            else:
+                _debug("hash_value: "+hash_value)
+                _debug("checkHash: "+checkHash)
+                printvars(data)
+                raise ValueError(_("hash_value does not match with checkHash, cannot verify request from 2C2P."))
         else:
-            print('No hash_value in request.POST, cannot verify request from 2C2P.', flush=True)
-            return None
+            raise ValueError(_("No hash_value in request.POST, cannot verify request from 2C2P."))
 
     @staticmethod
     def initGatewayByReturn(request):
@@ -78,7 +74,6 @@ class Factory_2C2P(PaymentGatewayFactory):
                 donation = Donation.objects.get(pk=int(request.POST['user_defined_1']))
                 return Factory_2C2P.initGateway(request, donation, None, data=request.POST)
             except Donation.DoesNotExist:
-                print('Cannot identify donation record from 2C2P request.', flush=True)
-                return None
-        print('No user_defined_1 in request.POST, cannot initialize gateway from 2C2P request.', flush=True)
-        return None
+                raise ValueError(_('Cannot identify donation record from 2C2P request, id: %(id)s') % {'id': request.POST['user_defined_1']})
+        else:
+            raise ValueError(_('No user_defined_1 in request.POST, cannot initialize gateway from 2C2P request.'))

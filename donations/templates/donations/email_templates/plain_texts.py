@@ -1,6 +1,6 @@
 from django.utils.translation import gettext as _
 
-from newstream.functions import getSiteName
+from newstream.functions import getSiteName, getFullReverseUrl
 from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
 
 
@@ -40,7 +40,8 @@ def get_donation_receipt_text(request, donation):
         Donation Receipt\n
         \n
         Dear %(name)s,\n
-        Thank you for your generosity! Your support means a lot to us. Here are the details of your donation:\n
+        Thank you for your generosity! Your support means a lot to us. Go to %(url)s to view your donation on the website.\n
+        Here are the details of your donation:\n
         \n
         Order Number: %(order_number)s\n
         Donation Frequency: %(frequency)s\n
@@ -53,6 +54,7 @@ def get_donation_receipt_text(request, donation):
         %(sitename)s
     """) % {
         'name': donation.user.fullname,
+        'url': getFullReverseUrl(request, 'donations:my-onetime-donations'),
         'order_number': donation.order_number,
         'frequency': donation.donation_frequency,
         'currency': donation.currency,
@@ -99,7 +101,8 @@ def get_renewal_receipt_text(request, donation):
         Renewal Donation Receipt\n
         \n
         Dear %(name)s,\n
-        Thank you for your generosity! Your support means a lot to us. Here are the details of your renewal donation:\n
+        Thank you for your generosity! Your support means a lot to us. Go to %(url)s to view your renewal donation on the website.\n
+        Here are the details of your renewal donation:\n
         \n
         Order Number: %(order_number)s\n
         Donation Frequency: %(frequency)s\n
@@ -112,6 +115,7 @@ def get_renewal_receipt_text(request, donation):
         %(sitename)s
     """) % {
         'name': donation.user.fullname,
+        'url': getFullReverseUrl(request, 'donations:my-renewals', kwargs={'id': donation.subscription.id}),
         'order_number': donation.order_number,
         'frequency': donation.donation_frequency,
         'currency': donation.currency,
@@ -155,7 +159,8 @@ def get_recurring_updated_donor_text(request, subscription, message):
         Your Recurring Donation is updated\n
         \n
         Dear %(name)s,\n
-        %(message)s Here are the details of your recurring donation:\n
+        %(message)s Go to %(url)s to view your recurring donations on the website.\n
+        Here are the details of your recurring donation:\n
         \n
         Donor: %(name)s\n
         Recurring Donation Identifier: %(object_id)s\n
@@ -168,6 +173,7 @@ def get_recurring_updated_donor_text(request, subscription, message):
     """) % {
         'name': subscription.user.fullname,
         'message': message,
+        'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
         'object_id': subscription.object_id,
         'currency': subscription.currency,
         'amount': displayRecurringAmountWithCurrency(subscription),
@@ -208,7 +214,8 @@ def get_recurring_paused_donor_text(request, subscription):
         Your Recurring Donation is paused\n
         \n
         Dear %(name)s,\n
-        You have just paused your recurring donation. You can resume it anytime in your account. Here are the details of your recurring donation:\n
+        You have just paused your recurring donation. You can resume it anytime in your account. Go to %(url)s to view your recurring donations on the website.\n
+        Here are the details of your recurring donation:\n
         \n
         Donor: %(name)s\n
         Recurring Donation Identifier: %(object_id)s\n
@@ -220,6 +227,7 @@ def get_recurring_paused_donor_text(request, subscription):
         %(sitename)s
     """) % {
         'name': subscription.user.fullname,
+        'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
         'object_id': subscription.object_id,
         'currency': subscription.currency,
         'amount': displayRecurringAmountWithCurrency(subscription),
@@ -260,7 +268,8 @@ def get_recurring_resumed_donor_text(request, subscription):
         Your Recurring Donation is resumed\n
         \n
         Dear %(name)s,\n
-        You have just resumed your recurring donation. Here are the details of your recurring donation:\n
+        You have just resumed your recurring donation. Go to %(url)s to view your recurring donations on the website.\n
+        Here are the details of your recurring donation:\n
         \n
         Donor: %(name)s\n
         Recurring Donation Identifier: %(object_id)s\n
@@ -272,6 +281,7 @@ def get_recurring_resumed_donor_text(request, subscription):
         %(sitename)s
     """) % {
         'name': subscription.user.fullname,
+        'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
         'object_id': subscription.object_id,
         'currency': subscription.currency,
         'amount': displayRecurringAmountWithCurrency(subscription),
@@ -312,7 +322,8 @@ def get_recurring_cancelled_donor_text(request, subscription):
         Your Recurring Donation is cancelled\n
         \n
         Dear %(name)s,\n
-        You have just cancelled your recurring donation. Here are the details of your recurring donation:\n
+        You have just cancelled your recurring donation. Go to %(url)s to view your recurring donations on the website.\n
+        Here are the details of your recurring donation:\n
         \n
         Donor: %(name)s\n
         Recurring Donation Identifier: %(object_id)s\n
@@ -324,6 +335,7 @@ def get_recurring_cancelled_donor_text(request, subscription):
         %(sitename)s
     """) % {
         'name': subscription.user.fullname,
+        'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
         'object_id': subscription.object_id,
         'currency': subscription.currency,
         'amount': displayRecurringAmountWithCurrency(subscription),

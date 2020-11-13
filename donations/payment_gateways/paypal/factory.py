@@ -1,16 +1,85 @@
+import json
+from datetime import datetime
+from django.utils.translation import gettext_lazy as _
+from paypalcheckoutsdk.core import PayPalHttpClient
+from paypalcheckoutsdk.orders import OrdersGetRequest
+from paypalrestsdk.notifications import WebhookEvent
+
+from newstream.functions import printvars, _debug, _error
+from donations.models import Donation
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.paypal.gateway import Gateway_Paypal
+from donations.payment_gateways.setting_classes import getPayPalSettings
 
 
 class Factory_Paypal(PaymentGatewayFactory):
     @staticmethod
-    def initGateway(request, donation, subscription):
-        return Gateway_Paypal(request, donation, subscription)
+    def initGateway(request, donation, subscription, **kwargs):
+        return Gateway_Paypal(request, donation, subscription, **kwargs)
 
     @staticmethod
     def initGatewayByVerification(request):
-        pass
+        _debug('PayPal: Webhook Request incoming')
+        paypalSettings = getPayPalSettings(request)
+
+        # The payload body sent in the webhook event
+        event_body = request.body.decode()
+        json_data = json.loads(request.body)
+        _debug('Event Type: '+json_data['event_type'])
+        # printvars(request.headers)
+        # Paypal-Transmission-Id in webhook payload header
+        transmission_id = request.headers['Paypal-Transmission-Id']
+        # Paypal-Transmission-Time in webhook payload header
+        timestamp = request.headers['Paypal-Transmission-Time']
+        # Webhook id created
+        webhook_id = paypalSettings.webhook_id
+        # Paypal-Transmission-Sig in webhook payload header
+        actual_signature = request.headers['Paypal-Transmission-Sig']
+        # Paypal-Cert-Url in webhook payload header
+        cert_url = request.headers['Paypal-Cert-Url']
+        # PayPal-Auth-Algo in webhook payload header
+        auth_algo = request.headers['PayPal-Auth-Algo']
+
+        response = WebhookEvent.verify(
+            transmission_id, timestamp, webhook_id, event_body, cert_url, actual_signature, auth_algo)
+        _debug('Webhook verification result: '+str(response))
+
+        if response:
+            donation_id = json_data['resource']['purchase_units'][0]['custom_id']
+            if not donation_id:
+                raise ValueError(_("Missing donation_id in purchase_units custom_id attribute"))
+            try:
+                donation = Donation.objects.get(pk=donation_id)
+                kwargs = {}
+                kwargs['payload'] = json_data
+                return Factory_Paypal.initGateway(request, donation, None, **kwargs)
+            except Donation.DoesNotExist:
+                raise ValueError(_("Donation object not found by id: ")+str(donation_id))
+        else:
+            raise ValueError(_("PayPal Webhook verification failed."))
 
     @staticmethod
     def initGatewayByReturn(request):
-        pass
+        # a get param named 'token' contains the order_id
+        paypalSettings = getPayPalSettings(request)
+        client = PayPalHttpClient(paypalSettings.environment)
+
+        if request.GET.get('token', None):
+            req = OrdersGetRequest(request.GET.get('token'))
+            # might throw IOError
+            response = client.execute(req)
+            _debug('PayPal: Returns from Gateway')
+            _debug('PayPal: Order status: ' + response.result.status)
+            donation_id = response.result.purchase_units[0].custom_id
+            if not donation_id:
+                raise ValueError(_("Missing donation_id in purchase_units custom_id attribute"))
+            try:
+                donation = Donation.objects.get(pk=donation_id)
+                kwargs = {}
+                kwargs['order_id'] = request.GET.get('token')
+                kwargs['order_status'] = response.result.status
+                return Factory_Paypal.initGateway(request, donation, None, **kwargs)
+            except Donation.DoesNotExist:
+                raise ValueError(_("Donation object not found by id: ")+str(donation_id))
+        else:
+            raise ValueError(_("Missing token from PayPal request"))

@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.urls import reverse
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from django.contrib.auth import get_user_model, authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import PasswordResetView
@@ -15,7 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import translation
 from django.views.decorators.csrf import csrf_exempt
 
-from newstream.functions import getSiteSettings, printvars
+from newstream.functions import getSiteSettings, printvars, _exception
 from site_settings.models import PaymentGateway
 from .models import *
 from .forms import *
@@ -112,9 +113,9 @@ def thank_you(request):
             login(request, donation.user,
                   backend='django.contrib.auth.backends.ModelBackend')
         return render(request, 'donations/thankyou.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
-    if 'return-error' in request.session:
-        return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': request.session['return-error']})
-    return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': _('No Payment Data is received.')})
+    if 'error-title' in request.session or 'error-message' in request.session:
+        return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': request.session['error-message'], 'error_title': request.session['error-title']})
+    return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
 
 def cancelled(request):
@@ -129,9 +130,9 @@ def cancelled(request):
             login(request, donation.user,
                   backend='django.contrib.auth.backends.ModelBackend')
         return render(request, 'donations/cancelled.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
-    if 'return-error' in request.session:
-        return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': request.session['return-error']})
-    return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': _('No Payment Data is received.')})
+    if 'error-title' in request.session or 'error-message' in request.session:
+        return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': request.session['error-message'], 'error_title': request.session['error-title']})
+    return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
 
 def revoked(request):
@@ -146,67 +147,90 @@ def revoked(request):
             login(request, donation.user,
                   backend='django.contrib.auth.backends.ModelBackend')
         return render(request, 'donations/revoked.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
-    if 'return-error' in request.session:
-        return render(request, 'donations/revoked.html', {'isValid': False, 'error_message': request.session['return-error']})
-    return render(request, 'donations/revoked.html', {'isValid': False, 'error_message': _('No Payment Data is received.')})
+    if 'error-title' in request.session or 'error-message' in request.session:
+        return render(request, 'donations/revoked.html', {'isValid': False, 'error_message': request.session['error-message'], 'error_title': request.session['error-title']})
+    return render(request, 'donations/revoked.html', {'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
 
 @login_required
 @csrf_exempt
 def cancel_recurring(request):
-    if request.method == 'POST':
-        json_data = json.loads(request.body)
-        if 'subscription_id' not in json_data:
-            print("No subscription_id in JSON body", flush=True)
-            return HttpResponse(status=400)
-        subscription_id = int(json_data['subscription_id'])
-        subscription = get_object_or_404(Subscription, id=subscription_id)
-        gatewayManager = InitPaymentGateway(
-            request, subscription=subscription)
-        resultSet = gatewayManager.cancel_recurring_payment()
-        if resultSet['status'] == 'success':
-            return JsonResponse({'status': resultSet['status'], 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
+    try:
+        if request.method == 'POST':
+            json_data = json.loads(request.body)
+            if 'subscription_id' not in json_data:
+                print("No subscription_id in JSON body", flush=True)
+                return HttpResponse(status=400)
+            subscription_id = int(json_data['subscription_id'])
+            subscription = get_object_or_404(Subscription, id=subscription_id)
+            gatewayManager = InitPaymentGateway(
+                request, subscription=subscription)
+            gatewayManager.cancel_recurring_payment()
+            return JsonResponse({'status': 'success', 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
         else:
-            return JsonResponse({'status': resultSet['status'], 'reason': resultSet['reason']})
-    else:
-        return HttpResponse(400)
+            return HttpResponse(400)
+    except ValueError as e:
+        _exception(str(e))
+        return JsonResponse({'status': 'failure', 'reason': str(e)})
+    except RuntimeError as e:
+        _exception(str(e))
+        return JsonResponse({'status': 'failure', 'reason': str(e)})
+    except Exception as e:
+        _exception(str(e))
+        return JsonResponse({'status': 'failure', 'reason': str(e)})
 
 
 @login_required
 @csrf_exempt
 def toggle_recurring(request):
-    if request.method == 'POST':
-        json_data = json.loads(request.body)
-        if 'subscription_id' not in json_data:
-            print("No subscription_id in JSON body", flush=True)
-            return HttpResponse(status=400)
-        subscription_id = int(json_data['subscription_id'])
-        subscription = get_object_or_404(Subscription, id=subscription_id)
-        gatewayManager = InitPaymentGateway(
-            request, subscription=subscription)
-        resultSet = gatewayManager.toggle_recurring_payment()
-        if resultSet['status'] == 'success':
-            return JsonResponse({'status': resultSet['status'], 'button-html': resultSet['button-html'], 'recurring-status': str(_(resultSet['recurring-status'].capitalize())), 'success-message': resultSet['success-message']})
+    try:
+        if request.method == 'POST':
+            json_data = json.loads(request.body)
+            if 'subscription_id' not in json_data:
+                print("No subscription_id in JSON body", flush=True)
+                return HttpResponse(status=400)
+            subscription_id = int(json_data['subscription_id'])
+            subscription = get_object_or_404(Subscription, id=subscription_id)
+            gatewayManager = InitPaymentGateway(
+                request, subscription=subscription)
+            resultSet = gatewayManager.toggle_recurring_payment()
+            return JsonResponse({'status': 'success', 'button-html': resultSet['button-html'], 'recurring-status': str(_(resultSet['recurring-status'].capitalize())), 'success-message': resultSet['success-message']})
         else:
-            return JsonResponse({'status': resultSet['status'], 'reason': resultSet['reason']})
-    else:
-        return HttpResponse(400)
+            return HttpResponse(400)
+    except ValueError as e:
+        _exception(str(e))
+        return JsonResponse({'status': 'failure', 'reason': str(e)})
+    except RuntimeError as e:
+        _exception(str(e))
+        return JsonResponse({'status': 'failure', 'reason': str(e)})
+    except Exception as e:
+        _exception(str(e))
+        return JsonResponse({'status': 'failure', 'reason': str(e)})
 
 
 @login_required
 def edit_recurring(request, id):
-    subscription = get_object_or_404(Subscription, id=id)
-    # Form object is initialized according to the specific gateway and if request.method=='POST'
-    form = InitEditRecurringPaymentForm(request, subscription)
-    if request.method == 'POST':
-        if form.is_valid():
-            # use gatewayManager to process the data in form.cleaned_data as required
-            gatewayManager = InitPaymentGateway(
-                request, subscription=subscription)
-            gatewayManager.update_recurring_payment(form.cleaned_data)
+    try:
+        subscription = get_object_or_404(Subscription, id=id)
+        # Form object is initialized according to the specific gateway and if request.method=='POST'
+        form = InitEditRecurringPaymentForm(request, subscription)
+        if request.method == 'POST':
+            if form.is_valid():
+                # use gatewayManager to process the data in form.cleaned_data as required
+                gatewayManager = InitPaymentGateway(
+                    request, subscription=subscription)
+                gatewayManager.update_recurring_payment(form.cleaned_data)
 
-            return redirect('donations:edit-recurring', id=id)
-
+                return redirect('donations:edit-recurring', id=id)
+    except ValueError as e:
+        _exception(str(e))
+        messages.add_message(self.request, messages.ERROR, str(e))
+    except RuntimeError as e:
+        _exception(str(e))
+        messages.add_message(self.request, messages.ERROR, str(e))
+    except Exception as e:
+        _exception(str(e))
+        messages.add_message(self.request, messages.ERROR, str(e))
     return render(request, getEditRecurringPaymentHtml(subscription), {'form': form, 'subscription': subscription})
 
 

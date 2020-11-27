@@ -1,0 +1,47 @@
+{% extends "base_email.html" %}
+{% load common_tags i18n %}
+
+{% block title %}
+{% trans 'A Donation Error has occurred' %}
+{% endblock %}
+
+{% block content %}
+<table cellpadding="10" cellspacing="0" style="width: 100%;">
+    <tr>
+        <th style="width: 100%;text-align: left;">
+            <h2 style="font-weight: bold;">
+                {% trans "A Donation Error has occurred" %}
+            </h2>
+        </th>
+    </tr>
+    <tr>
+        <td style="width: 100%;">
+            <p>{% trans 'Hi Admins,' %}</p>
+            <p>
+                {% trans 'This email is to inform you that a donation error has occurred on your website:' %}<br>
+                <a href=" {{ request|domain }}" target="_blank">{{ request|domain }}</a>
+            </p>
+            <table cellpadding="10">
+                <tr>
+                    <td style="font-weight: bold;">{% trans 'Donation Order Number' %}</td>
+                    <td>{{ donation.order_number }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">{% trans 'Donor' %}</td>
+                    <td>{{ donation.user.fullname }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">{% trans 'Error Title' %}</td>
+                    <td>{{ error_title }}</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">{% trans 'Error Description' %}</td>
+                    <td>{{ error_description }}</td>
+                </tr>
+            </table>
+            <p>{% trans "Thank you," %}</p>
+            <p>{{ request|site_name }}</p>
+        </td>
+    </tr>
+</table>
+{% endblock %}

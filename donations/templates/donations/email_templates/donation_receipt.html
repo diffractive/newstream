@@ -17,7 +17,11 @@
     <tr>
         <td style="width: 100%;">
             <p>{% trans "Dear" %} {{ donation.user.fullname }},</p>
+            {% if donation.is_recurring %}
+            {% url 'donations:my-recurring-donations' as donations_url %}
+            {% else %}
             {% url 'donations:my-onetime-donations' as donations_url %}
+            {% endif %}
             <p>
                 {% blocktrans with donations_full_url=request|fullurl:donations_url%}Thank you for your generosity! Your support means a lot to us. Click <a href="{{donations_full_url}}" target="_blank">here</a> to view your donation on the website.{% endblocktrans %}
             </p>

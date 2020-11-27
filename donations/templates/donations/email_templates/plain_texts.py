@@ -54,7 +54,7 @@ def get_donation_receipt_text(request, donation):
         %(sitename)s
     """) % {
         'name': donation.user.fullname,
-        'url': getFullReverseUrl(request, 'donations:my-onetime-donations'),
+        'url': getFullReverseUrl(request, 'donations:my-recurring-donations') if donation.is_recurring else getFullReverseUrl(request, 'donations:my-onetime-donations'),
         'order_number': donation.order_number,
         'frequency': donation.donation_frequency,
         'currency': donation.currency,
@@ -393,5 +393,29 @@ def get_account_created_admin_text(request, user):
     """) % {
         'url': request.build_absolute_uri('/')[:-1],
         'name': user.fullname,
+        'sitename': getSiteName(request)
+    }
+
+def get_donation_error_admin_text(request, donation, error_title, error_description):
+    return _("""
+        A Donation Error has occurred.\n
+        \n
+        Hi Admins,\n
+        This email is to inform you that a donation error has occurred on your website:\n
+        %(url)s\n
+        \n
+        Donation order number: %(order)s\n
+        Donor: %(name)s\n
+        Error Title: %(error_title)s\n
+        Error Description: %(error_description)s\n
+        \n
+        Thank you,\n
+        %(sitename)s
+    """) % {
+        'url': request.build_absolute_uri('/')[:-1],
+        'order': donation.order_number,
+        'name': donation.user.fullname,
+        'error_title': error_title,
+        'error_description': error_description,
         'sitename': getSiteName(request)
     }

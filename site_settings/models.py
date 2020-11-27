@@ -92,6 +92,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     admin_receive_pause_recurring_emails = models.BooleanField(default=True)
     admin_receive_resume_recurring_emails = models.BooleanField(default=True)
     admin_receive_cancel_recurring_emails = models.BooleanField(default=True)
+    admin_receive_donation_error_emails = models.BooleanField(default=True)
     email_admin_panels = [
         FieldPanel('admin_receive_account_created_emails',
                    heading=_('Allow admins receive notifications of donor accounts being created?')),
@@ -109,6 +110,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
                    heading=_('Allow admins receive notifications of recurring donations being resumed?')),
         FieldPanel('admin_receive_cancel_recurring_emails',
                    heading=_('Allow admins receive notifications of recurring donations being cancelled?')),
+        FieldPanel('admin_receive_donation_error_emails',
+                   heading=_('Allow admins receive notifications of erroneous donations?')),
     ]
 
     social_login_enabled = models.BooleanField(default=True)
@@ -184,12 +187,16 @@ class SiteSettings(BaseSetting, ClusterableModel):
 
     paypal_frontend_label = models.CharField(
         max_length=255, default=_("PayPal"), help_text=_("The Gateway name to be shown on public-facing website."))
+    paypal_sandbox_api_product_id = models.CharField(
+        max_length=255, blank=True, help_text=_("The Sandbox API Product ID"))
     paypal_sandbox_api_client_id = models.CharField(
         max_length=255, blank=True, help_text=_("The Sandbox API Client ID"))
     paypal_sandbox_api_secret_key = models.CharField(
         max_length=255, blank=True, help_text=_("The Sandbox API secret key"))
     paypal_sandbox_api_webhook_id = models.CharField(
         max_length=255, blank=True, help_text=_("The Sandbox API Webhook ID"))
+    paypal_api_product_id = models.CharField(
+        max_length=255, blank=True, help_text=_("The Live API Product ID"))
     paypal_api_client_id = models.CharField(
         max_length=255, blank=True, help_text=_("The Live API Client ID"))
     paypal_api_secret_key = models.CharField(
@@ -201,6 +208,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
         FieldPanel("paypal_frontend_label", heading=_(
             "PayPal Gateway public-facing label")),
         MultiFieldPanel([
+            FieldPanel("paypal_sandbox_api_product_id",
+                       heading=_("PayPal Sandbox API Product ID")),
             FieldPanel("paypal_sandbox_api_client_id",
                        heading=_("PayPal Sandbox API Client ID")),
             FieldPanel("paypal_sandbox_api_secret_key",
@@ -209,6 +218,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
                        heading=_("PayPal Sandbox API Webhook ID")),
         ], heading=_("PayPal API Sandbox Settings")),
         MultiFieldPanel([
+            FieldPanel("paypal_api_product_id",
+                       heading=_("PayPal Live API Product ID")),
             FieldPanel("paypal_api_client_id",
                        heading=_("PayPal Live API Client ID")),
             FieldPanel("paypal_api_secret_key",
@@ -222,12 +233,14 @@ class SiteSettings(BaseSetting, ClusterableModel):
         max_length=255, default=_("Stripe"), help_text=_("The Gateway name to be shown on public-facing website."))
     stripe_webhook_secret = models.CharField(
         max_length=255, blank=True, help_text=_("The Secret for the Webhook used by the server for payment verification"))
-    stripe_product_id = models.CharField(max_length=255, blank=False, null=True, help_text=_(
-        "Product ID accessible on your Stripe Dashboard"))
+    stripe_testing_product_id = models.CharField(max_length=255, blank=False, null=True, help_text=_(
+        "Testing Product ID accessible on your Stripe Dashboard"))
     stripe_testing_api_publishable_key = models.CharField(
         max_length=255, blank=True, help_text=_("The Testing API publishable key"))
     stripe_testing_api_secret_key = models.CharField(
         max_length=255, blank=True, help_text=_("The Testing API secret key"))
+    stripe_product_id = models.CharField(max_length=255, blank=False, null=True, help_text=_(
+        "Product ID accessible on your Stripe Dashboard"))
     stripe_api_publishable_key = models.CharField(
         max_length=255, blank=True, help_text=_("The Live API publishable key"))
     stripe_api_secret_key = models.CharField(
@@ -238,14 +251,15 @@ class SiteSettings(BaseSetting, ClusterableModel):
             "Stripe Gateway public-facing label")),
         FieldPanel("stripe_webhook_secret",
                    heading=_("Stripe Webhook Secret")),
-        FieldPanel("stripe_product_id", heading=_("Stripe Product ID")),
         MultiFieldPanel([
+            FieldPanel("stripe_testing_product_id", heading=_("Stripe Testing Product ID")),
             FieldPanel("stripe_testing_api_publishable_key",
                        heading=_("Stripe Testing API Publishable Key")),
             FieldPanel("stripe_testing_api_secret_key",
                        heading=_("Stripe Testing API Secret Key")),
         ], heading=_("Stripe API Sandbox Settings")),
         MultiFieldPanel([
+            FieldPanel("stripe_product_id", heading=_("Stripe Product ID")),
             FieldPanel("stripe_api_publishable_key",
                        heading=_("Stripe Live API Publishable Key")),
             FieldPanel("stripe_api_secret_key",

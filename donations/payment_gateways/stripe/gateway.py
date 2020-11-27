@@ -133,6 +133,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                         self.donation.subscription.recurring_status = STATUS_ACTIVE
                     self.donation.subscription.save()
 
+                # todo: check logic consistency: does it make sense to log down subscription_period even when recurring is paused?
                 spmeta = SubscriptionPaymentMeta(
                     subscription=self.donation.subscription, field_key='stripe_subscription_period', field_value=str(self.subscription.current_period_start)+'-'+str(self.subscription.current_period_end))
                 spmeta.save()

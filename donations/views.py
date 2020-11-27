@@ -105,6 +105,10 @@ def donation_details(request):
 
 
 def thank_you(request):
+    if 'error-title' in request.session or 'error-message' in request.session:
+        error_title = request.session.pop('error-title', '')
+        error_message = request.session.pop('error-message', '')
+        return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': error_message, 'error_title': error_title})
     if 'return-donation-id' in request.session:
         donation = Donation.objects.get(
             pk=request.session['return-donation-id'])
@@ -113,12 +117,14 @@ def thank_you(request):
             login(request, donation.user,
                   backend='django.contrib.auth.backends.ModelBackend')
         return render(request, 'donations/thankyou.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
-    if 'error-title' in request.session or 'error-message' in request.session:
-        return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': request.session['error-message'], 'error_title': request.session['error-title']})
     return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
 
 def cancelled(request):
+    if 'error-title' in request.session or 'error-message' in request.session:
+        error_title = request.session.pop('error-title', '')
+        error_message = request.session.pop('error-message', '')
+        return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': error_message, 'error_title': error_title})
     if 'return-donation-id' in request.session:
         donation = Donation.objects.get(
             pk=request.session['return-donation-id'])
@@ -130,12 +136,14 @@ def cancelled(request):
             login(request, donation.user,
                   backend='django.contrib.auth.backends.ModelBackend')
         return render(request, 'donations/cancelled.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
-    if 'error-title' in request.session or 'error-message' in request.session:
-        return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': request.session['error-message'], 'error_title': request.session['error-title']})
     return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
 
 def revoked(request):
+    if 'error-title' in request.session or 'error-message' in request.session:
+        error_title = request.session.pop('error-title', '')
+        error_message = request.session.pop('error-message', '')
+        return render(request, 'donations/revoked.html', {'isValid': False, 'error_message': error_message, 'error_title': error_title})
     if 'return-donation-id' in request.session:
         donation = Donation.objects.get(
             pk=request.session['return-donation-id'])
@@ -147,8 +155,6 @@ def revoked(request):
             login(request, donation.user,
                   backend='django.contrib.auth.backends.ModelBackend')
         return render(request, 'donations/revoked.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
-    if 'error-title' in request.session or 'error-message' in request.session:
-        return render(request, 'donations/revoked.html', {'isValid': False, 'error_message': request.session['error-message'], 'error_title': request.session['error-title']})
     return render(request, 'donations/revoked.html', {'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
 
@@ -224,13 +230,13 @@ def edit_recurring(request, id):
                 return redirect('donations:edit-recurring', id=id)
     except ValueError as e:
         _exception(str(e))
-        messages.add_message(self.request, messages.ERROR, str(e))
+        messages.add_message(request, messages.ERROR, str(e))
     except RuntimeError as e:
         _exception(str(e))
-        messages.add_message(self.request, messages.ERROR, str(e))
+        messages.add_message(request, messages.ERROR, str(e))
     except Exception as e:
         _exception(str(e))
-        messages.add_message(self.request, messages.ERROR, str(e))
+        messages.add_message(request, messages.ERROR, str(e))
     return render(request, getEditRecurringPaymentHtml(subscription), {'form': form, 'subscription': subscription})
 
 

@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from allauth.account.utils import send_email_confirmation
 
 from newstream.functions import getSiteSettings, getDefaultFromEmail, setDefaultFromEmail
-from donations.templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text, get_new_renewal_text, get_renewal_receipt_text, get_recurring_updated_admin_text, get_recurring_updated_donor_text, get_recurring_paused_admin_text, get_recurring_paused_donor_text, get_recurring_resumed_admin_text, get_recurring_resumed_donor_text, get_recurring_cancelled_admin_text, get_recurring_cancelled_donor_text, get_account_created_admin_text, get_account_deleted_admin_text, get_account_deleted_donor_text
+from donations.templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text, get_new_renewal_text, get_renewal_receipt_text, get_recurring_updated_admin_text, get_recurring_updated_donor_text, get_recurring_paused_admin_text, get_recurring_paused_donor_text, get_recurring_resumed_admin_text, get_recurring_resumed_donor_text, get_recurring_cancelled_admin_text, get_recurring_cancelled_donor_text, get_account_created_admin_text, get_account_deleted_admin_text, get_account_deleted_donor_text, get_donation_error_admin_text
 
 
 def setDonorLanguagePreference(user):
@@ -49,6 +49,13 @@ def sendEmailNotificationsToAdmins(request, siteSettings, subject, textStr, html
     except Exception as e:
         print("Cannot send '"+subject +
               "' emails to admins: "+str(e), flush=True)
+
+
+def sendDonationErrorNotifToAdmins(request, donation, error_title, error_description):
+    siteSettings = getSiteSettings(request)
+    if siteSettings.admin_receive_donation_error_emails:
+        sendEmailNotificationsToAdmins(request, siteSettings, str(_("Donation Error")), get_donation_error_admin_text(request, donation, error_title, error_description), render_to_string(
+            'donations/email_templates/donation_error_admin.html', context={'donation': donation, 'error_title': error_title, 'error_description': error_description}, request=request))
 
 
 def sendDonationNotifToAdmins(request, donation):

@@ -9,23 +9,16 @@ from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest
 from paypalhttp import HttpError
 
 from newstream.functions import getSiteSettings, getSiteName, uuid4_str, getFullReverseUrl, printvars, object_to_json, _debug, _error, _exception
-from donations.models import Donation, DonationPaymentMeta, STATUS_COMPLETE, STATUS_PROCESSING
+from donations.models import Donation, DonationPaymentMeta, STATUS_COMPLETE, STATUS_PROCESSING, STATUS_FAILED
 from donations.functions import gen_order_id
 from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.payment_gateways import Factory_Paypal
-from .functions import capture_paypal_order
+from .functions import capture_paypal_order, checkAccessTokenExpiry, listProducts, createProduct, createPlan, createSubscription
 
 
-def build_onetime_request_body(request):
+def build_onetime_request_body(request, donation):
     """Method to create body with CAPTURE intent"""
-    donation_id = request.session.get('donation_id', None)
-    if not donation_id:
-        raise ValueError(_("Missing donation_id in session"))
-    try:
-        donation = Donation.objects.get(pk=int(donation_id))
-    except Donation.DoesNotExist:
-        raise ValueError(_("Donation object not found by id: ")+str(donation_id))
     # returl_url or cancel_url params in application_context tested to be only useful if order not initiated by Javascript APK
     return \
     {
@@ -41,7 +34,7 @@ def build_onetime_request_body(request):
         "purchase_units": [
             {
                 "description": getSiteName(request) + str(_(" Onetime Donation")),
-                "custom_id": donation_id,
+                "custom_id": donation.id,
                 "amount": {
                     "currency_code": donation.currency,
                     "value": str(donation.donation_amount)
@@ -57,26 +50,65 @@ def create_paypal_transaction(request):
         "issue": "Exception",
         "description": ""
     }
+    result = {}
     try:
         paypalSettings = getPayPalSettings(request)
         client = PayPalHttpClient(paypalSettings.environment)
 
-        req = OrdersCreateRequest()
-        # The following line is for mocking negative responses
-        # req.headers['PayPal-Mock-Response'] = '{"mock_application_codes":"INTERNAL_SERVER_ERROR"}'
-        req.prefer('return=representation')
-        req.request_body(build_onetime_request_body(request))
-        response = client.execute(req)
-        _debug('PayPal: Order Created Status: '+response.result.status)
-        # set approval_link attribute
-        for link in response.result.links:
-            _debug('PayPal: --- {}: {} ---'.format(link.rel, link.href))
-            if link.rel == 'approve':
-                response.result.approval_link = link.href
+        donation_id = request.session.get('donation_id', None)
+        if not donation_id:
+            raise ValueError(_("Missing donation_id in session"))
+        donation = Donation.objects.get(pk=int(donation_id))
+
+        if donation.is_recurring:
+            # Product should have been created by admin manually at the dashboard/setup wizard
+            # if no product exists, create one here(double safety net)
+            # todo: make sure the product_id in site_settings has been set by some kind of configuration enforcement before site is launched
+            product_list = listProducts(request)
+            product = None
+            if len(product_list['products']) == 0:
+                product = createProduct(request)
+            else:
+                # get the product, should aim at the product with the specific product id
+                for prod in product_list['products']:
+                    if prod['id'] == paypalSettings.product_id:
+                        product = prod
+            if product == None:
+                raise ValueError(_('Cannot initialize/get the paypal product object'))
+            # Create plan and subscription
+            plan = createPlan(request, product['id'], donation)
+            if plan['status'] == 'ACTIVE':
+                subscription = createSubscription(request, plan['id'], donation)
+                result['subscription_id'] = subscription['id']
+                for link in subscription['links']:
+                    if link['rel'] == 'approve':
+                        result['approval_link'] = link['href']
+            else:
+                raise ValueError(_("Newly created PayPal plan is not active, status: %(status)s") % {'status': plan['status']})
+        # else: one-time donation
+        else:
+            req = OrdersCreateRequest()
+            # The following line is for mocking negative responses
+            # req.headers['PayPal-Mock-Response'] = '{"mock_application_codes":"INTERNAL_SERVER_ERROR"}'
+            req.prefer('return=representation')
+            req.request_body(build_onetime_request_body(request, donation))
+            response = client.execute(req)
+            result = response.result
+            _debug('PayPal: Order Created Status: '+result.status)
+            # set approval_link attribute
+            for link in result.links:
+                _debug('PayPal: --- {}: {} ---'.format(link.rel, link.href))
+                if link.rel == 'approve':
+                    result.approval_link = link.href
     except ValueError as e:
         _exception(str(e))
-        errorObj['issue'] = "Donation.DoesNotExist"
+        errorObj['issue'] = "ValueError"
         errorObj['description'] = str(e)
+        return JsonResponse(object_to_json(errorObj), status=500)
+    except Donation.DoesNotExist:
+        _exception("Donation.DoesNotExist")
+        errorObj['issue'] = "Donation.DoesNotExist"
+        errorObj['description'] = str(_("Donation object not found by id: %(id)s") % {'id': donation_id})
         return JsonResponse(object_to_json(errorObj), status=500)
     except HttpError as ioe:
         # Catching exceptions from the paypalclient execution, HttpError is a subclass of IOError
@@ -85,12 +117,15 @@ def create_paypal_transaction(request):
             errorObj["issue"] = httpError['details'][0]['issue']
             errorObj["description"] = httpError['details'][0]['description']
             _exception(errorObj["description"])
+        # update donation status to failed
+        donation.payment_status = STATUS_FAILED
+        donation.save()
         return JsonResponse(object_to_json(errorObj), status=ioe.status_code)
     except Exception as error:
         errorObj['description'] = str(error)
         _exception(errorObj["description"])
         return JsonResponse(object_to_json(errorObj), status=500)
-    return JsonResponse(object_to_json(response.result))
+    return JsonResponse(object_to_json(result))
 
 
 @csrf_exempt
@@ -100,8 +135,6 @@ def verify_paypal_response(request):
         gatewayManager = Factory_Paypal.initGatewayByVerification(request)
 
         if gatewayManager:
-            _debug('PayPal Webhook Passed.')
-            # print('Paypal webhook passed thru', flush=True)
             return gatewayManager.process_webhook_response()
     except ValueError as error:
         _exception(str(error))
@@ -119,21 +152,25 @@ def return_from_paypal(request):
     try:
         gatewayManager = Factory_Paypal.initGatewayByReturn(request)
         request.session['return-donation-id'] = gatewayManager.donation.id
-        # further capture payment if detected order approved, if not just set payment as processing and leave it to webhook processing
-        if gatewayManager.order_status == 'APPROVED':
-            # might raise IOError/HttpError
-            capture_status = capture_paypal_order(request, gatewayManager.order_id)
-            if capture_status == 'COMPLETED':
-                _debug('PayPal: Order Captured. Payment Completed.')
-                gatewayManager.donation.payment_status = STATUS_COMPLETE
-                gatewayManager.donation.save()
-                # send email notifs
-                sendDonationReceiptToDonor(request, gatewayManager.donation)
-                sendDonationNotifToAdmins(request, gatewayManager.donation)
-        else:
-            _debug('PayPal: Order status after Paypal returns: '+gatewayManager.order_status)
+        if gatewayManager.donation.is_recurring:
             gatewayManager.donation.payment_status = STATUS_PROCESSING
             gatewayManager.donation.save()
+        else:
+            # further capture payment if detected order approved, if not just set payment as processing and leave it to webhook processing
+            if gatewayManager.order_status == 'APPROVED':
+                # might raise IOError/HttpError
+                capture_status = capture_paypal_order(request, gatewayManager.donation, gatewayManager.order_id)
+                if capture_status == 'COMPLETED':
+                    _debug('PayPal: Order Captured. Payment Completed.')
+                    gatewayManager.donation.payment_status = STATUS_COMPLETE
+                    gatewayManager.donation.save()
+                    # send email notifs
+                    sendDonationReceiptToDonor(request, gatewayManager.donation)
+                    sendDonationNotifToAdmins(request, gatewayManager.donation)
+            else:
+                _debug('PayPal: Order status after Paypal returns: '+gatewayManager.order_status)
+                gatewayManager.donation.payment_status = STATUS_PROCESSING
+                gatewayManager.donation.save()
     except IOError as error:
         request.session['error-title'] = str(_("IOError"))
         request.session['error-message'] = str(error)

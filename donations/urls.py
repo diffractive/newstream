@@ -4,6 +4,7 @@ from donations import views
 from donations.payment_gateways._2c2p.views import verify_2c2p_response, return_from_2c2p
 from donations.payment_gateways.stripe.views import create_checkout_session, verify_stripe_response, return_from_stripe, cancel_from_stripe
 from donations.payment_gateways.paypal.views import create_paypal_transaction, verify_paypal_response, capture_paypal_order, return_from_paypal, cancel_from_paypal
+from donations.payment_gateways.paypal.tests import test_views as paypal_tviews
 
 app_name = 'donations'
 urlpatterns = [
@@ -29,4 +30,12 @@ urlpatterns = [
     path('my-onetime-donations/', views.my_onetime_donations, name='my-onetime-donations'),
     path('my-recurring-donations/', views.my_recurring_donations, name='my-recurring-donations'),
     path('my-renewals/<int:id>/', views.my_renewals, name='my-renewals'),
+]
+
+# test urls
+urlpatterns += [
+    path('create-prod-during-transaction/', paypal_tviews.create_prod_during_transaction, name='create-prod-during-transaction'),
+    path('get-prod-during-transaction/', paypal_tviews.get_prod_during_transaction, name='get-prod-during-transaction'),
+    path('create-subscription-during-transaction/', paypal_tviews.create_subscription_during_transaction, name='create-subscription-during-transaction'),
+    path('cancel-subscription/<str:subscription_id>/', paypal_tviews.cancel_subscription, name='cancel-subscription'),
 ]

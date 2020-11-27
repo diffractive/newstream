@@ -10,11 +10,13 @@ class Settings2C2P:
 
 
 class SettingsPayPal:
-    def __init__(self, client_id, secret_key, webhook_id, environment):
+    def __init__(self, product_id, client_id, secret_key, webhook_id, environment, api_url):
+        self.product_id = product_id
         self.client_id = client_id
         self.secret_key = secret_key
         self.webhook_id = webhook_id
         self.environment = environment
+        self.api_url = api_url
 
 
 class SettingsStripe:
@@ -36,13 +38,15 @@ def getPayPalSettings(request):
     siteSettings = getSiteSettings(request)
     if (siteSettings.sandbox_mode):
         environment = SandboxEnvironment(client_id=siteSettings.paypal_sandbox_api_client_id, client_secret=siteSettings.paypal_sandbox_api_secret_key)
-        return SettingsPayPal(siteSettings.paypal_sandbox_api_client_id, siteSettings.paypal_sandbox_api_secret_key, siteSettings.paypal_sandbox_api_webhook_id, environment)
+        api_url = 'https://api-m.sandbox.paypal.com'
+        return SettingsPayPal(siteSettings.paypal_sandbox_api_product_id, siteSettings.paypal_sandbox_api_client_id, siteSettings.paypal_sandbox_api_secret_key, siteSettings.paypal_sandbox_api_webhook_id, environment, api_url)
     environment = LiveEnvironment(client_id=siteSettings.paypal_api_client_id, client_secret=siteSettings.paypal_api_secret_key)
-    return SettingsPayPal(siteSettings.paypal_api_client_id, siteSettings.paypal_api_secret_key, siteSettings.paypal_api_webhook_id, environment)
+    api_url = 'https://api-m.paypal.com'
+    return SettingsPayPal(siteSettings.paypal_api_product_id, siteSettings.paypal_api_client_id, siteSettings.paypal_api_secret_key, siteSettings.paypal_api_webhook_id, environment, api_url)
 
 
 def getStripeSettings(request):
     siteSettings = getSiteSettings(request)
     if (siteSettings.sandbox_mode):
-        return SettingsStripe(siteSettings.stripe_webhook_secret, siteSettings.stripe_product_id, siteSettings.stripe_testing_api_publishable_key, siteSettings.stripe_testing_api_secret_key)
+        return SettingsStripe(siteSettings.stripe_webhook_secret, siteSettings.stripe_testing_product_id, siteSettings.stripe_testing_api_publishable_key, siteSettings.stripe_testing_api_secret_key)
     return SettingsStripe(siteSettings.stripe_webhook_secret, siteSettings.stripe_product_id, siteSettings.stripe_api_publishable_key, siteSettings.stripe_api_secret_key)

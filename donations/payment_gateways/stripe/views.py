@@ -56,7 +56,10 @@ def create_checkout_session(request):
             product = stripe.Product.create(name=str(_(
                 "Newstream Default Product for Donation")), idempotency_key=uuid4_str())
             # Update product id in site_settings & stripe settings
-            siteSettings.stripe_product_id = product.id
+            if siteSettings.sandbox_mode:
+                siteSettings.stripe_testing_product_id = product.id
+            else:
+                siteSettings.stripe_product_id = product.id
             siteSettings.save()
             stripeSettings.product_id = product.id
         else:

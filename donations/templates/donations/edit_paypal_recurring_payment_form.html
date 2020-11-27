@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static common_tags donation_tags widget_tweaks i18n %}
+
+{% block title %}{% trans 'Donation Details' %}{% endblock %}
+
+{% block body_class %}newstream-donation-details-page{% endblock %}
+
+{% block content %}
+<div class="w-full bg-primary-dark">
+    <div class="container">
+        <div class="mb-4 w-64">
+            <a href="{% url 'donations:my-recurring-donations' %}"
+                class="ns-wide-btn left-chevron-btn block">{% trans 'Back to My Donations' %}<span
+                    class="icon"></span></a>
+        </div>
+        <h1 class="mb-4 text-white">{% trans 'Edit Recurring Donation' %}</h1>
+        <h4 class="mb-4 text-white">{% trans 'Recurring Donation Identifier: ' %}{{subscription.object_id}}</h4>
+        <h4 class="mb-4 text-white">{% trans 'Recurring Donation status:' %} <span
+                class="font-bold {{subscription.recurring_status|recurring_status_color}}">{{subscription.recurring_status|title}}</span>
+        </h4>
+        <p class="text-primary-light lg:w-3/4">
+            {% trans 'Edit your recurring donation by submitting this form.' %}
+        </p>
+    </div>
+</div>
+<div class="donation-form-div container-tight w-full">
+    {% include 'common/form_errors.html' %}
+
+    {# Form Area #}
+    <form method='POST' action='' class="action-form">
+        <div class="flex flex-row justify-center mb-4">
+            {% csrf_token %}
+            {# Include the hidden fields #}
+            {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+            {% endfor %}
+            <div class="donation-details-section w-full">
+                <h2 class="mb-2">{% trans 'Recurring Donation Details' %}</h2>
+                {% include 'common/form_visible_fields.html' %}
+                <button class="ns-wide-btn right-arrow-btn need-white-loading-btn"
+                    type="submit">{% trans 'Update Recurring Donation' %}<span class="icon"></span></button>
+                <div class="form-footer-text">{% trans 'Any price update will not impact billing cycles within next 10 days (Applicable only for subscriptions funded by PayPal account).' %}</div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock content %}

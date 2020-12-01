@@ -45,7 +45,7 @@ def curlPaypal(url, headers, userpwd='', post_data='', verb='GET'):
         _debug('curlPaypal returns 204')
         return {}
     if status_code >= 300:
-        raise RuntimeError("curlPaypal request unsuccessful. Full body: {}".format(body))
+        raise RuntimeError("curlPaypal request unsuccessful. Status Code: {}, Full body: {}".format(status_code, body.decode('utf-8')))
     # print("Curl to PayPal status code: {}({})".format(status_code, type(status_code)))
     # Here we deserialize the json into a python object
     return json.loads(body.decode('utf-8'))
@@ -126,6 +126,8 @@ def createPlan(request, product_id, donation):
             "payment_failure_threshold": 3
         }
     }
+    # uncomment below to test 'doom to fail' scenario - https://developer.paypal.com/docs/subscriptions/testing/#create-plan
+    # plan_dict['name'] = 'ERRSUB001'
     return curlPaypal(api_url, common_headers(request), post_data=json.dumps(plan_dict))
 
 
@@ -163,6 +165,8 @@ def createSubscription(request, plan_id, donation, is_test=False):
         },
         "custom_id": str(donation.id)
     }
+    # uncomment below to test 'doom to fail' scenario - https://developer.paypal.com/docs/subscriptions/testing/#create-plan
+    # subscription_dict['plan_id'] = 'ERRSUB033'
     api_url = paypalSettings.api_url+'/v1/billing/subscriptions'
     return curlPaypal(api_url, common_headers(request), post_data=json.dumps(subscription_dict))
 

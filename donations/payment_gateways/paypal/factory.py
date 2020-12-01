@@ -5,6 +5,7 @@ from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersGetRequest
 from paypalrestsdk.notifications import WebhookEvent
 
+from newstream.exceptions import WebhookNotProcessedError
 from newstream.functions import printvars, _debug, _error
 from donations.models import Donation
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
@@ -95,7 +96,7 @@ class Factory_Paypal(PaymentGatewayFactory):
             if json_data['event_type'] in expected_events and not donation_id:
                 raise ValueError(_("Missing donation_id after processing events from paypal"))
             if json_data['event_type'] not in expected_events:
-                raise ValueError(_("Event not expected for processing at the moment"))
+                raise WebhookNotProcessedError(_("PayPal Event not expected for processing at the moment"))
             try:
                 donation = Donation.objects.get(pk=donation_id)
                 kwargs['payload'] = json_data['resource']
@@ -112,6 +113,7 @@ class Factory_Paypal(PaymentGatewayFactory):
         paypalSettings = getPayPalSettings(request)
         client = PayPalHttpClient(paypalSettings.environment)
         donation_id = None
+        subscription = {}
         kwargs = {}
 
         if request.GET.get('subscription_id', None):
@@ -138,6 +140,6 @@ class Factory_Paypal(PaymentGatewayFactory):
         
         try:
             donation = Donation.objects.get(pk=donation_id)
-            return Factory_Paypal.initGateway(request, donation, None, **kwargs)
+            return Factory_Paypal.initGateway(request, donation, subscription, **kwargs)
         except Donation.DoesNotExist:
             raise ValueError(_("Donation object not found by id: ")+str(donation_id))

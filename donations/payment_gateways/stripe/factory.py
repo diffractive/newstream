@@ -1,10 +1,12 @@
 import stripe
 
+from newstream.exceptions import WebhookNotProcessedError
 from newstream.functions import raiseObjectNone, getSiteSettings
 from donations.models import Donation
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.stripe.gateway import Gateway_Stripe
 from donations.payment_gateways.stripe.functions import initStripeApiKey
+from donations.payment_gateways.stripe.constants import *
 
 
 class Factory_Stripe(PaymentGatewayFactory):
@@ -24,13 +26,14 @@ class Factory_Stripe(PaymentGatewayFactory):
         session = None
         subscription = None
         kwargs = {}
+        expected_events = [EVENT_CHECKOUT_SESSION_COMPLETED, EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID, EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED]
 
         event = stripe.Webhook.construct_event(
             payload, sig_header, siteSettings.stripe_webhook_secret
         )
 
         # Intercept the checkout.session.completed event
-        if event['type'] == 'checkout.session.completed':
+        if event['type'] == EVENT_CHECKOUT_SESSION_COMPLETED:
             session = event['data']['object']
             # Fulfill the purchase...
             if session:
@@ -51,7 +54,7 @@ class Factory_Stripe(PaymentGatewayFactory):
 
         # Intercept the invoice created event for subscriptions(a must for instant invoice finalization)
         # https://stripe.com/docs/billing/subscriptions/webhooks#understand
-        if event['type'] == 'invoice.created':
+        if event['type'] == EVENT_INVOICE_CREATED:
             invoice = event['data']['object']
             subscription_id = invoice.subscription
 
@@ -66,7 +69,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                 raise ValueError(_('Missing subscription_id'))
 
         # Intercept the invoice paid event for subscriptions
-        if event['type'] == 'invoice.paid':
+        if event['type'] == EVENT_INVOICE_PAID:
             invoice = event['data']['object']
             subscription_id = invoice.subscription
 
@@ -84,7 +87,7 @@ class Factory_Stripe(PaymentGatewayFactory):
         # That is because there is no guarantee which event hits first, it's better to let one event handles the model init as well.
 
         # Intercept the subscription updated event
-        if event['type'] == 'customer.subscription.updated':
+        if event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_UPDATED:
             subscription = event['data']['object']
 
             if subscription:
@@ -94,7 +97,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                     raise ValueError(_('Missing donation_id in subscription.metadata'))
 
         # Intercept the subscription deleted event
-        if event['type'] == 'customer.subscription.deleted':
+        if event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_DELETED:
             subscription = event['data']['object']
 
             if subscription:
@@ -106,6 +109,9 @@ class Factory_Stripe(PaymentGatewayFactory):
         # Finally init and return the Stripe Gateway Manager
         if not donation_id:
             raise ValueError(_('Missing donation_id'))
+        # for events not being processed
+        if event['type'] not in expected_events:
+            raise WebhookNotProcessedError(_("Stripe Event not expected for processing at the moment"))
 
         try:
             donation = Donation.objects.get(pk=donation_id)

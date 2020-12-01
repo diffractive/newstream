@@ -12,6 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from donations.models import Donation, DonationPaymentMeta, Subscription, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
+from donations.payment_gateways.stripe.constants import *
 from donations.functions import gen_order_id
 from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
 from newstream.functions import uuid4_str, getSiteName, getSiteSettings, getFullReverseUrl, printvars, raiseObjectNone, _debug
@@ -47,7 +48,7 @@ class Gateway_Stripe(PaymentGatewayManager):
         initStripeApiKey(self.request)
         # Decide what actions to perform on Newstream's side according to the results/events from the Stripe notifications
         # Event: checkout.session.completed
-        if self.event['type'] == 'checkout.session.completed':
+        if self.event['type'] == EVENT_CHECKOUT_SESSION_COMPLETED:
             # Update payment status
             self.donation.payment_status = STATUS_COMPLETE
             self.donation.save()
@@ -61,11 +62,11 @@ class Gateway_Stripe(PaymentGatewayManager):
 
         # Event: invoice.created (for subscriptions, just return 200 here and do nothing - to signify to Stripe that it can proceed and finalize the invoice)
         # https://stripe.com/docs/billing/subscriptions/webhooks#understand
-        if self.event['type'] == 'invoice.created' and hasattr(self, 'subscription') and hasattr(self, 'invoice'):
+        if self.event['type'] == EVENT_INVOICE_CREATED and hasattr(self, 'subscription') and hasattr(self, 'invoice'):
             return HttpResponse(status=200)
 
         # Event: invoice.paid (for subscriptions)
-        if self.event['type'] == 'invoice.paid' and hasattr(self, 'subscription') and hasattr(self, 'invoice'):
+        if self.event['type'] == EVENT_INVOICE_PAID and hasattr(self, 'subscription') and hasattr(self, 'invoice'):
             if self.invoice.status == 'paid':
                 # check if subscription has one or more invoices to determine it's a first time or renewal payment
                 # self.subscription here is the stripe subscription object
@@ -102,7 +103,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 return HttpResponse(status=200)
 
         # Event: customer.subscription.updated
-        if self.event['type'] == 'customer.subscription.updated' and hasattr(self, 'subscription'):
+        if self.event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_UPDATED and hasattr(self, 'subscription'):
             # Subscription active after invoice paid
             if self.subscription['status'] == 'active':
                 if self.donation.subscription == None:
@@ -143,7 +144,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 return HttpResponse(status=400)
 
         # Event: customer.subscription.deleted
-        if self.event['type'] == 'customer.subscription.deleted' and hasattr(self, 'subscription'):
+        if self.event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_DELETED and hasattr(self, 'subscription'):
             # update donation recurring_status
             self.donation.subscription.recurring_status = STATUS_CANCELLED
             self.donation.subscription.save()

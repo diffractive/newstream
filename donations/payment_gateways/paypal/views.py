@@ -8,13 +8,14 @@ from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest
 from paypalhttp import HttpError
 
+from newstream.exceptions import WebhookNotProcessedError
 from newstream.functions import getSiteSettings, getSiteName, uuid4_str, getFullReverseUrl, printvars, object_to_json, _debug, _error, _exception
 from donations.models import Donation, DonationPaymentMeta, STATUS_COMPLETE, STATUS_PROCESSING, STATUS_FAILED
 from donations.functions import gen_order_id
 from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.payment_gateways import Factory_Paypal
-from .functions import capture_paypal_order, checkAccessTokenExpiry, listProducts, createProduct, createPlan, createSubscription
+from .functions import capture_paypal_order, checkAccessTokenExpiry, listProducts, createProduct, createPlan, createSubscription, cancelSubscription
 
 
 def build_onetime_request_body(request, donation):
@@ -136,6 +137,11 @@ def verify_paypal_response(request):
 
         if gatewayManager:
             return gatewayManager.process_webhook_response()
+    except WebhookNotProcessedError as error:
+        # beware: this exception should be reserved for the incoming but not processed webhook events
+        _exception(str(error))
+        # return 200 to prevent resending of paypal server of those requests
+        return HttpResponse(status=200)
     except ValueError as error:
         _exception(str(error))
         return HttpResponse(status=500)
@@ -191,7 +197,9 @@ def cancel_from_paypal(request):
     try:
         gatewayManager = Factory_Paypal.initGatewayByReturn(request)
         request.session['return-donation-id'] = gatewayManager.donation.id
-        # might carry out further actions for donation cancellation
+        # no need to carry out further actions for donation cancellation
+        # 1. if it is a subscription, curlPaypal will fail to cancel it before any donor approval is given(resource not found error will be returned)
+        # 2. there is no cancel-order endpoint for the Orders API
     except IOError as error:
         request.session['error-title'] = str(_("IOError"))
         request.session['error-message'] = str(error)

@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 
+from newstream.exceptions import WebhookNotProcessedError
 from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, printvars, _exception
 from donations.models import Donation
 from donations.functions import gen_order_id
@@ -129,6 +130,11 @@ def verify_stripe_response(request):
         gatewayManager = Factory_Stripe.initGatewayByVerification(request)
 
         return gatewayManager.process_webhook_response()
+    except WebhookNotProcessedError as error:
+        # beware: this exception should be reserved for the incoming but not processed webhook events
+        _exception(str(error))
+        # return 200 for attaining a higher rate of successful response rate at Stripe backend
+        return HttpResponse(status=200)
     except ValueError as e:
         # Might be invalid payload from initGatewayByVerification
         # or missing donation_id/subscription_id or donation object not found

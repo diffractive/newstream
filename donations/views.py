@@ -16,7 +16,7 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import translation
 from django.views.decorators.csrf import csrf_exempt
 
-from newstream.functions import getSiteSettings, printvars, _exception
+from newstream.functions import getSiteSettings, printvars, _exception, _debug, uuid4_str
 from site_settings.models import PaymentGateway
 from .models import *
 from .forms import *
@@ -35,72 +35,88 @@ def donate(request):
 
 
 def donation_details(request):
-    siteSettings = getSiteSettings(request)
-    if not request.user.is_authenticated:
-        return redirect('donations:donate')
-    form_template = 'donations/donation_details_form.html'
-    form_blueprint = siteSettings.donation_form
-    if not form_blueprint:
-        raise Exception('Donation Form not yet set.')
-    if request.method == 'POST':
-        form = DonationDetailsForm(
-            request.POST, request=request, blueprint=form_blueprint, label_suffix='')
-        if form.is_valid():
-            # process meta data
-            donation_metas = process_donation_meta(request)
+    try:
+        siteSettings = getSiteSettings(request)
+        if not request.user.is_authenticated:
+            return redirect('donations:donate')
+        form_template = 'donations/donation_details_form.html'
+        form_blueprint = siteSettings.donation_form
+        if not form_blueprint:
+            raise Exception('Donation Form not yet set.')
+        if request.method == 'POST':
+            form = DonationDetailsForm(
+                request.POST, request=request, blueprint=form_blueprint, label_suffix='')
+            if form.is_valid():
+                # process meta data
+                donation_metas = process_donation_meta(request)
 
-            # process donation amount
-            if 'donation_amount_custom' in form.cleaned_data and form.cleaned_data['donation_amount_custom'] and form.cleaned_data['donation_amount_custom'] > 0:
-                donation_amount = form.cleaned_data['donation_amount_custom']
-            else:
-                donation_amount = form.cleaned_data['donation_amount']
+                # process donation amount
+                if 'donation_amount_custom' in form.cleaned_data and form.cleaned_data['donation_amount_custom'] and form.cleaned_data['donation_amount_custom'] > 0:
+                    donation_amount = form.cleaned_data['donation_amount_custom']
+                else:
+                    donation_amount = form.cleaned_data['donation_amount']
 
-            # create pending donation
-            payment_gateway = PaymentGateway.objects.get(
-                pk=form.cleaned_data['payment_gateway'])
-            order_id = gen_order_id(gateway=payment_gateway)
-            donation = Donation(
-                order_number=order_id,
-                user=request.user,
-                form=form_blueprint,
-                gateway=payment_gateway,
-                is_recurring=True if form.cleaned_data['donation_frequency'] == 'monthly' else False,
-                donation_amount=donation_amount,
-                currency=form.cleaned_data['currency'],
-                payment_status=STATUS_PENDING,
-                metas=donation_metas,
-            )
+                # create pending donation
+                payment_gateway = PaymentGateway.objects.get(
+                    pk=form.cleaned_data['payment_gateway'])
+                order_id = gen_order_id(gateway=payment_gateway)
+                donation = Donation(
+                    is_test=siteSettings.sandbox_mode,
+                    order_number=order_id,
+                    user=request.user,
+                    form=form_blueprint,
+                    gateway=payment_gateway,
+                    is_recurring=True if form.cleaned_data['donation_frequency'] == 'monthly' else False,
+                    donation_amount=donation_amount,
+                    currency=form.cleaned_data['currency'],
+                    payment_status=STATUS_PROCESSING,
+                    metas=donation_metas,
+                )
+                # create a pending subscription if is_recurring
+                if form.cleaned_data['donation_frequency'] == 'monthly':
+                    # create new Subscription object, with a temporary object_id created by uuidv4
+                    subscription = Subscription(
+                        is_test=siteSettings.sandbox_mode,
+                        object_id=uuid4_str(),
+                        user=request.user,
+                        gateway=payment_gateway,
+                        recurring_amount=donation_amount,
+                        currency=form.cleaned_data['currency'],
+                        recurring_status=STATUS_PROCESSING
+                    )
+                    subscription.save()
+                    # link subscription to the donation
+                    donation.subscription = subscription
 
-            try:
                 donation.save()
 
                 if 'first_time_registration' in request.session:
                     dpmeta = DonationPaymentMeta(
                         donation=donation, field_key='is_user_first_donation', field_value=request.session['first_time_registration'])
                     dpmeta.save()
-            except Exception as e:
-                # Should rarely happen, but in case some bugs or order id repeats itself
-                print(str(e), flush=True)
-                form.add_error(None, 'Server error, please retry.')
-                return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS})
 
-            # redirect to payment_gateway
-            gatewayManager = InitPaymentGateway(
-                request, donation=donation)
-            return gatewayManager.redirect_to_gateway_url()
+                # redirect to payment_gateway
+                gatewayManager = InitPaymentGateway(
+                    request, donation=donation)
+                return gatewayManager.redirect_to_gateway_url()
+            else:
+                pprint(form.errors)
         else:
-            pprint(form.errors)
-    else:
-        form = DonationDetailsForm(
-            request=request, blueprint=form_blueprint, label_suffix='')
+            form = DonationDetailsForm(
+                request=request, blueprint=form_blueprint, label_suffix='')
 
-    # see: https://docs.djangoproject.com/en/3.0/ref/forms/api/#django.forms.Form.field_order
-    if form_blueprint.isAmountSteppedCustom():
-        form.order_fields(
-            ['donation_amount', 'donation_amount_custom', 'donation_frequency', 'payment_gateway'])
-    else:
-        form.order_fields(
-            ['donation_amount', 'donation_frequency', 'payment_gateway'])
+        # see: https://docs.djangoproject.com/en/3.0/ref/forms/api/#django.forms.Form.field_order
+        if form_blueprint.isAmountSteppedCustom():
+            form.order_fields(
+                ['donation_amount', 'donation_amount_custom', 'donation_frequency', 'payment_gateway'])
+        else:
+            form.order_fields(
+                ['donation_amount', 'donation_frequency', 'payment_gateway'])
+    except Exception as e:
+        # Should rarely happen, but in case some bugs or order id repeats itself
+        _exception(str(e))
+        form.add_error(None, 'Server error, please retry.')
+    
     return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS})
 
 

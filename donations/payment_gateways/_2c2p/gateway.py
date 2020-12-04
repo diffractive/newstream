@@ -15,7 +15,7 @@ from django.utils.translation import gettext_lazy as _
 from newstream.functions import raiseObjectNone, getFullReverseUrl, getSiteName, getSiteSettings, _debug
 from donations.functions import getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode, currencyCodeToKey
 from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor, sendRenewalNotifToAdmins, sendRenewalReceiptToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringCancelledNotifToAdmins, sendRecurringCancelledNotifToDonor
-from donations.models import Donation, Subscription, DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ACTIVE, STATUS_PENDING, STATUS_REVOKED, STATUS_CANCELLED
+from donations.models import Donation, Subscription, DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ACTIVE, STATUS_REVOKED, STATUS_CANCELLED
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import get2C2PSettings
 from .functions import format_payment_amount, extract_payment_amount, map2C2PPaymentStatus, getRequestParamOrder, getResponseParamOrder
@@ -144,6 +144,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             if self.donation.payment_status == STATUS_COMPLETE:
                 # create new Subscription object
                 subscription = Subscription(
+                    is_test=self.testing_mode,
                     object_id=self.data['recurring_unique_id'],
                     user=self.donation.user,
                     gateway=self.donation.gateway,
@@ -169,6 +170,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             fDonation = Donation.objects.filter(subscription=self.subscription).order_by('id').first()
             # Create new donation record from fDonation
             donation = Donation(
+                is_test=self.testing_mode,
                 subscription=self.subscription,
                 order_number=self.data['order_id'],
                 user=fDonation.user,

@@ -30,7 +30,7 @@ def get_new_donation_text(request, donation):
         'currency': donation.currency,
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
-        'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring else '',
+        'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring and donation.subscription else '',
         'sitename': getSiteName(request)
     }
 
@@ -60,7 +60,7 @@ def get_donation_receipt_text(request, donation):
         'currency': donation.currency,
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
-        'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring else '',
+        'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring and donation.subscription else '',
         'sitename': getSiteName(request)
     }
 

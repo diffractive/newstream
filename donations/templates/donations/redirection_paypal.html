@@ -55,35 +55,5 @@
                 document.getElementById('error-msg-stripe').innerHTML = error;
             });
     }, 100);
-    // paypal.Buttons({
-    //     createOrder: function (data, actions) {
-    //         return fetch('{% url "donations:create-paypal-transaction" %}', {
-    //             method: 'post',
-    //             headers: {
-    //                 'content-type': 'application/json'
-    //             }
-    //         }).then(function (res) {
-    //             return res.json();
-    //         }).then(function (data) {
-    //             return data.id;
-    //         });
-    //     },
-    //     onApprove: function (data, actions) {
-    //         return fetch('{% url "donations:capture-paypal-order" %}', {
-    //             method: 'post',
-    //             headers: {
-    //                 'content-type': 'application/json'
-    //             },
-    //             body: JSON.stringify({
-    //                 orderID: data.orderID
-    //             })
-    //         }).then(function (res) {
-    //             return res.json();
-    //         }).then(function (details) {
-    //             console.log(details);
-    //             // decide what to do next
-    //         })
-    //     }
-    // }).render('#paypal-button-container'); // Display payment options on your web page
 </script>
 {% endblock content %}

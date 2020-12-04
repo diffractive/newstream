@@ -47,7 +47,7 @@
                     <td style="font-weight: bold;">{% trans "Payment Status" %}</td>
                     <td>{{ donation.payment_status|title }}</td>
                 </tr>
-                {% if donation.is_recurring %}
+                {% if donation.is_recurring and donation.subscription %}
                 <tr>
                     <td style="font-weight: bold;">{% trans 'Recurring Donation Status' %}</td>
                     <td>{{ donation.subscription.recurring_status|title }}</td>

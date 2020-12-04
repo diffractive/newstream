@@ -4,45 +4,17 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
-from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest
 from paypalhttp import HttpError
 
-from newstream.exceptions import WebhookNotProcessedError
+from newstream.classes import WebhookNotProcessedError
 from newstream.functions import getSiteSettings, getSiteName, uuid4_str, getFullReverseUrl, printvars, object_to_json, _debug, _error, _exception
-from donations.models import Donation, DonationPaymentMeta, STATUS_COMPLETE, STATUS_PROCESSING, STATUS_FAILED
+from donations.models import Donation, DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED
 from donations.functions import gen_order_id
 from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.payment_gateways import Factory_Paypal
-from .functions import capture_paypal_order, checkAccessTokenExpiry, listProducts, createProduct, createPlan, createSubscription, cancelSubscription
-
-
-def build_onetime_request_body(request, donation):
-    """Method to create body with CAPTURE intent"""
-    # returl_url or cancel_url params in application_context tested to be only useful if order not initiated by Javascript APK
-    return \
-    {
-        "intent": "CAPTURE",
-        "application_context": {
-            "brand_name": getSiteName(request),
-            "landing_page": "NO_PREFERENCE",
-            "shipping_preference": "NO_SHIPPING",
-            "user_action": "PAY_NOW",
-            "return_url": getFullReverseUrl(request, 'donations:return-from-paypal'),
-            "cancel_url": getFullReverseUrl(request, 'donations:cancel-from-paypal')
-        },
-        "purchase_units": [
-            {
-                "description": getSiteName(request) + str(_(" Onetime Donation")),
-                "custom_id": donation.id,
-                "amount": {
-                    "currency_code": donation.currency,
-                    "value": str(donation.donation_amount)
-                }
-            }
-        ]
-    }
+from .functions import create_paypal_order, capture_paypal_order, checkAccessTokenExpiry, listProducts, createProduct, createPlan, createSubscription, cancelSubscription
 
 
 @csrf_exempt
@@ -54,7 +26,6 @@ def create_paypal_transaction(request):
     result = {}
     try:
         paypalSettings = getPayPalSettings(request)
-        client = PayPalHttpClient(paypalSettings.environment)
 
         donation_id = request.session.get('donation_id', None)
         if not donation_id:
@@ -88,19 +59,14 @@ def create_paypal_transaction(request):
                 raise ValueError(_("Newly created PayPal plan is not active, status: %(status)s") % {'status': plan['status']})
         # else: one-time donation
         else:
-            req = OrdersCreateRequest()
-            # The following line is for mocking negative responses
-            # req.headers['PayPal-Mock-Response'] = '{"mock_application_codes":"INTERNAL_SERVER_ERROR"}'
-            req.prefer('return=representation')
-            req.request_body(build_onetime_request_body(request, donation))
-            response = client.execute(req)
-            result = response.result
-            _debug('PayPal: Order Created Status: '+result.status)
+            response = create_paypal_order(request, donation)
+            ppresult = response.result
+            _debug('PayPal: Order Created Status: '+ppresult.status)
             # set approval_link attribute
-            for link in result.links:
+            for link in ppresult.links:
                 _debug('PayPal: --- {}: {} ---'.format(link.rel, link.href))
                 if link.rel == 'approve':
-                    result.approval_link = link.href
+                    result['approval_link'] = link.href
     except ValueError as e:
         _exception(str(e))
         errorObj['issue'] = "ValueError"
@@ -158,10 +124,9 @@ def return_from_paypal(request):
     try:
         gatewayManager = Factory_Paypal.initGatewayByReturn(request)
         request.session['return-donation-id'] = gatewayManager.donation.id
-        if gatewayManager.donation.is_recurring:
-            gatewayManager.donation.payment_status = STATUS_PROCESSING
-            gatewayManager.donation.save()
-        else:
+        # subscription donation updates are handled by webhooks
+        # returning from paypal only needs to deal with onetime donations
+        if not gatewayManager.donation.is_recurring:
             # further capture payment if detected order approved, if not just set payment as processing and leave it to webhook processing
             if gatewayManager.order_status == 'APPROVED':
                 # might raise IOError/HttpError
@@ -175,8 +140,6 @@ def return_from_paypal(request):
                     sendDonationNotifToAdmins(request, gatewayManager.donation)
             else:
                 _debug('PayPal: Order status after Paypal returns: '+gatewayManager.order_status)
-                gatewayManager.donation.payment_status = STATUS_PROCESSING
-                gatewayManager.donation.save()
     except IOError as error:
         request.session['error-title'] = str(_("IOError"))
         request.session['error-message'] = str(error)

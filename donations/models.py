@@ -195,6 +195,7 @@ class Subscription(ClusterableModel):
         on_delete=models.SET_NULL,
         null=True
     )
+    is_test = models.BooleanField(default=False)
     object_id = models.CharField(max_length=191, unique=True)
     recurring_amount = models.DecimalField(max_digits=20, decimal_places=2)
     currency = models.CharField(max_length=20)
@@ -226,7 +227,6 @@ class Subscription(ClusterableModel):
 class Donation(ClusterableModel):
     PAYMENT_STATUS_CHOICES = [
         (STATUS_COMPLETE, _(STATUS_COMPLETE.capitalize())),
-        (STATUS_PENDING, _(STATUS_PENDING.capitalize())),
         (STATUS_PROCESSING, _(STATUS_PROCESSING.capitalize())),
         (STATUS_REFUNDED, _(STATUS_REFUNDED.capitalize())),
         (STATUS_REVOKED, _(STATUS_REVOKED.capitalize())),
@@ -253,8 +253,7 @@ class Donation(ClusterableModel):
         on_delete=models.SET_NULL,
         null=True
     )
-    # parent_donation = models.ForeignKey(
-    #     'self', on_delete=models.CASCADE, blank=True, null=True)
+    is_test = models.BooleanField(default=False)
     order_number = models.CharField(max_length=191, unique=True)
     donation_amount = models.DecimalField(max_digits=20, decimal_places=2)
     is_recurring = models.BooleanField(default=False)

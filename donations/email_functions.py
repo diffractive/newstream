@@ -10,6 +10,7 @@ from allauth.account.utils import send_email_confirmation
 
 from newstream.functions import getSiteSettings, getDefaultFromEmail, setDefaultFromEmail
 from donations.templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text, get_new_renewal_text, get_renewal_receipt_text, get_recurring_updated_admin_text, get_recurring_updated_donor_text, get_recurring_paused_admin_text, get_recurring_paused_donor_text, get_recurring_resumed_admin_text, get_recurring_resumed_donor_text, get_recurring_cancelled_admin_text, get_recurring_cancelled_donor_text, get_account_created_admin_text, get_account_deleted_admin_text, get_account_deleted_donor_text, get_donation_error_admin_text
+from donations.models import STATUS_REVOKED
 
 
 def setDonorLanguagePreference(user):
@@ -60,13 +61,19 @@ def sendDonationErrorNotifToAdmins(request, donation, error_title, error_descrip
 
 def sendDonationNotifToAdmins(request, donation):
     siteSettings = getSiteSettings(request)
+    mail_title = str(_("New Donation"))
+    if donation.payment_status == STATUS_REVOKED:
+        mail_title += str(_("(Revoked)"))
     if siteSettings.admin_receive_checkout_emails:
-        sendEmailNotificationsToAdmins(request, siteSettings, str(_("New Donation")), get_new_donation_text(request, donation), render_to_string(
+        sendEmailNotificationsToAdmins(request, siteSettings, mail_title, get_new_donation_text(request, donation), render_to_string(
             'donations/email_templates/new_donation.html', context={'donation': donation}, request=request))
 
 
 def sendDonationReceiptToDonor(request, donation):
-    sendEmailNotificationsToDonor(request, donation.user, str(_("Thank You! This is your Donation Receipt.")), get_donation_receipt_text(
+    mail_title = str(_("Thank You! This is your Donation Receipt."))
+    if donation.payment_status == STATUS_REVOKED:
+        mail_title += str(_("(Revoked)"))
+    sendEmailNotificationsToDonor(request, donation.user, mail_title, get_donation_receipt_text(
         request, donation), render_to_string('donations/email_templates/donation_receipt.html', context={'donation': donation}, request=request))
 
 

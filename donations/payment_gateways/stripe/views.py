@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 
-from newstream.exceptions import WebhookNotProcessedError
+from newstream.classes import WebhookNotProcessedError
 from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, printvars, _exception
 from donations.models import Donation
 from donations.functions import gen_order_id

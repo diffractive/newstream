@@ -1,7 +1,7 @@
 import re
 from decimal import *
 
-from donations.models import STATUS_COMPLETE, STATUS_REVOKED, STATUS_CANCELLED, STATUS_FAILED, STATUS_PENDING
+from donations.models import STATUS_COMPLETE, STATUS_REVOKED, STATUS_CANCELLED, STATUS_FAILED, STATUS_PROCESSING
 from newstream.functions import raiseObjectNone
 from donations.functions import getCurrencyDictAt, getCurrencyFromCode
 
@@ -45,7 +45,7 @@ def map2C2PPaymentStatus(payment_status):
     elif payment_status == '999':
         return STATUS_FAILED
     else:
-        return STATUS_PENDING
+        return STATUS_PROCESSING
 
 
 def getRequestParamOrder():

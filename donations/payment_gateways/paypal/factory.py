@@ -5,7 +5,7 @@ from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersGetRequest
 from paypalrestsdk.notifications import WebhookEvent
 
-from newstream.exceptions import WebhookNotProcessedError
+from newstream.classes import WebhookNotProcessedError
 from newstream.functions import printvars, _debug, _error
 from donations.models import Donation
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory

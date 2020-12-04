@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 from paypalcheckoutsdk.core import PayPalHttpClient
 
 from newstream.functions import _debug
-from donations.models import STATUS_ACTIVE, STATUS_CANCELLED, STATUS_COMPLETE, STATUS_PAUSED, Donation, Subscription, SubscriptionPaymentMeta, DonationPaymentMeta
+from donations.models import STATUS_PROCESSING, STATUS_ACTIVE, STATUS_CANCELLED, STATUS_COMPLETE, STATUS_PAUSED, Donation, Subscription, SubscriptionPaymentMeta, DonationPaymentMeta
 from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
 from donations.functions import gen_order_id
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
@@ -37,28 +37,23 @@ class Gateway_Paypal(PaymentGatewayManager):
         # Event: EVENT_BILLING_SUBSCRIPTION_ACTIVATED
         if self.event_type == EVENT_BILLING_SUBSCRIPTION_ACTIVATED and hasattr(self, 'subscription'):
             if self.subscription['status'] == 'ACTIVE':
-                if self.donation.subscription == None:
-                    # create new Subscription object
-                    subscription = Subscription(
-                        object_id=self.subscription['id'],
-                        user=self.donation.user,
-                        gateway=self.donation.gateway,
-                        recurring_amount=Decimal(self.subscription['billing_info']['last_payment']['amount']['value']),
-                        currency=self.subscription['billing_info']['last_payment']['amount']['currency_code'],
-                        recurring_status=STATUS_ACTIVE,
-                    )
-                    subscription.save()
-                    # link subscription to the donation
-                    self.donation.subscription = subscription
-                    # set donation payment_status to complete(should be already set by a previous payment-sale-completed event)
+                if self.donation.subscription.recurring_status == STATUS_PROCESSING:
+                    # save the new subscription, marked by object_id
+                    self.donation.subscription.object_id = self.subscription['id']
+                    self.donation.subscription.recurring_amount = Decimal(self.subscription['billing_info']['last_payment']['amount']['value'])
+                    self.donation.subscription.currency = self.subscription['billing_info']['last_payment']['amount']['currency_code']
+                    self.donation.subscription.recurring_status = STATUS_ACTIVE
+                    self.donation.subscription.save()
+
+                    # might be also set by payment-sale-completed, but in case this event is faster(for the email is sent next line)
                     self.donation.payment_status = STATUS_COMPLETE
                     self.donation.save()
 
-                    # send the donation receipt to donor and notification to admins if subscription is just created
+                    # send the donation receipt to donor and notification to admins as subscription is just created
                     sendDonationReceiptToDonor(self.request, self.donation)
                     sendDonationNotifToAdmins(self.request, self.donation)
                 else:
-                    # should be either re-activation after suspension or already created by return from paypal view
+                    # should be re-activation after suspension of subscription
                     subscription = Subscription.objects.filter(object_id=self.subscription['id']).first()
                     if not subscription:
                         raise ValueError(_("Cannot find subscription object in database with object_id %(id)s") % {'id': self.subscription['id']})
@@ -109,6 +104,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                     if not self.donation.subscription:
                         raise ValueError(_("Missing subscription linkage/object for donation %(id)s") % {'id': self.donation.id})
                     donation = Donation(
+                        is_test=self.testing_mode,
                         subscription=self.donation.subscription,
                         order_number=gen_order_id(self.donation.gateway),
                         user=self.donation.user,

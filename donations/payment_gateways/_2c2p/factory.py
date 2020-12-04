@@ -1,10 +1,11 @@
 import hmac
 import hashlib
 from datetime import datetime
+from django.utils.translation import gettext_lazy as _
 
 from site_settings.models import GATEWAY_2C2P
 from newstream.functions import raiseObjectNone, printvars, _debug
-from donations.models import Donation, Subscription, STATUS_PENDING
+from donations.models import Donation, Subscription
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways._2c2p.gateway import Gateway_2C2P
 from donations.payment_gateways.setting_classes import get2C2PSettings
@@ -20,16 +21,17 @@ class Factory_2C2P(PaymentGatewayFactory):
     def initGatewayByVerification(request):
         settings = get2C2PSettings(request)
         data = {}
+        # debugging POST params from 2C2P
+        for key, value in request.POST.items():
+            _debug(key + ': ' + value)
         for key in getResponseParamOrder():
             if key in request.POST:
                 data[key] = request.POST[key]
         if 'hash_value' in request.POST and request.POST['hash_value']:
             hash_value = request.POST['hash_value']
             checkHashStr = ''
-            print(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + "(UTC) - Constructing checkHashStr...", flush=True)
             for key in getResponseParamOrder():
                 if key in data.keys():
-                    print(key + ': ' + data[key], flush=True)
                     checkHashStr += data[key]
             checkHash = hmac.new(
                 bytes(settings.secret_key, 'utf-8'),
@@ -46,8 +48,8 @@ class Factory_2C2P(PaymentGatewayFactory):
                 # case two: either first time subscription or renewal donation
                 elif request.POST['recurring_unique_id']:
                     try:
-                        subscription = Subscription.objects.get(object_id=int(request.POST['recurring_unique_id']), gateway__title=GATEWAY_2C2P)
-                        print(datetime.now().strftime("%d/%m/%Y %H:%M:%S") + '(UTC)--2C2P initGatewayByVerification: subscription found--', flush=True)
+                        subscription = Subscription.objects.get(object_id=str(request.POST['recurring_unique_id']), gateway__title=GATEWAY_2C2P)
+                        _debug('--2C2P initGatewayByVerification: subscription found--')
                         # subscription object found, indicating this is a renewal request
                         return Factory_2C2P.initGateway(request, None, subscription, data=data)
                     except Subscription.DoesNotExist:

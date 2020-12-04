@@ -1,6 +1,6 @@
 import stripe
 
-from newstream.exceptions import WebhookNotProcessedError
+from newstream.classes import WebhookNotProcessedError
 from newstream.functions import raiseObjectNone, getSiteSettings
 from donations.models import Donation
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory

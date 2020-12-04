@@ -9,7 +9,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
-from donations.models import Donation, DonationPaymentMeta, Subscription, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING
+from donations.models import Donation, DonationPaymentMeta, Subscription, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.stripe.constants import *
@@ -80,6 +80,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                     # create a new donation record + then send donation receipt to user
                     # self.donation is the first donation made for a subscription
                     donation = Donation(
+                        is_test=self.testing_mode,
                         subscription=self.donation.subscription,
                         order_number=gen_order_id(self.donation.gateway),
                         user=self.donation.user,
@@ -106,24 +107,19 @@ class Gateway_Stripe(PaymentGatewayManager):
         if self.event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_UPDATED and hasattr(self, 'subscription'):
             # Subscription active after invoice paid
             if self.subscription['status'] == 'active':
-                if self.donation.subscription == None:
-                    # create new Subscription object
-                    subscription = Subscription(
-                        object_id=self.subscription.id,
-                        user=self.donation.user,
-                        gateway=self.donation.gateway,
-                        recurring_amount=formatDonationAmountFromGateway(self.subscription['items']['data'][0]['price']['unit_amount_decimal'], self.donation.currency),
-                        currency=self.donation.currency,
-                        recurring_status=STATUS_ACTIVE,
-                    )
-                    subscription.save()
-                    # link subscription to the donation
-                    self.donation.subscription = subscription
-                    # set donation payment_status to complete(as this event may be faster than checkout.session.completed)
+                if self.donation.subscription.recurring_status == STATUS_PROCESSING:
+                    # save the new subscription, marked by object_id
+                    self.donation.subscription.object_id = self.subscription.id
+                    self.donation.subscription.recurring_amount = formatDonationAmountFromGateway(self.subscription['items']['data'][0]['price']['unit_amount_decimal'], self.donation.currency)
+                    self.donation.subscription.currency = self.donation.currency
+                    self.donation.subscription.recurring_status = STATUS_ACTIVE
+                    self.donation.subscription.save()
+
+                    # set donation payment_status to complete(as this event may be faster than checkout.session.completed, for the email is sent next line)
                     self.donation.payment_status = STATUS_COMPLETE
                     self.donation.save()
 
-                    # send the donation receipt to donor and notification to admins if subscription is just created
+                    # send the donation receipt to donor and notification to admins as subscription is just created
                     sendDonationReceiptToDonor(self.request, self.donation)
                     sendDonationNotifToAdmins(self.request, self.donation)
                 else:

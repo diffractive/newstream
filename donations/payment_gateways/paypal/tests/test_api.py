@@ -17,6 +17,7 @@ TEST_DOMAIN_NAME = "newstream.hongkongfp.com"
 TEST_USER_CREDS = {'username':'paypal-tester', 'password':'odysseus'}
 TEST_CURRENCY = 'HKD'
 TEST_SUBSCRIPTION_ID = 0
+FORM_GATEWAY_ID = 2
 
 class PayPalApiTests(TestCase):
     '''
@@ -84,10 +85,10 @@ class PayPalApiTests(TestCase):
             print('Description: {}'.format(result['description']), flush=True)
 
     def test_onetime_donation(self):
-        self.common_donation_flow({'donation_amount': Decimal('10.00'), 'donation_frequency': 'onetime', 'payment_gateway': 2, 'currency': TEST_CURRENCY})
+        self.common_donation_flow({'donation_amount': Decimal('10.00'), 'donation_frequency': 'onetime', 'payment_gateway': FORM_GATEWAY_ID, 'currency': TEST_CURRENCY})
 
     def test_recurring_donation(self):
-        self.common_donation_flow({'donation_amount': Decimal('20.00'), 'donation_frequency': 'monthly', 'payment_gateway': 2, 'currency': TEST_CURRENCY})
+        self.common_donation_flow({'donation_amount': Decimal('20.00'), 'donation_frequency': 'monthly', 'payment_gateway': FORM_GATEWAY_ID, 'currency': TEST_CURRENCY})
 
     def test_cancel_subscription(self):
         self.common_recurring_action('/en/donations/cancel-recurring/', {'subscription_id': TEST_SUBSCRIPTION_ID})
@@ -109,7 +110,7 @@ class PayPalApiTests(TestCase):
             "extra_test_headers": {'PayPal-Mock-Response': '{"mock_application_codes":"INVALID_CURRENCY_CODE"}'},
         })
         s.save()
-        self.common_donation_flow({'donation_amount': Decimal('10.00'), 'donation_frequency': 'onetime', 'payment_gateway': 2, 'currency': TEST_CURRENCY}, assertStatus=422)
+        self.common_donation_flow({'donation_amount': Decimal('10.00'), 'donation_frequency': 'onetime', 'payment_gateway': FORM_GATEWAY_ID, 'currency': TEST_CURRENCY}, assertStatus=422)
 
     def test_recurring_donation_NT1(self):
         '''Negative Test: test failing listProducts'''
@@ -119,7 +120,7 @@ class PayPalApiTests(TestCase):
             "negtest_listProducts": "ERRCAT006",
         })
         s.save()
-        self.common_donation_flow({'donation_amount': Decimal('10.00'), 'donation_frequency': 'monthly', 'payment_gateway': 2, 'currency': TEST_CURRENCY}, assertStatus=500)
+        self.common_donation_flow({'donation_amount': Decimal('10.00'), 'donation_frequency': 'monthly', 'payment_gateway': FORM_GATEWAY_ID, 'currency': TEST_CURRENCY}, assertStatus=500)
 
     def test_recurring_donation_NT2(self):
         '''Negative Test: test failing createProduct'''
@@ -129,7 +130,7 @@ class PayPalApiTests(TestCase):
             "negtest_createProduct": "ERRCAT001",
         })
         s.save()
-        self.common_donation_flow({'donation_amount': Decimal('10.00'), 'donation_frequency': 'monthly', 'payment_gateway': 2, 'currency': TEST_CURRENCY}, assertStatus=500)
+        self.common_donation_flow({'donation_amount': Decimal('10.00'), 'donation_frequency': 'monthly', 'payment_gateway': FORM_GATEWAY_ID, 'currency': TEST_CURRENCY}, assertStatus=500)
 
     def test_recurring_donation_NT3(self):
         '''Negative Test: test failing createPlan'''
@@ -139,7 +140,7 @@ class PayPalApiTests(TestCase):
             "negtest_createPlan": "ERRSUB001",
         })
         s.save()
-        self.common_donation_flow({'donation_amount': Decimal('10.00'), 'donation_frequency': 'monthly', 'payment_gateway': 2, 'currency': TEST_CURRENCY}, assertStatus=500)
+        self.common_donation_flow({'donation_amount': Decimal('10.00'), 'donation_frequency': 'monthly', 'payment_gateway': FORM_GATEWAY_ID, 'currency': TEST_CURRENCY}, assertStatus=500)
 
     def test_recurring_donation_NT4(self):
         '''Negative Test: test failing createSubscription'''
@@ -149,7 +150,7 @@ class PayPalApiTests(TestCase):
             "negtest_createSubscription": "ERRSUB032",
         })
         s.save()
-        self.common_donation_flow({'donation_amount': Decimal('10.00'), 'donation_frequency': 'monthly', 'payment_gateway': 2, 'currency': TEST_CURRENCY}, assertStatus=500)
+        self.common_donation_flow({'donation_amount': Decimal('10.00'), 'donation_frequency': 'monthly', 'payment_gateway': FORM_GATEWAY_ID, 'currency': TEST_CURRENCY}, assertStatus=500)
 
     def test_recurring_donation_NT5(self):
         '''Negative Test: test failing cancelSubscription'''

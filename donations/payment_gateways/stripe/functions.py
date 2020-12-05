@@ -8,6 +8,8 @@ from donations.functions import getCurrencyDictAt
 def initStripeApiKey(request):
     stripeSettings = getStripeSettings(request)
     stripe.api_key = stripeSettings.secret_key
+    # see Network errors: https://stripe.com/docs/error-handling#network-errors
+    stripe.max_network_retries = 2
 
 
 def formatDonationAmount(amount, currency_code):

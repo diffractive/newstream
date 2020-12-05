@@ -30,6 +30,7 @@
 <script type="text/javascript">
     // Create an instance of the Stripe object with your publishable API key
     var stripe = Stripe('{{ publishable_key }}');
+    let serverError = false;
 
     setTimeout(() => {
         // Create a new Checkout Session using the server-side endpoint you
@@ -37,9 +38,15 @@
             method: 'POST',
         })
             .then(function (response) {
+                if (!response.ok) { // not 2xx codes
+                    serverError = true;
+                }
                 return response.json();
             })
             .then(function (session) {
+                if (serverError) {
+                    throw new Error(`${data['issue']}: ${data['description']}`)
+                }
                 return stripe.redirectToCheckout({ sessionId: session.id });
             })
             .then(function (result) {

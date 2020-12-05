@@ -70,8 +70,11 @@ class Gateway_Stripe(PaymentGatewayManager):
             if self.invoice.status == 'paid':
                 # check if subscription has one or more invoices to determine it's a first time or renewal payment
                 # self.subscription here is the stripe subscription object
-                invoices = stripe.Invoice.list(subscription=self.subscription.id)
-                _debug("Stripe: Subscription {} has {} invoices.".format(self.subscription.id, len(invoices['data'])))
+                try:
+                    invoices = stripe.Invoice.list(subscription=self.subscription.id)
+                except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+                    raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
+                # _debug("Stripe: Subscription {} has {} invoices.".format(self.subscription.id, len(invoices['data'])))
                 if len(invoices['data']) == 1:
                     dpmeta = DonationPaymentMeta(
                         donation=self.donation, field_key='stripe_invoice_number', field_value=self.invoice.number)
@@ -169,18 +172,24 @@ class Gateway_Stripe(PaymentGatewayManager):
                 }
             }
             # call stripe api to get the SubscriptionItem
-            stripeRes = stripe.SubscriptionItem.list(
-                subscription=self.subscription.object_id,
-            )
+            try:
+                stripeRes = stripe.SubscriptionItem.list(
+                    subscription=self.subscription.object_id,
+                )
+            except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+                raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
             if len(stripeRes['data']) == 1:
                 subItemId = stripeRes['data'][0].id
                 # call stripe api to update SubscriptionItem
-                updateRes = stripe.SubscriptionItem.modify(
-                    subItemId,
-                    proration_behavior='none',
-                    price_data=adhoc_price,
-                    quantity=1
-                )
+                try:
+                    updateRes = stripe.SubscriptionItem.modify(
+                        subItemId,
+                        proration_behavior='none',
+                        price_data=adhoc_price,
+                        quantity=1
+                    )
+                except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+                    raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
                 # update newstream model
                 if updateRes:
                     self.subscription.recurring_amount = formatDonationAmountFromGateway(updateRes['price']['unit_amount_decimal'], self.subscription.currency)
@@ -201,11 +210,14 @@ class Gateway_Stripe(PaymentGatewayManager):
 
         # update billing_cycle_anchor if user checked yes
         if form_data['billing_cycle_now']:
-            updateRes = stripe.Subscription.modify(
-                self.subscription.object_id,
-                proration_behavior='none',
-                billing_cycle_anchor='now',
-            )
+            try:
+                updateRes = stripe.Subscription.modify(
+                    self.subscription.object_id,
+                    proration_behavior='none',
+                    billing_cycle_anchor='now',
+                )
+            except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+                raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
             if updateRes:
                 # email notifications
                 sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, str(
@@ -223,8 +235,11 @@ class Gateway_Stripe(PaymentGatewayManager):
             raise ValueError(_('Subscription object is None. Cannot cancel recurring payment.'))
         initStripeApiKey(self.request)
         # cancel subscription via stripe API
-        cancelled_subscription = stripe.Subscription.delete(
-            self.subscription.object_id)
+        try:
+            cancelled_subscription = stripe.Subscription.delete(
+                self.subscription.object_id)
+        except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+            raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
         if cancelled_subscription and cancelled_subscription.status == 'canceled':
             # update newstream model
             self.subscription.recurring_status = STATUS_CANCELLED
@@ -250,8 +265,8 @@ class Gateway_Stripe(PaymentGatewayManager):
         try:
             updated_subscription = stripe.Subscription.modify(
                 self.subscription.object_id, pause_collection=toggle_obj)
-        except Exception as e:
-            raise RuntimeError(_('Cannot update stripe subscription: %(errmsg)s') % {'errmsg': str(e)})
+        except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+            raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
         if updated_subscription:
             if toggle_obj and updated_subscription['pause_collection']['behavior'] == 'mark_uncollectible':
                 # update newstream model

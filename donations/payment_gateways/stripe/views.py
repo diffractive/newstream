@@ -15,6 +15,10 @@ from .factory import Factory_Stripe
 
 @csrf_exempt
 def create_checkout_session(request):
+    errorObj = {
+        "issue": "Exception",
+        "description": ""
+    }
     try:
         initStripeApiKey(request)
         stripeSettings = getStripeSettings(request)
@@ -114,13 +118,23 @@ def create_checkout_session(request):
         return JsonResponse({'id': session.id})
     except ValueError as e:
         _exception(str(e))
-        return HttpResponse(status=500)
+        errorObj['issue'] = "ValueError"
+        errorObj['description'] = str(e)
+        return JsonResponse(object_to_json(errorObj), status=500)
     except Donation.DoesNotExist:
-        _exception("Donation object not found by id: "+str(donation_id))
-        return HttpResponse(status=500)
+        _exception("Donation.DoesNotExist")
+        errorObj['issue'] = "Donation.DoesNotExist"
+        errorObj['description'] = str(_("Donation object not found by id: %(id)s") % {'id': donation_id})
+        return JsonResponse(object_to_json(errorObj), status=500)
+    except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+        _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
+        errorObj['issue'] = type(e).__name__
+        errorObj['description'] = 'Message is: %s' % e.user_message
+        return JsonResponse(object_to_json(errorObj), status=int(e.http_status))
     except Exception as e:
-        _exception('Exception occured interfacing with stripe sdk: '+str(e))
-        return HttpResponse(status=500)
+        errorObj['description'] = str(e)
+        _exception(errorObj["description"])
+        return JsonResponse(object_to_json(errorObj), status=500)
 
 
 @csrf_exempt
@@ -144,6 +158,9 @@ def verify_stripe_response(request):
         # Invalid signature from initGatewayByVerification
         _exception(str(e))
         return HttpResponse(status=400)
+    except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+        _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
+        return HttpResponse(status=int(e.http_status))
     except Exception as e:
         _exception(str(e))
         return HttpResponse(status=500)
@@ -158,6 +175,10 @@ def return_from_stripe(request):
         _exception(str(e))
         request.session['error-title'] = str(_("ValueError"))
         request.session['error-message'] = str(e)
+    except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+        _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
+        request.session['error-title'] = type(e).__name__
+        request.session['error-message'] = e.user_message
     except Exception as e:
         _exception(str(e))
         request.session['error-title'] = str(_("Unknown Exception"))
@@ -181,6 +202,10 @@ def cancel_from_stripe(request):
         _exception(str(e))
         request.session['error-title'] = str(_("ValueError"))
         request.session['error-message'] = str(e)
+    except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+        _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
+        request.session['error-title'] = type(e).__name__
+        request.session['error-message'] = e.user_message
     except Exception as e:
         _exception(str(e))
         request.session['error-title'] = str(_("Unknown Error"))

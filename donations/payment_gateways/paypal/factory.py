@@ -51,7 +51,7 @@ class Factory_Paypal(PaymentGatewayFactory):
             donation_id = None
             subscription = None
             kwargs = {}
-            expected_events = [EVENT_PAYMENT_CAPTURE_COMPLETED, EVENT_BILLING_SUBSCRIPTION_ACTIVATED, EVENT_BILLING_SUBSCRIPTION_SUSPENDED, EVENT_BILLING_SUBSCRIPTION_UPDATED, EVENT_PAYMENT_SALE_COMPLETED]
+            expected_events = [EVENT_PAYMENT_CAPTURE_COMPLETED, EVENT_BILLING_SUBSCRIPTION_ACTIVATED, EVENT_BILLING_SUBSCRIPTION_UPDATED, EVENT_PAYMENT_SALE_COMPLETED]
 
             # one-time donation payment captured
             if json_data['event_type'] == EVENT_PAYMENT_CAPTURE_COMPLETED:
@@ -62,14 +62,6 @@ class Factory_Paypal(PaymentGatewayFactory):
 
             # subscription activated
             if json_data['event_type'] == EVENT_BILLING_SUBSCRIPTION_ACTIVATED:
-                subscription = json_data['resource']
-                if 'custom_id' in json_data['resource']:
-                    donation_id = json_data['resource']['custom_id']
-                else:
-                    raise ValueError(_('Missing custom_id(donation_id) in json_data.resource'))
-
-            # subscription suspended
-            if json_data['event_type'] == EVENT_BILLING_SUBSCRIPTION_SUSPENDED:
                 subscription = json_data['resource']
                 if 'custom_id' in json_data['resource']:
                     donation_id = json_data['resource']['custom_id']

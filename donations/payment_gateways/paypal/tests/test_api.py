@@ -27,6 +27,7 @@ class PayPalApiTests(TestCase):
     To test the full donation flow:
     Route 1(Onetime-Donation): test_onetime_donation -> manually approve at approval_link -> back to thankyou page
     Route 2(Recurring-Donation): test_recurring_donation -> manually approve at approval_link -> back to thankyou page
+        then: test_toggle_subscription x2 -> test_update_subscription -> test_cancel_subscription
     todo: Route n (irregularites in form data)
     '''
     # client_class = PersistentSessionClient

@@ -12,7 +12,7 @@ from donations.functions import gen_order_id
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.payment_gateways.paypal.constants import *
-from donations.payment_gateways.paypal.functions import activateSubscription, suspendSubscription, updateSubscription, cancelSubscription
+from donations.payment_gateways.paypal.functions import activateSubscription, suspendSubscription, updateSubscription, cancelSubscription, getSubscriptionDetails
 
 
 class Gateway_Paypal(PaymentGatewayManager):
@@ -52,30 +52,17 @@ class Gateway_Paypal(PaymentGatewayManager):
                     # send the donation receipt to donor and notification to admins as subscription is just created
                     sendDonationReceiptToDonor(self.request, self.donation)
                     sendDonationNotifToAdmins(self.request, self.donation)
-                else:
+                # else:
                     # should be re-activation after suspension of subscription
-                    subscription = Subscription.objects.filter(object_id=self.subscription['id']).first()
-                    if not subscription:
-                        raise ValueError(_("Cannot find subscription object in database with object_id %(id)s") % {'id': self.subscription['id']})
-                    subscription.recurring_status = STATUS_ACTIVE
-                    subscription.save()
+                    # subscription = Subscription.objects.filter(object_id=self.subscription['id']).first()
+                    # if not subscription:
+                    #     raise ValueError(_("Cannot find subscription object in database with object_id %(id)s") % {'id': self.subscription['id']})
+                    # subscription.recurring_status = STATUS_ACTIVE
+                    # subscription.save()
 
                 return HttpResponse(status=200)
             else:
                 raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_ACTIVATED but subscription status is %(status)s") % {'status': self.subscription['status']})
-
-        # Event: EVENT_BILLING_SUBSCRIPTION_SUSPENDED
-        if self.event_type == EVENT_BILLING_SUBSCRIPTION_SUSPENDED and hasattr(self, 'subscription'):
-            if self.subscription['status'] == 'SUSPENDED':
-                subscription = Subscription.objects.filter(object_id=self.subscription['id']).first()
-                if not subscription:
-                    raise ValueError(_("Cannot find subscription object in database with object_id %(id)s") % {'id': self.subscription['id']})
-                subscription.recurring_status = STATUS_PAUSED
-                subscription.save()
-
-                return HttpResponse(status=200)
-            else:
-                raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_SUSPENDED but subscription status is %(status)s") % {'status': self.subscription['status']})
         
         # Event: EVENT_BILLING_SUBSCRIPTION_UPDATED
         if self.event_type == EVENT_BILLING_SUBSCRIPTION_UPDATED and hasattr(self, 'subscription'):
@@ -171,8 +158,12 @@ class Gateway_Paypal(PaymentGatewayManager):
             self.request, self.subscription)
 
     def toggle_recurring_payment(self):
-        if self.subscription.recurring_status == STATUS_PAUSED:
-            # activate subscription
+        # no need to handle webhook events for activate/suspend actions(as they are too slow, donor might have already toggled twice before the first webhook arrives)
+        # get realtime subscription's status from paypal
+        req_subscription = getSubscriptionDetails(self.request, self.subscription.object_id)
+        # if self.subscription.recurring_status == STATUS_PAUSED:
+        if req_subscription['status'] == "SUSPENDED":
+            # activate subscription(returns 204 if success)
             activateSubscription(self.request, self.subscription.object_id)
             # update newstream model
             self.subscription.recurring_status = STATUS_ACTIVE
@@ -187,8 +178,9 @@ class Gateway_Paypal(PaymentGatewayManager):
                 'recurring-status': STATUS_ACTIVE,
                 'success-message': str(_('Your recurring donation is resumed.'))
             }
-        elif self.subscription.recurring_status == STATUS_ACTIVE:
-            # suspend subscription
+        # elif self.subscription.recurring_status == STATUS_ACTIVE:
+        elif req_subscription['status'] == "ACTIVE":
+            # suspend subscription(returns 204 if success)
             suspendSubscription(self.request, self.subscription.object_id)
             # update newstream model
             self.subscription.recurring_status = STATUS_PAUSED

@@ -34,6 +34,19 @@ class Gateway_Paypal(PaymentGatewayManager):
         return render(self.request, 'donations/redirection_paypal.html', {'client_id': self.settings.client_id, 'currency': self.donation.currency})
 
     def process_webhook_response(self):
+        # Event: EVENT_PAYMENT_CAPTURE_COMPLETED (This alone comes after the onetime donation is captured)
+        if self.event_type == EVENT_PAYMENT_CAPTURE_COMPLETED:
+            # payment should have been completed after successful capture at the moment of returning to this site
+            # only run below code if somehow payment_status is still not complete(e.g. donor did not return to site)
+            if self.donation.payment_status != STATUS_COMPLETE:
+                self.donation.payment_status = STATUS_COMPLETE
+                self.donation.save()
+                # send email notifs
+                sendDonationReceiptToDonor(self.request, self.donation)
+                sendDonationNotifToAdmins(self.request, self.donation)
+
+            return HttpResponse(status=200)
+
         # Event: EVENT_BILLING_SUBSCRIPTION_ACTIVATED
         if self.event_type == EVENT_BILLING_SUBSCRIPTION_ACTIVATED and hasattr(self, 'subscription'):
             if self.subscription['status'] == 'ACTIVE':
@@ -52,13 +65,6 @@ class Gateway_Paypal(PaymentGatewayManager):
                     # send the donation receipt to donor and notification to admins as subscription is just created
                     sendDonationReceiptToDonor(self.request, self.donation)
                     sendDonationNotifToAdmins(self.request, self.donation)
-                # else:
-                    # should be re-activation after suspension of subscription
-                    # subscription = Subscription.objects.filter(object_id=self.subscription['id']).first()
-                    # if not subscription:
-                    #     raise ValueError(_("Cannot find subscription object in database with object_id %(id)s") % {'id': self.subscription['id']})
-                    # subscription.recurring_status = STATUS_ACTIVE
-                    # subscription.save()
 
                 return HttpResponse(status=200)
             else:

@@ -16,10 +16,10 @@ class PaymentGatewayManager(ABC):
                 'Either one of donation or subscription has to be defined while initializing BasePaymentGateway class')
         self.donation = donation
         self.subscription = subscription
-        # stores whether current app is in test mode or not
-        self.testing_mode = isTestMode(self.request)
         # set global settings object
         self.global_settings = getSiteSettings(request)
+        # stores whether current app is in test mode or not
+        self.testing_mode = self.global_settings.sandbox_mode
 
     @abstractmethod
     def redirect_to_gateway_url(self):

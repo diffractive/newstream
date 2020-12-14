@@ -18,6 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from newstream.functions import getSiteSettings, printvars, _exception, _debug, uuid4_str
 from site_settings.models import PaymentGateway
+from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_TOGGLE
 from .models import *
 from .forms import *
 from .functions import *
@@ -215,7 +216,12 @@ def toggle_recurring(request):
             subscription = get_object_or_404(Subscription, id=subscription_id)
             gatewayManager = InitPaymentGateway(
                 request, subscription=subscription)
+            # check if frequency limitation is enabled and passed
+            if not isUpdateSubsFrequencyLimitationPassed(gatewayManager):
+                raise Exception(_('You have already carried out 5 subscription update action in the last 5 minutes, our current limit is 5 subscription update actions(edit/pause/resume) every 5 minutes.'))
             resultSet = gatewayManager.toggle_recurring_payment()
+            # add to the update actions log
+            addUpdateSubsActionLog(gatewayManager, SUBS_ACTION_TOGGLE)
             return JsonResponse({'status': 'success', 'button-html': resultSet['button-html'], 'recurring-status': str(_(resultSet['recurring-status'].capitalize())), 'success-message': resultSet['success-message']})
         else:
             return HttpResponse(400)
@@ -241,8 +247,12 @@ def edit_recurring(request, id):
                 # use gatewayManager to process the data in form.cleaned_data as required
                 gatewayManager = InitPaymentGateway(
                     request, subscription=subscription)
+                # check if frequency limitation is enabled and passed
+                if not isUpdateSubsFrequencyLimitationPassed(gatewayManager):
+                    raise Exception(_('You have already carried out 5 subscription update action in the last 5 minutes, our current limit is 5 subscription update actions(edit/pause/resume) every 5 minutes.'))
                 gatewayManager.update_recurring_payment(form.cleaned_data)
-
+                # add to the update actions log
+                addUpdateSubsActionLog(gatewayManager, SUBS_ACTION_UPDATE)
                 return redirect('donations:edit-recurring', id=id)
     except ValueError as e:
         _exception(str(e))

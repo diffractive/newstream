@@ -8,6 +8,8 @@ from modelcluster.models import ClusterableModel
 
 from allauth.account.models import EmailAddress
 
+SUBS_ACTION_UPDATE = 'update-subscription'
+SUBS_ACTION_TOGGLE = 'toggle-subscription'
 
 class UserMeta(models.Model):
     user = ParentalKey(
@@ -28,6 +30,33 @@ class UserMeta(models.Model):
 
     def __str__(self):
         return self.field_key
+
+
+class UserSubscriptionUpdatesLog(models.Model):
+    SUBS_ACTION_CHOICES = [
+        (SUBS_ACTION_UPDATE, SUBS_ACTION_UPDATE),
+        (SUBS_ACTION_TOGGLE, SUBS_ACTION_TOGGLE),
+    ]
+    user = ParentalKey(
+        'User',
+        related_name='subsupdateslogs',
+        on_delete=models.CASCADE,
+    )
+    subscription = models.ForeignKey(
+        'donations.Subscription',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    action_type = models.CharField(
+        max_length=255, choices=SUBS_ACTION_CHOICES, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = _('User Subscription Updates Log')
+        verbose_name_plural = _('User Subscription Updates Logs')
 
 
 class User(AbstractUser, ClusterableModel):

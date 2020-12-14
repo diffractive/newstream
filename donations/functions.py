@@ -11,9 +11,10 @@ from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
 from .includes.currency_dictionary import currency_dict
-from newstream.functions import getSiteSettings, getSuperUserTimezone
+from newstream.functions import getSiteSettings, getSuperUserTimezone, _debug
 from newstream.functions import evTokenGenerator, raiseObjectNone, getSiteName
 from donations.models import DonationMeta
+from newstream_user.models import UserSubscriptionUpdatesLog
 
 
 def getCurrencyDict():
@@ -43,6 +44,29 @@ def currencyCodeToKey(code):
 def isTestMode(request):
     siteSettings = getSiteSettings(request)
     return siteSettings.sandbox_mode
+
+
+def isUpdateSubsFrequencyLimitationPassed(gatewayManager):
+    if gatewayManager.global_settings.limit_fiveactions_per_fivemins:
+        # get count of the actions carried out by the same donor in the last 5 minutes
+        nowdt = datetime.now()
+        fiveminsbf = nowdt - timedelta(minutes=5)
+        count = UserSubscriptionUpdatesLog.objects.filter(user=gatewayManager.subscription.user, created_at__gte=fiveminsbf).count()
+        _debug('Count of Subscription Actions done by {} within five minutes: {}'.format(gatewayManager.subscription.user.fullname, count))
+        if count >= 5:
+            return False
+    return True
+
+
+def addUpdateSubsActionLog(gatewayManager, action_type):
+    # only add to the logs table if the limitation is enabled
+    if gatewayManager.global_settings.limit_fiveactions_per_fivemins:
+        log = UserSubscriptionUpdatesLog(
+            user=gatewayManager.subscription.user,
+            subscription=gatewayManager.subscription,
+            action_type=action_type
+        )
+        log.save()
 
 
 def gen_order_id(gateway=None):

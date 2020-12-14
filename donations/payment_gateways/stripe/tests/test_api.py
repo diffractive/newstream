@@ -12,7 +12,9 @@ User = get_user_model()
 
 # tweak these settings for your tests
 TEST_DOMAIN_NAME = "newstream.hongkongfp.com"
-TEST_USER_CREDS = {'username':'stripe-tester', 'password':'odysseus'}
+USERNAME = 'stripe-tester'
+USERPASS = 'odysseus'
+TEST_USER_CREDS = {'username':USERNAME, 'password':USERPASS}
 TEST_CURRENCY = 'HKD'
 TEST_SUBSCRIPTION_ID = 0
 FORM_GATEWAY_ID = 3
@@ -41,7 +43,8 @@ class StripeApiTests(TestCase):
         # else if it is 0, test would fetch the latest subscription object for testing
         global TEST_SUBSCRIPTION_ID
         if TEST_SUBSCRIPTION_ID == 0:
-            subs = Subscription.objects.order_by('-id').first()
+            user = User.objects.filter(username=USERNAME).first()
+            subs = Subscription.objects.filter(user=user).order_by('-id').first()
             self.subscription = subs
             TEST_SUBSCRIPTION_ID = subs.id
 

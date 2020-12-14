@@ -14,7 +14,9 @@ User = get_user_model()
 
 # tweak these settings for your tests
 TEST_DOMAIN_NAME = "newstream.hongkongfp.com"
-TEST_USER_CREDS = {'username':'paypal-tester', 'password':'odysseus'}
+USERNAME = 'paypal-tester'
+USERPASS = 'odysseus'
+TEST_USER_CREDS = {'username':USERNAME, 'password':USERPASS}
 TEST_CURRENCY = 'HKD'
 TEST_SUBSCRIPTION_ID = 0
 FORM_GATEWAY_ID = 2
@@ -38,10 +40,11 @@ class PayPalApiTests(TestCase):
         # logins user
         self.client.login(**TEST_USER_CREDS)
         # if TEST_SUBSCRIPTION is set larger than 0, this number would be used
-        # else if it is 0, test would fetch the latest subscription object for testing
+        # else if it is 0, test would fetch the latest subscription object from the test user for testing
         global TEST_SUBSCRIPTION_ID
         if TEST_SUBSCRIPTION_ID == 0:
-            subs = Subscription.objects.order_by('-id').first()
+            user = User.objects.filter(username=USERNAME).first()
+            subs = Subscription.objects.filter(user=user).order_by('-id').first()
             TEST_SUBSCRIPTION_ID = subs.id
 
     def update_recurring(self, form_data, assertStatus=302):

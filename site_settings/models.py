@@ -152,11 +152,13 @@ class SiteSettings(BaseSetting, ClusterableModel):
         on_delete=models.SET_NULL,
         related_name='+'
     )
+    limit_fiveactions_per_fivemins = models.BooleanField(default=True, help_text=_('Enable this will limit donor to only 5 subscription update-actions every 5 minutes'))
     donations_general_panels = [
         FieldPanel('sandbox_mode', heading=_('Sandbox Mode')),
         FieldPanel('currency', heading=_('Currency')),
         ModelChooserPanel('donation_form', heading=_(
             'Donation Form to be used')),
+        FieldPanel('limit_fiveactions_per_fivemins', heading=_("Frequency Limit on Donors' Subscription Update-Actions?")),
     ]
 
     _2c2p_frontend_label = models.CharField(

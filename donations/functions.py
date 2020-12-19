@@ -58,15 +58,14 @@ def isUpdateSubsFrequencyLimitationPassed(gatewayManager):
     return True
 
 
-def addUpdateSubsActionLog(gatewayManager, action_type):
-    # only add to the logs table if the limitation is enabled
-    if gatewayManager.global_settings.limit_fiveactions_per_fivemins:
-        log = UserSubscriptionUpdatesLog(
-            user=gatewayManager.subscription.user,
-            subscription=gatewayManager.subscription,
-            action_type=action_type
-        )
-        log.save()
+def addUpdateSubsActionLog(gatewayManager, action_type, user=None):
+    ''' This might be called either by donor or by admin'''
+    log = UserSubscriptionUpdatesLog(
+        user=gatewayManager.subscription.user if user == None else user,
+        subscription=gatewayManager.subscription,
+        action_type=action_type
+    )
+    log.save()
 
 
 def gen_order_id(gateway=None):

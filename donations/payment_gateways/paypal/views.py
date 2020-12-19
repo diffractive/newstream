@@ -1,5 +1,6 @@
 import stripe
 import json
+from datetime import datetime
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
@@ -134,6 +135,7 @@ def return_from_paypal(request):
                 if capture_status == 'COMPLETED':
                     _debug('PayPal: Order Captured. Payment Completed.')
                     gatewayManager.donation.payment_status = STATUS_COMPLETE
+                    gatewayManager.donation.donation_date = datetime.now()
                     gatewayManager.donation.save()
                     # send email notifs
                     sendDonationReceiptToDonor(request, gatewayManager.donation)

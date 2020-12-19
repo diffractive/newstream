@@ -1,5 +1,6 @@
 import stripe
 from decimal import *
+from datetime import datetime
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
@@ -51,6 +52,8 @@ class Gateway_Stripe(PaymentGatewayManager):
         if self.event['type'] == EVENT_CHECKOUT_SESSION_COMPLETED:
             # Update payment status
             self.donation.payment_status = STATUS_COMPLETE
+            # update donation_date
+            self.donation.donation_date = datetime.now()
             self.donation.save()
 
             # Since for recurring payment, subscription.updated event might lag behind checkout.session.completed
@@ -93,6 +96,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                         donation_amount=formatDonationAmountFromGateway(str(self.invoice.amount_paid), self.donation.currency),
                         currency=self.donation.currency,
                         payment_status=STATUS_COMPLETE,
+                        donation_date=datetime.now(),
                     )
                     donation.save()
 
@@ -103,6 +107,11 @@ class Gateway_Stripe(PaymentGatewayManager):
                     # email notifications
                     sendRenewalReceiptToDonor(self.request, donation)
                     sendRenewalNotifToAdmins(self.request, donation)
+
+                # log down the current subscription period span
+                spmeta = SubscriptionPaymentMeta(
+                    subscription=self.donation.subscription, field_key='stripe_subscription_period', field_value=str(self.subscription.current_period_start)+'-'+str(self.subscription.current_period_end))
+                spmeta.save()
 
                 return HttpResponse(status=200)
 
@@ -132,11 +141,6 @@ class Gateway_Stripe(PaymentGatewayManager):
                     else:
                         self.donation.subscription.recurring_status = STATUS_ACTIVE
                     self.donation.subscription.save()
-
-                # todo: check logic consistency: does it make sense to log down subscription_period even when recurring is paused?
-                spmeta = SubscriptionPaymentMeta(
-                    subscription=self.donation.subscription, field_key='stripe_subscription_period', field_value=str(self.subscription.current_period_start)+'-'+str(self.subscription.current_period_end))
-                spmeta.save()
 
                 return HttpResponse(status=200)
             else:

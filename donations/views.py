@@ -1,6 +1,7 @@
 import re
 import secrets
 import json
+from datetime import datetime
 from pprint import pprint
 from django.conf import settings
 from django.db import IntegrityError
@@ -18,7 +19,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from newstream.functions import getSiteSettings, printvars, _exception, _debug, uuid4_str
 from site_settings.models import PaymentGateway
-from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_TOGGLE
+from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
 from .models import *
 from .forms import *
 from .functions import *
@@ -72,6 +73,7 @@ def donation_details(request):
                     currency=form.cleaned_data['currency'],
                     payment_status=STATUS_PROCESSING,
                     metas=donation_metas,
+                    donation_date=datetime.now(),
                 )
                 # create a pending subscription if is_recurring
                 if form.cleaned_data['donation_frequency'] == 'monthly':
@@ -189,6 +191,8 @@ def cancel_recurring(request):
             gatewayManager = InitPaymentGateway(
                 request, subscription=subscription)
             gatewayManager.cancel_recurring_payment()
+            # add to the update actions log
+            addUpdateSubsActionLog(gatewayManager, SUBS_ACTION_CANCEL)
             return JsonResponse({'status': 'success', 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
         else:
             return HttpResponse(400)
@@ -221,7 +225,7 @@ def toggle_recurring(request):
                 raise Exception(_('You have already carried out 5 subscription update action in the last 5 minutes, our current limit is 5 subscription update actions(edit/pause/resume) every 5 minutes.'))
             resultSet = gatewayManager.toggle_recurring_payment()
             # add to the update actions log
-            addUpdateSubsActionLog(gatewayManager, SUBS_ACTION_TOGGLE)
+            addUpdateSubsActionLog(gatewayManager, SUBS_ACTION_PAUSE if resultSet['recurring-status'] == STATUS_PAUSED else SUBS_ACTION_RESUME)
             return JsonResponse({'status': 'success', 'button-html': resultSet['button-html'], 'recurring-status': str(_(resultSet['recurring-status'].capitalize())), 'success-message': resultSet['success-message']})
         else:
             return HttpResponse(400)
@@ -268,24 +272,28 @@ def edit_recurring(request, id):
 
 @login_required
 def my_onetime_donations(request):
+    # deleted=False should be valid whether soft-delete mode is on or off
+    # previously deleted records should still be hidden even soft-delete mode is turned off afterwards
     donations = Donation.objects.filter(
-        user=request.user, is_recurring=False).order_by('-created_at')
+        user=request.user, is_recurring=False, deleted=False).order_by('-donation_date')
     siteSettings = getSiteSettings(request)
     return render(request, 'donations/my_onetime_donations.html', {'donations': donations, 'siteSettings': siteSettings})
 
 
 @login_required
 def my_recurring_donations(request):
+    # deleted=False should be valid whether soft-delete mode is on or off
     subscriptions = Subscription.objects.filter(
-        user=request.user).order_by('-created_at')
+        user=request.user, deleted=False).order_by('-created_at')
     siteSettings = getSiteSettings(request)
     return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'siteSettings': siteSettings})
 
 
 @login_required
 def my_renewals(request, id):
-    subscription = get_object_or_404(Subscription, id=id)
+    # deleted=False should be valid whether soft-delete mode is on or off
+    subscription = get_object_or_404(Subscription, id=id, deleted=False)
     renewals = Donation.objects.filter(
-        subscription=subscription).order_by('-created_at')
+        subscription=subscription, deleted=False).order_by('-donation_date')
     siteSettings = getSiteSettings(request)
     return render(request, 'donations/my_renewals.html', {'subscription': subscription, 'renewals': renewals, 'siteSettings': siteSettings})

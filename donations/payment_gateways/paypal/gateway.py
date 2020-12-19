@@ -1,4 +1,5 @@
 from decimal import *
+from datetime import datetime
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.contrib import messages
@@ -107,6 +108,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                         donation_amount=Decimal(self.payload['amount']['total']),
                         currency=self.payload['amount']['currency'],
                         payment_status=STATUS_COMPLETE,
+                        donation_date=datetime.now(),
                     )
                     # save new donation as a record of renewal donation
                     donation.save()

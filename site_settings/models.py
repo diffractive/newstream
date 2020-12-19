@@ -152,13 +152,15 @@ class SiteSettings(BaseSetting, ClusterableModel):
         on_delete=models.SET_NULL,
         related_name='+'
     )
-    limit_fiveactions_per_fivemins = models.BooleanField(default=True, help_text=_('Enable this will limit donor to only 5 subscription update-actions every 5 minutes'))
+    limit_fiveactions_per_fivemins = models.BooleanField(default=True, help_text=_('Enable this will limit donor to only 5 subscription update-actions(edit/pause/resume) every 5 minutes'))
+    donations_soft_delete_mode = models.BooleanField(default=True, help_text=_('Enabling this will ensure Donations and Subscriptions will still exist in the database even after being deleted from wagtail admin'))
     donations_general_panels = [
         FieldPanel('sandbox_mode', heading=_('Sandbox Mode')),
         FieldPanel('currency', heading=_('Currency')),
         ModelChooserPanel('donation_form', heading=_(
             'Donation Form to be used')),
-        FieldPanel('limit_fiveactions_per_fivemins', heading=_("Frequency Limit on Donors' Subscription Update-Actions?")),
+        FieldPanel('limit_fiveactions_per_fivemins', heading=_("Frequency Limit on Donors' Subscription Update-Actions(edit/pause/resume)?")),
+        FieldPanel('donations_soft_delete_mode', heading=_("Soft Delete Mode(for Donations and Subscriptions only)")),
     ]
 
     _2c2p_frontend_label = models.CharField(

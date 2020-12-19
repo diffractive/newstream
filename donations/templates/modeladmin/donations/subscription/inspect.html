@@ -1,0 +1,242 @@
+{% extends "wagtailadmin/base.html" %}
+{% load i18n wagtailadmin_tags %}
+
+{% block titletag %}{{ view.get_meta_title }}{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+{{ view.media.css }}
+<link rel="stylesheet" href="{% versioned_static 'wagtailmodeladmin/css/breadcrumbs_page.css' %}" type="text/css" />
+{% endblock %}
+
+{% block extra_js %}
+{{ block.super }}
+{{ view.media.js }}
+{% endblock %}
+
+{% block content %}
+
+{% block header %}
+{% include "modeladmin/includes/header_with_breadcrumb.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon tabbed=True merged=True %}
+{% endblock %}
+
+{% block content_main %}
+<div class="backlink-div">
+    <p class="back backlink-p">
+        <a href="{{ view.index_url }}" class="icon icon-arrow-left">{% blocktrans with view.verbose_name as model_name %}Back to {{ model_name }} list{% endblocktrans %}</a>
+    </p>
+</div>
+
+<ul class="tab-nav merged" role="tablist">
+    <li role="tab" aria-controls="tab-subs-info">
+        <a href="#tab-subs-info">{% trans 'Subscription Info' %}</a>
+    </li>
+    <li role="tab" aria-controls="tab-meta-data">
+        <a href="#tab-meta-data">{% trans 'Meta Data' %}</a>
+    </li>
+    <li role="tab" aria-controls="tab-renewals">
+        <a href="#tab-renewals">{% trans 'Renewals' %}</a>
+    </li>
+    <li role="tab" aria-controls="tab-actions">
+        <a href="#tab-actions">{% trans 'Actions' %}</a>
+    </li>
+    <li role="tab" aria-controls="tab-action-logs">
+        <a href="#tab-action-logs">{% trans 'Action Logs' %}</a>
+    </li>
+</ul>
+
+<div class="tab-content">
+    <section id="tab-subs-info" role="tabpanel" aria-labelledby="tab-label-subs-info">
+        <div class="nice-padding">
+            {% block fields_output %}
+            {% if fields %}
+            <div class="two-column-flex">
+                <div class="column-1-2">
+                    <dt>{{ fields.is_test.label }}</dt>
+                    <dd>{{ fields.is_test.value }}</dd>
+                </div>
+                <div class="column-1-2">
+                    <dt>{{ fields.user.label }}</dt>
+                    <dd>{{ fields.user.value }}</dd>
+                </div>
+            </div>
+            <div class="two-column-flex">
+                <div class="column-1-2">
+                    <dt>{{ fields.recurring_amount.label }}</dt>
+                    <dd>{{ fields.recurring_amount.value }}</dd>
+                </div>
+                <div class="column-1-2">
+                    <dt>{{ fields.recurring_status.label }}</dt>
+                    <dd>{{ fields.recurring_status.value }}</dd>
+                </div>
+            </div>
+            <div class="two-column-flex">
+                <div class="column-1-2">
+                    <dt>{{ fields.currency.label }}</dt>
+                    <dd>{{ fields.currency.value }}</dd>
+                </div>
+                <div class="column-1-2">
+                    <dt>{{ fields.gateway.label }}</dt>
+                    <dd>{{ fields.gateway.value }}</dd>
+                </div>
+            </div>
+            <div class="two-column-flex">
+                <div class="column-1-2">
+                    <dt>{{ fields.id.label }}</dt>
+                    <dd>{{ fields.id.value }}</dd>
+                </div>
+                <div class="column-1-2">
+                    <dt>{{ fields.object_id.label }}</dt>
+                    <dd>{{ fields.object_id.value }}</dd>
+                </div>
+            </div>
+            <div class="two-column-flex">
+                <div class="column-1-2">
+                    <dt>{{ fields.created_at.label }}</dt>
+                    <dd>{{ fields.created_at.value }}</dd>
+                </div>
+                <div class="column-1-2">
+                    <dt>{{ fields.updated_at.label }}</dt>
+                    <dd>{{ fields.updated_at.value }}</dd>
+                </div>
+            </div>
+            <div class="two-column-flex">
+                <div class="column-1-2">
+                    <dt>{{ fields.linked_user_deleted.label }}</dt>
+                    <dd>{{ fields.linked_user_deleted.value }}</dd>
+                </div>
+            </div>
+            {% endif %}
+            {% endblock %}
+        </div>
+    </section>
+    <section id="tab-meta-data" role="tabpanel" aria-labelledby="tab-label-meta-data">
+        <div class="nice-padding">
+            {% if metas %}
+            <h2>{% trans 'System Generated Meta Data' %}</h2>
+            <dl>
+                {% for meta in metas %}
+                <dt>{{ meta.key }}</dt>
+                <dd>{{ meta.value }}</dd>
+                {% endfor %}
+            </dl>
+            {% else %}
+            <p>{% trans 'No system meta data registered.' %}</p>
+            {% endif %}
+        </div>
+    </section>
+    <section id="tab-renewals" role="tabpanel" aria-labelledby="tab-label-renewals">
+        <div class="nice-padding">
+            {% if renewals %}
+            <table class="listing full-width">
+                <thead>
+                    <tr>
+                        <th>{% trans 'ID' %}</th>
+                        <th>{% trans 'Order number' %}</th>
+                        <th>{% trans 'Donation amount' %}</th>
+                        <th>{% trans 'Currency' %}</th>
+                        <th>{% trans 'Payment status' %}</th>
+                        <th>{% trans 'Donation date' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for renewal in renewals %}
+                    <tr>
+                        <td>{{ renewal.id }} <a href="{% url 'donations_donation_modeladmin_inspect' instance_pk=renewal.id %}">(Inspect)</a></td>
+                        <td>{{ renewal.order_number }}</td>
+                        <td>{{ renewal.donation_amount }}</td>
+                        <td>{{ renewal.currency }}</td>
+                        <td>{{ renewal.payment_status }}</td>
+                        <td>{{ renewal.donation_date }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>{% trans 'No renewals are found.' %}</p>
+            {% endif %}
+        </div>
+    </section>
+    <section id="tab-actions" role="tabpanel" aria-labelledby="tab-label-actions">
+        <div class="nice-padding">
+            <p>{% trans 'Current subscription status is:' %} <strong>{{ fields.recurring_status.value }}</strong>.</p>
+            <hr>
+            <h2>{% trans 'Manually set subscription status as Active' %}</h2>
+            {% if fields.recurring_status.value != status_active %}
+            <form action="{% url 'internal-setactive-subscription' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{fields.id.value}}">
+                <input type="submit" class="button" value="{% trans 'Set subscription status as Active' %}">
+            </form>
+            {% else %}
+            <p>{% trans 'Subscription is already active.' %}</p>
+            {% endif %}
+            <hr>
+            <h2>{% trans 'Toggle subscription status' %}</h2>
+            {% if fields.recurring_status.value == status_active or fields.recurring_status.value == status_paused %}
+            <form action="{% url 'internal-toggle-subscription' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{fields.id.value}}">
+                <input type="submit" class="button" value="{% if fields.recurring_status.value == status_active %}{% trans 'Pause Subscription' %}{% else %}{% trans 'Resume Subscription' %}{% endif %}">
+                <br>
+                <small class="caution-text">*This action communicates with the payment gateway*</small>
+            </form>
+            {% else %}
+            <p>{% trans 'Subscription is not in a valid state for resuming/pausing.' %}</p>
+            {% endif %}
+            <hr>
+            <h2>{% trans 'Cancel subscription status' %}</h2>
+            {% if fields.recurring_status.value != status_cancelled %}
+            <form action="{% url 'internal-cancel-subscription' %}" method="POST">
+                {% csrf_token %}
+                <input type="hidden" name="id" value="{{fields.id.value}}">
+                <input type="submit" class="button" value="{% trans 'Cancel Subscription' %}">
+                <br>
+                <small class="caution-text">*This action communicates with the payment gateway*</small>
+            </form>
+            {% else %}
+            <p>{% trans 'Subscription is already cancelled.' %}</p>
+            {% endif %}
+        </div>
+    </section>
+    <section id="tab-action-logs" role="tabpanel" aria-labelledby="tab-label-action-logs">
+        <div class="nice-padding">
+            {% if action_logs %}
+            <table class="listing full-width">
+                <thead>
+                    <tr>
+                        <th>{% trans 'User' %}</th>
+                        <th>{% trans 'Action type' %}</th>
+                        <th>{% trans 'Created at' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in action_logs %}
+                    <tr>
+                        <td>{{ log.user }}</td>
+                        <td>{{ log.action_type }}</td>
+                        <td>{{ log.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>{% trans 'No update-actions are logged.' %}</p>
+            {% endif %}
+        </div>
+    </section>
+</div>
+{% endblock %}
+
+{% block footer %}
+{% if buttons %}
+<footer role="contentinfo">
+    <div class="button-group">
+        {% for button in buttons %}
+        {% include "modeladmin/includes/button.html" %}
+        {% endfor %}
+    </div>
+</footer>
+{% endif %}
+{% endblock %}
+{% endblock %}

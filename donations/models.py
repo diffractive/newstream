@@ -260,6 +260,7 @@ class Donation(ClusterableModel):
     currency = models.CharField(max_length=20)
     payment_status = models.CharField(
         max_length=255, choices=PAYMENT_STATUS_CHOICES)
+    donation_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     linked_user_deleted = models.BooleanField(default=False)

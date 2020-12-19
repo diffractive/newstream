@@ -9,7 +9,9 @@ from modelcluster.models import ClusterableModel
 from allauth.account.models import EmailAddress
 
 SUBS_ACTION_UPDATE = 'update-subscription'
-SUBS_ACTION_TOGGLE = 'toggle-subscription'
+SUBS_ACTION_PAUSE = 'pause-subscription'
+SUBS_ACTION_RESUME = 'resume-subscription'
+SUBS_ACTION_CANCEL = 'cancel-subscription'
 
 class UserMeta(models.Model):
     user = ParentalKey(
@@ -35,7 +37,9 @@ class UserMeta(models.Model):
 class UserSubscriptionUpdatesLog(models.Model):
     SUBS_ACTION_CHOICES = [
         (SUBS_ACTION_UPDATE, SUBS_ACTION_UPDATE),
-        (SUBS_ACTION_TOGGLE, SUBS_ACTION_TOGGLE),
+        (SUBS_ACTION_PAUSE, SUBS_ACTION_PAUSE),
+        (SUBS_ACTION_RESUME, SUBS_ACTION_RESUME),
+        (SUBS_ACTION_CANCEL, SUBS_ACTION_CANCEL),
     ]
     user = ParentalKey(
         'User',

@@ -1,0 +1,34 @@
+dt {
+    margin-bottom: 4px;
+}
+dt, dd {
+    font-size: 1.0rem;
+}
+dd a {
+    text-decoration: underline;
+}
+.caution-text {
+    color: red;
+}
+.two-column-flex {
+    display: flex;
+    flex-flow: row wrap;
+    width: 100%;
+    margin-bottom: 16px;
+}
+.column-1-2 {
+    width: 50%;
+    padding-right: 8px;
+    box-sizing: border-box;
+}
+.backlink-div {
+    background-color: #007d7e;
+    padding-bottom: 8px;
+}
+.backlink-p {
+    margin-bottom: 0;
+    margin-left:1.9em;
+}
+.backlink-p a {
+    color: white;
+}

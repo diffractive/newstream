@@ -5,7 +5,9 @@ import json
 import uuid
 import logging
 logger = logging.getLogger('newstream')
+from pytz import timezone
 from pprint import pprint
+from datetime import datetime
 from hashlib import blake2b
 import django.conf as conf
 from django.conf import settings
@@ -146,6 +148,12 @@ def getSuperUserTimezone():
     if not su:
         raiseObjectNone(_('Superuser not found'))
     return su.wagtail_userprofile.get_current_time_zone()
+
+
+def getAdminTodayDate(format):
+    tz = timezone(getSuperUserTimezone())
+    loc_dt = datetime.now(tz)
+    return loc_dt.strftime(format)
 
 
 def getSuperUserEmail():

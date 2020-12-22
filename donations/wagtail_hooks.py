@@ -1,13 +1,16 @@
+from pytz import timezone, utc
+from datetime import datetime, time
 from django.http import HttpResponse
 from django.contrib import messages
 from django.urls import path, reverse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import login_required
+from django.utils.safestring import mark_safe
 
 from wagtail.core import hooks
 
-from newstream.functions import _exception, _debug
+from newstream.functions import _exception, _debug, getAdminTodayDate, getSuperUserTimezone
 from newstream_user.models import SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
 from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED
 from donations.payment_gateways import InitPaymentGateway
@@ -94,3 +97,32 @@ def extra_urls():
         path('internal-toggle-subscription/', toggle_subscription, name='internal-toggle-subscription'),
         path('internal-cancel-subscription/', cancel_subscription, name='internal-cancel-subscription'),
     ]
+
+
+class TodayStatisticsPanel:
+    order = 10
+
+    def render(self):
+        tz = timezone(getSuperUserTimezone())
+        dt_now = datetime.now(tz)
+        today = dt_now.date()
+        midnight = tz.localize(datetime.combine(today, time(0, 0)), is_dst=None)
+        utc_dt = midnight.astimezone(utc) 
+        today_donations = Donation.objects.filter(donation_date__gte=utc_dt, payment_status=STATUS_COMPLETE, deleted=False).count()
+        today_subscriptions = Subscription.objects.filter(created_at__gte=utc_dt, recurring_status=STATUS_ACTIVE, deleted=False).count()
+        return mark_safe("<section class=\"summary nice-padding today-stats-panel\"><h1><strong>Today's Statistics ({})</strong></h1><ul class=\"stats\"><li><span>{}</span>Completed Donations</li><li><span>{}</span>Active Subscriptions</li></ul></section>".format(today, today_donations, today_subscriptions))
+
+
+class TotalStatisticsPanel:
+    order = 20
+
+    def render(self):
+        total_donations = Donation.objects.filter(payment_status=STATUS_COMPLETE, deleted=False).count()
+        total_active_subscriptions = Subscription.objects.filter(recurring_status=STATUS_ACTIVE, deleted=False).count()
+        total_subscriptions = Subscription.objects.filter(deleted=False).count()
+        return mark_safe("<section class=\"summary nice-padding total-stats-panel\"><h1><strong>Total Statistics</strong></h1><ul class=\"stats\"><li><span>{}</span>Completed Donations</li><li><span>{}</span>Active Subscriptions</li><li><span>{}</span>All Subscriptions</li></ul></section>".format(total_donations, total_active_subscriptions, total_subscriptions))
+
+@hooks.register('construct_homepage_panels')
+def add_statistics_panel(request, panels):
+    panels.append(TodayStatisticsPanel())
+    panels.append(TotalStatisticsPanel())

@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'wagtail.core',
     'wagtail.contrib.styleguide',
 
+    'wagtailstreamforms',
     'modelcluster',
     'taggit',
     'wagtailautocomplete',

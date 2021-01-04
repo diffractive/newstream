@@ -5,6 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
 from wagtail.contrib.modeladmin.views import InspectView, DeleteView
+from wagtail.contrib.modeladmin.helpers import ButtonHelper
 
 from newstream.functions import raiseObjectNone, getSiteSettings_from_default_site
 from .models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED
@@ -53,6 +54,8 @@ class DonationInspectView(InspectView):
             'status_complete': STATUS_COMPLETE.capitalize(),
             'dmetas': self.get_donor_meta_data(),
             'smetas': self.get_system_meta_data(),
+            'buttons': self.button_helper.get_buttons_for_obj(
+                self.instance, exclude=['inspect', 'edit']),
         }
         context.update(kwargs)
         return super().get_context_data(**context)
@@ -100,6 +103,8 @@ class SubscriptionInspectView(InspectView):
             'metas': self.get_meta_data(),
             'renewals': self.get_renewals(),
             'action_logs': self.get_action_logs(),
+            'buttons': self.button_helper.get_buttons_for_obj(
+                self.instance, exclude=['inspect', 'edit']),
         }
         context.update(kwargs)
         return super().get_context_data(**context)
@@ -150,8 +155,32 @@ class SubscriptionDeleteView(DeleteView):
         else:
             return super().confirmation_message()
 
+
+class SubscriptionButtonHelper(ButtonHelper):
+    def get_buttons_for_obj(self, obj, exclude=['edit'], classnames_add=None, classnames_exclude=None):
+        """
+        This function is originally used to gather all available buttons.
+        We exclude the edit button to the btns list.
+        """
+        btns = super().get_buttons_for_obj(
+            obj, exclude, classnames_add, classnames_exclude)
+        return btns
+
+
+class DonationButtonHelper(ButtonHelper):
+    def get_buttons_for_obj(self, obj, exclude=['edit'], classnames_add=None, classnames_exclude=None):
+        """
+        This function is originally used to gather all available buttons.
+        We exclude the edit button to the btns list.
+        """
+        btns = super().get_buttons_for_obj(
+            obj, exclude, classnames_add, classnames_exclude)
+        return btns
+
+
 class DonationAdmin(ModelAdmin):
     model = Donation
+    button_helper_class = DonationButtonHelper
     menu_label = _('Donations')
     menu_icon = 'pilcrow'
     menu_order = 100
@@ -182,6 +211,7 @@ class DonationAdmin(ModelAdmin):
 
 class SubscriptionAdmin(ModelAdmin):
     model = Subscription
+    button_helper_class = SubscriptionButtonHelper
     menu_label = _('Subscriptions')
     menu_icon = 'pilcrow'
     menu_order = 200

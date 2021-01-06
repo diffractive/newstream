@@ -291,6 +291,13 @@ class SiteSettings(BaseSetting, ClusterableModel):
         ImageChooserPanel('site_icon', heading=('Site Icon')),
     ]
 
+    recaptcha_public_key = models.CharField(max_length=255, blank=True, null=True)
+    recaptcha_private_key = models.CharField(max_length=255, blank=True, null=True)
+    others_recaptcha_panels = [
+        FieldPanel('recaptcha_public_key', heading=_('ReCAPTCHA public key')),
+        FieldPanel('recaptcha_private_key', heading=_('ReCAPTCHA private key')),
+    ]
+
     edit_handler = TopTabbedInterface([
         SubTabbedInterface([
             SubObjectList(email_general_panels, classname='email-general',
@@ -322,6 +329,10 @@ class SiteSettings(BaseSetting, ClusterableModel):
             SubObjectList(appearance_general_panels,
                           heading=_('General'), classname='appearance-general'),
         ], heading=_("Appearance")),
+        SubTabbedInterface([
+            SubObjectList(others_recaptcha_panels,
+                          heading=_('ReCAPTCHA'), classname='others-recaptcha'),
+        ], heading=_("Others")),
     ])
 
     class Meta:

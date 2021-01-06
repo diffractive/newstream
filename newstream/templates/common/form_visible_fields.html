@@ -7,7 +7,7 @@
 </div>
 {% else %}
 <div class="mb-4">
-    <div class="label-div">{{ field.label_tag }}</div>
+    <div class="label-div {% if '#ReCAPTCHA' in field.label_tag %}hidden{% endif %}">{{ field.label_tag }}</div>
     <div class="field-div widget_{{ field|widget_type }}">
         {{ field }}
     </div>

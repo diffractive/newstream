@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'wagtail.core',
     'wagtail.contrib.styleguide',
 
+    'captcha',
     'wagtailstreamforms',
     'modelcluster',
     'taggit',
@@ -260,6 +261,17 @@ USE_L10N = True
 
 USE_TZ = True
 
+# wagtailstreamforms
+WAGTAILSTREAMFORMS_FORM_TEMPLATES = (
+    ('streamforms/form_block.html', 'Default Form Template'),  # default
+    ('pages/streamforms/custom_template.html', 'Newstream Form Template'),
+)
+
+# django-recaptcha
+# enable no captcha
+SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+NOCAPTCHA = True
+RECAPTCHA_REQUIRED_SCORE = 0.85
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/

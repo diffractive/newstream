@@ -48,7 +48,7 @@ class Factory_2C2P(PaymentGatewayFactory):
                 # case two: either first time subscription or renewal donation
                 elif request.POST['recurring_unique_id']:
                     try:
-                        subscription = Subscription.objects.get(object_id=str(request.POST['recurring_unique_id']), gateway__title=GATEWAY_2C2P)
+                        subscription = Subscription.objects.get(profile_id=str(request.POST['recurring_unique_id']), gateway__title=GATEWAY_2C2P)
                         _debug('--2C2P initGatewayByVerification: subscription found--')
                         # subscription object found, indicating this is a renewal request
                         return Factory_2C2P.initGateway(request, None, subscription, data=data)

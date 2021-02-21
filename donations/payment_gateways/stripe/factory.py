@@ -2,7 +2,7 @@ import stripe
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import raiseObjectNone, getSiteSettings
-from donations.models import Donation
+from donations.models import Donation, Subscription
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.stripe.gateway import Gateway_Stripe
 from donations.payment_gateways.stripe.functions import initStripeApiKey
@@ -22,15 +22,24 @@ class Factory_Stripe(PaymentGatewayFactory):
         payload = request.body
         sig_header = request.META['HTTP_STRIPE_SIGNATURE']
         donation_id = None
+        can_skip_donation_id = False
         event = None
         session = None
+        donation = None
         subscription = None
+        subscription_obj = None
         kwargs = {}
         expected_events = [EVENT_CHECKOUT_SESSION_COMPLETED, EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID, EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED]
 
+        # the following call will raise ValueError/stripe.error.SignatureVerificationError
         event = stripe.Webhook.construct_event(
             payload, sig_header, siteSettings.stripe_webhook_secret
         )
+
+        # for events not being processed
+        if event['type'] not in expected_events:
+            raise WebhookNotProcessedError(_("Stripe Event not expected for processing at the moment"))
+        _debug("[stripe recurring] Incoming Event type:"+event['type'])
 
         # Intercept the checkout.session.completed event
         if event['type'] == EVENT_CHECKOUT_SESSION_COMPLETED:
@@ -45,12 +54,12 @@ class Factory_Stripe(PaymentGatewayFactory):
                     else:
                         raise ValueError(_('Missing donation_id in payment_intent.metadata'))
                 elif session.mode == 'subscription' and session.subscription:
-                    subscription = stripe.Subscription.retrieve(
+                    subscription_obj = stripe.Subscription.retrieve(
                         session.subscription)
-                    if 'donation_id' in subscription.metadata:
-                        donation_id = subscription.metadata['donation_id']
+                    if 'donation_id' in subscription_obj.metadata:
+                        donation_id = subscription_obj.metadata['donation_id']
                     else:
-                        raise ValueError(_('Missing donation_id in subscription.metadata'))
+                        raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
 
         # Intercept the invoice created event for subscriptions(a must for instant invoice finalization)
         # https://stripe.com/docs/billing/subscriptions/webhooks#understand
@@ -59,12 +68,12 @@ class Factory_Stripe(PaymentGatewayFactory):
             subscription_id = invoice.subscription
 
             if subscription_id:
-                subscription = stripe.Subscription.retrieve(subscription_id)
-                if 'donation_id' in subscription.metadata:
-                    donation_id = subscription.metadata['donation_id']
+                subscription_obj = stripe.Subscription.retrieve(subscription_id)
+                if 'donation_id' in subscription_obj.metadata:
+                    donation_id = subscription_obj.metadata['donation_id']
                     kwargs['invoice'] = invoice
                 else:
-                    raise ValueError(_('Missing donation_id in subscription.metadata'))
+                    raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
             else:
                 raise ValueError(_('Missing subscription_id'))
 
@@ -74,9 +83,9 @@ class Factory_Stripe(PaymentGatewayFactory):
             subscription_id = invoice.subscription
 
             if subscription_id:
-                subscription = stripe.Subscription.retrieve(subscription_id)
-                if 'donation_id' in subscription.metadata:
-                    donation_id = subscription.metadata['donation_id']
+                subscription_obj = stripe.Subscription.retrieve(subscription_id)
+                if 'donation_id' in subscription_obj.metadata:
+                    donation_id = subscription_obj.metadata['donation_id']
                     kwargs['invoice'] = invoice
                 else:
                     raise ValueError(_('Missing donation_id in subscription.metadata'))
@@ -88,35 +97,35 @@ class Factory_Stripe(PaymentGatewayFactory):
 
         # Intercept the subscription updated event
         if event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_UPDATED:
-            subscription = event['data']['object']
+            subscription_obj = event['data']['object']
 
-            if subscription:
-                if 'donation_id' in subscription.metadata:
-                    donation_id = subscription.metadata['donation_id']
+            if subscription_obj:
+                if 'donation_id' in subscription_obj.metadata:
+                    donation_id = subscription_obj.metadata['donation_id']
                 else:
-                    raise ValueError(_('Missing donation_id in subscription.metadata'))
+                    raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
 
         # Intercept the subscription deleted event
         if event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_DELETED:
-            subscription = event['data']['object']
+            subscription_obj = event['data']['object']
 
-            if subscription:
-                if 'donation_id' in subscription.metadata:
-                    donation_id = subscription.metadata['donation_id']
+            if subscription_obj:
+                if 'donation_id' in subscription_obj.metadata:
+                    donation_id = subscription_obj.metadata['donation_id']
                 else:
-                    raise ValueError(_('Missing donation_id in subscription.metadata'))
+                    raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
 
         # Finally init and return the Stripe Gateway Manager
-        if not donation_id:
+        if not donation_id and not can_skip_donation_id:
             raise ValueError(_('Missing donation_id'))
-        # for events not being processed
-        if event['type'] not in expected_events:
-            raise WebhookNotProcessedError(_("Stripe Event not expected for processing at the moment"))
 
         try:
-            donation = Donation.objects.get(pk=donation_id)
+            # no need to query donation object if can skip
+            if not can_skip_donation_id and not donation:
+                donation = Donation.objects.get(pk=donation_id)
             kwargs['session'] = session
             kwargs['event'] = event
+            kwargs['subscription_obj'] = subscription_obj
             return Factory_Stripe.initGateway(request, donation, subscription, **kwargs)
         except Donation.DoesNotExist:
             raise ValueError(_('No matching Donation found, donation_id: ')+str(donation_id))

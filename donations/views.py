@@ -1,7 +1,7 @@
 import re
 import secrets
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pprint import pprint
 from django.conf import settings
 from django.db import IntegrityError
@@ -20,9 +20,9 @@ from django.views.decorators.csrf import csrf_exempt
 from newstream.functions import getSiteSettings, printvars, _exception, _debug, uuid4_str
 from site_settings.models import PaymentGateway
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
-from .models import *
-from .forms import *
-from .functions import *
+from .models import DonationMetaField, AmountStep, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, Subscription, Donation, update_deleted_users_donations, STATUS_ACTIVE, STATUS_INACTIVE, STATUS_COMPLETE, STATUS_PENDING, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING
+from .forms import DONATION_DETAILS_FIELDS, PERSONAL_INFO_FIELDS, OTHER_FIELDS, DonationDetailsForm
+from .functions import getCurrencyDict, getCurrencyDictAt, getCurrencyFromCode, currencyCodeToKey, isTestMode, isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, gen_order_prefix_2c2p, getNextDateFromRecurringInterval, process_donation_meta, displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml
 User = get_user_model()
 
@@ -61,10 +61,10 @@ def donation_details(request):
                 # create pending donation
                 payment_gateway = PaymentGateway.objects.get(
                     pk=form.cleaned_data['payment_gateway'])
-                order_id = gen_order_id(gateway=payment_gateway)
+                transaction_id = gen_transaction_id(gateway=payment_gateway)
                 donation = Donation(
                     is_test=siteSettings.sandbox_mode,
-                    order_number=order_id,
+                    transaction_id=transaction_id,
                     user=request.user,
                     form=form_blueprint,
                     gateway=payment_gateway,
@@ -73,14 +73,14 @@ def donation_details(request):
                     currency=form.cleaned_data['currency'],
                     payment_status=STATUS_PROCESSING,
                     metas=donation_metas,
-                    donation_date=datetime.now(),
+                    donation_date=datetime.now(timezone.utc),
                 )
                 # create a pending subscription if is_recurring
                 if form.cleaned_data['donation_frequency'] == 'monthly':
-                    # create new Subscription object, with a temporary object_id created by uuidv4
+                    # create new Subscription object, with a temporary profile_id created by uuidv4
                     subscription = Subscription(
                         is_test=siteSettings.sandbox_mode,
-                        object_id=uuid4_str(),
+                        profile_id=uuid4_str(),
                         user=request.user,
                         gateway=payment_gateway,
                         recurring_amount=donation_amount,

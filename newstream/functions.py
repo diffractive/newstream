@@ -9,6 +9,7 @@ from pytz import timezone
 from pprint import pprint
 from datetime import datetime
 from hashlib import blake2b
+from decimal import Decimal, ROUND_HALF_UP
 import django.conf as conf
 from django.conf import settings
 from django.urls import reverse
@@ -76,6 +77,14 @@ def array_to_json_array(json_array):
 def is_primittive(data):
     return isinstance(data, str) or isinstance(data, int)
 
+
+def round_half_up(value, precision=0):
+    '''
+    Returns a Decimal instance constructed from the value and precision provided
+    Decimal instances can be constructed from integers, strings, floats, or tuples. Construction from an integer or a float performs an exact conversion of the value of that integer or float. Decimal numbers include special values such as NaN which stands for “Not a number”, positive and negative Infinity, and -0.
+    '''
+    exponent = '1.' + '0' * precision if precision > 0 else '1'
+    return Decimal(value).quantize(Decimal(exponent), rounding=ROUND_HALF_UP)
 
 def getFullReverseUrl(request, urlname, kwargs=None):
     return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + request.get_host() + reverse(urlname, kwargs=kwargs)

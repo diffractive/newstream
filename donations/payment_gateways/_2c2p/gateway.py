@@ -71,7 +71,7 @@ class Gateway_2C2P(PaymentGatewayManager):
         data = {}
         data['version'] = REDIRECT_API_VERSION
         data['merchant_id'] = self.settings.merchant_id
-        data['order_id'] = self.donation.order_number
+        data['order_id'] = self.donation.transaction_id
         data['currency'] = getCurrencyDictAt(
             self.donation.currency)['code']
         # Beware: self.donation.donation_amount param is str in type
@@ -147,7 +147,7 @@ class Gateway_2C2P(PaymentGatewayManager):
                 # create new Subscription object
                 subscription = Subscription(
                     is_test=self.testing_mode,
-                    object_id=self.data['recurring_unique_id'],
+                    profile_id=self.data['recurring_unique_id'],
                     user=self.donation.user,
                     gateway=self.donation.gateway,
                     recurring_amount=extract_payment_amount(self.data['amount'], self.data['currency']),
@@ -174,7 +174,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             donation = Donation(
                 is_test=self.testing_mode,
                 subscription=self.subscription,
-                order_number=self.data['order_id'],
+                transaction_id=self.data['order_id'],
                 user=fDonation.user,
                 form=fDonation.form,
                 gateway=fDonation.gateway,
@@ -205,7 +205,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             '--version', RPP_API_VERSION,
             '--mid', self.settings.merchant_id,
             '--secret', self.settings.secret_key,
-            '--ruid', self.subscription.object_id,
+            '--ruid', self.subscription.profile_id,
             '--type=U',
             '--status=Y',
             '--amount='+format_payment_amount(form_data['recurring_amount'], self.subscription.currency)
@@ -215,7 +215,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             '--version', RPP_API_VERSION,
             '--mid', self.settings.merchant_id,
             '--secret', self.settings.secret_key,
-            '--ruid', self.subscription.object_id,
+            '--ruid', self.subscription.profile_id,
             '--type=I'
         ]
         # make the call only either if donation amount is changed or billing_today is checked
@@ -275,7 +275,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             '--version', RPP_API_VERSION,
             '--mid', self.settings.merchant_id,
             '--secret', self.settings.secret_key,
-            '--ruid', self.subscription.object_id,
+            '--ruid', self.subscription.profile_id,
             '--type=C'
         ]
         # cancel subscription via 2c2p payment action call

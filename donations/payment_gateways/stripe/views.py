@@ -7,7 +7,7 @@ from django.views.decorators.csrf import csrf_exempt
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, printvars, _exception
 from donations.models import Donation
-from donations.functions import gen_order_id
+from donations.functions import gen_transaction_id
 from donations.payment_gateways.setting_classes import getStripeSettings
 from .functions import initStripeApiKey, formatDonationAmount
 from .factory import Factory_Stripe

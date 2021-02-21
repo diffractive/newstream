@@ -50,6 +50,7 @@ class Factory_Paypal(PaymentGatewayFactory):
         if response:
             donation_id = None
             subscription = None
+            subscription_obj = None
             kwargs = {}
             expected_events = [EVENT_PAYMENT_CAPTURE_COMPLETED, EVENT_BILLING_SUBSCRIPTION_ACTIVATED, EVENT_BILLING_SUBSCRIPTION_UPDATED, EVENT_PAYMENT_SALE_COMPLETED]
 
@@ -62,7 +63,7 @@ class Factory_Paypal(PaymentGatewayFactory):
 
             # subscription activated
             if json_data['event_type'] == EVENT_BILLING_SUBSCRIPTION_ACTIVATED:
-                subscription = json_data['resource']
+                subscription_obj = json_data['resource']
                 if 'custom_id' in json_data['resource']:
                     donation_id = json_data['resource']['custom_id']
                 else:
@@ -70,7 +71,7 @@ class Factory_Paypal(PaymentGatewayFactory):
 
             # subscription updated
             if json_data['event_type'] == EVENT_BILLING_SUBSCRIPTION_UPDATED:
-                subscription = json_data['resource']
+                subscription_obj = json_data['resource']
                 if 'custom_id' in json_data['resource']:
                     donation_id = json_data['resource']['custom_id']
                 else:
@@ -79,11 +80,11 @@ class Factory_Paypal(PaymentGatewayFactory):
             # subscription payment sale completed
             if json_data['event_type'] == EVENT_PAYMENT_SALE_COMPLETED:
                 subscription_id = json_data['resource']['billing_agreement_id']
-                subscription = getSubscriptionDetails(request, subscription_id)
-                if 'custom_id' in subscription:
-                    donation_id = subscription['custom_id']
+                subscription_obj = getSubscriptionDetails(request, subscription_id)
+                if 'custom_id' in subscription_obj:
+                    donation_id = subscription_obj['custom_id']
                 else:
-                    raise ValueError(_('Missing custom_id(donation_id) in curlPaypal-returned subscription'))
+                    raise ValueError(_('Missing custom_id(donation_id) in curlPaypal-returned subscription_obj'))
 
             if json_data['event_type'] in expected_events and not donation_id:
                 raise ValueError(_("Missing donation_id after processing events from paypal"))
@@ -93,6 +94,7 @@ class Factory_Paypal(PaymentGatewayFactory):
                 donation = Donation.objects.get(pk=donation_id)
                 kwargs['payload'] = json_data['resource']
                 kwargs['event_type'] = json_data['event_type']
+                kwargs['subscription_obj'] = subscription_obj
                 return Factory_Paypal.initGateway(request, donation, subscription, **kwargs)
             except Donation.DoesNotExist:
                 raise ValueError(_("Donation object not found by id: ")+str(donation_id))
@@ -105,14 +107,15 @@ class Factory_Paypal(PaymentGatewayFactory):
         paypalSettings = getPayPalSettings(request)
         client = PayPalHttpClient(paypalSettings.environment)
         donation_id = None
-        subscription = {}
+        subscription_obj = {}
         kwargs = {}
 
         if request.GET.get('subscription_id', None):
             # recurring payment
-            subscription = getSubscriptionDetails(request, request.GET.get('subscription_id'))
-            if 'custom_id' in subscription:
-                donation_id = subscription['custom_id']
+            subscription_obj = getSubscriptionDetails(request, request.GET.get('subscription_id'))
+            kwargs['subscription_obj'] = subscription_obj
+            if 'custom_id' in subscription_obj:
+                donation_id = subscription_obj['custom_id']
             else:
                 raise ValueError(_('Missing custom_id(donation_id) in curlPaypal-returned subscription'))
         elif request.GET.get('token', None):
@@ -132,6 +135,6 @@ class Factory_Paypal(PaymentGatewayFactory):
         
         try:
             donation = Donation.objects.get(pk=donation_id)
-            return Factory_Paypal.initGateway(request, donation, subscription, **kwargs)
+            return Factory_Paypal.initGateway(request, donation, None, **kwargs)
         except Donation.DoesNotExist:
             raise ValueError(_("Donation object not found by id: ")+str(donation_id))

@@ -86,8 +86,8 @@
                     <dd>{{ fields.id.value }}</dd>
                 </div>
                 <div class="column-1-2">
-                    <dt>{{ fields.object_id.label }}</dt>
-                    <dd>{{ fields.object_id.value }}</dd>
+                    <dt>{{ fields.profile_id.label }}</dt>
+                    <dd>{{ fields.profile_id.value }}</dd>
                 </div>
             </div>
             <div class="two-column-flex">
@@ -132,7 +132,7 @@
                 <thead>
                     <tr>
                         <th>{% trans 'ID' %}</th>
-                        <th>{% trans 'Order number' %}</th>
+                        <th>{% trans 'Transaction ID' %}</th>
                         <th>{% trans 'Donation amount' %}</th>
                         <th>{% trans 'Currency' %}</th>
                         <th>{% trans 'Payment status' %}</th>
@@ -143,7 +143,7 @@
                     {% for renewal in renewals %}
                     <tr>
                         <td>{{ renewal.id }} <a href="{% url 'donations_donation_modeladmin_inspect' instance_pk=renewal.id %}">(Inspect)</a></td>
-                        <td>{{ renewal.order_number }}</td>
+                        <td>{{ renewal.transaction_id }}</td>
                         <td>{{ renewal.donation_amount }}</td>
                         <td>{{ renewal.currency }}</td>
                         <td>{{ renewal.payment_status }}</td>

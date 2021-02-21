@@ -189,7 +189,7 @@ class DonationAdmin(ModelAdmin):
     list_display = ('donation_amount', 'gateway',
                     'is_recurring', 'payment_status', 'user_column', 'created_at',)
     list_filter = ('is_recurring', 'payment_status', 'created_at',)
-    search_fields = ('order_number', 'donation_amount',
+    search_fields = ('transaction_id', 'donation_amount',
                      'payment_status', 'is_recurring', 'created_at',)
     inspect_view_enabled = True
     inspect_view_class = DonationInspectView
@@ -220,7 +220,7 @@ class SubscriptionAdmin(ModelAdmin):
     list_display = ('recurring_amount', 'gateway',
                     'recurring_status', 'user_column', 'created_at',)
     list_filter = ('recurring_status', 'created_at',)
-    search_fields = ('object_id', 'recurring_amount',
+    search_fields = ('profile_id', 'recurring_amount',
                      'recurring_status', 'created_at',)
     inspect_view_enabled = True
     inspect_view_class = SubscriptionInspectView

@@ -14,7 +14,7 @@
                     class="icon"></span></a>
         </div>
         <h1 class="mb-4 text-white">{% trans 'Edit Recurring Donation' %}</h1>
-        <h4 class="mb-4 text-white">{% trans 'Recurring Donation Identifier: ' %}{{subscription.object_id}}</h4>
+        <h4 class="mb-4 text-white">{% trans 'Recurring Donation Identifier: ' %}{{subscription.profile_id}}</h4>
         <h4 class="mb-4 text-white">{% trans 'Recurring Donation status:' %} <span
                 class="font-bold {{subscription.recurring_status|recurring_status_color}}">{{subscription.recurring_status|title}}</span>
         </h4>

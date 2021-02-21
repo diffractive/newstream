@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from django.shortcuts import get_object_or_404
 from django.conf.urls import url
 from django.conf import settings
@@ -112,7 +112,7 @@ class SendCampaignView(InstanceSpecificView):
 
             if self.mails_sent > 0:
                 model.sent = True
-                model.sent_at = datetime.now()
+                model.sent_at = datetime.now(timezone.utc)
                 model.save()
 
     def get_context_data(self, **kwargs):

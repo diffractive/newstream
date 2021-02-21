@@ -1,6 +1,6 @@
 import stripe
 from decimal import *
-from datetime import datetime
+from datetime import datetime, timezone
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.shortcuts import get_object_or_404
@@ -14,7 +14,7 @@ from donations.models import Donation, DonationPaymentMeta, Subscription, Subscr
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.stripe.constants import *
-from donations.functions import gen_order_id
+from donations.functions import gen_transaction_id
 from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
 from newstream.functions import uuid4_str, getSiteName, getSiteSettings, getFullReverseUrl, printvars, raiseObjectNone, _debug
 from .functions import initStripeApiKey, formatDonationAmount, formatDonationAmountFromGateway
@@ -24,11 +24,12 @@ class Gateway_Stripe(PaymentGatewayManager):
 
     def __init__(self, request, donation=None, subscription=None, **kwargs):
         '''
-        Note that the subscription parameter passed here can be either a newstream model or a stripe subscription object.
+        Note that the subscription parameter passed here should always be a newstream model.
 
         Other stripe objects are to be passed in kwargs, including session, event and invoice
         session: this is the stripe checkout session object, stores also the donation_id in the metadata
         event: this is the stripe event object when stripe webhooks are triggered and emitted to our server
+        subscription_obj: this is the stripe subscription object fetched directly or retrieved indirectly from the webhook payload
         invoice: this is the stripe invoice object sent to our server when a payment has succeeded or failed
         '''
         super().__init__(request, donation, subscription)
@@ -53,7 +54,7 @@ class Gateway_Stripe(PaymentGatewayManager):
             # Update payment status
             self.donation.payment_status = STATUS_COMPLETE
             # update donation_date
-            self.donation.donation_date = datetime.now()
+            self.donation.donation_date = datetime.now(timezone.utc)
             self.donation.save()
 
             # Since for recurring payment, subscription.updated event might lag behind checkout.session.completed
@@ -65,30 +66,37 @@ class Gateway_Stripe(PaymentGatewayManager):
 
         # Event: invoice.created (for subscriptions, just return 200 here and do nothing - to signify to Stripe that it can proceed and finalize the invoice)
         # https://stripe.com/docs/billing/subscriptions/webhooks#understand
-        if self.event['type'] == EVENT_INVOICE_CREATED and hasattr(self, 'subscription') and hasattr(self, 'invoice'):
+        if self.event['type'] == EVENT_INVOICE_CREATED and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):
             return HttpResponse(status=200)
 
         # Event: invoice.paid (for subscriptions)
-        if self.event['type'] == EVENT_INVOICE_PAID and hasattr(self, 'subscription') and hasattr(self, 'invoice'):
+        if self.event['type'] == EVENT_INVOICE_PAID and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):
             if self.invoice.status == 'paid':
+                _debug("[stripe recurring] Invoice confirmed paid")
                 # check if subscription has one or more invoices to determine it's a first time or renewal payment
-                # self.subscription here is the stripe subscription object
+                # self.subscription_obj here is the stripe subscription object
                 try:
-                    invoices = stripe.Invoice.list(subscription=self.subscription.id)
+                    invoices = stripe.Invoice.list(subscription=self.subscription_obj.id)
                 except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
                     raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
-                # _debug("Stripe: Subscription {} has {} invoices.".format(self.subscription.id, len(invoices['data'])))
+                # _debug("Stripe: Subscription {} has {} invoices.".format(self.subscription_obj.id, len(invoices['data'])))
                 if len(invoices['data']) == 1:
+                    _debug("[stripe recurring] First time subscription")
+                    # save charge id as donation.transaction_id
+                    self.donation.transaction_id = self.invoice.charge
+                    self.donation.save()
+                    # also save the invoice number as a DonationPaymentMeta
                     dpmeta = DonationPaymentMeta(
                         donation=self.donation, field_key='stripe_invoice_number', field_value=self.invoice.number)
                     dpmeta.save()
                 elif len(invoices['data']) > 1:
+                    _debug("[stripe recurring] About to add renewal donation")
                     # create a new donation record + then send donation receipt to user
                     # self.donation is the first donation made for a subscription
                     donation = Donation(
-                        is_test=self.testing_mode,
+                        is_test=self.donation.is_test,
                         subscription=self.donation.subscription,
-                        order_number=gen_order_id(self.donation.gateway),
+                        transaction_id=self.invoice.charge,
                         user=self.donation.user,
                         form=self.donation.form,
                         gateway=self.donation.gateway,
@@ -96,7 +104,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                         donation_amount=formatDonationAmountFromGateway(str(self.invoice.amount_paid), self.donation.currency),
                         currency=self.donation.currency,
                         payment_status=STATUS_COMPLETE,
-                        donation_date=datetime.now(),
+                        donation_date=datetime.now(timezone.utc),
                     )
                     donation.save()
 
@@ -110,19 +118,19 @@ class Gateway_Stripe(PaymentGatewayManager):
 
                 # log down the current subscription period span
                 spmeta = SubscriptionPaymentMeta(
-                    subscription=self.donation.subscription, field_key='stripe_subscription_period', field_value=str(self.subscription.current_period_start)+'-'+str(self.subscription.current_period_end))
+                    subscription=self.donation.subscription, field_key='stripe_subscription_period', field_value=str(self.subscription_obj.current_period_start)+'-'+str(self.subscription_obj.current_period_end))
                 spmeta.save()
 
                 return HttpResponse(status=200)
 
         # Event: customer.subscription.updated
-        if self.event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_UPDATED and hasattr(self, 'subscription'):
+        if self.event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_UPDATED and hasattr(self, 'subscription_obj'):
             # Subscription active after invoice paid
-            if self.subscription['status'] == 'active':
+            if self.subscription_obj['status'] == 'active':
                 if self.donation.subscription.recurring_status == STATUS_PROCESSING:
-                    # save the new subscription, marked by object_id
-                    self.donation.subscription.object_id = self.subscription.id
-                    self.donation.subscription.recurring_amount = formatDonationAmountFromGateway(self.subscription['items']['data'][0]['price']['unit_amount_decimal'], self.donation.currency)
+                    # save the new subscription, marked by profile_id
+                    self.donation.subscription.profile_id = self.subscription_obj.id
+                    self.donation.subscription.recurring_amount = formatDonationAmountFromGateway(self.subscription_obj['items']['data'][0]['price']['unit_amount_decimal'], self.donation.currency)
                     self.donation.subscription.currency = self.donation.currency
                     self.donation.subscription.recurring_status = STATUS_ACTIVE
                     self.donation.subscription.save()
@@ -136,7 +144,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                     sendDonationNotifToAdmins(self.request, self.donation)
                 else:
                     # check if pause_collection is marked_uncollectible
-                    if self.subscription['pause_collection'] and self.subscription['pause_collection']['behavior'] == 'mark_uncollectible':
+                    if self.subscription_obj['pause_collection'] and self.subscription_obj['pause_collection']['behavior'] == 'mark_uncollectible':
                         self.donation.subscription.recurring_status = STATUS_PAUSED
                     else:
                         self.donation.subscription.recurring_status = STATUS_ACTIVE
@@ -147,7 +155,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 return HttpResponse(status=400)
 
         # Event: customer.subscription.deleted
-        if self.event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_DELETED and hasattr(self, 'subscription'):
+        if self.event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_DELETED and hasattr(self, 'subscription_obj'):
             # update donation recurring_status
             self.donation.subscription.recurring_status = STATUS_CANCELLED
             self.donation.subscription.save()
@@ -178,7 +186,7 @@ class Gateway_Stripe(PaymentGatewayManager):
             # call stripe api to get the SubscriptionItem
             try:
                 stripeRes = stripe.SubscriptionItem.list(
-                    subscription=self.subscription.object_id,
+                    subscription=self.subscription.profile_id,
                 )
             except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
                 raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
@@ -216,7 +224,7 @@ class Gateway_Stripe(PaymentGatewayManager):
         if form_data['billing_cycle_now']:
             try:
                 updateRes = stripe.Subscription.modify(
-                    self.subscription.object_id,
+                    self.subscription.profile_id,
                     proration_behavior='none',
                     billing_cycle_anchor='now',
                 )
@@ -241,7 +249,7 @@ class Gateway_Stripe(PaymentGatewayManager):
         # cancel subscription via stripe API
         try:
             cancelled_subscription = stripe.Subscription.delete(
-                self.subscription.object_id)
+                self.subscription.profile_id)
         except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
             raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
         if cancelled_subscription and cancelled_subscription.status == 'canceled':
@@ -268,7 +276,7 @@ class Gateway_Stripe(PaymentGatewayManager):
             raise ValueError(_('Subscription object is neither Active or Paused'))
         try:
             updated_subscription = stripe.Subscription.modify(
-                self.subscription.object_id, pause_collection=toggle_obj)
+                self.subscription.profile_id, pause_collection=toggle_obj)
         except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
             raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
         if updated_subscription:

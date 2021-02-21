@@ -21,7 +21,7 @@
         <div class="donation-record p-4 rounded-lg bg-primary-light mb-4">
             <table class="w-full">
                 <tr>
-                    <td colspan="2"><span class="font-bold">#&nbsp;</span>{{ subscription.object_id }}</td>
+                    <td colspan="2"><span class="font-bold">#&nbsp;</span>{{ subscription.profile_id }}</td>
                     <td width="50">
                         <div class="more-dropdown-div flex items-center dropdown-div-wrapper">
                             <input type="checkbox" name="md_dropdown-toggle-checkbox"
@@ -95,7 +95,7 @@
             <tr>
                 <td>{{ subscription|recurring_amount_with_currency }}</td>
                 <td>{% trans 'Monthly' %}</td>
-                <td>{{ subscription.object_id }}</td>
+                <td>{{ subscription.profile_id }}</td>
                 <td>{{ subscription.created_at|date:'j M Y' }}</td>
                 <td>{{ siteSettings|get_attr:subscription.gateway.frontend_label_attr_name }}</td>
                 <td class="recurring-status-td" data-id="{{ subscription.id }}">

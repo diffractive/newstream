@@ -196,7 +196,7 @@ class Subscription(ClusterableModel):
         null=True
     )
     is_test = models.BooleanField(default=False)
-    object_id = models.CharField(max_length=191, unique=True)
+    profile_id = models.CharField(max_length=191, unique=True)
     recurring_amount = models.DecimalField(max_digits=20, decimal_places=2)
     currency = models.CharField(max_length=20)
     recurring_status = models.CharField(
@@ -207,7 +207,7 @@ class Subscription(ClusterableModel):
     deleted = models.BooleanField(default=False)
 
     panels = [
-        ReadOnlyPanel('object_id', heading=_('Object ID')),
+        ReadOnlyPanel('profile_id', heading=_('Profile ID')),
         ReadOnlyPanel('recurring_amount', heading=_('Recurring Donation Amount')),
         ReadOnlyPanel('currency', heading=_('Currency')),
         ReadOnlyPanel('recurring_status', heading=_('Recurring Status')),
@@ -254,7 +254,7 @@ class Donation(ClusterableModel):
         null=True
     )
     is_test = models.BooleanField(default=False)
-    order_number = models.CharField(max_length=191, unique=True)
+    transaction_id = models.CharField(max_length=191, unique=True)
     donation_amount = models.DecimalField(max_digits=20, decimal_places=2)
     is_recurring = models.BooleanField(default=False)
     currency = models.CharField(max_length=20)
@@ -267,7 +267,7 @@ class Donation(ClusterableModel):
     deleted = models.BooleanField(default=False)
 
     panels = [
-        FieldPanel('order_number', heading=_('Order Number')),
+        FieldPanel('transaction_id', heading=_('Transaction ID')),
         ReadOnlyPanel('donation_amount', heading=_('Donation Amount')),
         ReadOnlyPanel('is_recurring', heading=_('Is Recurring')),
         ReadOnlyPanel('currency', heading=_('Currency')),

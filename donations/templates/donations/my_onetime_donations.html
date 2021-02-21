@@ -21,7 +21,7 @@
         <div class="donation-record p-4 rounded-lg bg-primary-light mb-4">
             <table class="w-full">
                 <tr>
-                    <td colspan="2"><span class="font-bold">#&nbsp;</span>{{ donation.order_number }}</td>
+                    <td colspan="2"><span class="font-bold">#&nbsp;</span>{{ donation.transaction_id }}</td>
                 </tr>
                 <tr>
                     <td width="120">{{ donation|amount_with_currency }}</td>
@@ -45,7 +45,7 @@
             <tr>
                 <th>{% trans 'Donation Amount' %}</th>
                 <th>{% trans 'Donation Frequency' %}</th>
-                <th>{% trans 'Order Number' %}</th>
+                <th>{% trans 'Transaction ID' %}</th>
                 <th>{% trans 'Date' %}</th>
                 <th>{% trans 'Payment Method' %}</th>
                 <th>{% trans 'Status' %}</th>
@@ -57,7 +57,7 @@
             <tr>
                 <td>{{ donation|amount_with_currency }}</td>
                 <td>{{ donation.donation_frequency }}</td>
-                <td>{{ donation.order_number }}</td>
+                <td>{{ donation.transaction_id }}</td>
                 <td>{{ donation.created_at|date:'j M Y' }}</td>
                 <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
                 <td>{{ donation.payment_status|title }}</td>

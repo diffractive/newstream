@@ -1,6 +1,6 @@
 import stripe
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
@@ -11,7 +11,7 @@ from paypalhttp import HttpError
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import getSiteSettings, getSiteName, uuid4_str, getFullReverseUrl, printvars, object_to_json, _debug, _error, _exception
 from donations.models import Donation, DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED
-from donations.functions import gen_order_id
+from donations.functions import gen_transaction_id
 from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.payment_gateways import Factory_Paypal
@@ -135,7 +135,7 @@ def return_from_paypal(request):
                 if capture_status == 'COMPLETED':
                     _debug('PayPal: Order Captured. Payment Completed.')
                     gatewayManager.donation.payment_status = STATUS_COMPLETE
-                    gatewayManager.donation.donation_date = datetime.now()
+                    gatewayManager.donation.donation_date = datetime.now(timezone.utc)
                     gatewayManager.donation.save()
                     # send email notifs
                     sendDonationReceiptToDonor(request, gatewayManager.donation)

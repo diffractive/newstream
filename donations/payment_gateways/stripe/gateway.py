@@ -155,10 +155,11 @@ class Gateway_Stripe(PaymentGatewayManager):
                 return HttpResponse(status=400)
 
         # Event: customer.subscription.deleted
+        # self.donation is not initialized here, reason refer to Factory_Stripe.initGatewayByVerification
         if self.event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_DELETED and hasattr(self, 'subscription_obj'):
-            # update donation recurring_status
-            self.donation.subscription.recurring_status = STATUS_CANCELLED
-            self.donation.subscription.save()
+            # update subscription recurring_status
+            self.subscription.recurring_status = STATUS_CANCELLED
+            self.subscription.save()
 
             return HttpResponse(status=200)
         

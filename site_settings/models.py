@@ -273,6 +273,18 @@ class SiteSettings(BaseSetting, ClusterableModel):
         ], heading=_("Stripe API Live Settings")),
     ]
 
+    manual_frontend_label = models.CharField(
+        max_length=255, default=_("Manual"), help_text=_("The Gateway name to be shown on public-facing website for admin-added donations."))
+    offline_frontend_label = models.CharField(
+        max_length=255, default=_("Offline"), help_text=_("The Gateway name to be shown on public-facing website for offline donations."))
+
+    donations_others_panels = [
+        FieldPanel("manual_frontend_label", heading=_(
+            "Manual Donations public-facing label")),
+        FieldPanel("offline_frontend_label", heading=_(
+            "Offline Donations public-facing label")),
+    ]
+
     brand_logo = models.ForeignKey(
         'wagtailimages.Image',
         null=True,
@@ -326,6 +338,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
                           heading=_('PayPal'), classname='gateways-paypal'),
             SubObjectList(donations_stripe_panels,
                           heading=_('Stripe'), classname='gateways-stripe'),
+            SubObjectList(donations_others_panels,
+                          heading=_('Others'), classname='gateways-others'),
         ], heading=_("Donations")),
         SubTabbedInterface([
             SubObjectList(appearance_general_panels,

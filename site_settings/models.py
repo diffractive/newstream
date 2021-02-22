@@ -16,6 +16,8 @@ from donations.includes.currency_dictionary import currency_dict
 GATEWAY_2C2P = '2C2P'
 GATEWAY_PAYPAL = 'PayPal'
 GATEWAY_STRIPE = 'Stripe'
+GATEWAY_MANUAL = 'Manual'
+GATEWAY_OFFLINE = 'Offline'
 
 
 class TopTabbedInterface(TabbedInterface):

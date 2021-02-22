@@ -4,7 +4,7 @@ import re
 import os
 import traceback
 from decimal import *
-from datetime import datetime
+from datetime import datetime, timezone
 from xml.etree import ElementTree as ET
 from urllib.parse import urlencode
 from subprocess import Popen, STDOUT, PIPE
@@ -182,7 +182,7 @@ class Gateway_2C2P(PaymentGatewayManager):
                 donation_amount=extract_payment_amount(self.data['amount'], self.data['currency']),
                 currency=currencyCodeToKey(self.data['currency']),
                 payment_status=map2C2PPaymentStatus(self.data['payment_status']),
-                donation_date=datetime.now(),
+                donation_date=datetime.now(timezone.utc),
             )
             _debug('Save renewal Donation:'+self.data['order_id'])
             donation.save()

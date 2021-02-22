@@ -42,6 +42,9 @@ class Command(BaseCommand):
             return STATUS_CANCELLED
         return STATUS_FAILED
 
+    # def gateway_mapping(self, give_gateway):
+    #     if give_gateway == 
+
     def handle(self, *args, **options):
         try:
             with connect(
@@ -51,30 +54,48 @@ class Command(BaseCommand):
                 database="support_clone"
             ) as connection:
                 for donor_id in options['donor_ids']:
-                    select_donors_lj_meta_query = "select id, email, date_created, dnm.* from wp_give_donors dn left join wp_give_donormeta dnm on dn.id = dnm.donor_id where dn.id = %d;" % donor_id
+                    # select_donor_query = "select * from wp_give_donors where id = %d" % donor_id
+                    select_donors_lj_meta_query = "select id, email, name, date_created, dnm.* from wp_give_donors dn left join wp_give_donormeta dnm on dn.id = dnm.donor_id where dn.id = %d;" % donor_id
                     select_subscriptions_query = "select * from wp_give_subscriptions where customer_id = %d;" % donor_id
                     with connection.cursor() as cursor:
+                        donorMetaDict = {}
                         cursor.execute(select_donors_lj_meta_query)
-                        result = cursor.fetchall()
+                        donorMetaResult = cursor.fetchall()
                         newUser = None
-                        for i, row in enumerate(result):
+                        for i, row in enumerate(donorMetaResult):
+                            donorMetaDict[row[6]] = row[7]
                             if i == 0:
                                 # Add the user first
                                 newUser = User.objects.create_user(username=row[1], email=row[1], password='password628')
                                 newUser.save()
-                            if row[5] == '_give_donor_first_name':
-                                newUser.first_name = row[6]
-                            elif row[5] == '_give_donor_last_name':
-                                newUser.last_name = row[6]
+                                # save donor's name attribute as UserMeta as I am not sure how to correctly split the name into first and last names
+                                um = UserMeta(user=newUser, field_key='_give_donor_name', field_value=row[2])
+                            if row[6] == '_give_donor_first_name':
+                                newUser.first_name = row[7]
+                            elif row[6] == '_give_donor_last_name':
+                                newUser.last_name = row[7]
                             else:
-                                um = UserMeta(user=newUser, field_key=row[5], field_value=row[6])
+                                um = UserMeta(user=newUser, field_key=row[6], field_value=row[7])
                                 um.save()
                         newUser.save()
+                        
                         # add subscriptions
                         cursor.execute(select_subscriptions_query)
                         result = cursor.fetchall()
                         newSubscription = None
                         for i, row in enumerate(result):
+                            parent_donation_id = row[8]
+                            # prepare data for subscription adding
+                            parent_donation_query = "select * from wp_posts where ID = %d" % parent_donation_id
+                            cursor.execute(parent_donation_query)
+                            parentDonationResult = cursor.fetchone()
+                            parent_donationmeta_query = "select * from wp_give_donationmeta where donation_id = %d" % parent_donation_id
+                            cursor.execute(parent_donationmeta_query)
+                            parentDonationMetaResult = cursor.fetchall()
+                            parentDonationMetaDict = {}
+                            for j, meta in enumerate(parentDonationMetaResult):
+                                parentDonationMetaDict[row[2]] = row[3]
+
                             newSubscription = Subscription(
                                 is_test=True,
                                 profile_id=row[13],

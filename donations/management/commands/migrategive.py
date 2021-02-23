@@ -2,6 +2,7 @@ from getpass import getpass
 from subprocess import PIPE, Popen
 from mysql.connector import connect
 from datetime import datetime, timezone
+from allauth.account.models import EmailAddress
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -125,6 +126,9 @@ class Command(BaseCommand):
                                     # Add the user first
                                     newUser = User.objects.create_user(username=givewp_donor_email, email=givewp_donor_email, password='password628')
                                     newUser.save()
+                                    # save donor email as verified and primary
+                                    email_obj = EmailAddress(email=givewp_donor_email, verified=True, primary=True, user=newUser)
+                                    email_obj.save()
                                     # save donor's name attribute as UserMeta as I am not sure how to correctly split the name into first and last names
                                     um = UserMeta(user=newUser, field_key='_give_donor_name', field_value=givewp_donor_name)
                                     um.save()
@@ -185,7 +189,7 @@ class Command(BaseCommand):
                                     recurring_amount=round_half_up(givewp_subscription_initial_amount, 2),
                                     currency=parentDonationMetaDict['_give_payment_currency'],
                                     recurring_status=self.subscription_status_mapping(givewp_subscription_status),
-                                    created_at=givewp_subscription_created.replace(tzinfo=timezone.utc)
+                                    subscribe_date=givewp_subscription_created.replace(tzinfo=timezone.utc)
                                 )
                                 newSubscription.save()
                                 self.print("[√] Created Newstream Subscription (id: %d, profile_id: %s)" % (newSubscription.id, newSubscription.profile_id))

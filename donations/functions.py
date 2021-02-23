@@ -15,7 +15,7 @@ from newstream.functions import getSiteSettings, getSuperUserTimezone, _debug
 from newstream.functions import evTokenGenerator, raiseObjectNone, getSiteName
 from donations.models import DonationMeta
 from newstream_user.models import UserSubscriptionUpdatesLog
-from site_settings import GATEWAY_STRIPE, GATEWAY_PAYPAL, GATEWAY_2C2P
+from site_settings.models import GATEWAY_STRIPE, GATEWAY_PAYPAL, GATEWAY_2C2P
 
 
 def getCurrencyDict():

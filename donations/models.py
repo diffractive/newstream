@@ -202,7 +202,7 @@ class Subscription(ClusterableModel):
     currency = models.CharField(max_length=20)
     recurring_status = models.CharField(
         max_length=255, choices=RECURRING_STATUS_CHOICES, default=STATUS_INACTIVE, blank=True, null=True)
-    subscribe_date = models.DateTimeField(default=datetime.now(timezone.utc))
+    subscribe_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     linked_user_deleted = models.BooleanField(default=False)
@@ -263,7 +263,7 @@ class Donation(ClusterableModel):
     currency = models.CharField(max_length=20)
     payment_status = models.CharField(
         max_length=255, choices=PAYMENT_STATUS_CHOICES)
-    donation_date = models.DateTimeField(default=datetime.now(timezone.utc))
+    donation_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     linked_user_deleted = models.BooleanField(default=False)

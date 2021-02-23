@@ -15,7 +15,7 @@
         <h1 class="mb-4 text-white">{% trans 'My renewals' %}</h1>
         <h4 class="mb-2 text-white">{% trans 'Recurring Donation identifier:' %} {{ subscription.profile_id }}</h4>
         <h4 class="mb-2 text-white">{% trans 'Recurring Donation start date:' %}
-            {{ subscription.created_at|date:'j M Y' }}</h4>
+            {{ subscription.subscribe_date|date:'j M Y' }}</h4>
         <h4 class="mb-2 text-white">{% trans 'Recurring Donation interval:' %} {% trans 'Monthly' %}</h4>
         <h4 class="mb-4 text-white">{% trans 'Recurring Donation status:' %} <span
                 class="font-bold {{subscription.recurring_status|recurring_status_color}}">{{subscription.recurring_status|title}}</span>
@@ -39,7 +39,7 @@
                     <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
                 <tr>
                     <td>{{ donation.donation_frequency }}</td>
-                    <td>{{ donation.created_at|date:'j M Y' }}</td>
+                    <td>{{ donation.donation_date|date:'j M Y' }}</td>
                 </tr>
                 <tr>
                     <td colspan="2">{{ donation.payment_status|title }}</td>
@@ -67,7 +67,7 @@
                 <td>{{ donation|amount_with_currency }}</td>
                 <td>{{ donation.donation_frequency }}</td>
                 <td>{{ donation.transaction_id }}</td>
-                <td>{{ donation.created_at|date:'j M Y' }}</td>
+                <td>{{ donation.donation_date|date:'j M Y' }}</td>
                 <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
                 <td>{{ donation.payment_status|title }}</td>
             </tr>

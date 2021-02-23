@@ -126,7 +126,7 @@
         </div>
     </section>
     <section id="tab-renewals" role="tabpanel" aria-labelledby="tab-label-renewals">
-        <div class="nice-padding">
+        <div class="nice-padding" style="padding-bottom: 60px;">
             {% if renewals %}
             <table class="listing full-width">
                 <thead>
@@ -172,6 +172,7 @@
             <p>{% trans 'Subscription is already active.' %}</p>
             {% endif %}
             <hr>
+            {% if gateway_actions_supported %}
             <h2>{% trans 'Toggle subscription status' %}</h2>
             {% if fields.recurring_status.value == status_active or fields.recurring_status.value == status_paused %}
             <form action="{% url 'internal-toggle-subscription' %}" method="POST">
@@ -196,6 +197,9 @@
             </form>
             {% else %}
             <p>{% trans 'Subscription is already cancelled.' %}</p>
+            {% endif %}
+            {% else %}
+            <p>{% trans 'Current payment gateway does not support api calls or any actions performed here.' %}</p>
             {% endif %}
         </div>
     </section>

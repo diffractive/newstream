@@ -7,10 +7,11 @@ from wagtail.contrib.modeladmin.options import (
 from wagtail.contrib.modeladmin.views import InspectView, DeleteView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper
 
+from donations.functions import isGatewayActionSupported
 from newstream.functions import raiseObjectNone, getSiteSettings_from_default_site
-from .models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED
+from donations.models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED
 from newstream_user.models import UserSubscriptionUpdatesLog
-from .payment_gateways._2c2p.functions import RPPInquiryRequest
+from donations.payment_gateways._2c2p.functions import RPPInquiryRequest
 
 
 class DonationInspectView(InspectView):
@@ -100,6 +101,7 @@ class SubscriptionInspectView(InspectView):
             'status_active': STATUS_ACTIVE.capitalize(),
             'status_paused': STATUS_PAUSED.capitalize(),
             'status_cancelled': STATUS_CANCELLED.capitalize(),
+            'gateway_actions_supported': isGatewayActionSupported(self.instance.gateway),
             'metas': self.get_meta_data(),
             'renewals': self.get_renewals(),
             'action_logs': self.get_action_logs(),
@@ -187,10 +189,10 @@ class DonationAdmin(ModelAdmin):
     add_to_settings_menu = False
     exclude_from_explorer = False
     list_display = ('donation_amount', 'gateway',
-                    'is_recurring', 'payment_status', 'user_column', 'created_at',)
-    list_filter = ('is_recurring', 'payment_status', 'created_at',)
+                    'is_recurring', 'payment_status', 'user_column', 'donation_date',)
+    list_filter = ('is_recurring', 'payment_status', 'donation_date',)
     search_fields = ('transaction_id', 'donation_amount',
-                     'payment_status', 'is_recurring', 'created_at',)
+                     'payment_status', 'is_recurring', 'donation_date',)
     inspect_view_enabled = True
     inspect_view_class = DonationInspectView
     inspect_view_extra_css = ['css/admin_inspect.css']
@@ -218,10 +220,10 @@ class SubscriptionAdmin(ModelAdmin):
     add_to_settings_menu = False
     exclude_from_explorer = False
     list_display = ('recurring_amount', 'gateway',
-                    'recurring_status', 'user_column', 'created_at',)
-    list_filter = ('recurring_status', 'created_at',)
+                    'recurring_status', 'user_column', 'subscribe_date',)
+    list_filter = ('recurring_status', 'subscribe_date',)
     search_fields = ('profile_id', 'recurring_amount',
-                     'recurring_status', 'created_at',)
+                     'recurring_status', 'subscribe_date',)
     inspect_view_enabled = True
     inspect_view_class = SubscriptionInspectView
     inspect_view_extra_css = ['css/admin_inspect.css']

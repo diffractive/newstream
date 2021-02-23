@@ -30,6 +30,7 @@ client/node_modules
  
 ### NEWSTREAM
 *.log
+.backups/
 test_pkcs7/
 fixure.json
 fixture-converted.json

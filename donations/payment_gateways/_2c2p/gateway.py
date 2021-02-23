@@ -153,6 +153,7 @@ class Gateway_2C2P(PaymentGatewayManager):
                     recurring_amount=extract_payment_amount(self.data['amount'], self.data['currency']),
                     currency=currencyCodeToKey(self.data['currency']),
                     recurring_status=STATUS_ACTIVE,
+                    subscribe_date=datetime.now(timezone.utc)
                 )
                 subscription.save()
                 # link subscription to the donation

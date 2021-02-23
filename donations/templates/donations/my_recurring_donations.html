@@ -32,7 +32,8 @@
                             <div
                                 class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch recurring-donation-menu">
                                 {% if request.user.is_email_verified %}
-                                {% if subscription.isRecurringCancelled %}
+                                {% with support_actions=subscription|gateway_actions_supported %}
+                                {% if subscription.isRecurringCancelled or not support_actions %}
                                 <div class="payment-cancelled-options-div" data-id="{{ subscription.id }}">
                                     <button class="view-recurring-donation" data-id="{{ subscription.id }}"
                                         data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
@@ -52,6 +53,7 @@
                                             class="icon"></span></button>
                                 </div>
                                 {% endif %}
+                                {% endwith %}
                                 {% else %}
                                 <button class="actions-locked">{% trans 'Actions locked (Email unverified)' %}</button>
                                 {% endif %}
@@ -65,7 +67,7 @@
                     <td>&nbsp;</td>
                 <tr>
                     <td>{% trans 'Monthly' %}</td>
-                    <td>{{ subscription.created_at|date:'j M Y' }}</td>
+                    <td>{{ subscription.subscribe_date|date:'j M Y' }}</td>
                     <td>&nbsp;</td>
                 </tr>
                 <tr>
@@ -96,7 +98,7 @@
                 <td>{{ subscription|recurring_amount_with_currency }}</td>
                 <td>{% trans 'Monthly' %}</td>
                 <td>{{ subscription.profile_id }}</td>
-                <td>{{ subscription.created_at|date:'j M Y' }}</td>
+                <td>{{ subscription.subscribe_date|date:'j M Y' }}</td>
                 <td>{{ siteSettings|get_attr:subscription.gateway.frontend_label_attr_name }}</td>
                 <td class="recurring-status-td" data-id="{{ subscription.id }}">
                     {{ subscription.recurring_status|title }}</td>
@@ -110,7 +112,8 @@
                         <div
                             class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch recurring-donation-menu">
                             {% if request.user.is_email_verified %}
-                            {% if subscription.isRecurringCancelled %}
+                            {% with support_actions=subscription|gateway_actions_supported %}
+                            {% if subscription.isRecurringCancelled or not support_actions %}
                             <div class="payment-cancelled-options-div" data-id="{{ subscription.id }}">
                                 <button class="view-recurring-donation" data-id="{{ subscription.id }}"
                                     data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
@@ -130,6 +133,7 @@
                                         class="icon"></span></button>
                             </div>
                             {% endif %}
+                            {% endwith %}
                             {% else %}
                             <button class="actions-locked">{% trans 'Actions locked (Email unverified)' %}</button>
                             {% endif %}

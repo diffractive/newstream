@@ -21,6 +21,9 @@ from django.conf import global_settings
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
+# for processing paypal legacy ipns (12M)
+DATA_UPLOAD_MAX_MEMORY_SIZE = 12582912
+
 # django needs this to redirects user correctly when he stumbles upon a logn_required route
 LOGIN_URL = "/accounts/login"
 LOGIN_REDIRECT_URL = "/"

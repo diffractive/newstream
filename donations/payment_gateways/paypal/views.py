@@ -97,6 +97,30 @@ def create_paypal_transaction(request):
 
 
 @csrf_exempt
+def verify_paypal_response_legacy(request):
+    try:
+        # Set up gateway manager object with its linking donation, session, etc...
+        gatewayManager = Factory_Paypal.initGatewayByVerificationLegacy(request)
+
+        if gatewayManager:
+            return gatewayManager.process_webhook_response_legacy()
+    except WebhookNotProcessedError as error:
+        # beware: this exception should be reserved for the incoming but not processed webhook events
+        _exception(str(error))
+        # return 200 to prevent resending of paypal server of those requests
+        return HttpResponse(status=200)
+    except ValueError as error:
+        _exception(str(error))
+        return HttpResponse(status=500)
+    except Exception as error:
+        _exception(str(error))
+        return HttpResponse(status=500)
+        
+    # return fine for now, only testing purposes
+    return HttpResponse(status=200)
+
+
+@csrf_exempt
 def verify_paypal_response(request):
     try:
         # Set up gateway manager object with its linking donation, session, etc...

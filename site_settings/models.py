@@ -15,6 +15,7 @@ from donations.includes.currency_dictionary import currency_dict
 
 GATEWAY_2C2P = '2C2P'
 GATEWAY_PAYPAL = 'PayPal'
+GATEWAY_PAYPAL_OLD = 'PayPal - Old'
 GATEWAY_STRIPE = 'Stripe'
 GATEWAY_MANUAL = 'Manual'
 GATEWAY_OFFLINE = 'Offline'
@@ -193,6 +194,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
 
     paypal_frontend_label = models.CharField(
         max_length=255, default=_("PayPal"), help_text=_("The Gateway name to be shown on public-facing website."))
+    paypal_old_frontend_label = models.CharField(
+        max_length=255, default=_("PayPal - Old"), help_text=_("The Gateway name to be shown on public-facing website for old Paypal transactions."))
     paypal_sandbox_api_product_id = models.CharField(
         max_length=255, blank=True, help_text=_("The Sandbox API Product ID"))
     paypal_sandbox_api_client_id = models.CharField(
@@ -213,6 +216,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
     donations_paypal_panels = [
         FieldPanel("paypal_frontend_label", heading=_(
             "PayPal Gateway public-facing label")),
+        FieldPanel("paypal_old_frontend_label", heading=_(
+            "PayPal-Old Gateway public-facing label")),
         MultiFieldPanel([
             FieldPanel("paypal_sandbox_api_product_id",
                        heading=_("PayPal Sandbox API Product ID")),

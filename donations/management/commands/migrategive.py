@@ -1,5 +1,6 @@
 from getpass import getpass
-from mysql.connector import connect, error
+from subprocess import PIPE, Popen
+from mysql.connector import connect
 from datetime import datetime, timezone
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth import get_user_model
@@ -19,12 +20,19 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument('donor_ids', nargs='+', type=int)
         
-        '# Named (optional) arguments
+        # Named (optional) arguments
         parser.add_argument(
             '--test',
             action='store_true',
             help='Indicate data migrated is in test mode',
-        )'
+        )
+
+        # Named (optional) arguments
+        parser.add_argument(
+            '--backupdb',
+            action='store_true',
+            help='Tell script to backup newstream db before migration',
+        )
 
     def subscription_status_mapping(self, givewp_status):
         if givewp_status == 'active':
@@ -77,10 +85,17 @@ class Command(BaseCommand):
         self.stdout.write(msg)
 
     def handle(self, *args, **options):
-        if options['delete']:
+        if options['test']:
             is_test = True
         else:
             is_test = False
+        # ask user if backup the newstream database
+        if options['backupdb']:
+            subp = Popen(["/bin/bash", "/srv/www/newstream/backup-db"], stdin=PIPE, stdout=PIPE)
+            outputs, errors = subp.communicate()
+            self.print("[√] Saved a backup of the newstream database at .backups/")
+        else:
+            self.print("...skipping database backup")
 
         try:
             with connect(
@@ -122,7 +137,7 @@ class Command(BaseCommand):
                                     um.save()
                             newUser.save()
                             self.print("[√] Created Newstream User (email: %s, name: %s)." % (newUser.email, newUser.fullname))
-                            
+
                             # add subscriptions
                             self.print("...Now processing queries of subscriptions of givewp donor %d" % donor_id)
                             cursor.execute(select_subscriptions_query)
@@ -170,7 +185,7 @@ class Command(BaseCommand):
                                     recurring_amount=round_half_up(givewp_subscription_initial_amount, 2),
                                     currency=parentDonationMetaDict['_give_payment_currency'],
                                     recurring_status=self.subscription_status_mapping(givewp_subscription_status),
-                                    created_at=datetime.strptime(givewp_subscription_created, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc)
+                                    created_at=givewp_subscription_created.replace(tzinfo=timezone.utc)
                                 )
                                 newSubscription.save()
                                 self.print("[√] Created Newstream Subscription (id: %d, profile_id: %s)" % (newSubscription.id, newSubscription.profile_id))
@@ -187,16 +202,23 @@ class Command(BaseCommand):
                                     donation_amount=round_half_up(parentDonationMetaDict['_give_payment_total'], 2),
                                     currency=newSubscription.currency,
                                     payment_status=self.donation_status_mapping(parent_donation_status),
-                                    donation_date=datetime.strptime(parent_donation_datetime, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc),
+                                    donation_date=parent_donation_datetime.replace(tzinfo=timezone.utc),
                                 )
                                 parentDonation.save()
                                 self.print("[√] Created Newstream Parent Donation (id: %d, amount: %s)" % (parentDonation.id, parentDonation.donation_amount))
 
                                 # save all meta data as DonationPaymentMeta
                                 for key, value in parentDonationMetaDict.items():
+                                    # if newUser first name and last name empty, save once again
+                                    if key == '_give_donor_billing_first_name' and not newUser.first_name:
+                                        newUser.first_name = value
+                                        newUser.save()
+                                    if key == '_give_donor_billing_last_name' and not newUser.last_name:
+                                        newUser.last_name = value
+                                        newUser.save()
                                     dpm = DonationPaymentMeta(donation=parentDonation, field_key=key, field_value=value)
                                     dpm.save()
-
+                                
                                 # then add renewals as well
                                 for renewalID in renewalsResult:
                                     # query data for renewal donation's meta data
@@ -224,7 +246,7 @@ class Command(BaseCommand):
                                         donation_amount=round_half_up(renewalDonationMetaDict['_give_payment_total'], 2),
                                         currency=renewalDonationMetaDict['_give_payment_currency'],
                                         payment_status=self.donation_status_mapping(renewal_donation_status),
-                                        donation_date=datetime.strptime(renewal_donation_datetime, "%Y-%m-%d %H:%M:%S").replace(tzinfo=timezone.utc),
+                                        donation_date=renewal_donation_datetime.replace(tzinfo=timezone.utc),
                                     )
                                     renewalDonation.save()
                                     self.print("[√] Created Newstream Renewal Donation (id: %d, amount: %s)" % (renewalDonation.id, renewalDonation.donation_amount))
@@ -237,7 +259,7 @@ class Command(BaseCommand):
                             # todo: add one-time donations
 
         except Exception as e:
-            self.print(e)
+            self.print(str(e))
             self.print("...rolling back previous changes.")
 
         

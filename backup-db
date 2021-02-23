@@ -1,0 +1,12 @@
+#!/bin/bash
+
+BKUP_DIR=/srv/www/newstream/.backups
+
+# make sure .backups directory exist
+mkdir -p $BKUP_DIR
+
+# set db backup filename format
+DB_FILENAME="newstream_db_backup_$(date +"%Y%m%d_%H%M%S").sql"
+
+# make the backup
+sudo mysqldump newstream > $BKUP_DIR/$DB_FILENAME

@@ -2,6 +2,7 @@ from django import template
 from django.utils.translation import gettext_lazy as _
 
 from donations.models import STATUS_PAUSED, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_CANCELLED, STATUS_INACTIVE
+from donations.functions import isGatewayActionSupported
 
 register = template.Library()
 
@@ -13,6 +14,11 @@ def toggle_text(subscription):
     elif subscription.recurring_status == STATUS_PAUSED:
         return str(_('Resume Recurring Donation'))
     return '--'
+
+
+@register.filter(name='gateway_actions_supported')
+def gateway_actions_supported(subscription):
+    return isGatewayActionSupported(subscription.gateway)
 
 
 @register.filter(name='recurring_status_color')

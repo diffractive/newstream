@@ -85,7 +85,8 @@ def donation_details(request):
                         gateway=payment_gateway,
                         recurring_amount=donation_amount,
                         currency=form.cleaned_data['currency'],
-                        recurring_status=STATUS_PROCESSING
+                        recurring_status=STATUS_PROCESSING,
+                        subscribe_date=datetime.now(timezone.utc)
                     )
                     subscription.save()
                     # link subscription to the donation

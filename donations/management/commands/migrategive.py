@@ -1,3 +1,6 @@
+import traceback
+import pytz
+from pytz import timezone as pytimezone
 from getpass import getpass
 from subprocess import PIPE, Popen
 from mysql.connector import connect
@@ -8,24 +11,25 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 
 from newstream_user.models import UserMeta
-from newstream.functions import round_half_up
+from newstream.functions import round_half_up, uuid4_str
 from donations.functions import gen_transaction_id
 from donations.models import Donation, DonationPaymentMeta, Subscription, SubscriptionPaymentMeta, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED, STATUS_INACTIVE, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED
 from site_settings.models import PaymentGateway, GATEWAY_STRIPE, GATEWAY_PAYPAL_OLD, GATEWAY_MANUAL, GATEWAY_OFFLINE
 
 User = get_user_model()
+SOURCE_DB = 'support_clone'
 
 class Command(BaseCommand):
     help = 'Migrate donors and related data from Givewp\'s database'
 
     def add_arguments(self, parser):
-        parser.add_argument('donor_ids', nargs='+', type=int)
-        
         # Named (optional) arguments
         parser.add_argument(
-            '--test',
-            action='store_true',
-            help='Indicate data migrated is in test mode',
+            '--donorids',
+            action='append',
+            nargs='+',
+            type=int,
+            help='Provide specific donor ids to import those ids only instead of all data',
         )
 
         # Named (optional) arguments
@@ -86,10 +90,6 @@ class Command(BaseCommand):
         self.stdout.write(msg)
 
     def handle(self, *args, **options):
-        if options['test']:
-            is_test = True
-        else:
-            is_test = False
         # ask user if backup the newstream database
         if options['backupdb']:
             subp = Popen(["/bin/bash", "/srv/www/newstream/backup-db"], stdin=PIPE, stdout=PIPE)
@@ -101,20 +101,40 @@ class Command(BaseCommand):
         try:
             with connect(
                 host="localhost",
-                user=input("Enter username: "),
-                password=getpass("Enter password: "),
-                database="support_clone"
+                user=input("Enter %s username: " % SOURCE_DB),
+                password=getpass("Enter %s password: " % SOURCE_DB),
+                database=SOURCE_DB
             ) as connection:
-                self.print("Connected to support_clone.")
+                self.print("Connected to %s." % SOURCE_DB)
+                donorids_list = []
+                migrated_donations = 0
                 with transaction.atomic():
-                    for donor_id in options['donor_ids']:
-                        # select_donor_query = "select * from wp_give_donors where id = %d" % donor_id
-                        select_donors_lj_meta_query = "select id, email, name, date_created, dnm.* from wp_give_donors dn left join wp_give_donormeta dnm on dn.id = dnm.donor_id where dn.id = %d;" % donor_id
-                        select_subscriptions_query = "select * from wp_give_subscriptions where customer_id = %d;" % donor_id
-                        with connection.cursor() as cursor:
+                    with connection.cursor() as cursor:
+                        if options['donorids']:
+                            # migrate specific donors, beware it is a list of lists
+                            donorids_list = [item for sublist in options['donorids'] for item in sublist]
+                        else:
+                            # migrate all donors
+                            select_all_donors_query = "select id from wp_give_donors;"
+                            cursor.execute(select_all_donors_query)
+                            allDonors = cursor.fetchall()
+                            donorids_list = [row[0] for row in allDonors]
+                        # get source wordpress db timezone setting
+                        timezone_query = "select option_value from wp_options where option_name = 'timezone_string';"
+                        cursor.execute(timezone_query)
+                        timezoneResult = cursor.fetchall()
+                        timezone_string = timezoneResult[0][0]
+                        sourcedb_tz = pytimezone(timezone_string)
+                        for donor_id in donorids_list:
+                            select_donor_lj_meta_query = "select id, email, name, date_created, dnm.* from wp_give_donors dn left join wp_give_donormeta dnm on dn.id = dnm.donor_id where dn.id = %d;" % donor_id
+                            select_donor_donations_query = "select distinct donation_id from wp_give_donationmeta where meta_key = '_give_payment_donor_id' and meta_value = %d;" % donor_id
+                            select_subscriptions_query = "select * from wp_give_subscriptions where customer_id = %d;" % donor_id
                             self.print("...Now processing queries of givewp donor %d" % donor_id)
-                            cursor.execute(select_donors_lj_meta_query)
+                            cursor.execute(select_donor_lj_meta_query)
                             donorMetaResult = cursor.fetchall()
+                            cursor.execute(select_donor_donations_query)
+                            donationsResult = cursor.fetchall()
+                            donationids_list = [row[0] for row in donationsResult]
                             newUser = None
                             um = None
                             for i, row in enumerate(donorMetaResult):
@@ -124,7 +144,7 @@ class Command(BaseCommand):
                                 givewp_donormeta_value = row[7]
                                 if i == 0:
                                     # Add the user first
-                                    newUser = User.objects.create_user(username=givewp_donor_email, email=givewp_donor_email, password='password628')
+                                    newUser = User.objects.create_user(username=givewp_donor_email, email=givewp_donor_email, password=uuid4_str())
                                     newUser.save()
                                     # save donor email as verified and primary
                                     email_obj = EmailAddress(email=givewp_donor_email, verified=True, primary=True, user=newUser)
@@ -166,7 +186,8 @@ class Command(BaseCommand):
                                 cursor.execute(parent_donation_query)
                                 parentDonationResult = cursor.fetchone()
                                 parent_donation_status = parentDonationResult[7]
-                                parent_donation_datetime = parentDonationResult[3]
+                                parent_donation_datetime_local = sourcedb_tz.localize(parentDonationResult[2])
+                                parent_donation_datetime = parent_donation_datetime_local.astimezone(pytz.utc)
                                 self.print("[info] givewp parent donation status: %s" % parent_donation_status)
                                 self.print("[info] givewp parent donation created at: %s" % parent_donation_datetime)
                                 # query data for parent donation's meta data
@@ -206,9 +227,12 @@ class Command(BaseCommand):
                                     donation_amount=round_half_up(parentDonationMetaDict['_give_payment_total'], 2),
                                     currency=newSubscription.currency,
                                     payment_status=self.donation_status_mapping(parent_donation_status),
-                                    donation_date=parent_donation_datetime.replace(tzinfo=timezone.utc),
+                                    donation_date=parent_donation_datetime,
                                 )
                                 parentDonation.save()
+                                migrated_donations += 1
+                                # remove parentDonation id from donationids_list
+                                donationids_list.remove(givewp_parent_donation_id)
                                 self.print("[√] Created Newstream Parent Donation (id: %d, amount: %s)" % (parentDonation.id, parentDonation.donation_amount))
 
                                 # save all meta data as DonationPaymentMeta
@@ -226,14 +250,16 @@ class Command(BaseCommand):
                                 # then add renewals as well
                                 for renewalID in renewalsResult:
                                     # query data for renewal donation's meta data
-                                    renewal_donation_query = "select * from wp_posts where ID = %d" % renewalID[0]
+                                    givewp_renewal_donation_id = renewalID[0]
+                                    renewal_donation_query = "select * from wp_posts where ID = %d" % givewp_renewal_donation_id
                                     cursor.execute(renewal_donation_query)
                                     renewalDonationResult = cursor.fetchone()
-                                    renewal_donation_status = renewalDonationResult[7]
-                                    renewal_donation_datetime = renewalDonationResult[3]
-                                    self.print("[info] givewp renewal donation status: %s" % renewal_donation_status)
-                                    self.print("[info] givewp renewal donation created at: %s" % renewal_donation_datetime)
-                                    renewal_donationmeta_query = "select * from wp_give_donationmeta where donation_id = %d;" % renewalID[0]
+                                    givewp_renewal_donation_status = renewalDonationResult[7]
+                                    givewp_renewal_donation_datetime_local = sourcedb_tz.localize(renewalDonationResult[2])
+                                    givewp_renewal_donation_datetime = givewp_renewal_donation_datetime_local.astimezone(pytz.utc)
+                                    self.print("[info] givewp renewal donation status: %s" % givewp_renewal_donation_status)
+                                    self.print("[info] givewp renewal donation created at: %s" % givewp_renewal_donation_datetime)
+                                    renewal_donationmeta_query = "select * from wp_give_donationmeta where donation_id = %d;" % givewp_renewal_donation_id
                                     cursor.execute(renewal_donationmeta_query)
                                     renewalDonationMetaResult = cursor.fetchall()
                                     renewalDonationMetaDict = {}
@@ -249,10 +275,13 @@ class Command(BaseCommand):
                                         is_recurring=True,
                                         donation_amount=round_half_up(renewalDonationMetaDict['_give_payment_total'], 2),
                                         currency=renewalDonationMetaDict['_give_payment_currency'],
-                                        payment_status=self.donation_status_mapping(renewal_donation_status),
-                                        donation_date=renewal_donation_datetime.replace(tzinfo=timezone.utc),
+                                        payment_status=self.donation_status_mapping(givewp_renewal_donation_status),
+                                        donation_date=givewp_renewal_donation_datetime,
                                     )
                                     renewalDonation.save()
+                                    migrated_donations += 1
+                                    # remove renewalDonation id from donationids_list
+                                    donationids_list.remove(givewp_renewal_donation_id)
                                     self.print("[√] Created Newstream Renewal Donation (id: %d, amount: %s)" % (renewalDonation.id, renewalDonation.donation_amount))
 
                                     # save all meta data as DonationPaymentMeta
@@ -260,10 +289,46 @@ class Command(BaseCommand):
                                         dpm = DonationPaymentMeta(donation=renewalDonation, field_key=key, field_value=value)
                                         dpm.save()
 
-                            # todo: add one-time donations
+                            # loop remaining (one-time) donations from donationids_list
+                            for givewp_donation_id in donationids_list:
+                                givewp_donation_query = "select * from wp_posts where ID = %d;" % givewp_donation_id
+                                cursor.execute(givewp_donation_query)
+                                givewpDonationResult = cursor.fetchone()
+                                givewp_donation_status = givewpDonationResult[7]
+                                givewp_donation_datetime_local = sourcedb_tz.localize(givewpDonationResult[2])
+                                givewp_donation_datetime = givewp_donation_datetime_local.astimezone(pytz.utc)
+                                self.print("[info] givewp (onetime) donation status: %s" % givewp_donation_status)
+                                self.print("[info] givewp (onetime) donation created at: %s" % givewp_donation_datetime)
+                                # query data for givewp donation's meta data
+                                givewp_donationmeta_query = "select * from wp_give_donationmeta where donation_id = %d;" % givewp_donation_id
+                                cursor.execute(givewp_donationmeta_query)
+                                givewpDonationMetaResult = cursor.fetchall()
+                                givewpDonationMetaDict = {}
+                                for meta in givewpDonationMetaResult:
+                                    givewpDonationMetaDict[meta[2]] = meta[3]
 
+                                # add donations linked to this subscription(need to link with the new subscription id in Newstream)
+                                # need to add the parent payment first, so it gets the smallest id among the renewals
+                                singleDonation = Donation(
+                                    is_test=self.paymentmode_mapping(givewpDonationMetaDict['_give_payment_mode']),
+                                    transaction_id=givewpDonationMetaDict['_give_payment_transaction_id'] if '_give_payment_transaction_id' in givewpDonationMetaDict else gen_transaction_id(self.gateway_mapping(givewpDonationMetaDict['_give_payment_gateway'])),
+                                    user=newUser,
+                                    gateway=self.gateway_mapping(givewpDonationMetaDict['_give_payment_gateway']),
+                                    is_recurring=False,
+                                    donation_amount=round_half_up(givewpDonationMetaDict['_give_payment_total'], 2),
+                                    currency=givewpDonationMetaDict['_give_payment_currency'],
+                                    payment_status=self.donation_status_mapping(givewp_donation_status),
+                                    donation_date=givewp_donation_datetime,
+                                )
+                                singleDonation.save()
+                                migrated_donations += 1
+                                self.print("[√] Created Newstream (onetime) Donation (id: %d, amount: %s)" % (singleDonation.id, str(singleDonation.donation_amount)))
+
+                self.print('==============================')
+                self.print("Total Migrated Donations: %d" % migrated_donations)
         except Exception as e:
             self.print(str(e))
             self.print("...rolling back previous changes.")
+            traceback.print_exc()
 
         

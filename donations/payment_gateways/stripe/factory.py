@@ -1,4 +1,5 @@
 import stripe
+from django.utils.translation import gettext_lazy as _
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import raiseObjectNone, getSiteSettings, _debug

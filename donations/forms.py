@@ -11,7 +11,7 @@ from wagtail.contrib.forms.forms import FormBuilder
 from allauth.account.adapter import DefaultAccountAdapter
 from allauth.utils import email_address_exists
 
-from newstream.functions import raiseObjectNone, getSiteSettings
+from newstream.functions import getSiteSettings
 from donations.functions import getCurrencyDictAt
 from .models import DonationForm
 User = get_user_model()
@@ -45,9 +45,9 @@ class DonationDetailsForm(forms.Form):
     def __init__(self, *args, request=None, blueprint=None, **kwargs):
         super().__init__(*args, **kwargs)
         if not request:
-            raiseObjectNone('Please provide request object')
+            raise ValueError(_('Please provide request object'))
         if not blueprint:
-            raiseObjectNone('Please provide a DonationForm blueprint')
+            raise ValueError(_('Please provide a DonationForm blueprint'))
         form = blueprint
         self.request = request
         self.footer_html = form.donation_footer_text

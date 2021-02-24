@@ -53,6 +53,7 @@ class UserSubscriptionUpdatesLog(models.Model):
     )
     action_type = models.CharField(
         max_length=255, choices=SUBS_ACTION_CHOICES, null=True)
+    action_notes = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted = models.BooleanField(default=False)

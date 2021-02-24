@@ -3,9 +3,11 @@ from django.utils.translation import gettext_lazy as _
 from donations.payment_gateways._2c2p.factory import Factory_2C2P
 from donations.payment_gateways.paypal.factory import Factory_Paypal
 from donations.payment_gateways.stripe.factory import Factory_Stripe
+from donations.payment_gateways.offline.factory import Factory_Offline
 from donations.payment_gateways._2c2p.forms import RecurringPaymentForm_2C2P
 from donations.payment_gateways.paypal.forms import RecurringPaymentForm_Paypal
 from donations.payment_gateways.stripe.forms import RecurringPaymentForm_Stripe
+from donations.payment_gateways.offline.forms import RecurringPaymentForm_Offline
 
 
 def InitPaymentGateway(request, donation=None, subscription=None):
@@ -19,6 +21,8 @@ def InitPaymentGateway(request, donation=None, subscription=None):
         return Factory_Paypal.initGateway(request, donation, subscription)
     elif paymentObj.gateway.is_stripe():
         return Factory_Stripe.initGateway(request, donation, subscription)
+    elif paymentObj.gateway.is_offline():
+        return Factory_Offline.initGateway(request, donation, subscription)
     else:
         raise ValueError(_('The Provided gateway has not been implemented yet'))
 
@@ -38,6 +42,8 @@ def InitEditRecurringPaymentForm(request, subscription):
         form.order_fields(
             ['subscription_id', 'currency', 'recurring_amount', 'billing_cycle_now'])
         return form
+    elif subscription.gateway.is_offline():
+        return RecurringPaymentForm_Offline(request.POST, request=request, subscription=subscription, label_suffix='') if request.method == 'POST' else RecurringPaymentForm_Offline(request=request, subscription=subscription, label_suffix='')
     else:
         raise ValueError(_('The Provided gateway has not been implemented yet'))
 
@@ -51,5 +57,7 @@ def getEditRecurringPaymentHtml(subscription):
         return 'donations/edit_paypal_recurring_payment_form.html'
     elif subscription.gateway.is_stripe():
         return 'donations/edit_stripe_recurring_payment_form.html'
+    elif subscription.gateway.is_offline():
+        return 'donations/edit_offline_recurring_payment_form.html'
     else:
         raise ValueError(_('The Provided gateway has not been implemented yet'))

@@ -18,12 +18,13 @@ from django.utils import translation
 from django.views.decorators.csrf import csrf_exempt
 
 from newstream.functions import getSiteSettings, printvars, _exception, _debug, uuid4_str
-from site_settings.models import PaymentGateway
+from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
-from .models import DonationMetaField, AmountStep, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, Subscription, Donation, update_deleted_users_donations, STATUS_ACTIVE, STATUS_INACTIVE, STATUS_COMPLETE, STATUS_PENDING, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING
-from .forms import DONATION_DETAILS_FIELDS, PERSONAL_INFO_FIELDS, OTHER_FIELDS, DonationDetailsForm
-from .functions import getCurrencyDict, getCurrencyDictAt, getCurrencyFromCode, currencyCodeToKey, isTestMode, isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, gen_order_prefix_2c2p, getNextDateFromRecurringInterval, process_donation_meta, displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
+from donations.models import DonationMetaField, AmountStep, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, Subscription, Donation, update_deleted_users_donations, STATUS_ACTIVE, STATUS_INACTIVE, STATUS_COMPLETE, STATUS_PENDING, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING
+from donations.forms import DONATION_DETAILS_FIELDS, PERSONAL_INFO_FIELDS, OTHER_FIELDS, DonationDetailsForm
+from donations.functions import getCurrencyDict, getCurrencyDictAt, getCurrencyFromCode, currencyCodeToKey, isTestMode, isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, gen_order_prefix_2c2p, getNextDateFromRecurringInterval, process_donation_meta, displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml
+from donations.payment_gateways.setting_classes import getOfflineSettings
 User = get_user_model()
 
 
@@ -58,7 +59,7 @@ def donation_details(request):
                 else:
                     donation_amount = form.cleaned_data['donation_amount']
 
-                # create pending donation
+                # create processing donation
                 payment_gateway = PaymentGateway.objects.get(
                     pk=form.cleaned_data['payment_gateway'])
                 transaction_id = gen_transaction_id(gateway=payment_gateway)
@@ -75,7 +76,7 @@ def donation_details(request):
                     metas=donation_metas,
                     donation_date=datetime.now(timezone.utc),
                 )
-                # create a pending subscription if is_recurring
+                # create a processing subscription if is_recurring
                 if form.cleaned_data['donation_frequency'] == 'monthly':
                     # create new Subscription object, with a temporary profile_id created by uuidv4
                     subscription = Subscription(
@@ -120,11 +121,18 @@ def donation_details(request):
         # Should rarely happen, but in case some bugs or order id repeats itself
         _exception(str(e))
         form.add_error(None, 'Server error, please retry.')
+
+    # get offline gateway id and instructions text
+    offline_gateway = PaymentGateway.objects.get(title=GATEWAY_OFFLINE)
+    offline_gateway_id = offline_gateway.id
+    offlineSettings = getOfflineSettings(request)
+    offline_instructions_html = offlineSettings.offline_instructions_text
     
-    return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS})
+    return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS, 'offline_gateway_id': offline_gateway_id, 'offline_instructions_html': offline_instructions_html})
 
 
 def thank_you(request):
+    reminders_html = None
     if 'error-title' in request.session or 'error-message' in request.session:
         error_title = request.session.pop('error-title', '')
         error_message = request.session.pop('error-message', '')
@@ -136,8 +144,12 @@ def thank_you(request):
         if donation.user:
             login(request, donation.user,
                   backend='django.contrib.auth.backends.ModelBackend')
-        return render(request, 'donations/thankyou.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
-    return render(request, 'donations/thankyou.html', {'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
+        # display extra html if donation is offline
+        if donation.gateway.is_offline():
+            offlineSettings = getOfflineSettings(request)
+            reminders_html = offlineSettings.offline_thankyou_text
+        return render(request, 'donations/thankyou.html', {'reminders_html': reminders_html, 'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
+    return render(request, 'donations/thankyou.html', {'reminders_html': reminders_html, 'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
 
 def cancelled(request):
@@ -255,9 +267,11 @@ def edit_recurring(request, id):
                 # check if frequency limitation is enabled and passed
                 if not isUpdateSubsFrequencyLimitationPassed(gatewayManager):
                     raise Exception(_('You have already carried out 5 subscription update action in the last 5 minutes, our current limit is 5 subscription update actions(edit/pause/resume) every 5 minutes.'))
+                original_value = gatewayManager.subscription.recurring_amount
                 gatewayManager.update_recurring_payment(form.cleaned_data)
+                new_value = gatewayManager.subscription.recurring_amount
                 # add to the update actions log
-                addUpdateSubsActionLog(gatewayManager, SUBS_ACTION_UPDATE)
+                addUpdateSubsActionLog(gatewayManager, SUBS_ACTION_UPDATE, 'Recurring Amount: %s -> %s' % (str(original_value), str(new_value)))
                 return redirect('donations:edit-recurring', id=id)
     except ValueError as e:
         _exception(str(e))

@@ -15,9 +15,9 @@ class RecurringPaymentForm_2C2P(forms.Form):
         super().__init__(*args, **kwargs)
         currency_set = getCurrencyDictAt(subscription.currency)
         if not request:
-            raiseObjectNone('Please provide a request object')
+            raise ValueError(_('Please provide a request object'))
         if not subscription:
-            raiseObjectNone('Please provide a subscription object')
+            raise ValueError(_('Please provide a subscription object'))
         self.fields["subscription_id"].initial = subscription.profile_id
         self.fields["subscription_id"].widget.attrs['disabled'] = True
         self.fields["currency"].initial = html.unescape(currency_set['admin_label'])

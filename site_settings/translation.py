@@ -11,6 +11,10 @@ class SiteSettingsTrans(TranslationOptions):
         '_2c2p_frontend_label',
         'paypal_frontend_label',
         'stripe_frontend_label',
+        'manual_frontend_label',
+        'offline_frontend_label',
+        'offline_instructions_text',
+        'offline_thankyou_text',
     )
 
 

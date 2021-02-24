@@ -106,6 +106,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                         if not donation:
                             raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
                         else:
+                            kwargs['invoice'] = invoice
                             can_skip_donation_id = True
                     except Subscription.DoesNotExist:
                         raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)

@@ -105,6 +105,8 @@ class Factory_Stripe(PaymentGatewayFactory):
                         donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
                         if not donation:
                             raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
+                        else:
+                            can_skip_donation_id = True
                     except Subscription.DoesNotExist:
                         raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
                     # raise ValueError(_('Missing donation_id in subscription_obj.metadata'))

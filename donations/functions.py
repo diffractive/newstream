@@ -15,7 +15,7 @@ from newstream.functions import getSiteSettings, getSuperUserTimezone, _debug
 from newstream.functions import evTokenGenerator, raiseObjectNone, getSiteName
 from donations.models import DonationMeta
 from newstream_user.models import UserSubscriptionUpdatesLog
-from site_settings.models import GATEWAY_STRIPE, GATEWAY_PAYPAL, GATEWAY_2C2P
+from site_settings.models import GATEWAY_STRIPE, GATEWAY_PAYPAL, GATEWAY_2C2P, GATEWAY_OFFLINE
 
 
 def getCurrencyDict():
@@ -48,7 +48,7 @@ def isTestMode(request):
 
 
 def isGatewayActionSupported(gateway):
-    if gateway.title in [GATEWAY_2C2P, GATEWAY_PAYPAL, GATEWAY_STRIPE]:
+    if gateway.title in [GATEWAY_2C2P, GATEWAY_PAYPAL, GATEWAY_STRIPE, GATEWAY_OFFLINE]:
         return True
     return False
 
@@ -65,12 +65,13 @@ def isUpdateSubsFrequencyLimitationPassed(gatewayManager):
     return True
 
 
-def addUpdateSubsActionLog(gatewayManager, action_type, user=None):
+def addUpdateSubsActionLog(gatewayManager, action_type, action_notes='', user=None):
     ''' This might be called either by donor or by admin'''
     log = UserSubscriptionUpdatesLog(
         user=gatewayManager.subscription.user if user == None else user,
         subscription=gatewayManager.subscription,
-        action_type=action_type
+        action_type=action_type,
+        action_notes=action_notes
     )
     log.save()
 

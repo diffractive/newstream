@@ -31,6 +31,13 @@ class SettingsStripe:
         self.secret_key = secret_key
 
 
+class SettingsOffline:
+    def __init__(self, sandbox_mode, offline_instructions_text, offline_thankyou_text):
+        self.sandbox_mode = sandbox_mode
+        self.offline_instructions_text = offline_instructions_text
+        self.offline_thankyou_text = offline_thankyou_text
+
+
 def get2C2PSettings(request):
     siteSettings = getSiteSettings(request)
     if (siteSettings.sandbox_mode):
@@ -56,3 +63,9 @@ def getStripeSettings(request):
     if (siteSettings.sandbox_mode):
         return SettingsStripe(siteSettings.sandbox_mode, siteSettings.stripe_webhook_secret, siteSettings.stripe_testing_product_id, siteSettings.stripe_testing_api_publishable_key, siteSettings.stripe_testing_api_secret_key)
     return SettingsStripe(siteSettings.sandbox_mode, siteSettings.stripe_webhook_secret, siteSettings.stripe_product_id, siteSettings.stripe_api_publishable_key, siteSettings.stripe_api_secret_key)
+
+
+def getOfflineSettings(request):
+    ''' Seems there's no need to have separate sets of sandbox/live settings here '''
+    siteSettings = getSiteSettings(request)
+    return SettingsOffline(siteSettings.sandbox_mode, siteSettings.offline_instructions_text, siteSettings.offline_thankyou_text)

@@ -1,15 +1,13 @@
 import html
 from decimal import *
 from django import forms
-from django.core.validators import MinValueValidator
 from django.utils.translation import gettext_lazy as _
 
 from donations.functions import getCurrencyDictAt
 
-class RecurringPaymentForm_Stripe(forms.Form):
+class RecurringPaymentForm_Offline(forms.Form):
     subscription_id = forms.CharField(label=_('Recurring Donation Identifier(fixed)'), required=False)
     currency = forms.CharField(label=('Donation Currency(fixed)'), required=False)
-    billing_cycle_now = forms.BooleanField(label=_('Change Billing Cycle to Now'), required=False)
 
     def __init__(self, *args, request=None, subscription=None, **kwargs):
         super().__init__(*args, **kwargs)

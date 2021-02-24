@@ -57,6 +57,12 @@ class PaymentGateway(models.Model):
     def is_stripe(self):
         return self.title == GATEWAY_STRIPE
 
+    def is_manual(self):
+        return self.title == GATEWAY_MANUAL
+
+    def is_offline(self):
+        return self.title == GATEWAY_OFFLINE
+
 
 class AdminEmails(models.Model):
     title = models.CharField(max_length=255)
@@ -167,7 +173,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     ]
 
     _2c2p_frontend_label = models.CharField(
-        max_length=255, default=_("2C2P(Credit Card)"), help_text=_("The Gateway name to be shown on public-facing website."))
+        max_length=255, default=_("2C2P(Credit Card)"), help_text=_("The Gateway name to be shown on the frontend website."))
     _2c2p_merchant_id = models.CharField(
         max_length=255, blank=True, null=True, help_text=_("Merchant ID"))
     _2c2p_secret_key = models.CharField(
@@ -241,7 +247,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     ]
 
     stripe_frontend_label = models.CharField(
-        max_length=255, default=_("Stripe"), help_text=_("The Gateway name to be shown on public-facing website."))
+        max_length=255, default=_("Stripe"), help_text=_("The Gateway name to be shown on the frontend website."))
     stripe_webhook_secret = models.CharField(
         max_length=255, blank=True, help_text=_("The Secret for the Webhook used by the server for payment verification"))
     stripe_testing_product_id = models.CharField(max_length=255, blank=False, null=True, help_text=_(
@@ -279,15 +285,21 @@ class SiteSettings(BaseSetting, ClusterableModel):
     ]
 
     manual_frontend_label = models.CharField(
-        max_length=255, default=_("Manual"), help_text=_("The Gateway name to be shown on public-facing website for admin-added donations."))
+        max_length=255, default=_("Manual"), help_text=_("The Gateway name to be shown on the frontend website for admin-added donations."))
     offline_frontend_label = models.CharField(
-        max_length=255, default=_("Offline"), help_text=_("The Gateway name to be shown on public-facing website for offline donations."))
+        max_length=255, default=_("Offline"), help_text=_("The Gateway name to be shown on the frontend website for offline donations."))
+    offline_instructions_text = RichTextField(blank=True)
+    offline_thankyou_text = RichTextField(blank=True)
 
     donations_others_panels = [
         FieldPanel("manual_frontend_label", heading=_(
             "Manual Donations public-facing label")),
         FieldPanel("offline_frontend_label", heading=_(
             "Offline Donations public-facing label")),
+        FieldPanel("offline_instructions_text", heading=_(
+            "Offline-donations Instructions in the donation form")),
+        FieldPanel("offline_thankyou_text", heading=_(
+            "Offline-donations Instructions on the thank you page")),
     ]
 
     brand_logo = models.ForeignKey(

@@ -61,6 +61,10 @@
                 {% endif %}
                 {% endfor %}
 
+                <div id="offline-instructions-div" class="mb-8">
+                    {{ offline_instructions_html|safe }}
+                </div>
+
                 <button class="ns-wide-btn right-arrow-btn need-white-loading-btn"
                     type="submit">{% trans 'Continue' %}<span class="icon"></span></button>
                 <div class="form-footer-text">{{ form.footer_html|safe }}</div>
@@ -73,9 +77,12 @@
 {% block extra_js %}
 <script>
     window.addEventListener('load', function () {
+        let offlineGatewayId = {{ offline_gateway_id }};
         let amountSelect = document.getElementById('id_donation_amount');
+        let gatewaySelect = document.getElementById('id_payment_gateway');
         let customAmount = document.getElementById('id_donation_amount_custom');
         let customAmountDiv = document.getElementById('id_donation_amount_custom').parentNode.parentNode;
+        let offlineInstructionsDiv = document.getElementById('offline-instructions-div');
         amountSelect.onchange = (event) => {
             if (event.target.value == 'custom') {
                 customAmountDiv.classList.remove('hidden');
@@ -87,6 +94,15 @@
             }
         };
         amountSelect.dispatchEvent(new Event("change"));
+
+        gatewaySelect.onchange = (event) => {
+            if (event.target.value == offlineGatewayId) {
+                offlineInstructionsDiv.classList.remove('hidden');
+            } else {
+                offlineInstructionsDiv.classList.add('hidden');
+            }
+        };
+        gatewaySelect.dispatchEvent(new Event("change"));
     });
 </script>
 {% endblock extra_js %}

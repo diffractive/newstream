@@ -211,6 +211,7 @@
                     <tr>
                         <th>{% trans 'User' %}</th>
                         <th>{% trans 'Action type' %}</th>
+                        <th>{% trans 'Action notes' %}</th>
                         <th>{% trans 'Created at' %}</th>
                     </tr>
                 </thead>
@@ -219,6 +220,7 @@
                     <tr>
                         <td>{{ log.user }}</td>
                         <td>{{ log.action_type }}</td>
+                        <td>{{ log.action_notes }}</td>
                         <td>{{ log.created_at }}</td>
                     </tr>
                     {% endfor %}

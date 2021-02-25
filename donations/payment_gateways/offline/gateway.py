@@ -32,6 +32,10 @@ class Gateway_Offline(PaymentGatewayManager):
         # save donation id in session for use in later checkout session creation
         self.request.session['return-donation-id'] = self.donation.id
 
+        # send email notifs
+        sendDonationReceiptToDonor(self.request, self.donation)
+        sendDonationNotifToAdmins(self.request, self.donation)
+
         return redirect('donations:thank-you')
 
     def process_webhook_response(self):

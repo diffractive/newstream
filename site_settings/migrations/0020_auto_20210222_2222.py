@@ -2,7 +2,7 @@
 
 from django.db import migrations
 
-from site_settings.models import GATEWAY_PAYPAL_OLD
+from site_settings.models import GATEWAY_PAYPAL_LEGACY
 
 def populate_more_supported_gateways(apps, schema_editor):
     # We can't import the PaymentGateway model directly as it may be a newer
@@ -11,8 +11,8 @@ def populate_more_supported_gateways(apps, schema_editor):
 
     supported_gateways = [
         {
-            "title": GATEWAY_PAYPAL_OLD,
-            "frontend_label_attr_name": "paypal_old_frontend_label",
+            "title": GATEWAY_PAYPAL_LEGACY,
+            "frontend_label_attr_name": "paypal_legacy_frontend_label",
             "list_order": 5
         },
     ]

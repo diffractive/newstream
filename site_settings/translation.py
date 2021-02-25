@@ -10,6 +10,7 @@ class SiteSettingsTrans(TranslationOptions):
         'signup_footer_text',
         '_2c2p_frontend_label',
         'paypal_frontend_label',
+        'paypal_legacy_frontend_label',
         'stripe_frontend_label',
         'manual_frontend_label',
         'offline_frontend_label',

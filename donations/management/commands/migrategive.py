@@ -14,7 +14,7 @@ from newstream_user.models import UserMeta
 from newstream.functions import round_half_up, uuid4_str
 from donations.functions import gen_transaction_id
 from donations.models import Donation, DonationPaymentMeta, Subscription, SubscriptionPaymentMeta, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED, STATUS_INACTIVE, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED
-from site_settings.models import PaymentGateway, GATEWAY_STRIPE, GATEWAY_PAYPAL_OLD, GATEWAY_MANUAL, GATEWAY_OFFLINE
+from site_settings.models import PaymentGateway, GATEWAY_STRIPE, GATEWAY_PAYPAL_LEGACY, GATEWAY_MANUAL, GATEWAY_OFFLINE
 
 User = get_user_model()
 SOURCE_DB = 'support_clone'
@@ -72,7 +72,7 @@ class Command(BaseCommand):
         if give_gateway == 'offline':
             gateway_title = GATEWAY_OFFLINE
         if give_gateway == 'paypal':
-            gateway_title = GATEWAY_PAYPAL_OLD
+            gateway_title = GATEWAY_PAYPAL_LEGACY
         if give_gateway == 'stripe':
             gateway_title = GATEWAY_STRIPE
         if gateway_title:
@@ -175,12 +175,12 @@ class Command(BaseCommand):
                                 givewp_subscription_created = row[10]
                                 givewp_subscription_status = row[12]
                                 subscription_profile_id = row[13]
-                                self.print("[info] givewp subscription id: %s" % givewp_subscription_id)
-                                self.print("[info] givewp subscription amount: %s" % givewp_subscription_initial_amount)
-                                self.print("[info] givewp subscription parent donation id: %s" % givewp_parent_donation_id)
-                                self.print("[info] givewp subscription created at: %s" % givewp_subscription_created)
-                                self.print("[info] givewp subscription status: %s" % givewp_subscription_status)
-                                self.print("[info] givewp subscription profile id: %s" % subscription_profile_id)
+                                # self.print("[info] givewp subscription id: %s" % givewp_subscription_id)
+                                # self.print("[info] givewp subscription amount: %s" % givewp_subscription_initial_amount)
+                                # self.print("[info] givewp subscription parent donation id: %s" % givewp_parent_donation_id)
+                                # self.print("[info] givewp subscription created at: %s" % givewp_subscription_created)
+                                # self.print("[info] givewp subscription status: %s" % givewp_subscription_status)
+                                # self.print("[info] givewp subscription profile id: %s" % subscription_profile_id)
                                 # query data for subscription's parent donation
                                 parent_donation_query = "select * from wp_posts where ID = %d;" % givewp_parent_donation_id
                                 cursor.execute(parent_donation_query)
@@ -188,8 +188,8 @@ class Command(BaseCommand):
                                 parent_donation_status = parentDonationResult[7]
                                 parent_donation_datetime_local = sourcedb_tz.localize(parentDonationResult[2])
                                 parent_donation_datetime = parent_donation_datetime_local.astimezone(pytz.utc)
-                                self.print("[info] givewp parent donation status: %s" % parent_donation_status)
-                                self.print("[info] givewp parent donation created at: %s" % parent_donation_datetime)
+                                # self.print("[info] givewp parent donation status: %s" % parent_donation_status)
+                                # self.print("[info] givewp parent donation created at: %s" % parent_donation_datetime)
                                 # query data for parent donation's meta data
                                 parent_donationmeta_query = "select * from wp_give_donationmeta where donation_id = %d;" % givewp_parent_donation_id
                                 cursor.execute(parent_donationmeta_query)
@@ -203,6 +203,7 @@ class Command(BaseCommand):
                                 renewalsResult = cursor.fetchall()
 
                                 newSubscription = Subscription(
+                                    id=givewp_subscription_id,
                                     is_test=self.paymentmode_mapping(parentDonationMetaDict['_give_payment_mode']),
                                     profile_id=subscription_profile_id,
                                     user=newUser,
@@ -218,6 +219,7 @@ class Command(BaseCommand):
                                 # add donations linked to this subscription(need to link with the new subscription id in Newstream)
                                 # need to add the parent payment first, so it gets the smallest id among the renewals
                                 parentDonation = Donation(
+                                    id=givewp_parent_donation_id,
                                     is_test=newSubscription.is_test,
                                     subscription=newSubscription,
                                     transaction_id=parentDonationMetaDict['_give_payment_transaction_id'] if '_give_payment_transaction_id' in parentDonationMetaDict else gen_transaction_id(newSubscription.gateway),
@@ -257,8 +259,8 @@ class Command(BaseCommand):
                                     givewp_renewal_donation_status = renewalDonationResult[7]
                                     givewp_renewal_donation_datetime_local = sourcedb_tz.localize(renewalDonationResult[2])
                                     givewp_renewal_donation_datetime = givewp_renewal_donation_datetime_local.astimezone(pytz.utc)
-                                    self.print("[info] givewp renewal donation status: %s" % givewp_renewal_donation_status)
-                                    self.print("[info] givewp renewal donation created at: %s" % givewp_renewal_donation_datetime)
+                                    # self.print("[info] givewp renewal donation status: %s" % givewp_renewal_donation_status)
+                                    # self.print("[info] givewp renewal donation created at: %s" % givewp_renewal_donation_datetime)
                                     renewal_donationmeta_query = "select * from wp_give_donationmeta where donation_id = %d;" % givewp_renewal_donation_id
                                     cursor.execute(renewal_donationmeta_query)
                                     renewalDonationMetaResult = cursor.fetchall()
@@ -267,6 +269,7 @@ class Command(BaseCommand):
                                         renewalDonationMetaDict[meta[2]] = meta[3]
 
                                     renewalDonation = Donation(
+                                        id=givewp_renewal_donation_id,
                                         is_test=parentDonation.is_test,
                                         subscription=newSubscription,
                                         transaction_id=renewalDonationMetaDict['_give_payment_transaction_id'] if '_give_payment_transaction_id' in renewalDonationMetaDict else gen_transaction_id(self.gateway_mapping(renewalDonationMetaDict['_give_payment_gateway'])),
@@ -297,8 +300,8 @@ class Command(BaseCommand):
                                 givewp_donation_status = givewpDonationResult[7]
                                 givewp_donation_datetime_local = sourcedb_tz.localize(givewpDonationResult[2])
                                 givewp_donation_datetime = givewp_donation_datetime_local.astimezone(pytz.utc)
-                                self.print("[info] givewp (onetime) donation status: %s" % givewp_donation_status)
-                                self.print("[info] givewp (onetime) donation created at: %s" % givewp_donation_datetime)
+                                # self.print("[info] givewp (onetime) donation status: %s" % givewp_donation_status)
+                                # self.print("[info] givewp (onetime) donation created at: %s" % givewp_donation_datetime)
                                 # query data for givewp donation's meta data
                                 givewp_donationmeta_query = "select * from wp_give_donationmeta where donation_id = %d;" % givewp_donation_id
                                 cursor.execute(givewp_donationmeta_query)
@@ -310,6 +313,7 @@ class Command(BaseCommand):
                                 # add donations linked to this subscription(need to link with the new subscription id in Newstream)
                                 # need to add the parent payment first, so it gets the smallest id among the renewals
                                 singleDonation = Donation(
+                                    id=givewp_donation_id,
                                     is_test=self.paymentmode_mapping(givewpDonationMetaDict['_give_payment_mode']),
                                     transaction_id=givewpDonationMetaDict['_give_payment_transaction_id'] if '_give_payment_transaction_id' in givewpDonationMetaDict else gen_transaction_id(self.gateway_mapping(givewpDonationMetaDict['_give_payment_gateway'])),
                                     user=newUser,

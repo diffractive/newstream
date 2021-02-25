@@ -94,10 +94,11 @@ class Gateway_Paypal(PaymentGatewayManager):
             # continue code execution
             pass
 
+        # commented here as there is no logical need for this
         # verify if mc_currency match with the system defined currency_code
-        if self.request.POST.get('mc_currency', '').lower() != self.global_settings.currency.lower():
+        # if self.request.POST.get('mc_currency', '').lower() != self.global_settings.currency.lower():
             # the currency code is invalid
-            raise Exception(str(_('Invalid currency in IPN response. IPN data: %(data)s') % {'data': json.dumps(self.request.POST.dict())}))
+            # raise Exception(str(_('Invalid currency in IPN response. IPN data: %(data)s') % {'data': json.dumps(self.request.POST.dict())}))
 
         # add renewal payment to subscription
         # transaction_id uses the txn_id from paypal directly, just for convenience, value is the same as _give_payment_transaction_id in donationPaymentMeta

@@ -120,11 +120,12 @@ class TotalStatisticsPanel:
     order = 20
 
     def render(self):
-        total_donations = Donation.objects.filter(payment_status=STATUS_COMPLETE, deleted=False).count()
+        total_completed_donations = Donation.objects.filter(payment_status=STATUS_COMPLETE, deleted=False).count()
+        total_donations = Donation.objects.filter(deleted=False).count()
+        total_donors = User.objects.all().count()
         total_active_subscriptions = Subscription.objects.filter(recurring_status=STATUS_ACTIVE, deleted=False).count()
         total_subscriptions = Subscription.objects.filter(deleted=False).count()
-        total_donors = User.objects.all().count()
-        return mark_safe("<section class=\"summary nice-padding total-stats-panel\"><h1><strong>Total Statistics</strong></h1><ul class=\"stats\"><li><span>{}</span>Completed Donations</li><li><span>{}</span>Active Subscriptions</li><li><span>{}</span>All Subscriptions</li><li><span>{}</span>All Donors</li></ul></section>".format(total_donations, total_active_subscriptions, total_subscriptions, total_donors))
+        return mark_safe("<section class=\"summary nice-padding total-stats-panel\"><h1><strong>Total Statistics</strong></h1><ul class=\"stats\"><li><span>{}</span>Completed Donations</li><li><span>{}</span>Total Donations</li><li><span>{}</span>All Donors</li><li><span>{}</span>Active Subscriptions</li><li><span>{}</span>All Subscriptions</li></ul></section>".format(total_completed_donations, total_donations, total_donors, total_active_subscriptions, total_subscriptions))
 
 @hooks.register('construct_homepage_panels')
 def add_statistics_panel(request, panels):

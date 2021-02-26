@@ -7,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
+from django.contrib.auth import get_user_model
 
 from wagtail.core import hooks
 
@@ -15,6 +16,7 @@ from newstream_user.models import SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_AC
 from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED
 from donations.payment_gateways import InitPaymentGateway
 from donations.functions import addUpdateSubsActionLog
+User = get_user_model()
 
 # for the reverse url naming rules of the modeladmin actions, see method 'get_action_url_name' in class 'AdminURLHelper' in wagtail/contrib/modeladmin/helpers/url.py
 
@@ -110,7 +112,8 @@ class TodayStatisticsPanel:
         utc_dt = midnight.astimezone(utc) 
         today_donations = Donation.objects.filter(donation_date__gte=utc_dt, payment_status=STATUS_COMPLETE, deleted=False).count()
         today_subscriptions = Subscription.objects.filter(created_at__gte=utc_dt, recurring_status=STATUS_ACTIVE, deleted=False).count()
-        return mark_safe("<section class=\"summary nice-padding today-stats-panel\"><h1><strong>Today's Statistics ({})</strong></h1><ul class=\"stats\"><li><span>{}</span>Completed Donations</li><li><span>{}</span>Active Subscriptions</li></ul></section>".format(today, today_donations, today_subscriptions))
+        today_donors = User.objects.filter(date_joined__gte=utc_dt).count()
+        return mark_safe("<section class=\"summary nice-padding today-stats-panel\"><h1><strong>Today's Statistics ({})</strong></h1><ul class=\"stats\"><li><span>{}</span>New Completed Donations</li><li><span>{}</span>New Active Subscriptions</li><li><span>{}</span>New Donors</li></ul></section>".format(today, today_donations, today_subscriptions, today_donors))
 
 
 class TotalStatisticsPanel:
@@ -120,7 +123,8 @@ class TotalStatisticsPanel:
         total_donations = Donation.objects.filter(payment_status=STATUS_COMPLETE, deleted=False).count()
         total_active_subscriptions = Subscription.objects.filter(recurring_status=STATUS_ACTIVE, deleted=False).count()
         total_subscriptions = Subscription.objects.filter(deleted=False).count()
-        return mark_safe("<section class=\"summary nice-padding total-stats-panel\"><h1><strong>Total Statistics</strong></h1><ul class=\"stats\"><li><span>{}</span>Completed Donations</li><li><span>{}</span>Active Subscriptions</li><li><span>{}</span>All Subscriptions</li></ul></section>".format(total_donations, total_active_subscriptions, total_subscriptions))
+        total_donors = User.objects.all().count()
+        return mark_safe("<section class=\"summary nice-padding total-stats-panel\"><h1><strong>Total Statistics</strong></h1><ul class=\"stats\"><li><span>{}</span>Completed Donations</li><li><span>{}</span>Active Subscriptions</li><li><span>{}</span>All Subscriptions</li><li><span>{}</span>All Donors</li></ul></section>".format(total_donations, total_active_subscriptions, total_subscriptions, total_donors))
 
 @hooks.register('construct_homepage_panels')
 def add_statistics_panel(request, panels):

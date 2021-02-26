@@ -18,6 +18,11 @@
         {% endwith %}
     </p>
     <p class="mb-5 text-center">{% trans 'We are so grateful for your support.' %}</p>
+    <div class="mb-5 p-4 md:p-4 lg:py-8 lg:px-24 border-2 rounded border-gray-200">
+        {% if reminders_html %}
+            {{ reminders_html|safe }}
+        {% endif %}
+    </div>
     <div class="p-1 sm:p-2 md:p-4 lg:py-8 lg:px-24 border-2 rounded border-gray-200">
         <table class="thankyou-table mb-8">
             <tr>
@@ -26,7 +31,7 @@
             </tr>
             <tr>
                 <td>{% trans 'Transaction ID' %}</td>
-                <td>{{ donation.transaction_id }}</td>
+                <td style="word-break: break-all;">{{ donation.transaction_id }}</td>
             </tr>
             <tr>
                 <td>{% trans 'Donation Frequency' %}</td>
@@ -51,9 +56,6 @@
             </tr>
             {% endif %}
         </table>
-        {% if reminders_html %}
-            {{ reminders_html|safe }}
-        {% endif %}
     </div>
     <br>
     {% else %}

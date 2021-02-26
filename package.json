@@ -17,14 +17,14 @@
   },
   "homepage": "https://github.com/diffractive/newstream#readme",
   "dependencies": {
-    "tailwindcss": "^1.2.0"
+    "tailwindcss": "^1.9.6"
   },
   "devDependencies": {
-    "autoprefixer": "^9.7.5",
+    "autoprefixer": "^9.8.6",
     "gulp": "^4.0.2",
     "gulp-clean-css": "^4.3.0",
     "gulp-postcss": "^8.0.0",
-    "gulp-sass": "^4.0.2",
-    "through2": "^3.0.1"
+    "gulp-sass": "^4.1.0",
+    "through2": "^3.0.2"
   }
 }

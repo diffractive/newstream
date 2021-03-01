@@ -172,7 +172,7 @@
             <p>{% trans 'Subscription is already active.' %}</p>
             {% endif %}
             <hr>
-            {% if gateway_actions_supported %}
+            {% if gateway_togglesub_supported %}
             <h2>{% trans 'Toggle subscription status' %}</h2>
             {% if fields.recurring_status.value == status_active or fields.recurring_status.value == status_paused %}
             <form action="{% url 'internal-toggle-subscription' %}" method="POST">
@@ -186,6 +186,8 @@
             <p>{% trans 'Subscription is not in a valid state for resuming/pausing.' %}</p>
             {% endif %}
             <hr>
+            {% endif %}
+            {% if gateway_cancelsub_supported %}
             <h2>{% trans 'Cancel subscription status' %}</h2>
             {% if fields.recurring_status.value != status_cancelled %}
             <form action="{% url 'internal-cancel-subscription' %}" method="POST">
@@ -198,7 +200,8 @@
             {% else %}
             <p>{% trans 'Subscription is already cancelled.' %}</p>
             {% endif %}
-            {% else %}
+            {% endif %}
+            {% if not gateway_togglesub_supported and not gateway_cancelsub_supported %}
             <p>{% trans 'Current payment gateway does not support api calls or any actions performed here.' %}</p>
             {% endif %}
         </div>

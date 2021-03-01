@@ -12,13 +12,16 @@ from modelcluster.fields import ParentalKey
 
 from donations.includes.currency_dictionary import currency_dict
 
-
 GATEWAY_2C2P = '2C2P'
 GATEWAY_PAYPAL = 'PayPal'
 GATEWAY_PAYPAL_LEGACY = 'PayPal - Legacy'
 GATEWAY_STRIPE = 'Stripe'
 GATEWAY_MANUAL = 'Manual'
 GATEWAY_OFFLINE = 'Offline'
+
+GATEWAY_CAN_EDIT_SUBSCRIPTION = 'gateway-can-edit-subscription'
+GATEWAY_CAN_TOGGLE_SUBSCRIPTION = 'gateway-can-toggle-subscription'
+GATEWAY_CAN_CANCEL_SUBSCRIPTION = 'gateway-can-cancel-subscription'
 
 
 class TopTabbedInterface(TabbedInterface):

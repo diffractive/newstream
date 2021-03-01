@@ -19,14 +19,14 @@ from donations.email_functions import sendDonationNotifToAdmins, sendDonationRec
 from donations.models import Donation, Subscription, DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ACTIVE, STATUS_REVOKED, STATUS_CANCELLED
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import get2C2PSettings
-from .functions import format_payment_amount, extract_payment_amount, map2C2PPaymentStatus, getRequestParamOrder, getResponseParamOrder
+from donations.payment_gateways._2c2p.functions import format_payment_amount, extract_payment_amount, map2C2PPaymentStatus, getRequestParamOrder, getResponseParamOrder
+
 
 REDIRECT_API_VERSION = '8.5'
 RPP_API_VERSION = '2.3'
 
 
 class Gateway_2C2P(PaymentGatewayManager):
-
     def __init__(self, request, donation=None, subscription=None, **kwargs):
         '''
         Either donation or subscription newstream model is passed to this init.

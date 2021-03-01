@@ -317,6 +317,33 @@ def get_recurring_cancelled_admin_text(request, subscription):
     }
 
 
+def get_recurring_cancel_request_admin_text(request, subscription):
+    return _("""
+        Cancellation to a Recurring Donation is requested\n
+        \n
+        Hi Admins,\n
+        This email is to inform you that a cancellation to a recurring donation has been requested on your website. Please complete the request and manually change the subscription status to Cancelled at the link below:\n
+        %(url)s\n
+        \n
+        Donor: %(name)s\n
+        Recurring Donation Identifier: %(profile_id)s\n
+        Currency: %(currency)s\n
+        Recurring Donation Amount: %(amount)s\n
+        Recurring Status: %(recurring_status)s\n
+        \n
+        Thank you,\n
+        %(sitename)s
+    """) % {
+        'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'name': subscription.user.fullname,
+        'profile_id': subscription.profile_id,
+        'currency': subscription.currency,
+        'amount': displayRecurringAmountWithCurrency(subscription),
+        'recurring_status': subscription.recurring_status,
+        'sitename': getSiteName(request)
+    }
+
+
 def get_recurring_cancelled_donor_text(request, subscription):
     return _("""
         Your Recurring Donation is cancelled\n

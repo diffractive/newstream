@@ -12,50 +12,13 @@ from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.paypal.gateway import Gateway_Paypal
 from donations.payment_gateways.paypal.constants import *
 from donations.payment_gateways.setting_classes import getPayPalSettings
-from donations.payment_gateways.paypal.functions import getSubscriptionDetails, curlPaypalIPN
+from donations.payment_gateways.paypal.functions import getSubscriptionDetails
 
 
 class Factory_Paypal(PaymentGatewayFactory):
     @staticmethod
     def initGateway(request, donation, subscription, **kwargs):
         return Gateway_Paypal(request, donation, subscription, **kwargs)
-
-    @staticmethod
-    def initGatewayByVerificationLegacy(request):
-        # Regular PayPal IPN
-        # give-listener=IPN param check is done in the nginx config file
-        if request.method == 'POST':
-            paypalSettings = getPayPalSettings(request)
-
-            raw_post_data = request.body.decode('utf-8')
-            req_data = 'cmd=_notify-validate'
-            if raw_post_data:
-                req_data += '&' + raw_post_data
-            curl_ipn_result = curlPaypalIPN(paypalSettings.ipn_url, ['Connection: Close'], req_data)
-
-            if curl_ipn_result == 'VERIFIED':
-                # todo: update give_last_paypal_ipn_received meta and insert payment note just like givewp
-
-                donation_id = None
-                kwargs = {}
-
-                # get donation_id from renewal ipn's custom param
-                if request.POST.get('custom', None):
-                    donation_id = request.POST.get('custom')
-                else:
-                    raise ValueError(_('Missing custom(donation_id) in PayPal\'s incoming renewal IPN'))
-                
-                try:
-                    # pk can be string or int
-                    donation = Donation.objects.get(pk=donation_id)
-                    return Factory_Paypal.initGateway(request, donation, donation.subscription)
-                except Donation.DoesNotExist:
-                    raise ValueError(_("Donation object not found by id: ")+str(donation_id))
-            else:
-                raise Exception(_("IPN is not verified by PayPal"))
-        else:
-            raise Exception(_("Not POST request from PayPal IPN"))
-
 
     @staticmethod
     def initGatewayByVerification(request):

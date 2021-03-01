@@ -57,6 +57,9 @@ class PaymentGateway(models.Model):
     def is_paypal(self):
         return self.title == GATEWAY_PAYPAL
 
+    def is_paypal_legacy(self):
+        return self.title == GATEWAY_PAYPAL_LEGACY
+
     def is_stripe(self):
         return self.title == GATEWAY_STRIPE
 
@@ -203,8 +206,6 @@ class SiteSettings(BaseSetting, ClusterableModel):
 
     paypal_frontend_label = models.CharField(
         max_length=255, default=_("PayPal"), help_text=_("The Gateway name to be shown on public-facing website."))
-    paypal_legacy_frontend_label = models.CharField(
-        max_length=255, default=_("PayPal - Legacy"), help_text=_("The Gateway name to be shown on public-facing website for old Paypal transactions."))
     paypal_sandbox_api_product_id = models.CharField(
         max_length=255, blank=True, help_text=_("The Sandbox API Product ID"))
     paypal_sandbox_api_client_id = models.CharField(
@@ -225,8 +226,6 @@ class SiteSettings(BaseSetting, ClusterableModel):
     donations_paypal_panels = [
         FieldPanel("paypal_frontend_label", heading=_(
             "PayPal Gateway public-facing label")),
-        FieldPanel("paypal_legacy_frontend_label", heading=_(
-            "PayPal-Old Gateway public-facing label")),
         MultiFieldPanel([
             FieldPanel("paypal_sandbox_api_product_id",
                        heading=_("PayPal Sandbox API Product ID")),
@@ -247,6 +246,13 @@ class SiteSettings(BaseSetting, ClusterableModel):
             FieldPanel("paypal_api_webhook_id",
                        heading=_("PayPal Live API Webhook ID")),
         ], heading=_("PayPal API Live Settings")),
+    ]
+
+    paypal_legacy_frontend_label = models.CharField(
+        max_length=255, default=_("PayPal - Legacy"), help_text=_("The Gateway name to be shown on public-facing website for old Paypal transactions."))
+    donations_paypal_legacy_panels = [
+        FieldPanel("paypal_legacy_frontend_label", heading=_(
+            "PayPal-Old Gateway public-facing label")),
     ]
 
     stripe_frontend_label = models.CharField(
@@ -356,6 +362,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
                           heading=_('2C2P(Credit Card)'), classname='gateways-2c2p'),
             SubObjectList(donations_paypal_panels,
                           heading=_('PayPal'), classname='gateways-paypal'),
+            SubObjectList(donations_paypal_legacy_panels,
+                          heading=_('PayPal(Legacy)'), classname='gateways-paypal-legacy'),
             SubObjectList(donations_stripe_panels,
                           heading=_('Stripe'), classname='gateways-stripe'),
             SubObjectList(donations_others_panels,

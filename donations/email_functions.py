@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from allauth.account.utils import send_email_confirmation
 
 from newstream.functions import getSiteSettings, getDefaultFromEmail, setDefaultFromEmail
-from donations.templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text, get_new_renewal_text, get_renewal_receipt_text, get_recurring_updated_admin_text, get_recurring_updated_donor_text, get_recurring_paused_admin_text, get_recurring_paused_donor_text, get_recurring_resumed_admin_text, get_recurring_resumed_donor_text, get_recurring_cancelled_admin_text, get_recurring_cancelled_donor_text, get_account_created_admin_text, get_account_deleted_admin_text, get_account_deleted_donor_text, get_donation_error_admin_text
+from donations.templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text, get_new_renewal_text, get_renewal_receipt_text, get_recurring_updated_admin_text, get_recurring_updated_donor_text, get_recurring_paused_admin_text, get_recurring_paused_donor_text, get_recurring_resumed_admin_text, get_recurring_resumed_donor_text, get_recurring_cancelled_admin_text, get_recurring_cancel_request_admin_text, get_recurring_cancelled_donor_text, get_account_created_admin_text, get_account_deleted_admin_text, get_account_deleted_donor_text, get_donation_error_admin_text
 from donations.models import STATUS_REVOKED
 
 
@@ -130,6 +130,12 @@ def sendRecurringCancelledNotifToAdmins(request, subscription):
     if siteSettings.admin_receive_cancel_recurring_emails:
         sendEmailNotificationsToAdmins(request, siteSettings, str(_("A Recurring Donation is cancelled")), get_recurring_cancelled_admin_text(request, subscription), render_to_string(
             'donations/email_templates/recurring_cancelled_admin.html', context={'subscription': subscription}, request=request))
+
+
+def sendRecurringCancelRequestNotifToAdmins(request, subscription):
+    siteSettings = getSiteSettings(request)
+    sendEmailNotificationsToAdmins(request, siteSettings, str(_("Cancellation to a Recurring Donation is requested")), get_recurring_cancel_request_admin_text(request, subscription), render_to_string(
+        'donations/email_templates/recurring_cancel_request_admin.html', context={'subscription': subscription}, request=request))
 
 
 def sendRecurringCancelledNotifToDonor(request, subscription):

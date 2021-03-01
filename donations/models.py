@@ -220,6 +220,9 @@ class Subscription(ClusterableModel):
     def isRecurringCancelled(self):
         return True if self.recurring_status == STATUS_CANCELLED else False
 
+    def isRecurringProcessing(self):
+        return True if self.recurring_status == STATUS_PROCESSING else False
+
     class Meta:
         ordering = ['-created_at']
         verbose_name = _('Subscription')

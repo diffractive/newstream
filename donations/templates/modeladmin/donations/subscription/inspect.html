@@ -186,6 +186,9 @@
             <p>{% trans 'Subscription is not in a valid state for resuming/pausing.' %}</p>
             {% endif %}
             <hr>
+            {% else %}
+            <p>{% trans 'Toggle Subscription is not supported for this gateway.' %}</p>
+            <hr>
             {% endif %}
             {% if gateway_cancelsub_supported %}
             <h2>{% trans 'Cancel subscription status' %}</h2>
@@ -200,6 +203,8 @@
             {% else %}
             <p>{% trans 'Subscription is already cancelled.' %}</p>
             {% endif %}
+            {% else %}
+            <p>{% trans 'Cancel Subscription is not supported for this gateway.' %}</p>
             {% endif %}
             {% if not gateway_togglesub_supported and not gateway_cancelsub_supported %}
             <p>{% trans 'Current payment gateway does not support api calls or any actions performed here.' %}</p>

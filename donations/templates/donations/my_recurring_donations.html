@@ -36,21 +36,15 @@
                                 <div class="payment-recurring-options-div" data-id="{{ subscription.id }}">
                                     <button class="view-recurring-donation" data-id="{{ subscription.id }}"
                                         data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
-                                    {% if not subscription.isRecurringCancelled and support_editsub %}
                                     <button class="edit-recurring-donation" data-id="{{ subscription.id }}"
-                                        data-href="{% url 'donations:edit-recurring' subscription.id %}">{% trans 'Edit Recurring donation' %}</button>
-                                    {% endif %}
-                                    {% if not subscription.isRecurringCancelled and support_togglesub %}
+                                        data-href="{% url 'donations:edit-recurring' subscription.id %}" {% if subscription.isRecurringCancelled or subscription.isRecurringProcessing or not support_editsub %}disabled{% endif %}>{% trans 'Edit Recurring donation' %}</button>
                                     <button class="toggle-recurring-donation need-black-loading-btn adhoc-right-pad"
-                                        data-id="{{ subscription.id }}"><span
+                                        data-id="{{ subscription.id }}" {% if subscription.isRecurringCancelled or subscription.isRecurringProcessing or not support_togglesub %}disabled{% endif %}><span
                                             class="btn-text">{{ subscription|toggle_text }}</span><span
                                             class="icon"></span></button>
-                                    {% endif %}
-                                    {% if not subscription.isRecurringCancelled and support_cancelsub %}
                                     <button class="cancel-recurring-donation need-black-loading-btn adhoc-right-pad"
-                                        data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}<span
+                                        data-id="{{ subscription.id }}" {% if subscription.isRecurringCancelled or subscription.isRecurringProcessing or not support_cancelsub %}disabled{% endif %}>{% trans 'Cancel recurring donation' %}<span
                                             class="icon"></span></button>
-                                    {% endif %}
                                 </div>
                                 {% endwith %}
                                 {% else %}
@@ -115,21 +109,15 @@
                             <div class="payment-recurring-options-div" data-id="{{ subscription.id }}">
                                 <button class="view-recurring-donation" data-id="{{ subscription.id }}"
                                     data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
-                                {% if not subscription.isRecurringCancelled and support_editsub %}
                                 <button class="edit-recurring-donation" data-id="{{ subscription.id }}"
-                                    data-href="{% url 'donations:edit-recurring' subscription.id %}">{% trans 'Edit Recurring donation' %}</button>
-                                {% endif %}
-                                {% if not subscription.isRecurringCancelled and support_togglesub %}
+                                    data-href="{% url 'donations:edit-recurring' subscription.id %}" {% if subscription.isRecurringCancelled or subscription.isRecurringProcessing or not support_editsub %}disabled{% endif %}>{% trans 'Edit Recurring donation' %}</button>
                                 <button class="toggle-recurring-donation need-black-loading-btn adhoc-right-pad"
-                                    data-id="{{ subscription.id }}"><span
+                                    data-id="{{ subscription.id }}" {% if subscription.isRecurringCancelled or subscription.isRecurringProcessing or not support_togglesub %}disabled{% endif %}><span
                                         class="btn-text">{{ subscription|toggle_text }}</span><span
                                         class="icon"></span></button>
-                                {% endif %}
-                                {% if not subscription.isRecurringCancelled and support_cancelsub %}
                                 <button class="cancel-recurring-donation need-black-loading-btn adhoc-right-pad"
-                                    data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}<span
+                                    data-id="{{ subscription.id }}" {% if subscription.isRecurringCancelled or subscription.isRecurringProcessing or not support_cancelsub %}disabled{% endif %}>{% trans 'Cancel recurring donation' %}<span
                                         class="icon"></span></button>
-                                {% endif %}
                             </div>
                             {% endwith %}
                             {% else %}
@@ -188,10 +176,15 @@
                             if (data['status'] == 'success') {
                                 alert('Recurring donation cancelled!');
                                 for (let buttonsDiv of document.querySelectorAll(`div.payment-recurring-options-div[data-id='${subscription_id}']`)) {
-                                    buttonsDiv.innerHTML = `<button class="view-recurring-donation" data-id="${subscription_id}" data-href="${data['button-href']}">${data['button-html']}</button>`;
-                                    buttonsDiv.querySelector('button.view-recurring-donation').addEventListener("click", function (event) {
-                                        window.location.href = data['button-href'];
-                                    });
+                                    if (buttonsDiv.querySelector('button.edit-recurring-donation')) {
+                                        buttonsDiv.querySelector('button.edit-recurring-donation').disabled = true;
+                                    }
+                                    if (buttonsDiv.querySelector('button.toggle-recurring-donation')) {
+                                        buttonsDiv.querySelector('button.toggle-recurring-donation').disabled = true;
+                                    }
+                                    if (buttonsDiv.querySelector('button.cancel-recurring-donation')) {
+                                        buttonsDiv.querySelector('button.cancel-recurring-donation').disabled = true;
+                                    }
                                 }
                                 for (let statusTd of document.querySelectorAll(`td.recurring-status-td[data-id='${subscription_id}']`)) {
                                     statusTd.innerHTML = data['recurring-status'];

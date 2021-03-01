@@ -1,4 +1,3 @@
-import stripe
 import json
 from datetime import datetime, timezone
 from django.shortcuts import render, redirect, get_object_or_404

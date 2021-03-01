@@ -1,5 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 
+from site_settings.models import GATEWAY_STRIPE, GATEWAY_PAYPAL, GATEWAY_2C2P, GATEWAY_OFFLINE, GATEWAY_CAN_EDIT_SUBSCRIPTION, GATEWAY_CAN_TOGGLE_SUBSCRIPTION, GATEWAY_CAN_CANCEL_SUBSCRIPTION
 from donations.payment_gateways._2c2p.factory import Factory_2C2P
 from donations.payment_gateways.paypal.factory import Factory_Paypal
 from donations.payment_gateways.stripe.factory import Factory_Stripe
@@ -8,6 +9,10 @@ from donations.payment_gateways._2c2p.forms import RecurringPaymentForm_2C2P
 from donations.payment_gateways.paypal.forms import RecurringPaymentForm_Paypal
 from donations.payment_gateways.stripe.forms import RecurringPaymentForm_Stripe
 from donations.payment_gateways.offline.forms import RecurringPaymentForm_Offline
+from donations.payment_gateways._2c2p.constants import API_CAPABILITIES as _2C2P_API_CAPABILITIES
+from donations.payment_gateways.paypal.constants import API_CAPABILITIES as PAYPAL_API_CAPABILITIES
+from donations.payment_gateways.stripe.constants import API_CAPABILITIES as STRIPE_API_CAPABILITIES
+from donations.payment_gateways.offline.constants import API_CAPABILITIES as OFFLINE_API_CAPABILITIES
 
 
 def InitPaymentGateway(request, donation=None, subscription=None):
@@ -61,3 +66,34 @@ def getEditRecurringPaymentHtml(subscription):
         return 'donations/edit_offline_recurring_payment_form.html'
     else:
         raise ValueError(_('The Provided gateway has not been implemented yet'))
+
+
+def getAPICapabilitiesFromPaymentGateway(paymentGateway):
+    if paymentGateway.title == GATEWAY_STRIPE:
+        return STRIPE_API_CAPABILITIES
+    elif paymentGateway.title == GATEWAY_PAYPAL:
+        return PAYPAL_API_CAPABILITIES
+    elif paymentGateway.title == GATEWAY_2C2P:
+        return _2C2P_API_CAPABILITIES
+    elif paymentGateway.title == GATEWAY_OFFLINE:
+        return OFFLINE_API_CAPABILITIES
+    else:
+        return []
+
+
+def isGatewayEditSubSupported(gateway):
+    if GATEWAY_CAN_EDIT_SUBSCRIPTION in getAPICapabilitiesFromPaymentGateway(gateway):
+        return True
+    return False
+
+
+def isGatewayToggleSubSupported(gateway):
+    if GATEWAY_CAN_TOGGLE_SUBSCRIPTION in getAPICapabilitiesFromPaymentGateway(gateway):
+        return True
+    return False
+
+
+def isGatewayCancelSubSupported(gateway):
+    if GATEWAY_CAN_CANCEL_SUBSCRIPTION in getAPICapabilitiesFromPaymentGateway(gateway):
+        return True
+    return False

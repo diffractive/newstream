@@ -7,11 +7,11 @@ from wagtail.contrib.modeladmin.options import (
 from wagtail.contrib.modeladmin.views import InspectView, DeleteView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper
 
-from donations.functions import isGatewayActionSupported
 from newstream.functions import raiseObjectNone, getSiteSettings_from_default_site
 from donations.models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED
 from newstream_user.models import UserSubscriptionUpdatesLog
 from donations.payment_gateways._2c2p.functions import RPPInquiryRequest
+from donations.payment_gateways import isGatewayEditSubSupported, isGatewayToggleSubSupported, isGatewayCancelSubSupported
 
 
 class DonationInspectView(InspectView):
@@ -101,7 +101,9 @@ class SubscriptionInspectView(InspectView):
             'status_active': STATUS_ACTIVE.capitalize(),
             'status_paused': STATUS_PAUSED.capitalize(),
             'status_cancelled': STATUS_CANCELLED.capitalize(),
-            'gateway_actions_supported': isGatewayActionSupported(self.instance.gateway),
+            'gateway_editsub_supported': isGatewayEditSubSupported(self.instance.gateway),
+            'gateway_togglesub_supported': isGatewayToggleSubSupported(self.instance.gateway),
+            'gateway_cancelsub_supported': isGatewayCancelSubSupported(self.instance.gateway),
             'metas': self.get_meta_data(),
             'renewals': self.get_renewals(),
             'action_logs': self.get_action_logs(),

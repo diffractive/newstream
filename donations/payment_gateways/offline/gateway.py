@@ -18,7 +18,6 @@ from newstream.functions import uuid4_str, getSiteName, getSiteSettings, getFull
 
 
 class Gateway_Offline(PaymentGatewayManager):
-
     def __init__(self, request, donation=None, subscription=None, **kwargs):
         super().__init__(request, donation, subscription)
         # set offline settings object

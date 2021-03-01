@@ -15,7 +15,6 @@ from newstream.functions import getSiteSettings, getSuperUserTimezone, _debug
 from newstream.functions import evTokenGenerator, raiseObjectNone, getSiteName
 from donations.models import DonationMeta
 from newstream_user.models import UserSubscriptionUpdatesLog
-from site_settings.models import GATEWAY_STRIPE, GATEWAY_PAYPAL, GATEWAY_2C2P, GATEWAY_OFFLINE
 
 
 def getCurrencyDict():
@@ -45,12 +44,6 @@ def currencyCodeToKey(code):
 def isTestMode(request):
     siteSettings = getSiteSettings(request)
     return siteSettings.sandbox_mode
-
-
-def isGatewayActionSupported(gateway):
-    if gateway.title in [GATEWAY_2C2P, GATEWAY_PAYPAL, GATEWAY_STRIPE, GATEWAY_OFFLINE]:
-        return True
-    return False
 
 
 def isUpdateSubsFrequencyLimitationPassed(gatewayManager):

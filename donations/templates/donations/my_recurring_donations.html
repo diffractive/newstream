@@ -32,27 +32,26 @@
                             <div
                                 class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch recurring-donation-menu">
                                 {% if request.user.is_email_verified %}
-                                {% with support_actions=subscription|gateway_actions_supported %}
-                                {% if subscription.isRecurringCancelled or not support_actions %}
-                                <div class="payment-cancelled-options-div" data-id="{{ subscription.id }}">
-                                    <button class="view-recurring-donation" data-id="{{ subscription.id }}"
-                                        data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
-                                </div>
-                                {% else %}
+                                {% with support_editsub=subscription|is_gateway_editsub_supported support_togglesub=subscription|is_gateway_togglesub_supported support_cancelsub=subscription|is_gateway_cancelsub_supported %}
                                 <div class="payment-recurring-options-div" data-id="{{ subscription.id }}">
                                     <button class="view-recurring-donation" data-id="{{ subscription.id }}"
                                         data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
+                                    {% if not subscription.isRecurringCancelled and support_editsub %}
                                     <button class="edit-recurring-donation" data-id="{{ subscription.id }}"
                                         data-href="{% url 'donations:edit-recurring' subscription.id %}">{% trans 'Edit Recurring donation' %}</button>
+                                    {% endif %}
+                                    {% if not subscription.isRecurringCancelled and support_togglesub %}
                                     <button class="toggle-recurring-donation need-black-loading-btn adhoc-right-pad"
                                         data-id="{{ subscription.id }}"><span
                                             class="btn-text">{{ subscription|toggle_text }}</span><span
                                             class="icon"></span></button>
+                                    {% endif %}
+                                    {% if not subscription.isRecurringCancelled and support_cancelsub %}
                                     <button class="cancel-recurring-donation need-black-loading-btn adhoc-right-pad"
                                         data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}<span
                                             class="icon"></span></button>
+                                    {% endif %}
                                 </div>
-                                {% endif %}
                                 {% endwith %}
                                 {% else %}
                                 <button class="actions-locked">{% trans 'Actions locked (Email unverified)' %}</button>
@@ -112,27 +111,26 @@
                         <div
                             class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch recurring-donation-menu">
                             {% if request.user.is_email_verified %}
-                            {% with support_actions=subscription|gateway_actions_supported %}
-                            {% if subscription.isRecurringCancelled or not support_actions %}
-                            <div class="payment-cancelled-options-div" data-id="{{ subscription.id }}">
-                                <button class="view-recurring-donation" data-id="{{ subscription.id }}"
-                                    data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
-                            </div>
-                            {% else %}
+                            {% with support_editsub=subscription|is_gateway_editsub_supported support_togglesub=subscription|is_gateway_togglesub_supported support_cancelsub=subscription|is_gateway_cancelsub_supported %}
                             <div class="payment-recurring-options-div" data-id="{{ subscription.id }}">
                                 <button class="view-recurring-donation" data-id="{{ subscription.id }}"
                                     data-href="{% url 'donations:my-renewals' subscription.id %}">{% trans 'View all renewals' %}</button>
+                                {% if not subscription.isRecurringCancelled and support_editsub %}
                                 <button class="edit-recurring-donation" data-id="{{ subscription.id }}"
                                     data-href="{% url 'donations:edit-recurring' subscription.id %}">{% trans 'Edit Recurring donation' %}</button>
+                                {% endif %}
+                                {% if not subscription.isRecurringCancelled and support_togglesub %}
                                 <button class="toggle-recurring-donation need-black-loading-btn adhoc-right-pad"
                                     data-id="{{ subscription.id }}"><span
                                         class="btn-text">{{ subscription|toggle_text }}</span><span
                                         class="icon"></span></button>
+                                {% endif %}
+                                {% if not subscription.isRecurringCancelled and support_cancelsub %}
                                 <button class="cancel-recurring-donation need-black-loading-btn adhoc-right-pad"
                                     data-id="{{ subscription.id }}">{% trans 'Cancel recurring donation' %}<span
                                         class="icon"></span></button>
+                                {% endif %}
                             </div>
-                            {% endif %}
                             {% endwith %}
                             {% else %}
                             <button class="actions-locked">{% trans 'Actions locked (Email unverified)' %}</button>

@@ -2,7 +2,7 @@ from django import template
 from django.utils.translation import gettext_lazy as _
 
 from donations.models import STATUS_PAUSED, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_CANCELLED, STATUS_INACTIVE
-from donations.functions import isGatewayActionSupported
+from donations.payment_gateways import isGatewayEditSubSupported, isGatewayToggleSubSupported, isGatewayCancelSubSupported
 
 register = template.Library()
 
@@ -16,9 +16,19 @@ def toggle_text(subscription):
     return '--'
 
 
-@register.filter(name='gateway_actions_supported')
-def gateway_actions_supported(subscription):
-    return isGatewayActionSupported(subscription.gateway)
+@register.filter(name='is_gateway_editsub_supported')
+def is_gateway_editsub_supported(subscription):
+    return isGatewayEditSubSupported(subscription.gateway)
+
+
+@register.filter(name='is_gateway_togglesub_supported')
+def is_gateway_togglesub_supported(subscription):
+    return isGatewayToggleSubSupported(subscription.gateway)
+
+
+@register.filter(name='is_gateway_cancelsub_supported')
+def is_gateway_cancelsub_supported(subscription):
+    return isGatewayCancelSubSupported(subscription.gateway)
 
 
 @register.filter(name='recurring_status_color')

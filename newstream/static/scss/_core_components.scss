@@ -423,6 +423,11 @@ span.multilang-icon {
         }
     }
 }
+.payment-recurring-options-div {
+    button:disabled {
+        color: #dddddd;
+    }
+}
 
 /* Profile Sidebar */
 .profile-sidebar {

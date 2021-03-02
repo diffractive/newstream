@@ -12,6 +12,8 @@ SUBS_ACTION_UPDATE = 'update-subscription'
 SUBS_ACTION_PAUSE = 'pause-subscription'
 SUBS_ACTION_RESUME = 'resume-subscription'
 SUBS_ACTION_CANCEL = 'cancel-subscription'
+SUBS_ACTION_MANUAL = 'manual-update-status'
+DONATION_ACTION_MANUAL = 'manual-update-status'
 
 class UserMeta(models.Model):
     user = ParentalKey(
@@ -40,6 +42,7 @@ class UserSubscriptionUpdatesLog(models.Model):
         (SUBS_ACTION_PAUSE, SUBS_ACTION_PAUSE),
         (SUBS_ACTION_RESUME, SUBS_ACTION_RESUME),
         (SUBS_ACTION_CANCEL, SUBS_ACTION_CANCEL),
+        (SUBS_ACTION_MANUAL, SUBS_ACTION_MANUAL),
     ]
     user = ParentalKey(
         'User',
@@ -62,6 +65,33 @@ class UserSubscriptionUpdatesLog(models.Model):
         ordering = ['-id']
         verbose_name = _('User Subscription Updates Log')
         verbose_name_plural = _('User Subscription Updates Logs')
+
+
+class UserDonationUpdatesLog(models.Model):
+    DONATION_ACTION_CHOICES = [
+        (DONATION_ACTION_MANUAL, DONATION_ACTION_MANUAL),
+    ]
+    user = ParentalKey(
+        'User',
+        related_name='donationupdateslogs',
+        on_delete=models.CASCADE,
+    )
+    donation = models.ForeignKey(
+        'donations.Donation',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    action_type = models.CharField(
+        max_length=255, choices=DONATION_ACTION_CHOICES, null=True)
+    action_notes = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = _('User Donation Updates Log')
+        verbose_name_plural = _('User Donation Updates Logs')
 
 
 class User(AbstractUser, ClusterableModel):

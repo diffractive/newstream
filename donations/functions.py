@@ -14,7 +14,7 @@ from .includes.currency_dictionary import currency_dict
 from newstream.functions import getSiteSettings, getSuperUserTimezone, _debug
 from newstream.functions import evTokenGenerator, raiseObjectNone, getSiteName
 from donations.models import DonationMeta
-from newstream_user.models import UserSubscriptionUpdatesLog
+from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
 
 
 def getCurrencyDict():
@@ -58,11 +58,22 @@ def isUpdateSubsFrequencyLimitationPassed(gatewayManager):
     return True
 
 
-def addUpdateSubsActionLog(gatewayManager, action_type, action_notes='', user=None):
+def addUpdateSubsActionLog(subscription, action_type, action_notes='', user=None):
     ''' This might be called either by donor or by admin'''
     log = UserSubscriptionUpdatesLog(
-        user=gatewayManager.subscription.user if user == None else user,
-        subscription=gatewayManager.subscription,
+        user=subscription.user if user == None else user,
+        subscription=subscription,
+        action_type=action_type,
+        action_notes=action_notes
+    )
+    log.save()
+
+
+def addUpdateDonationActionLog(donation, action_type, action_notes='', user=None):
+    ''' This might be called either by donor or by admin'''
+    log = UserDonationUpdatesLog(
+        user=donation.user if user == None else user,
+        donation=donation,
         action_type=action_type,
         action_notes=action_notes
     )

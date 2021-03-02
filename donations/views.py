@@ -205,7 +205,7 @@ def cancel_recurring(request):
                 request, subscription=subscription)
             gatewayManager.cancel_recurring_payment()
             # add to the update actions log
-            addUpdateSubsActionLog(gatewayManager, SUBS_ACTION_CANCEL)
+            addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL)
             return JsonResponse({'status': 'success', 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
         else:
             return HttpResponse(400)
@@ -238,7 +238,7 @@ def toggle_recurring(request):
                 raise Exception(_('You have already carried out 5 subscription update action in the last 5 minutes, our current limit is 5 subscription update actions(edit/pause/resume) every 5 minutes.'))
             resultSet = gatewayManager.toggle_recurring_payment()
             # add to the update actions log
-            addUpdateSubsActionLog(gatewayManager, SUBS_ACTION_PAUSE if resultSet['recurring-status'] == STATUS_PAUSED else SUBS_ACTION_RESUME)
+            addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_PAUSE if resultSet['recurring-status'] == STATUS_PAUSED else SUBS_ACTION_RESUME)
             return JsonResponse({'status': 'success', 'button-html': resultSet['button-html'], 'recurring-status': str(_(resultSet['recurring-status'].capitalize())), 'success-message': resultSet['success-message']})
         else:
             return HttpResponse(400)
@@ -271,7 +271,7 @@ def edit_recurring(request, id):
                 gatewayManager.update_recurring_payment(form.cleaned_data)
                 new_value = gatewayManager.subscription.recurring_amount
                 # add to the update actions log
-                addUpdateSubsActionLog(gatewayManager, SUBS_ACTION_UPDATE, 'Recurring Amount: %s -> %s' % (str(original_value), str(new_value)))
+                addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_UPDATE, 'Recurring Amount: %s -> %s' % (str(original_value), str(new_value)))
                 return redirect('donations:edit-recurring', id=id)
     except ValueError as e:
         _exception(str(e))

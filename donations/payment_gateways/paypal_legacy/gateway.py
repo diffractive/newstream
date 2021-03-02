@@ -131,7 +131,7 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
         self.subscription.save()
 
         # add to the update actions log
-        addUpdateSubsActionLog(self, SUBS_ACTION_CANCEL, action_notes='Cancellation Request')
+        addUpdateSubsActionLog(self.subscription, SUBS_ACTION_CANCEL, action_notes='Cancellation Request')
 
         # email notifications
         sendRecurringCancelRequestNotifToAdmins(

@@ -19,7 +19,7 @@
             <p>{% trans 'Hi Admins,' %}</p>
             <p>
                 {% trans 'This email is to inform you that a recurring donation has been resumed on your website:' %}<br>
-                <a href=" {{ request|domain }}" target="_blank">{{ request|domain }}</a>
+                <a href="{{ request|domain }}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}" target="_blank">{{ request|domain }}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}</a>
             </p>
             <table cellpadding="10">
                 <tr>

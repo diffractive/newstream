@@ -2,7 +2,7 @@
 {% load common_tags i18n %}
 
 {% block title %}
-{% trans 'A Recurring Donation is cancelled' %}
+{% trans 'Your Recurring Donation Status has been updated' %}
 {% endblock %}
 
 {% block content %}
@@ -10,24 +10,20 @@
     <tr>
         <th style="width: 100%;text-align: left;">
             <h2 style="font-weight: bold;">
-                {% trans "A Recurring Donation is cancelled" %}
+                {% trans "Your Recurring Donation Status has been updated" %}
             </h2>
         </th>
     </tr>
     <tr>
         <td style="width: 100%;">
-            <p>{% trans 'Hi Admins,' %}</p>
+            <p>{% trans "Dear" %} {{ subscription.user.fullname }},</p>
+            {% url 'donations:my-recurring-donations' as donations_url %}
             <p>
-                {% trans 'This email is to inform you that a recurring donation has been cancelled on your website:' %}<br>
-                <a href="{{ request|domain }}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}" target="_blank">{{ request|domain }}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}</a>
+                {% blocktrans with donations_full_url=request|fullurl:donations_url%}Here are the details of your recurring donation at <a href="{{donations_full_url}}" target="_blank">here</a>.{% endblocktrans %}
             </p>
             <table cellpadding="10">
                 <tr>
-                    <td style="font-weight: bold;">{% trans 'Donor' %}</td>
-                    <td>{{ subscription.user.fullname }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold;">{% trans "Recurring Donation Identifier" %}</td>
+                    <td style="font-weight: bold;">{% trans "Profile ID" %}</td>
                     <td>{{ subscription.profile_id }}</td>
                 </tr>
                 <tr>
@@ -35,11 +31,11 @@
                     <td>{{ subscription.currency }}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold;">{% trans "Recurring Donation Amount" %}</td>
+                    <td style="font-weight: bold;">{% trans "Recurring Amount" %}</td>
                     <td>{{ subscription|recurring_amount_with_currency }}</td>
                 </tr>
                 <tr>
-                    <td style="font-weight: bold;">{% trans 'Recurring Donation Status' %}</td>
+                    <td style="font-weight: bold;">{% trans "Status" %}</td>
                     <td>{{ subscription.recurring_status|title }}</td>
                 </tr>
             </table>

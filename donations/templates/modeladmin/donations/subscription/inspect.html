@@ -158,27 +158,36 @@
         </div>
     </section>
     <section id="tab-actions" role="tabpanel" aria-labelledby="tab-label-actions">
-        <div class="nice-padding">
-            <p>{% trans 'Current subscription status is:' %} <strong>{{ fields.recurring_status.value }}</strong>.</p>
+        <div class="nice-padding" style="padding-bottom: 60px;">
+            <p>{% trans 'Current subscription status is:' %} <strong>{{ subscription.recurring_status|title }}</strong>.</p>
             <hr>
-            <h2>{% trans 'Manually set subscription status as Active' %}</h2>
-            {% if fields.recurring_status.value != status_active %}
-            <form action="{% url 'internal-setactive-subscription' %}" method="POST">
+            <h2>{% trans 'Manually set subscription status' %}</h2>
+            <form action="{% url 'internal-set-subscription-status' %}" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="{{fields.id.value}}">
-                <input type="submit" class="button" value="{% trans 'Set subscription status as Active' %}">
+                <p>Set Subscription status as:</p>
+                <div class="col3" style="padding-left: 0px;">
+                    <div class="dropdown dropdown-button match-width">
+                        <input type="submit" name="status" value="{{ status_active|title }}" class="button">
+                        <div class="dropdown-toggle icon icon-arrow-down"></div>
+                        <ul>
+                            <li><input type="submit" name="status" value="{{ status_processing|title }}" class="button"></li>
+                            <li><input type="submit" name="status" value="{{ status_paused|title }}" class="button"></li>
+                            <li><input type="submit" name="status" value="{{ status_cancelled|title }}" class="button"></li>
+                            <li><input type="submit" name="status" value="{{ status_inactive|title }}" class="button"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="clear: both;"></div>
             </form>
-            {% else %}
-            <p>{% trans 'Subscription is already active.' %}</p>
-            {% endif %}
             <hr>
             {% if gateway_togglesub_supported %}
             <h2>{% trans 'Toggle subscription status' %}</h2>
-            {% if fields.recurring_status.value == status_active or fields.recurring_status.value == status_paused %}
+            {% if subscription.recurring_status == status_active or subscription.recurring_status == status_paused %}
             <form action="{% url 'internal-toggle-subscription' %}" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="{{fields.id.value}}">
-                <input type="submit" class="button" value="{% if fields.recurring_status.value == status_active %}{% trans 'Pause Subscription' %}{% else %}{% trans 'Resume Subscription' %}{% endif %}">
+                <input type="submit" class="button" value="{% if subscription.recurring_status == status_active %}{% trans 'Pause Subscription' %}{% else %}{% trans 'Resume Subscription' %}{% endif %}">
                 <br>
                 <small class="caution-text">*This action communicates with the payment gateway*</small>
             </form>
@@ -192,7 +201,7 @@
             {% endif %}
             {% if gateway_cancelsub_supported %}
             <h2>{% trans 'Cancel subscription status' %}</h2>
-            {% if fields.recurring_status.value != status_cancelled %}
+            {% if subscription.recurring_status != status_cancelled %}
             <form action="{% url 'internal-cancel-subscription' %}" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="{{fields.id.value}}">
@@ -205,9 +214,6 @@
             {% endif %}
             {% else %}
             <p>{% trans 'Cancel Subscription is not supported for this gateway.' %}</p>
-            {% endif %}
-            {% if not gateway_togglesub_supported and not gateway_cancelsub_supported %}
-            <p>{% trans 'Current payment gateway does not support api calls or any actions performed here.' %}</p>
             {% endif %}
         </div>
     </section>

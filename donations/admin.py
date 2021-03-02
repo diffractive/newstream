@@ -8,8 +8,8 @@ from wagtail.contrib.modeladmin.views import InspectView, DeleteView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper
 
 from newstream.functions import raiseObjectNone, getSiteSettings_from_default_site
-from donations.models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED
-from newstream_user.models import UserSubscriptionUpdatesLog
+from donations.models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING, STATUS_INACTIVE
+from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
 from donations.payment_gateways._2c2p.functions import RPPInquiryRequest
 from donations.payment_gateways import isGatewayEditSubSupported, isGatewayToggleSubSupported, isGatewayCancelSubSupported
 
@@ -48,15 +48,28 @@ class DonationInspectView(InspectView):
         for meta in metasResult:
             metas.append({'key': meta.field_key, 'value': meta.field_value})
         return metas
+
+    def get_action_logs(self):
+        """
+        Return a list of UserDonationUpdatesLog from self.instance
+        """
+        return UserDonationUpdatesLog.objects.filter(donation=self.instance).order_by('-created_at')
     
     def get_context_data(self, **kwargs):
         context = {
             'fields': self.get_fields_dict_as_dict(),
-            'status_complete': STATUS_COMPLETE.capitalize(),
+            'donation': self.instance,
+            'status_complete': STATUS_COMPLETE,
+            'status_processing': STATUS_PROCESSING,
+            'status_refunded': STATUS_REFUNDED,
+            'status_revoked': STATUS_REVOKED,
+            'status_failed': STATUS_FAILED,
+            'status_cancelled': STATUS_CANCELLED,
             'dmetas': self.get_donor_meta_data(),
             'smetas': self.get_system_meta_data(),
             'buttons': self.button_helper.get_buttons_for_obj(
                 self.instance, exclude=['inspect', 'edit']),
+            'action_logs': self.get_action_logs(),
         }
         context.update(kwargs)
         return super().get_context_data(**context)
@@ -98,9 +111,12 @@ class SubscriptionInspectView(InspectView):
     def get_context_data(self, **kwargs):
         context = {
             'fields': self.get_fields_dict_as_dict(),
-            'status_active': STATUS_ACTIVE.capitalize(),
-            'status_paused': STATUS_PAUSED.capitalize(),
-            'status_cancelled': STATUS_CANCELLED.capitalize(),
+            'subscription': self.instance,
+            'status_active': STATUS_ACTIVE,
+            'status_paused': STATUS_PAUSED,
+            'status_cancelled': STATUS_CANCELLED,
+            'status_processing': STATUS_PROCESSING,
+            'status_inactive': STATUS_INACTIVE,
             'gateway_editsub_supported': isGatewayEditSubSupported(self.instance.gateway),
             'gateway_togglesub_supported': isGatewayToggleSubSupported(self.instance.gateway),
             'gateway_cancelsub_supported': isGatewayCancelSubSupported(self.instance.gateway),

@@ -37,6 +37,9 @@
     <li role="tab" aria-controls="tab-actions">
         <a href="#tab-actions">{% trans 'Actions' %}</a>
     </li>
+    <li role="tab" aria-controls="tab-action-logs">
+        <a href="#tab-action-logs">{% trans 'Action Logs' %}</a>
+    </li>
 </ul>
 
 <div class="tab-content">
@@ -154,18 +157,56 @@
     </section>
     <section id="tab-actions" role="tabpanel" aria-labelledby="tab-label-actions">
         <div class="nice-padding">
-            <h2>{% trans 'Manually set donation status as Complete' %}</h2>
-            {% if fields.payment_status.value != status_complete %}
-            <p>{% trans 'Current donation status is:' %} {{ fields.payment_status.value }}.</p>
-            <form action="{% url 'internal-complete-donation' %}" method="POST">
+            <h2>{% trans 'Manually set donation status' %}</h2>
+            <p>{% trans 'Current donation status is:' %} <strong>{{ fields.payment_status.value }}</strong>.</p>
+            <form action="{% url 'internal-set-donation-status' %}" method="POST">
                 {% csrf_token %}
                 <input type="hidden" name="id" value="{{fields.id.value}}">
-                <input type="submit" class="button" value="{% trans 'Set donation status as Complete' %}">
+                <p>Set Donation status as:</p>
+                <div class="col3" style="padding-left: 0px;">
+                    <div class="dropdown dropdown-button match-width">
+                        <input type="submit" name="status" value="{{ status_complete|title }}" class="button">
+                        <div class="dropdown-toggle icon icon-arrow-down"></div>
+                        <ul>
+                            <li><input type="submit" name="status" value="{{ status_processing|title }}" class="button"></li>
+                            <li><input type="submit" name="status" value="{{ status_refunded|title }}" class="button"></li>
+                            <li><input type="submit" name="status" value="{{ status_revoked|title }}" class="button"></li>
+                            <li><input type="submit" name="status" value="{{ status_failed|title }}" class="button"></li>
+                            <li><input type="submit" name="status" value="{{ status_cancelled|title }}" class="button"></li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="clear: both;"></div>
             </form>
-            {% else %}
-            <p>{% trans 'Donation is already completed.' %}</p>
-            {% endif %}
             <hr>
+        </div>
+    </section>
+    <section id="tab-action-logs" role="tabpanel" aria-labelledby="tab-label-action-logs">
+        <div class="nice-padding" style="padding-bottom: 60px;">
+            {% if action_logs %}
+            <table class="listing full-width">
+                <thead>
+                    <tr>
+                        <th>{% trans 'User' %}</th>
+                        <th>{% trans 'Action type' %}</th>
+                        <th>{% trans 'Action notes' %}</th>
+                        <th>{% trans 'Created at' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in action_logs %}
+                    <tr>
+                        <td>{{ log.user }}</td>
+                        <td>{{ log.action_type }}</td>
+                        <td>{{ log.action_notes }}</td>
+                        <td>{{ log.created_at }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            {% else %}
+            <p>{% trans 'No update-actions are logged.' %}</p>
+            {% endif %}
         </div>
     </section>
 </div>

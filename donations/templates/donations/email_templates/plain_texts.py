@@ -65,6 +65,58 @@ def get_donation_receipt_text(request, donation):
     }
 
 
+def get_donation_status_change_text(request, donation):
+    return _("""
+        Your Donation Payment Status has been updated\n
+        \n
+        Dear %(name)s,\n
+        Here are the latest details of your donation at %(url)s:\n
+        \n
+        Transaction ID: %(transaction_id)s\n
+        Donation Frequency: %(frequency)s\n
+        Currency: %(currency)s\n
+        Donation Amount: %(amount)s\n
+        Payment Status: %(status)s\n
+        \n
+        Thank you,\n
+        %(sitename)s
+    """) % {
+        'name': donation.user.fullname,
+        'url': getFullReverseUrl(request, 'donations:my-recurring-donations') if donation.is_recurring else getFullReverseUrl(request, 'donations:my-onetime-donations'),
+        'transaction_id': donation.transaction_id,
+        'frequency': donation.donation_frequency,
+        'currency': donation.currency,
+        'amount': displayDonationAmountWithCurrency(donation),
+        'status': donation.payment_status,
+        'sitename': getSiteName(request)
+    }
+
+
+def get_subscription_status_change_text(request, subscription):
+    return _("""
+        Your Recurring Donation Status has been updated\n
+        \n
+        Dear %(name)s,\n
+        Here are the latest details of your recurring donation at %(url)s:\n
+        \n
+        Profile ID: %(profile_id)s\n
+        Currency: %(currency)s\n
+        Recurring Amount: %(amount)s\n
+        Status: %(status)s\n
+        \n
+        Thank you,\n
+        %(sitename)s
+    """) % {
+        'name': subscription.user.fullname,
+        'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
+        'profile_id': subscription.profile_id,
+        'currency': subscription.currency,
+        'amount': displayRecurringAmountWithCurrency(subscription),
+        'status': subscription.recurring_status,
+        'sitename': getSiteName(request)
+    }
+
+
 def get_new_renewal_text(request, donation):
     return _("""
         New Renewal Donation\n

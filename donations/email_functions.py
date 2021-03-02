@@ -9,7 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from allauth.account.utils import send_email_confirmation
 
 from newstream.functions import getSiteSettings, getDefaultFromEmail, setDefaultFromEmail
-from donations.templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text, get_new_renewal_text, get_renewal_receipt_text, get_recurring_updated_admin_text, get_recurring_updated_donor_text, get_recurring_paused_admin_text, get_recurring_paused_donor_text, get_recurring_resumed_admin_text, get_recurring_resumed_donor_text, get_recurring_cancelled_admin_text, get_recurring_cancelled_donor_text, get_account_created_admin_text, get_account_deleted_admin_text, get_account_deleted_donor_text, get_donation_error_admin_text
+from donations.templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text, get_donation_status_change_text, get_subscription_status_change_text, get_new_renewal_text, get_renewal_receipt_text, get_recurring_updated_admin_text, get_recurring_updated_donor_text, get_recurring_paused_admin_text, get_recurring_paused_donor_text, get_recurring_resumed_admin_text, get_recurring_resumed_donor_text, get_recurring_cancelled_admin_text, get_recurring_cancelled_donor_text, get_account_created_admin_text, get_account_deleted_admin_text, get_account_deleted_donor_text, get_donation_error_admin_text
 from donations.models import STATUS_REVOKED
 
 
@@ -75,6 +75,18 @@ def sendDonationReceiptToDonor(request, donation):
         mail_title += str(_("(Revoked)"))
     sendEmailNotificationsToDonor(request, donation.user, mail_title, get_donation_receipt_text(
         request, donation), render_to_string('donations/email_templates/donation_receipt.html', context={'donation': donation}, request=request))
+
+
+def sendDonationStatusChangeToDonor(request, donation):
+    mail_title = str(_("Your Donation Payment Status has been updated."))
+    sendEmailNotificationsToDonor(request, donation.user, mail_title, get_donation_status_change_text(
+        request, donation), render_to_string('donations/email_templates/donation_status_change.html', context={'donation': donation}, request=request))
+
+
+def sendSubscriptionStatusChangeToDonor(request, subscription):
+    mail_title = str(_("Your Subscription Payment Status has been updated."))
+    sendEmailNotificationsToDonor(request, subscription.user, mail_title, get_subscription_status_change_text(
+        request, subscription), render_to_string('donations/email_templates/subscription_status_change.html', context={'subscription': subscription}, request=request))
 
 
 def sendRenewalNotifToAdmins(request, donation):

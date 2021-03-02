@@ -18,7 +18,7 @@
         <td style="width: 100%;">
             <p>{% trans "Dear" %} {{ donation.user.fullname }},</p>
             {% if donation.is_recurring %}
-            {% url 'donations:my-recurring-donations' as donations_url %}
+            {% url 'donations:my-renewals' donation.subscription.id as donations_url %}
             {% else %}
             {% url 'donations:my-onetime-donations' as donations_url %}
             {% endif %}

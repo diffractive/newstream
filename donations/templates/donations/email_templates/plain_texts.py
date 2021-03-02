@@ -23,7 +23,7 @@ def get_new_donation_text(request, donation):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': request.build_absolute_uri('/')[:-1],
+        'url': getFullReverseUrl(request, 'donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
         'name': donation.user.fullname,
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
@@ -82,7 +82,7 @@ def get_donation_status_change_text(request, donation):
         %(sitename)s
     """) % {
         'name': donation.user.fullname,
-        'url': getFullReverseUrl(request, 'donations:my-recurring-donations') if donation.is_recurring else getFullReverseUrl(request, 'donations:my-onetime-donations'),
+        'url': getFullReverseUrl(request, 'donations:my-renewals', kwargs={'id': donation.subscription.id}) if donation.is_recurring else getFullReverseUrl(request, 'donations:my-onetime-donations'),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
         'currency': donation.currency,
@@ -136,7 +136,7 @@ def get_new_renewal_text(request, donation):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': request.build_absolute_uri('/')[:-1],
+        'url': getFullReverseUrl(request, 'donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
         'name': donation.user.fullname,
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
@@ -196,7 +196,7 @@ def get_recurring_updated_admin_text(request, subscription, message):
         %(sitename)s
     """) % {
         'message': message,
-        'url': request.build_absolute_uri('/')[:-1],
+        'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
         'currency': subscription.currency,
@@ -251,7 +251,7 @@ def get_recurring_paused_admin_text(request, subscription):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': request.build_absolute_uri('/')[:-1],
+        'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
         'currency': subscription.currency,
@@ -305,7 +305,7 @@ def get_recurring_resumed_admin_text(request, subscription):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': request.build_absolute_uri('/')[:-1],
+        'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
         'currency': subscription.currency,
@@ -359,7 +359,7 @@ def get_recurring_cancelled_admin_text(request, subscription):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': request.build_absolute_uri('/')[:-1],
+        'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
         'currency': subscription.currency,
@@ -409,7 +409,7 @@ def get_account_deleted_admin_text(request, user):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': request.build_absolute_uri('/')[:-1],
+        'url': request.build_absolute_uri('/')+'admin/users/',
         'name': user.fullname,
         'sitename': getSiteName(request)
     }
@@ -443,10 +443,11 @@ def get_account_created_admin_text(request, user):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': request.build_absolute_uri('/')[:-1],
+        'url': request.build_absolute_uri('/')+'admin/users/%d/' % user.id,
         'name': user.fullname,
         'sitename': getSiteName(request)
     }
+
 
 def get_donation_error_admin_text(request, donation, error_title, error_description):
     return _("""
@@ -464,7 +465,7 @@ def get_donation_error_admin_text(request, donation, error_title, error_descript
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': request.build_absolute_uri('/')[:-1],
+        'url': getFullReverseUrl(request, 'donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
         'order': donation.transaction_id,
         'name': donation.user.fullname,
         'error_title': error_title,

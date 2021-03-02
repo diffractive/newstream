@@ -19,7 +19,7 @@
             <p>{% trans 'Hi Admins,' %}</p>
             <p>
                 {% trans 'This email is to inform you that a donor account has been created on your website:' %}<br>
-                <a href=" {{ request|domain }}" target="_blank">{{ request|domain }}</a>
+                <a href="{{ request|domain }}/admin/users/{{ user.id }}/" target="_blank">{{ request|domain }}/admin/users/{{ user.id }}/</a>
             </p>
             <table cellpadding="10">
                 <tr>

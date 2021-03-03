@@ -1,8 +1,6 @@
 from abc import ABC, abstractmethod
-from django.shortcuts import redirect
 
 from newstream.functions import raiseObjectNone, getSiteSettings
-from donations.functions import isTestMode
 
 
 class PaymentGatewayManager(ABC):

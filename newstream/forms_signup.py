@@ -1,4 +1,3 @@
-import re
 from django import forms
 from django.utils.translation import gettext_lazy as _
 from django.utils import translation
@@ -7,7 +6,6 @@ from django.conf import settings
 from wagtail.contrib.forms.forms import FormBuilder
 
 from newstream.functions import setDefaultFromEmail, getSiteSettings_from_default_site, process_user_meta
-from newstream_user.models import UserMeta
 
 
 class BaseSignupForm(forms.Form):

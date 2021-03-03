@@ -1,6 +1,6 @@
 from django.utils import translation
 from django.conf import settings
-from django.core.mail import EmailMessage, EmailMultiAlternatives
+from django.core.mail import EmailMultiAlternatives
 from django.template.defaultfilters import pluralize
 from django.utils.translation import gettext_lazy as _
 

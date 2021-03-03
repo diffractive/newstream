@@ -11,7 +11,7 @@ from paypalhttp import HttpError
 from donations.models import STATUS_FAILED
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.email_functions import sendDonationErrorNotifToAdmins
-from newstream.functions import getSiteName, getFullReverseUrl, printvars, uuid4_str, _debug, _error
+from newstream.functions import getSiteName, getFullReverseUrl, uuid4_str, _debug
 
 def common_headers(request):
     return ['Content-Type: application/json', 'Authorization: Bearer %s' % (request.session['paypal_token']), 'PayPal-Request-Id: %s' % (uuid4_str())]

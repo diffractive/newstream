@@ -12,8 +12,8 @@ from django.utils import translation
 from wagtail.contrib.modeladmin.views import InstanceSpecificView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper, AdminURLHelper
 
-from newstream.functions import raiseObjectNone, generateIDSecretHash, getFullReverseUrl
-from .models import Campaign
+from newstream.functions import generateIDSecretHash, getFullReverseUrl
+from email_campaigns.models import Campaign
 User = get_user_model()
 
 

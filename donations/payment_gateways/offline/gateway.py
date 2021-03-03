@@ -1,20 +1,11 @@
-from decimal import *
-from datetime import datetime, timezone
-from django.conf import settings
-from django.shortcuts import render, redirect
-from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import redirect
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
-from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
-from donations.models import Donation, DonationPaymentMeta, Subscription, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED
+from donations.models import STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getOfflineSettings
-from donations.functions import gen_transaction_id
-from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
-from newstream.functions import uuid4_str, getSiteName, getSiteSettings, getFullReverseUrl, printvars, _debug
+from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
 
 
 class Gateway_Offline(PaymentGatewayManager):

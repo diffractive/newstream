@@ -1,7 +1,6 @@
 import re
 import sys
 import os
-import json
 import uuid
 import logging
 logger = logging.getLogger('newstream')

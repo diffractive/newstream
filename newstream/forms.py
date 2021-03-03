@@ -1,6 +1,4 @@
-import re
 from django import forms
-from django.contrib.auth.forms import PasswordChangeForm
 from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
@@ -14,8 +12,7 @@ from allauth.account.utils import filter_users_by_email, user_email
 from allauth.socialaccount import app_settings
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 
-from newstream.functions import raiseObjectNone, setDefaultFromEmail, getSiteSettings, getSiteSettings_from_default_site
-from newstream_user.models import UserMeta
+from newstream.functions import getSiteSettings
 
 
 class PersonalInfoForm(forms.Form):
@@ -38,7 +35,7 @@ class PersonalInfoForm(forms.Form):
     def __init__(self, *args, request=None, **kwargs):
         super().__init__(*args, **kwargs)
         if not request:
-            raiseObjectNone(_('Please provide request object'))
+            raise ValueError(_('Please provide request object'))
         site_settings = getSiteSettings(request)
         usermeta_dict = {}
         for um in request.user.metas.all():

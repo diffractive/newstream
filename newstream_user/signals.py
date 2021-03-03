@@ -1,9 +1,6 @@
-from django.shortcuts import render
 from django.dispatch import receiver
-from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.utils import translation
-from django.http import HttpResponseRedirect
 
 from allauth.account.signals import user_logged_in, user_signed_up
 

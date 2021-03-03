@@ -1,7 +1,5 @@
-from decimal import *
-from datetime import datetime, timezone
+from decimal import Decimal
 from django.db import models
-from django.conf import settings
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
 from django.contrib.auth import get_user_model

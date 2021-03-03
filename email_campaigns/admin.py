@@ -3,9 +3,8 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
 
-from newstream.functions import raiseObjectNone
-from .models import EmailTemplate, TargetGroup, Campaign
-from .custom_classes import SendCampaignMAMixin
+from email_campaigns.models import EmailTemplate, TargetGroup, Campaign
+from email_campaigns.custom_classes import SendCampaignMAMixin
 
 
 class EmailTemplateAdmin(ModelAdmin):

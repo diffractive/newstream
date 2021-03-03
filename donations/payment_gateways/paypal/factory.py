@@ -1,12 +1,11 @@
 import json
-from datetime import datetime
 from django.utils.translation import gettext_lazy as _
 from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersGetRequest
 from paypalrestsdk.notifications import WebhookEvent
 
 from newstream.classes import WebhookNotProcessedError
-from newstream.functions import printvars, _debug, _error
+from newstream.functions import _debug
 from donations.models import Donation
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.paypal.gateway import Gateway_Paypal

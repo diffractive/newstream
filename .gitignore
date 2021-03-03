@@ -27,6 +27,7 @@ client/node_modules
 
 ### vscode
 .vscode
+.pylintrc
  
 ### NEWSTREAM
 *.log

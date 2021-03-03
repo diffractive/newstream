@@ -1,5 +1,5 @@
 import stripe
-from decimal import *
+from decimal import Decimal
 from datetime import datetime, timezone
 from django.conf import settings
 from django.shortcuts import render, redirect

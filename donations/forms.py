@@ -1,19 +1,12 @@
 import html
-import re
-import secrets
 from django import forms
-from django.contrib.auth import get_user_model, login
-from django.core.exceptions import ValidationError
+from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
 from wagtail.contrib.forms.forms import FormBuilder
 
-from allauth.account.adapter import DefaultAccountAdapter
-from allauth.utils import email_address_exists
-
 from newstream.functions import getSiteSettings
 from donations.functions import getCurrencyDictAt
-from .models import DonationForm
 User = get_user_model()
 
 

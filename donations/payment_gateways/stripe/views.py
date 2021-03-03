@@ -1,16 +1,15 @@
 import stripe
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect
 from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 
 from newstream.classes import WebhookNotProcessedError
-from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, printvars, _exception
+from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, _exception
 from donations.models import Donation, DonationPaymentMeta
-from donations.functions import gen_transaction_id
 from donations.payment_gateways.setting_classes import getStripeSettings
-from .functions import initStripeApiKey, formatDonationAmount
-from .factory import Factory_Stripe
+from donations.payment_gateways.stripe.functions import initStripeApiKey, formatDonationAmount
+from donations.payment_gateways.stripe.factory import Factory_Stripe
 
 
 @csrf_exempt

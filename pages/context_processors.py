@@ -2,8 +2,6 @@ from django.core.exceptions import MultipleObjectsReturned
 
 from wagtail.core.models import Page
 
-from newstream.functions import printvars
-
 
 def homepage(request):
     try:

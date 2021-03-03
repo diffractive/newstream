@@ -1,5 +1,3 @@
-from newstream.functions import getSiteSettings, _debug
-from donations.models import Donation, Subscription
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.offline.gateway import Gateway_Offline
 

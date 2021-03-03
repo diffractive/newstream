@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import raiseObjectNone, getSiteSettings, _debug
-from donations.models import Donation, Subscription
+from donations.models import Donation, Subscription, DonationPaymentMeta
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.stripe.gateway import Gateway_Stripe
 from donations.payment_gateways.stripe.functions import initStripeApiKey
@@ -26,11 +26,12 @@ class Factory_Stripe(PaymentGatewayFactory):
         can_skip_donation_id = False
         event = None
         session = None
+        payment_intent = None
         donation = None
         subscription = None
         subscription_obj = None
         kwargs = {}
-        expected_events = [EVENT_CHECKOUT_SESSION_COMPLETED, EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID, EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED]
+        expected_events = [EVENT_CHECKOUT_SESSION_COMPLETED, EVENT_PAYMENT_INTENT_SUCCEEDED, EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID, EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED]
 
         # the following call will raise ValueError/stripe.error.SignatureVerificationError
         event = stripe.Webhook.construct_event(
@@ -61,6 +62,19 @@ class Factory_Stripe(PaymentGatewayFactory):
                         donation_id = subscription_obj.metadata['donation_id']
                     else:
                         raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
+
+        # Intercept the payment_intent.succeeded event
+        if event['type'] == EVENT_PAYMENT_INTENT_SUCCEEDED:
+            payment_intent = event['data']['object']
+            # Fulfill the purchase...
+            if payment_intent:
+                try:
+                    dpm = DonationPaymentMeta.objects.get(field_key='stripe_payment_intent_id', field_value=payment_intent.id)
+                    donation = dpm.donation
+                    can_skip_donation_id = True
+                except DonationPaymentMeta.DoesNotExist:
+                    # should be renewal payments since only one-time/parent payments have saved stripe_payment_intent_id
+                    raise WebhookNotProcessedError(_('Payment Intent Id not found in DonationPaymentMeta:') + payment_intent.id)
 
         # Intercept the invoice created event for subscriptions(a must for instant invoice finalization)
         # https://stripe.com/docs/billing/subscriptions/webhooks#understand
@@ -126,6 +140,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                 donation = Donation.objects.get(pk=donation_id)
             kwargs['session'] = session
             kwargs['event'] = event
+            kwargs['payment_intent'] = payment_intent
             kwargs['subscription_obj'] = subscription_obj
             return Factory_Stripe.initGateway(request, donation, subscription, **kwargs)
         except Donation.DoesNotExist:

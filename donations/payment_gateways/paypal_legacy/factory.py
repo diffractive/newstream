@@ -1,6 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 
-from donations.models import Donation, Subscription
+from donations.models import Donation
 from donations.payment_gateways.setting_classes import getPayPalLegacySettings
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.paypal_legacy.gateway import Gateway_Paypal_Legacy

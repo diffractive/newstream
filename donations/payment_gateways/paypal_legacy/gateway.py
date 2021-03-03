@@ -1,14 +1,13 @@
 import re
 import pytz
 import json
-from decimal import *
 from datetime import datetime, timezone
 from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
 
 from newstream.functions import _debug, round_half_up
 from newstream_user.models import SUBS_ACTION_CANCEL
-from donations.models import STATUS_PROCESSING, STATUS_COMPLETE, Donation, Subscription, DonationPaymentMeta
+from donations.models import STATUS_PROCESSING, STATUS_COMPLETE, Donation, DonationPaymentMeta
 from donations.email_functions import sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringCancelRequestNotifToAdmins
 from donations.functions import gen_transaction_id, addUpdateSubsActionLog
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager

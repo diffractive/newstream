@@ -1,5 +1,3 @@
-import json
-import time
 import pycurl
 import certifi
 from io import BytesIO

@@ -155,6 +155,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                 #     raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
                 try:
                     subscription = Subscription.objects.get(profile_id=subscription_obj.id)
+                    can_skip_donation_id = True
                 except Subscription.DoesNotExist:
                     raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_obj.id)
 

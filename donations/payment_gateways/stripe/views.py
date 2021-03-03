@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, printvars, _exception
-from donations.models import Donation
+from donations.models import Donation, DonationPaymentMeta
 from donations.functions import gen_transaction_id
 from donations.payment_gateways.setting_classes import getStripeSettings
 from .functions import initStripeApiKey, formatDonationAmount
@@ -115,6 +115,11 @@ def create_checkout_session(request):
 
         session = stripe.checkout.Session.create(**session_kwargs)
 
+        # save payment_intent id for recognition purposes when receiving the payment_intent.succeeded webhook for onetime donations
+        if session.payment_intent:
+            dpm = DonationPaymentMeta(donation=donation, field_key='stripe_payment_intent_id', field_value=session.payment_intent)
+            dpm.save()
+
         return JsonResponse({'id': session.id})
     except ValueError as e:
         _exception(str(e))
@@ -145,7 +150,7 @@ def verify_stripe_response(request):
 
         return gatewayManager.process_webhook_response()
     except WebhookNotProcessedError as error:
-        # beware: this exception should be reserved for the incoming but not processed webhook events
+        # beware: this exception should be reserved for the incoming but not processed webhook events, or events processed but data not needed further action
         _exception(str(error))
         # return 200 for attaining a higher rate of successful response rate at Stripe backend
         return HttpResponse(status=200)

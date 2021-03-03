@@ -63,6 +63,16 @@ class Gateway_Stripe(PaymentGatewayManager):
 
             return HttpResponse(status=200)
 
+        # Event: payment_intent.succeeded
+        # Should be handled for onetime donations
+        if self.event['type'] == EVENT_PAYMENT_INTENT_SUCCEEDED:
+            # Update payment transaction_id as the charge id
+            printvars(self.payment_intent)
+            self.donation.transaction_id = self.payment_intent['charges']['data'][0]['id']
+            self.donation.save()
+
+            return HttpResponse(status=200)
+
         # Event: invoice.created (for subscriptions, just return 200 here and do nothing - to signify to Stripe that it can proceed and finalize the invoice)
         # https://stripe.com/docs/billing/subscriptions/webhooks#understand
         if self.event['type'] == EVENT_INVOICE_CREATED and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):

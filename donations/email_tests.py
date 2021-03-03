@@ -1,12 +1,4 @@
 from django.test import TestCase
-
-# Create your tests here.
-import json
-from decimal import *
-from http import HTTPStatus
-# from unittest import TestCase
-from django.test import TestCase
-from django.contrib import auth
 from django.http import HttpRequest
 from django.contrib.auth import get_user_model
 from django.test.utils import override_settings

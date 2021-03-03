@@ -1,20 +1,18 @@
 import json
 from datetime import datetime, timezone
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect
 from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
-from paypalcheckoutsdk.orders import OrdersCreateRequest, OrdersCaptureRequest
 from paypalhttp import HttpError
 
 from newstream.classes import WebhookNotProcessedError
-from newstream.functions import getSiteSettings, getSiteName, uuid4_str, getFullReverseUrl, printvars, object_to_json, _debug, _error, _exception
-from donations.models import Donation, DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED
-from donations.functions import gen_transaction_id
+from newstream.functions import object_to_json, _debug, _exception
+from donations.models import Donation, STATUS_COMPLETE, STATUS_FAILED
 from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.payment_gateways import Factory_Paypal
-from .functions import create_paypal_order, capture_paypal_order, checkAccessTokenExpiry, listProducts, createProduct, createPlan, createSubscription, cancelSubscription
+from donations.payment_gateways.paypal.functions import create_paypal_order, capture_paypal_order, listProducts, createProduct, createPlan, createSubscription
 
 
 @csrf_exempt

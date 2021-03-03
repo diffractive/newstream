@@ -1,11 +1,9 @@
 import re
 import os
-import html
 from django import template
-from django.urls import reverse
 from django.utils.safestring import mark_safe
 
-from donations.functions import getCurrencyDictAt, displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
+from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
 from newstream.functions import getSiteName, printvars, getSiteSettings
 
 register = template.Library()

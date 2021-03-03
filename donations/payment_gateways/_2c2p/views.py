@@ -1,14 +1,11 @@
-from django.conf import settings
-from django.utils import translation
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import redirect
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 
-from newstream.functions import printvars, _exception
+from newstream.functions import _exception
 from donations.models import STATUS_COMPLETE, STATUS_CANCELLED, STATUS_REVOKED
 from donations.payment_gateways._2c2p.factory import Factory_2C2P
-from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor
 from .functions import map2C2PPaymentStatus
 
 

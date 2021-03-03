@@ -1,5 +1,5 @@
 import stripe
-from decimal import *
+from decimal import Decimal
 
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.functions import getCurrencyDictAt

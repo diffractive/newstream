@@ -1,5 +1,4 @@
-from django.http import HttpResponse, Http404
-from django.middleware.csrf import CsrfViewMiddleware
+from django.http import HttpResponse
 
 from newstream.functions import getSiteSettings
 

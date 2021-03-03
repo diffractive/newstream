@@ -1,9 +1,8 @@
 from pytz import timezone, utc
 from datetime import datetime, time
-from django.http import HttpResponse
 from django.contrib import messages
 from django.urls import path, reverse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
@@ -11,7 +10,7 @@ from django.contrib.auth import get_user_model
 
 from wagtail.core import hooks
 
-from newstream.functions import _exception, _debug, getAdminTodayDate, getSuperUserTimezone
+from newstream.functions import _exception, getSuperUserTimezone
 from newstream_user.models import SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL, SUBS_ACTION_MANUAL, DONATION_ACTION_MANUAL
 from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED
 from donations.payment_gateways import InitPaymentGateway

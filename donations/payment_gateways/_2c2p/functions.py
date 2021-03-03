@@ -1,5 +1,5 @@
 import re
-from decimal import *
+from decimal import Decimal
 
 from donations.models import STATUS_COMPLETE, STATUS_REVOKED, STATUS_CANCELLED, STATUS_FAILED, STATUS_PROCESSING
 from newstream.functions import raiseObjectNone

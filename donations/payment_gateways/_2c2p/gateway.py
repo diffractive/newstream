@@ -1,25 +1,21 @@
 import hmac
 import hashlib
-import re
 import os
-import traceback
-from decimal import *
 from datetime import datetime, timezone
 from xml.etree import ElementTree as ET
-from urllib.parse import urlencode
-from subprocess import Popen, STDOUT, PIPE
+from subprocess import Popen, PIPE
 from django.http import HttpResponse
 from django.contrib import messages
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
-from newstream.functions import raiseObjectNone, getFullReverseUrl, getSiteName, getSiteSettings, _debug
-from donations.functions import getNextDateFromRecurringInterval, getRecurringDateNextMonth, gen_order_prefix_2c2p, getCurrencyDictAt, getCurrencyFromCode, currencyCodeToKey
+from newstream.functions import getFullReverseUrl, getSiteName, _debug
+from donations.functions import getNextDateFromRecurringInterval, gen_order_prefix_2c2p, getCurrencyDictAt, currencyCodeToKey
 from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor, sendRenewalNotifToAdmins, sendRenewalReceiptToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringCancelledNotifToAdmins, sendRecurringCancelledNotifToDonor
-from donations.models import Donation, Subscription, DonationPaymentMeta, STATUS_COMPLETE, STATUS_FAILED, STATUS_ACTIVE, STATUS_REVOKED, STATUS_CANCELLED
+from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_CANCELLED
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import get2C2PSettings
-from donations.payment_gateways._2c2p.functions import format_payment_amount, extract_payment_amount, map2C2PPaymentStatus, getRequestParamOrder, getResponseParamOrder
+from donations.payment_gateways._2c2p.functions import format_payment_amount, extract_payment_amount, map2C2PPaymentStatus, getRequestParamOrder
 
 
 REDIRECT_API_VERSION = '8.5'

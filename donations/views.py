@@ -1,28 +1,21 @@
-import re
-import secrets
 import json
 from datetime import datetime, timezone
 from pprint import pprint
-from django.conf import settings
-from django.db import IntegrityError
-from django.db.models import Q
 from django.urls import reverse
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth import get_user_model, authenticate, login
+from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.views import PasswordResetView
 from django.utils.translation import gettext_lazy as _
-from django.utils import translation
 from django.views.decorators.csrf import csrf_exempt
 
-from newstream.functions import getSiteSettings, printvars, _exception, _debug, uuid4_str
+from newstream.functions import getSiteSettings, _exception, uuid4_str
 from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
-from donations.models import DonationMetaField, AmountStep, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, Subscription, Donation, update_deleted_users_donations, STATUS_ACTIVE, STATUS_INACTIVE, STATUS_COMPLETE, STATUS_PENDING, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING
-from donations.forms import DONATION_DETAILS_FIELDS, PERSONAL_INFO_FIELDS, OTHER_FIELDS, DonationDetailsForm
-from donations.functions import getCurrencyDict, getCurrencyDictAt, getCurrencyFromCode, currencyCodeToKey, isTestMode, isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, gen_order_prefix_2c2p, getNextDateFromRecurringInterval, process_donation_meta, displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
+from donations.models import DonationPaymentMeta, Subscription, Donation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING
+from donations.forms import DONATION_DETAILS_FIELDS, DonationDetailsForm
+from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, process_donation_meta
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml
 from donations.payment_gateways.setting_classes import getOfflineSettings
 User = get_user_model()

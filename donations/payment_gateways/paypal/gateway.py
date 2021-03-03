@@ -1,7 +1,4 @@
-import re
-import pytz
-import json
-from decimal import *
+from decimal import Decimal
 from datetime import datetime, timezone
 from django.shortcuts import render
 from django.http import HttpResponse

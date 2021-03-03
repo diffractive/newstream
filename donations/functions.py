@@ -1,18 +1,13 @@
-import os
 import secrets
 import re
 import html
-from pprint import pprint
 from datetime import datetime, timedelta, timezone as dt_timezone
 from pytz import timezone
 from django.utils.safestring import mark_safe
-from django.conf import settings
-from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
 from .includes.currency_dictionary import currency_dict
 from newstream.functions import getSiteSettings, getSuperUserTimezone, _debug
-from newstream.functions import evTokenGenerator, raiseObjectNone, getSiteName
 from donations.models import DonationMeta
 from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
 
@@ -82,7 +77,7 @@ def addUpdateDonationActionLog(donation, action_type, action_notes='', user=None
 
 def gen_transaction_id(gateway=None):
     if not gateway:
-        raiseObjectNone('Please provide a payment gateway object')
+        raise ValueError(_('Please provide a payment gateway object'))
     if gateway.is_2c2p():
         transaction_id = secrets.token_hex(10)
     elif gateway.is_paypal():
@@ -98,14 +93,14 @@ def gen_order_prefix_2c2p():
     return 'P' + secrets.token_hex(7)
 
 
-def getNextDateFromRecurringInterval(days, format):
+def getNextDateFromRecurringInterval(days, date_format):
     tz = timezone(getSuperUserTimezone())
     loc_dt = datetime.now(tz)
     new_dt = loc_dt + timedelta(days=days)
-    return new_dt.strftime(format)
+    return new_dt.strftime(date_format)
 
 
-def getRecurringDateNextMonth(format):
+def getRecurringDateNextMonth(date_format):
     try:
         tz = timezone(getSuperUserTimezone())
         loc_dt = datetime.now(tz)
@@ -119,7 +114,7 @@ def getRecurringDateNextMonth(format):
             just like how paypal solve this: https://developer.paypal.com/docs/paypal-payments-standard/integration-guide/subscription-billing-cycles/
             """
             nextmonthdate = loc_dt.replace(month=loc_dt.month+2, day=1)
-    return nextmonthdate.strftime(format)
+    return nextmonthdate.strftime(date_format)
 
 
 def process_donation_meta(request):

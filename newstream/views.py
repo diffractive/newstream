@@ -1,19 +1,14 @@
-import re
-from django.http import HttpResponse
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import login, logout, get_user_model, update_session_auth_hash
+from django.contrib.auth import logout, get_user_model
 from django.contrib.auth.decorators import login_required
-from django.utils.encoding import force_text
-from django.utils.http import urlsafe_base64_decode
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from django.utils import translation
 
-from newstream_user.models import UserMeta
-from donations.models import Donation, Subscription, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED
-from donations.email_functions import sendVerificationEmail, sendAccountDeletedNotifToAdmins, sendAccountDeletedNotifToDonor
-from newstream.functions import evTokenGenerator, generateIDSecretHash, process_user_meta
+from donations.models import Subscription, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED
+from donations.email_functions import sendAccountDeletedNotifToAdmins, sendAccountDeletedNotifToDonor
+from newstream.functions import generateIDSecretHash, process_user_meta
 from newstream.forms import PersonalInfoForm, DeleteAccountForm
 User = get_user_model()
 

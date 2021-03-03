@@ -73,7 +73,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                     donation = dpm.donation
                     can_skip_donation_id = True
                 except DonationPaymentMeta.DoesNotExist:
-                    # should be renewal payments since only one-time/parent payments have saved stripe_payment_intent_id
+                    # should be renewal payments since only one-time payments have saved stripe_payment_intent_id
                     raise WebhookNotProcessedError(_('Payment Intent Id not found in DonationPaymentMeta:') + payment_intent.id)
 
         # Intercept the invoice created event for subscriptions(a must for instant invoice finalization)

@@ -130,7 +130,7 @@ class TodayStatisticsPanel:
         utc_dt = midnight.astimezone(utc) 
         today_donations = Donation.objects.filter(donation_date__gte=utc_dt, payment_status=STATUS_COMPLETE, deleted=False).count()
         today_subscriptions = Subscription.objects.filter(created_at__gte=utc_dt, recurring_status=STATUS_ACTIVE, deleted=False).count()
-        today_donors = User.objects.filter(date_joined__gte=utc_dt).count()
+        today_donors = User.objects.filter(date_joined__gte=utc_dt, is_staff=False).count()
         return mark_safe("<section class=\"summary nice-padding today-stats-panel\"><h1><strong>Today's Statistics ({})</strong></h1><ul class=\"stats\"><li><span>{}</span>New Completed Donations</li><li><span>{}</span>New Active Subscriptions</li><li><span>{}</span>New Donors</li></ul></section>".format(today, today_donations, today_subscriptions, today_donors))
 
 
@@ -140,7 +140,7 @@ class TotalStatisticsPanel:
     def render(self):
         total_completed_donations = Donation.objects.filter(payment_status=STATUS_COMPLETE, deleted=False).count()
         total_donations = Donation.objects.filter(deleted=False).count()
-        total_donors = User.objects.all().count()
+        total_donors = User.objects.filter(is_staff=False).count()
         total_active_subscriptions = Subscription.objects.filter(recurring_status=STATUS_ACTIVE, deleted=False).count()
         total_subscriptions = Subscription.objects.filter(deleted=False).count()
         return mark_safe("<section class=\"summary nice-padding total-stats-panel\"><h1><strong>Total Statistics</strong></h1><ul class=\"stats\"><li><span>{}</span>Completed Donations</li><li><span>{}</span>Total Donations</li><li><span>{}</span>All Donors</li><li><span>{}</span>Active Subscriptions</li><li><span>{}</span>All Subscriptions</li></ul></section>".format(total_completed_donations, total_donations, total_donors, total_active_subscriptions, total_subscriptions))

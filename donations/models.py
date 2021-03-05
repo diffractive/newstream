@@ -244,6 +244,7 @@ class Donation(ClusterableModel):
     form = models.ForeignKey(
         'DonationForm',
         on_delete=models.SET_NULL,
+        blank=True,
         null=True
     )
     gateway = models.ForeignKey(

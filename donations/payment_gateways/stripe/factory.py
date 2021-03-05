@@ -17,6 +17,12 @@ class Factory_Stripe(PaymentGatewayFactory):
 
     @staticmethod
     def initGatewayByVerification(request):
+        '''
+        This method verifies webhooks of either Newstream-created transactions or Givewp-created subscriptions
+        In givewp, $event_json->data->object->charge is ensured to be not empty before processing the webhooks,
+        but I cannot find the 'charge' attribute in my Newstream 'customer.subscription.deleted' event,
+        thus I will not apply the same checking here but run the same stripe_signature header check instead.
+        '''
         initStripeApiKey(request)
         siteSettings = getSiteSettings(request)
 
@@ -93,6 +99,10 @@ class Factory_Stripe(PaymentGatewayFactory):
                 raise ValueError(_('Missing subscription_id'))
 
         # Intercept the invoice paid event for subscriptions
+        # At Givewp, invoice.payment_succeeded is processed instead
+        # but I checked that the payloads of both invoice.paid and invoice.payment_succeeded are the same
+        # so I will process only the invoice.paid event for both Newstream or Givewp Subscriptions
+        # notice that Givewp subscriptions do not have metadata['donation_id'], so ValueError is commented
         if event['type'] == EVENT_INVOICE_PAID:
             invoice = event['data']['object']
             subscription_id = invoice.subscription
@@ -103,7 +113,18 @@ class Factory_Stripe(PaymentGatewayFactory):
                     donation_id = subscription_obj.metadata['donation_id']
                     kwargs['invoice'] = invoice
                 else:
-                    raise ValueError(_('Missing donation_id in subscription.metadata'))
+                    # should be a Givewp subscription
+                    try:
+                        subscription = Subscription.objects.get(profile_id=subscription_id)
+                        donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
+                        if not donation:
+                            raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
+                        else:
+                            kwargs['invoice'] = invoice
+                            can_skip_donation_id = True
+                    except Subscription.DoesNotExist:
+                        raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
+                    # raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
             else:
                 raise ValueError(_('Missing subscription_id'))
 
@@ -121,14 +142,22 @@ class Factory_Stripe(PaymentGatewayFactory):
                     raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
 
         # Intercept the subscription deleted event
+        # This event links to either Newstream or Givewp created subscriptions
+        # For Givewp created subscriptions, no donation_id is saved in subscription.metadata
         if event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_DELETED:
             subscription_obj = event['data']['object']
 
             if subscription_obj:
-                if 'donation_id' in subscription_obj.metadata:
-                    donation_id = subscription_obj.metadata['donation_id']
-                else:
-                    raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
+                # donation_id checking can be commented since givewp subscriptions do not have donation_id
+                # if 'donation_id' in subscription_obj.metadata:
+                #     donation_id = subscription_obj.metadata['donation_id']
+                # else:
+                #     raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
+                try:
+                    subscription = Subscription.objects.get(profile_id=subscription_obj.id)
+                    can_skip_donation_id = True
+                except Subscription.DoesNotExist:
+                    raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_obj.id)
 
         # Finally init and return the Stripe Gateway Manager
         if not donation_id and not can_skip_donation_id:

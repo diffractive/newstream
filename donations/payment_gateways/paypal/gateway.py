@@ -34,6 +34,7 @@ class Gateway_Paypal(PaymentGatewayManager):
 
         return render(self.request, 'donations/redirection_paypal.html', {'client_id': self.settings.client_id, 'currency': self.donation.currency})
 
+    
     def process_webhook_response(self):
         # Event: EVENT_PAYMENT_CAPTURE_COMPLETED (This alone comes after the onetime donation is captured)
         if self.event_type == EVENT_PAYMENT_CAPTURE_COMPLETED:

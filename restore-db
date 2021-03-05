@@ -1,0 +1,17 @@
+#!/bin/bash
+
+# make sure .backups directory exist
+BKUP_DIR=/srv/www/newstream/.backups
+if [ -d "$BKUP_DIR" ]; then
+    BKUP_FILE=$(find /srv/www/newstream/.backups -maxdepth 1 -type f -name "*.sql" -exec stat -c '%Y %n' {} \; | sort -nr | awk 'NR==1 {print $2}')
+    if [ ! -z "$BKUP_FILE" ]; then
+        sudo mysql -u root -p -e "DROP DATABASE newstream;CREATE DATABASE newstream;"
+        sudo mysql -u root -p newstream < $BKUP_FILE
+    else
+        echo "backup file is not found."
+        exit 1
+    fi
+else
+    echo "$BKUP_DIR does not exist."
+    exit 1
+fi

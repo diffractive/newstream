@@ -1,8 +1,9 @@
 from django.utils.translation import gettext_lazy as _
 
-from site_settings.models import GATEWAY_STRIPE, GATEWAY_PAYPAL, GATEWAY_2C2P, GATEWAY_OFFLINE, GATEWAY_CAN_EDIT_SUBSCRIPTION, GATEWAY_CAN_TOGGLE_SUBSCRIPTION, GATEWAY_CAN_CANCEL_SUBSCRIPTION
+from site_settings.models import GATEWAY_STRIPE, GATEWAY_PAYPAL, GATEWAY_2C2P, GATEWAY_OFFLINE, GATEWAY_PAYPAL_LEGACY, GATEWAY_CAN_EDIT_SUBSCRIPTION, GATEWAY_CAN_TOGGLE_SUBSCRIPTION, GATEWAY_CAN_CANCEL_SUBSCRIPTION
 from donations.payment_gateways._2c2p.factory import Factory_2C2P
 from donations.payment_gateways.paypal.factory import Factory_Paypal
+from donations.payment_gateways.paypal_legacy.factory import Factory_Paypal_Legacy
 from donations.payment_gateways.stripe.factory import Factory_Stripe
 from donations.payment_gateways.offline.factory import Factory_Offline
 from donations.payment_gateways._2c2p.forms import RecurringPaymentForm_2C2P
@@ -11,6 +12,7 @@ from donations.payment_gateways.stripe.forms import RecurringPaymentForm_Stripe
 from donations.payment_gateways.offline.forms import RecurringPaymentForm_Offline
 from donations.payment_gateways._2c2p.constants import API_CAPABILITIES as _2C2P_API_CAPABILITIES
 from donations.payment_gateways.paypal.constants import API_CAPABILITIES as PAYPAL_API_CAPABILITIES
+from donations.payment_gateways.paypal_legacy.constants import API_CAPABILITIES as PAYPAL_LEGACY_API_CAPABILITIES
 from donations.payment_gateways.stripe.constants import API_CAPABILITIES as STRIPE_API_CAPABILITIES
 from donations.payment_gateways.offline.constants import API_CAPABILITIES as OFFLINE_API_CAPABILITIES
 
@@ -24,6 +26,8 @@ def InitPaymentGateway(request, donation=None, subscription=None):
         return Factory_2C2P.initGateway(request, donation, subscription)
     elif paymentObj.gateway.is_paypal():
         return Factory_Paypal.initGateway(request, donation, subscription)
+    elif paymentObj.gateway.is_paypal_legacy():
+        return Factory_Paypal_Legacy.initGateway(request, donation, subscription)
     elif paymentObj.gateway.is_stripe():
         return Factory_Stripe.initGateway(request, donation, subscription)
     elif paymentObj.gateway.is_offline():
@@ -77,6 +81,8 @@ def getAPICapabilitiesFromPaymentGateway(paymentGateway):
         return _2C2P_API_CAPABILITIES
     elif paymentGateway.title == GATEWAY_OFFLINE:
         return OFFLINE_API_CAPABILITIES
+    elif paymentGateway.title == GATEWAY_PAYPAL_LEGACY:
+        return PAYPAL_LEGACY_API_CAPABILITIES
     else:
         return []
 

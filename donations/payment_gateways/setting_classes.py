@@ -21,6 +21,12 @@ class SettingsPayPal:
         self.api_url = api_url
 
 
+class SettingsPayPalLegacy:
+    def __init__(self, sandbox_mode, ipn_url):
+        self.sandbox_mode = sandbox_mode
+        self.ipn_url = ipn_url
+
+
 class SettingsStripe:
     def __init__(self, sandbox_mode, webhook_secret, product_id, publishable_key, secret_key):
         self.sandbox_mode = sandbox_mode
@@ -53,6 +59,15 @@ def getPayPalSettings(request):
     environment = LiveEnvironment(client_id=siteSettings.paypal_api_client_id, client_secret=siteSettings.paypal_api_secret_key)
     api_url = 'https://api-m.paypal.com'
     return SettingsPayPal(siteSettings.sandbox_mode, siteSettings.paypal_api_product_id, siteSettings.paypal_api_client_id, siteSettings.paypal_api_secret_key, siteSettings.paypal_api_webhook_id, environment, api_url)
+
+
+def getPayPalLegacySettings(request):
+    siteSettings = getSiteSettings(request)
+    if (siteSettings.sandbox_mode):
+        ipn_url = 'https://ipnpb.sandbox.paypal.com/cgi-bin/webscr'
+        return SettingsPayPalLegacy(siteSettings.sandbox_mode, ipn_url)
+    ipn_url = 'https://ipnpb.paypal.com/cgi-bin/webscr'
+    return SettingsPayPalLegacy(siteSettings.sandbox_mode, ipn_url)
 
 
 def getStripeSettings(request):

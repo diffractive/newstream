@@ -100,6 +100,8 @@ class User(AbstractUser, ClusterableModel):
     language_preference = models.CharField(
         max_length=10, choices=settings.LANGUAGES, blank=True)
 
+    USERNAME_FIELD = 'email'
+    
     def email_verification_status(self):
         if self.is_email_verified:
             return _('(Verified)')

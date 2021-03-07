@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import getSiteSettings, _debug
-from donations.models import Donation, DonationPaymentMeta
+from donations.models import Donation, DonationPaymentMeta, Subscription
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.stripe.gateway import Gateway_Stripe
 from donations.payment_gateways.stripe.functions import initStripeApiKey

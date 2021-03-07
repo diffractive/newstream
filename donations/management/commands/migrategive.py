@@ -170,7 +170,7 @@ class Command(BaseCommand):
                                 givewp_donormeta_value = row[7]
                                 if i == 0:
                                     # Add the user first
-                                    newUser = User.objects.create_user(username=givewp_donor_email, email=givewp_donor_email, password=uuid4_str())
+                                    newUser = User.objects.create_user(email=givewp_donor_email, password=uuid4_str())
                                     newUser.save()
                                     # save donor email as verified and primary
                                     email_obj = EmailAddress(email=givewp_donor_email, verified=True, primary=True, user=newUser)

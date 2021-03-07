@@ -83,18 +83,23 @@ class Factory_Stripe(PaymentGatewayFactory):
                     raise WebhookNotProcessedError(_('Payment Intent Id not found in DonationPaymentMeta:') + payment_intent.id)
 
         # Intercept the invoice created event for subscriptions(a must for instant invoice finalization)
+        # skipping getting donation_id from metadata as givewp subscriptions don't have subscription metadata
         # https://stripe.com/docs/billing/subscriptions/webhooks#understand
         if event['type'] == EVENT_INVOICE_CREATED:
             invoice = event['data']['object']
+            kwargs['invoice'] = invoice
             subscription_id = invoice.subscription
 
             if subscription_id:
-                subscription_obj = stripe.Subscription.retrieve(subscription_id)
-                if 'donation_id' in subscription_obj.metadata:
-                    donation_id = subscription_obj.metadata['donation_id']
-                    kwargs['invoice'] = invoice
-                else:
-                    raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
+                try:
+                    subscription_obj = stripe.Subscription.retrieve(subscription_id)
+                    subscription = Subscription.objects.get(profile_id=subscription_id)
+                    donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
+                    can_skip_donation_id = True
+                    if not donation:
+                        raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
+                except Subscription.DoesNotExist:
+                    raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
             else:
                 raise ValueError(_('Missing subscription_id'))
 
@@ -102,29 +107,22 @@ class Factory_Stripe(PaymentGatewayFactory):
         # At Givewp, invoice.payment_succeeded is processed instead
         # but I checked that the payloads of both invoice.paid and invoice.payment_succeeded are the same
         # so I will process only the invoice.paid event for both Newstream or Givewp Subscriptions
-        # notice that Givewp subscriptions do not have metadata['donation_id'], so ValueError is commented
+        # skipping getting donation_id from metadata as givewp subscriptions don't have subscription metadata
         if event['type'] == EVENT_INVOICE_PAID:
             invoice = event['data']['object']
+            kwargs['invoice'] = invoice
             subscription_id = invoice.subscription
 
             if subscription_id:
-                subscription_obj = stripe.Subscription.retrieve(subscription_id)
-                if 'donation_id' in subscription_obj.metadata:
-                    donation_id = subscription_obj.metadata['donation_id']
-                    kwargs['invoice'] = invoice
-                else:
-                    # should be a Givewp subscription
-                    try:
-                        subscription = Subscription.objects.get(profile_id=subscription_id)
-                        donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
-                        if not donation:
-                            raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
-                        else:
-                            kwargs['invoice'] = invoice
-                            can_skip_donation_id = True
-                    except Subscription.DoesNotExist:
-                        raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
-                    # raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
+                try:
+                    subscription_obj = stripe.Subscription.retrieve(subscription_id)
+                    subscription = Subscription.objects.get(profile_id=subscription_id)
+                    donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
+                    can_skip_donation_id = True
+                    if not donation:
+                        raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
+                except Subscription.DoesNotExist:
+                    raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
             else:
                 raise ValueError(_('Missing subscription_id'))
 

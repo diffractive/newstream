@@ -7,6 +7,8 @@ from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth import get_user_model
 from allauth.account.views import PasswordResetView
 
+from wagtail.core.models import Site
+
 User = get_user_model()
 
 class Command(BaseCommand):
@@ -20,6 +22,13 @@ class Command(BaseCommand):
             nargs='+',
             type=int,
             help='Provide specific donor ids for this operation instead of all data',
+        )
+
+        parser.add_argument(
+            '--site_host',
+            action='store', 
+            default='support.hongkongfp.com',
+            help='Hostname for the wagtail site'
         )
 
     def print(self, msg):
@@ -40,10 +49,11 @@ class Command(BaseCommand):
             request.method = 'POST'
 
             # add the absolute url to be be included in email
-            if settings.DEBUG:
-                request.META['HTTP_HOST'] = 'newstream.hongkongfp.com'
+            if options['site_host']:
+                request.META['HTTP_HOST'] = options['site_host']
             else:
-                request.META['HTTP_HOST'] = 'support.hongkongfp.com'
+                newstreamSite = Site.objects.filter(is_default_site=True).get()
+                request.META['HTTP_HOST'] = newstreamSite.hostname
 
             # loop donors to send email to each one
             for donor in donors:

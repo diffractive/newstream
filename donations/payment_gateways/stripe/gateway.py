@@ -159,6 +159,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                         self.donation.subscription.recurring_status = STATUS_ACTIVE
                     self.donation.subscription.save()
 
+                # price changes events should goes through the if-else block and returns 200 right here
                 return HttpResponse(status=200)
             else:
                 return HttpResponse(status=400)

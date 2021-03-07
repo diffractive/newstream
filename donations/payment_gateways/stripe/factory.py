@@ -132,14 +132,19 @@ class Factory_Stripe(PaymentGatewayFactory):
         # That is because there is no guarantee which event hits first, it's better to let one event handles the model init as well.
 
         # Intercept the subscription updated event
+        # skipping getting donation_id from metadata as givewp subscriptions don't have subscription metadata
         if event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_UPDATED:
             subscription_obj = event['data']['object']
 
             if subscription_obj:
-                if 'donation_id' in subscription_obj.metadata:
-                    donation_id = subscription_obj.metadata['donation_id']
-                else:
-                    raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
+                try:
+                    subscription = Subscription.objects.get(profile_id=subscription_obj.id)
+                    donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
+                    can_skip_donation_id = True
+                    if not donation:
+                        raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
+                except Subscription.DoesNotExist:
+                    raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
 
         # Intercept the subscription deleted event
         # This event links to either Newstream or Givewp created subscriptions

@@ -23,7 +23,7 @@ class PersonalInfoForm(forms.Form):
     opt_in_mailing_list = forms.BooleanField(
         label=_('Opt in Mailing List?'), required=False)
     language_preference = forms.ChoiceField(
-        label=_('Language Preference'), choices=settings.LANGUAGES)
+        label=_('Language Preference'), choices=settings.LANGUAGES, required=False)
     personal_info_fields = [
         'first_name',
         'last_name',

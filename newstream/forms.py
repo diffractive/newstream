@@ -29,7 +29,7 @@ class PersonalInfoForm(forms.Form):
         'last_name',
         'email',
         'opt_in_mailing_list',
-        'language_preference'
+        # 'language_preference'
     ]
 
     def __init__(self, *args, request=None, **kwargs):

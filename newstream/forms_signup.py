@@ -23,7 +23,7 @@ class BaseSignupForm(forms.Form):
         'password2'
     ]
     other_fields = [
-        'language_preference',
+        # 'language_preference',
         'opt_in_mailing_list'
     ]
 

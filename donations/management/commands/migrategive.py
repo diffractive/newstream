@@ -17,7 +17,6 @@ from donations.models import Donation, DonationPaymentMeta, Subscription, Subscr
 from site_settings.models import PaymentGateway, GATEWAY_STRIPE, GATEWAY_PAYPAL_LEGACY, GATEWAY_MANUAL, GATEWAY_OFFLINE
 
 User = get_user_model()
-SOURCE_DB = 'support_clone'
 
 class Command(BaseCommand):
     help = 'Migrate donors and related data from Givewp\'s database'
@@ -30,6 +29,27 @@ class Command(BaseCommand):
             nargs='+',
             type=int,
             help='Provide specific donor ids to import those ids only instead of all data',
+        )
+
+        parser.add_argument(
+            '--source_host',
+            action='store', 
+            default='localhost',
+            help='Hostname for the source MySQL database'
+        )
+
+        parser.add_argument(
+            '--source_db',
+            action='store', 
+            default='wordpress',
+            help='MySQL database to migrate from',
+        )
+
+        parser.add_argument(
+            '--source_user',
+            action='store', 
+            default='wordpress',
+            help='MySQL user for source database',
         )
 
         # Named (optional) arguments
@@ -98,18 +118,20 @@ class Command(BaseCommand):
         else:
             self.print("...skipping database backup")
 
+        password = getpass("Enter %s password: " % options['source_db'])
         try:
             with connect(
-                host="localhost",
-                user=input("Enter %s username: " % SOURCE_DB),
-                password=getpass("Enter %s password: " % SOURCE_DB),
-                database=SOURCE_DB
+                host=options['source_host'],
+                user=options['source_user'],
+                password=password,
+                database=options['source_db']
             ) as connection:
-                self.print("Connected to %s." % SOURCE_DB)
+                self.print("Connected to %s." % options['source_db'])
                 donorids_list = []
                 migrated_donations = 0
                 with transaction.atomic():
                     with connection.cursor() as cursor:
+
                         if options['donorids']:
                             # migrate specific donors, beware it is a list of lists
                             donorids_list = [item for sublist in options['donorids'] for item in sublist]
@@ -119,13 +141,16 @@ class Command(BaseCommand):
                             cursor.execute(select_all_donors_query)
                             allDonors = cursor.fetchall()
                             donorids_list = [row[0] for row in allDonors]
+
                         # get source wordpress db timezone setting
                         timezone_query = "select option_value from wp_options where option_name = 'timezone_string';"
                         cursor.execute(timezone_query)
                         timezoneResult = cursor.fetchall()
                         timezone_string = timezoneResult[0][0]
                         sourcedb_tz = pytimezone(timezone_string)
+
                         for donor_id in donorids_list:
+
                             select_donor_lj_meta_query = "select id, email, name, date_created, dnm.* from wp_give_donors dn left join wp_give_donormeta dnm on dn.id = dnm.donor_id where dn.id = %d;" % donor_id
                             select_donor_donations_query = "select distinct donation_id from wp_give_donationmeta where meta_key = '_give_payment_donor_id' and meta_value = %d;" % donor_id
                             select_subscriptions_query = "select * from wp_give_subscriptions where customer_id = %d;" % donor_id
@@ -137,6 +162,7 @@ class Command(BaseCommand):
                             donationids_list = [row[0] for row in donationsResult]
                             newUser = None
                             um = None
+
                             for i, row in enumerate(donorMetaResult):
                                 givewp_donor_email = row[1]
                                 givewp_donor_name = row[2]
@@ -159,6 +185,7 @@ class Command(BaseCommand):
                                 else:
                                     um = UserMeta(user=newUser, field_key=givewp_donormeta_key, field_value=givewp_donormeta_value)
                                     um.save()
+
                             newUser.save()
                             self.print("[√] Created Newstream User (email: %s, name: %s)." % (newUser.email, newUser.fullname))
 
@@ -167,6 +194,7 @@ class Command(BaseCommand):
                             cursor.execute(select_subscriptions_query)
                             subscriptionsResult = cursor.fetchall()
                             newSubscription = None
+
                             for i, row in enumerate(subscriptionsResult):
                                 # extract givewp subscription data
                                 givewp_subscription_id = row[0]
@@ -334,5 +362,4 @@ class Command(BaseCommand):
             self.print(str(e))
             self.print("...rolling back previous changes.")
             traceback.print_exc()
-
         

@@ -1,6 +1,7 @@
 {% load wagtailcore_tags %}
 
 {% for subpage in page.get_children.specific %}
+{% if subpage.show_in_menus %}
 <div class="flex flex-col pl-6">
     <div class="menu-item-wrapper">
         <a href="{% pageurl subpage %}" class="block menu-item flex items-center">{{ subpage.title }}</a>
@@ -9,4 +10,5 @@
     {% include "common/mobile_main_sub_menu.html" with page=subpage %}
     {% endif %}
 </div>
+{% endif %}
 {% endfor %}

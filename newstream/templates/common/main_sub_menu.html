@@ -1,6 +1,7 @@
 {% load wagtailcore_tags %}
 
 {% for subpage in page.get_children.specific %}
+{% if subpage.show_in_menus %}
 <div class="menu-item-wrapper">
     <a href="{% pageurl subpage %}" class="menu-item">{{ subpage.title }}</a>
     {% if subpage.get_children.specific %}
@@ -9,4 +10,5 @@
     </div>
     {% endif %}
 </div>
+{% endif %}
 {% endfor %}

@@ -10,7 +10,7 @@ from django.contrib.auth import get_user_model
 
 from wagtail.core import hooks
 
-from newstream.functions import _exception, getSuperUserTimezone
+from newstream.functions import _exception, getUserTimezone
 from newstream_user.models import SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL, SUBS_ACTION_MANUAL, DONATION_ACTION_MANUAL
 from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED
 from donations.payment_gateways import InitPaymentGateway
@@ -122,8 +122,11 @@ def extra_urls():
 class TodayStatisticsPanel:
     order = 10
 
+    def __init__(self, request):
+        self.request = request
+
     def render(self):
-        tz = timezone(getSuperUserTimezone())
+        tz = timezone(getUserTimezone(self.request.user))
         dt_now = datetime.now(tz)
         today = dt_now.date()
         midnight = tz.localize(datetime.combine(today, time(0, 0)), is_dst=None)
@@ -147,5 +150,5 @@ class TotalStatisticsPanel:
 
 @hooks.register('construct_homepage_panels')
 def add_statistics_panel(request, panels):
-    panels.append(TodayStatisticsPanel())
+    panels.append(TodayStatisticsPanel(request))
     panels.append(TotalStatisticsPanel())

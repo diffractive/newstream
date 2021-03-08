@@ -262,6 +262,7 @@ class Donation(ClusterableModel):
     subscription = models.ForeignKey(
         'Subscription',
         on_delete=models.SET_NULL,
+        blank=True,
         null=True
     )
     is_test = models.BooleanField(default=False)

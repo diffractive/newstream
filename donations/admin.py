@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
-from wagtail.contrib.modeladmin.views import InspectView, DeleteView, CreateView
+from wagtail.contrib.modeladmin.views import InspectView, DeleteView, CreateView, EditView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper
 
 from newstream.functions import getSiteSettings_from_default_site
@@ -13,12 +13,32 @@ from donations.payment_gateways import isGatewayEditSubSupported, isGatewayToggl
 
 
 class DonationCreateView(CreateView):
+    form_fields_exclude = ['created_by']
+
     def form_valid(self, form):
         form.instance.created_by = self.request.user
         return super().form_valid(form)
 
 
 class SubscriptionCreateView(CreateView):
+    form_fields_exclude = ['created_by']
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        return super().form_valid(form)
+
+
+class DonationEditView(EditView):
+    form_fields_exclude = ['created_by']
+
+    def form_valid(self, form):
+        form.instance.created_by = self.request.user
+        return super().form_valid(form)
+
+
+class SubscriptionEditView(EditView):
+    form_fields_exclude = ['created_by']
+
     def form_valid(self, form):
         form.instance.created_by = self.request.user
         return super().form_valid(form)
@@ -193,8 +213,9 @@ class SubscriptionButtonHelper(ButtonHelper):
         We exclude the edit button to the btns list.
         """
         # only exclude edit for subscriptions not created by a staff
-        if not obj.created_by.is_staff:
-            exclude = ['edit']
+        exclude = ['edit']
+        if obj.created_by != None and obj.created_by.is_staff:
+            exclude = None
         btns = super().get_buttons_for_obj(
             obj, exclude, classnames_add, classnames_exclude)
         return btns
@@ -207,8 +228,9 @@ class DonationButtonHelper(ButtonHelper):
         We exclude the edit button to the btns list.
         """
         # only exclude edit for donations not created by a staff
-        if not obj.created_by.is_staff:
-            exclude = ['edit']
+        exclude = ['edit']
+        if obj.created_by != None and obj.created_by.is_staff:
+            exclude = None
         btns = super().get_buttons_for_obj(
             obj, exclude, classnames_add, classnames_exclude)
         return btns
@@ -229,6 +251,7 @@ class DonationAdmin(ModelAdmin):
                      'payment_status', 'is_recurring', 'donation_date',)
     inspect_view_enabled = True
     create_view_class = DonationCreateView
+    edit_view_class = DonationEditView
     inspect_view_class = DonationInspectView
     inspect_view_extra_css = ['css/admin_inspect.css']
     inspect_view_extra_js = ['js/admin_inspect.js']
@@ -261,6 +284,7 @@ class SubscriptionAdmin(ModelAdmin):
                      'recurring_status', 'subscribe_date',)
     inspect_view_enabled = True
     create_view_class = SubscriptionCreateView
+    edit_view_class = SubscriptionEditView
     inspect_view_class = SubscriptionInspectView
     inspect_view_extra_css = ['css/admin_inspect.css']
     inspect_view_extra_js = ['js/admin_inspect.js']

@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
-from wagtail.contrib.modeladmin.views import InspectView, DeleteView, CreateView, EditView
+from wagtail.contrib.modeladmin.views import InspectView, DeleteView, CreateView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper
 
 from newstream.functions import getSiteSettings_from_default_site
@@ -13,32 +13,12 @@ from donations.payment_gateways import isGatewayEditSubSupported, isGatewayToggl
 
 
 class DonationCreateView(CreateView):
-    form_fields_exclude = ['created_by']
-
     def form_valid(self, form):
         form.instance.created_by = self.request.user
         return super().form_valid(form)
 
 
 class SubscriptionCreateView(CreateView):
-    form_fields_exclude = ['created_by']
-
-    def form_valid(self, form):
-        form.instance.created_by = self.request.user
-        return super().form_valid(form)
-
-
-class DonationEditView(EditView):
-    form_fields_exclude = ['created_by']
-
-    def form_valid(self, form):
-        form.instance.created_by = self.request.user
-        return super().form_valid(form)
-
-
-class SubscriptionEditView(EditView):
-    form_fields_exclude = ['created_by']
-
     def form_valid(self, form):
         form.instance.created_by = self.request.user
         return super().form_valid(form)
@@ -251,11 +231,11 @@ class DonationAdmin(ModelAdmin):
                      'payment_status', 'is_recurring', 'donation_date',)
     inspect_view_enabled = True
     create_view_class = DonationCreateView
-    edit_view_class = DonationEditView
     inspect_view_class = DonationInspectView
     inspect_view_extra_css = ['css/admin_inspect.css']
     inspect_view_extra_js = ['js/admin_inspect.js']
     delete_view_class = DonationDeleteView
+    form_fields_exclude = ['created_by']
 
     def get_queryset(self, request):
         # only show records with deleted=False (which should be valid whether soft-delete is on/off)
@@ -284,11 +264,11 @@ class SubscriptionAdmin(ModelAdmin):
                      'recurring_status', 'subscribe_date',)
     inspect_view_enabled = True
     create_view_class = SubscriptionCreateView
-    edit_view_class = SubscriptionEditView
     inspect_view_class = SubscriptionInspectView
     inspect_view_extra_css = ['css/admin_inspect.css']
     inspect_view_extra_js = ['js/admin_inspect.js']
     delete_view_class = SubscriptionDeleteView
+    form_fields_exclude = ['created_by']
 
     def user_column(self, obj):
         return obj.user.email if obj.user else '-'

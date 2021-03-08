@@ -9,6 +9,8 @@ from allauth.account.models import EmailAddress
 from django.core.management.base import BaseCommand, CommandError
 from django.contrib.auth import get_user_model
 from django.db import transaction
+from django.core.management.color import no_style
+from django.db import connection as django_connection
 
 from newstream_user.models import UserMeta
 from newstream.functions import round_half_up, uuid4_str
@@ -358,6 +360,12 @@ class Command(BaseCommand):
 
                 self.print('==============================')
                 self.print("Total Migrated Donations: %d" % migrated_donations)
+        
+            # reset sequences for donations and subscriptions
+            sequence_sql = django_connection.ops.sequence_reset_sql(no_style(), [Donation, Subscription])
+            with django_connection.cursor() as cursor:
+                for sql in sequence_sql:
+                    cursor.execute(sql)
         except Exception as e:
             self.print(str(e))
             self.print("...rolling back previous changes.")

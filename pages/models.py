@@ -44,7 +44,7 @@ class HomePage(Page):
 
         # Add extra variables and return the updated context
         siteSettings = getSiteSettings(request)
-        context['privacy_policy_url'] = siteSettings.privacy_policy_url
+        context['privacy_policy_link'] = siteSettings.privacy_policy_link
         return context
 
 

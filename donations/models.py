@@ -203,17 +203,24 @@ class Subscription(ClusterableModel):
     subscribe_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        'newstream_user.User',
+        related_name='subscription_created_by',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
     linked_user_deleted = models.BooleanField(default=False)
     deleted = models.BooleanField(default=False)
 
-    panels = [
-        ReadOnlyPanel('profile_id', heading=_('Profile ID')),
-        ReadOnlyPanel('recurring_amount', heading=_('Recurring Donation Amount')),
-        ReadOnlyPanel('currency', heading=_('Currency')),
-        ReadOnlyPanel('recurring_status', heading=_('Recurring Status')),
-        ReadOnlyPanel('linked_user_deleted',
-                      heading=_("Linked User Account Deleted?")),
-    ]
+    # panels = [
+    #     ReadOnlyPanel('profile_id', heading=_('Profile ID')),
+    #     ReadOnlyPanel('recurring_amount', heading=_('Recurring Donation Amount')),
+    #     ReadOnlyPanel('currency', heading=_('Currency')),
+    #     ReadOnlyPanel('recurring_status', heading=_('Recurring Status')),
+    #     ReadOnlyPanel('linked_user_deleted',
+    #                   heading=_("Linked User Account Deleted?")),
+    # ]
 
     def isRecurringCancelled(self):
         return True if self.recurring_status == STATUS_CANCELLED else False
@@ -267,20 +274,27 @@ class Donation(ClusterableModel):
     donation_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        'newstream_user.User',
+        related_name='donation_created_by',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
     linked_user_deleted = models.BooleanField(default=False)
     deleted = models.BooleanField(default=False)
 
-    panels = [
-        FieldPanel('transaction_id', heading=_('Transaction ID')),
-        ReadOnlyPanel('donation_amount', heading=_('Donation Amount')),
-        ReadOnlyPanel('is_recurring', heading=_('Is Recurring')),
-        ReadOnlyPanel('currency', heading=_('Currency')),
-        ReadOnlyPanel('payment_status', heading=_('Payment Status')),
-        InlinePanel('metas', label=_('Donation Meta'), heading=_('Donation Meta Data'),
-                    help_text=_('Meta data about this donation is recorded here')),
-        ReadOnlyPanel('linked_user_deleted',
-                      heading=_("Linked User Account Deleted?")),
-    ]
+    # panels = [
+    #     FieldPanel('transaction_id', heading=_('Transaction ID')),
+    #     ReadOnlyPanel('donation_amount', heading=_('Donation Amount')),
+    #     ReadOnlyPanel('is_recurring', heading=_('Is Recurring')),
+    #     ReadOnlyPanel('currency', heading=_('Currency')),
+    #     ReadOnlyPanel('payment_status', heading=_('Payment Status')),
+    #     InlinePanel('metas', label=_('Donation Meta'), heading=_('Donation Meta Data'),
+    #                 help_text=_('Meta data about this donation is recorded here')),
+    #     ReadOnlyPanel('linked_user_deleted',
+    #                   heading=_("Linked User Account Deleted?")),
+    # ]
 
     class Meta:
         ordering = ['-created_at']

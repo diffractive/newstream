@@ -12,18 +12,11 @@
             <span></span>
         </div>
     </div>
-    {% for page in homepage.get_children.specific %}
-    {% if page.show_in_menus %}
     <div class="btm-grey-border">
         <div class="menu-item-wrapper">
-            <a href="{% pageurl page %}" class="menu-item flex items-center">{{ page.title }}</a>
+            <a href="https://hongkongfp.com/contact-us/" target="_blank" class="menu-item flex items-center">Contact Us</a>
         </div>
-        {% if page.get_children.specific %}
-        {% include "common/mobile_main_sub_menu.html" with page=page %}
-        {% endif %}
     </div>
-    {% endif %}
-    {% endfor %}
     {% if user.is_authenticated %}
     <div class="menu-item-wrapper btm-grey-border">
         <div class="mb-3 flex items-center">

@@ -1,16 +1,7 @@
 {% load common_tags wagtailcore_tags %}
 
 <div id="newstream-mainmenu" class="w-auto hidden lg:flex items-center ">
-    {% for page in homepage.get_children.specific %}
-    {% if page.show_in_menus %}
     <div class="menu-item-wrapper">
-        <a href="{% pageurl page %}" class="menu-item">{{ page.title }}</a>
-        {% if page.get_children.specific %}
-        <div class="hidden submenu">
-            {% include "common/main_sub_menu.html" with page=page %}
-        </div>
-        {% endif %}
+        <a href="https://hongkongfp.com/contact-us/" target="_blank" class="menu-item">Contact Us</a>
     </div>
-    {% endif %}
-    {% endfor %}
 </div>

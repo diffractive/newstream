@@ -138,7 +138,12 @@ class User(AbstractUser, ClusterableModel):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
+    autocomplete_search_field = 'email'
+
     objects = CustomUserManager()
+
+    def autocomplete_label(self):
+        return self.email
 
     def email_verification_status(self):
         if self.is_email_verified:

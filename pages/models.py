@@ -8,6 +8,7 @@ from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel
 from wagtailstreamforms.blocks import WagtailFormBlock
 
 from pages.blocks import FullWidthImageSectionBlock, FullWidthSectionBlock
+from newstream.functions import getSiteSettings
 
 
 class StaticPage(Page):
@@ -37,6 +38,15 @@ class HomePage(Page):
     content_panels = Page.content_panels + [
         StreamFieldPanel('body', heading=_('Page Body')),
     ]
+
+    def get_context(self, request):
+        context = super().get_context(request)
+
+        # Add extra variables and return the updated context
+        siteSettings = getSiteSettings(request)
+        context['privacy_policy_url'] = siteSettings.privacy_policy_url
+        return context
+
 
     class Meta:
         verbose_name = _('Home Page')

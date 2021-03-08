@@ -331,6 +331,13 @@ class SiteSettings(BaseSetting, ClusterableModel):
         ImageChooserPanel('site_icon', heading=('Site Icon')),
     ]
 
+    privacy_policy_link = models.URLField(max_length=200, default='#', blank=True)
+
+    appearance_footer_panels = [
+        FieldPanel("privacy_policy_link", heading=_(
+            "Privacy policy url displayed in the footer section")),
+    ]
+
     recaptcha_public_key = models.CharField(max_length=255, blank=True, null=True)
     recaptcha_private_key = models.CharField(max_length=255, blank=True, null=True)
     others_recaptcha_panels = [
@@ -372,6 +379,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
         SubTabbedInterface([
             SubObjectList(appearance_general_panels,
                           heading=_('General'), classname='appearance-general'),
+            SubObjectList(appearance_footer_panels,
+                          heading=_('Footer'), classname='appearance-footer'),
         ], heading=_("Appearance")),
         SubTabbedInterface([
             SubObjectList(others_recaptcha_panels,

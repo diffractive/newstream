@@ -134,6 +134,22 @@ class Gateway_Paypal(PaymentGatewayManager):
             else:
                raise ValueError(_("EVENT_PAYMENT_SALE_COMPLETED but payment state is %(state)s") % {'state': self.payload['state']})
 
+        # Event: EVENT_BILLING_SUBSCRIPTION_CANCELLED
+        if self.event_type == EVENT_BILLING_SUBSCRIPTION_CANCELLED and hasattr(self, 'subscription_obj'):
+            if self.subscription_obj['status'] == 'CANCELLED':
+                self.donation.subscription.recurring_status = STATUS_CANCELLED
+                self.donation.subscription.save()
+
+                # email notifications
+                sendRecurringCancelledNotifToAdmins(
+                    self.request, self.donation.subscription)
+                sendRecurringCancelledNotifToDonor(
+                    self.request, self.donation.subscription)
+
+                return HttpResponse(status=200)
+            else:
+               raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_CANCELLED but subscription status is %(status)s") % {'status': self.subscription_obj['status']})
+
         # return 400 for all other events
         return HttpResponse(status=400)
 
@@ -164,11 +180,7 @@ class Gateway_Paypal(PaymentGatewayManager):
         # update newstream model
         self.subscription.recurring_status = STATUS_CANCELLED
         self.subscription.save()
-        # email notifications
-        sendRecurringCancelledNotifToAdmins(
-            self.request, self.subscription)
-        sendRecurringCancelledNotifToDonor(
-            self.request, self.subscription)
+        
 
     def toggle_recurring_payment(self):
         # no need to handle webhook events for activate/suspend actions(as they are too slow, donor might have already toggled twice before the first webhook arrives)

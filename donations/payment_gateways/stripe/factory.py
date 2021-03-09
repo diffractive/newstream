@@ -36,6 +36,7 @@ class Factory_Stripe(PaymentGatewayFactory):
         donation = None
         subscription = None
         subscription_obj = None
+        invoice = None
         kwargs = {}
         expected_events = [EVENT_CHECKOUT_SESSION_COMPLETED, EVENT_PAYMENT_INTENT_SUCCEEDED, EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID, EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED]
 
@@ -83,23 +84,28 @@ class Factory_Stripe(PaymentGatewayFactory):
                     raise WebhookNotProcessedError(_('Payment Intent Id not found in DonationPaymentMeta:') + payment_intent.id)
 
         # Intercept the invoice created event for subscriptions(a must for instant invoice finalization)
-        # skipping getting donation_id from metadata as givewp subscriptions don't have subscription metadata
+        # if it's givewp subscription -> no donation_id in metadata is set -> query subscription from profile_id -> then get first donation as parent donation
+        # if it's newstream-created subscription -> has donation_id in metadata -> query donation is enough(since profile_id might not have yet been set in subscription)
         # https://stripe.com/docs/billing/subscriptions/webhooks#understand
         if event['type'] == EVENT_INVOICE_CREATED:
             invoice = event['data']['object']
-            kwargs['invoice'] = invoice
             subscription_id = invoice.subscription
 
             if subscription_id:
-                try:
-                    subscription_obj = stripe.Subscription.retrieve(subscription_id)
-                    subscription = Subscription.objects.get(profile_id=subscription_id)
-                    donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
-                    can_skip_donation_id = True
-                    if not donation:
-                        raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
-                except Subscription.DoesNotExist:
-                    raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
+                subscription_obj = stripe.Subscription.retrieve(subscription_id)
+                if 'donation_id' in subscription_obj.metadata:
+                    # newstream-created subscription
+                    donation_id = subscription_obj.metadata['donation_id']
+                else:
+                    # givewp subscription
+                    try:
+                        subscription = Subscription.objects.get(profile_id=subscription_id)
+                        donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
+                        can_skip_donation_id = True
+                        if not donation:
+                            raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
+                    except Subscription.DoesNotExist:
+                        raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
             else:
                 raise ValueError(_('Missing subscription_id'))
 
@@ -107,22 +113,27 @@ class Factory_Stripe(PaymentGatewayFactory):
         # At Givewp, invoice.payment_succeeded is processed instead
         # but I checked that the payloads of both invoice.paid and invoice.payment_succeeded are the same
         # so I will process only the invoice.paid event for both Newstream or Givewp Subscriptions
-        # skipping getting donation_id from metadata as givewp subscriptions don't have subscription metadata
+        # if it's givewp subscription -> no donation_id in metadata is set -> query subscription from profile_id -> then get first donation as parent donation
+        # if it's newstream-created subscription -> has donation_id in metadata -> query donation is enough(since profile_id might not have yet been set in subscription)
         if event['type'] == EVENT_INVOICE_PAID:
             invoice = event['data']['object']
-            kwargs['invoice'] = invoice
             subscription_id = invoice.subscription
 
             if subscription_id:
-                try:
-                    subscription_obj = stripe.Subscription.retrieve(subscription_id)
-                    subscription = Subscription.objects.get(profile_id=subscription_id)
-                    donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
-                    can_skip_donation_id = True
-                    if not donation:
-                        raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
-                except Subscription.DoesNotExist:
-                    raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
+                subscription_obj = stripe.Subscription.retrieve(subscription_id)
+                if 'donation_id' in subscription_obj.metadata:
+                    # newstream-created subscription
+                    donation_id = subscription_obj.metadata['donation_id']
+                else:
+                    # givewp subscription
+                    try:
+                        subscription = Subscription.objects.get(profile_id=subscription_id)
+                        donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
+                        can_skip_donation_id = True
+                        if not donation:
+                            raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
+                    except Subscription.DoesNotExist:
+                        raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
             else:
                 raise ValueError(_('Missing subscription_id'))
 
@@ -130,37 +141,46 @@ class Factory_Stripe(PaymentGatewayFactory):
         # That is because there is no guarantee which event hits first, it's better to let one event handles the model init as well.
 
         # Intercept the subscription updated event
-        # skipping getting donation_id from metadata as givewp subscriptions don't have subscription metadata
+        # if it's givewp subscription -> no donation_id in metadata is set -> query subscription from profile_id -> then get first donation as parent donation
+        # if it's newstream-created subscription -> has donation_id in metadata -> query donation is enough(since profile_id might not have yet been set in subscription)
         if event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_UPDATED:
             subscription_obj = event['data']['object']
 
             if subscription_obj:
-                try:
-                    subscription = Subscription.objects.get(profile_id=subscription_obj.id)
-                    donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
-                    can_skip_donation_id = True
-                    if not donation:
-                        raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
-                except Subscription.DoesNotExist:
-                    raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
+                if 'donation_id' in subscription_obj.metadata:
+                    # newstream-created subscription
+                    donation_id = subscription_obj.metadata['donation_id']
+                else:
+                    # givewp subscription
+                    subscription_id = subscription_obj.id
+                    try:
+                        subscription = Subscription.objects.get(profile_id=subscription_id)
+                        donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
+                        can_skip_donation_id = True
+                        if not donation:
+                            raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
+                    except Subscription.DoesNotExist:
+                        raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
 
         # Intercept the subscription deleted event
         # This event links to either Newstream or Givewp created subscriptions
-        # For Givewp created subscriptions, no donation_id is saved in subscription.metadata
+        # if it's givewp subscription -> no donation_id in metadata is set -> query subscription from profile_id -> then get first donation as parent donation
+        # if it's newstream-created subscription -> has donation_id in metadata -> query donation is enough(since profile_id might not have yet been set in subscription)
         if event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_DELETED:
             subscription_obj = event['data']['object']
 
             if subscription_obj:
-                # donation_id checking can be commented since givewp subscriptions do not have donation_id
-                # if 'donation_id' in subscription_obj.metadata:
-                #     donation_id = subscription_obj.metadata['donation_id']
-                # else:
-                #     raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
-                try:
-                    subscription = Subscription.objects.get(profile_id=subscription_obj.id)
-                    can_skip_donation_id = True
-                except Subscription.DoesNotExist:
-                    raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_obj.id)
+                if 'donation_id' in subscription_obj.metadata:
+                    # newstream-created subscription
+                    donation_id = subscription_obj.metadata['donation_id']
+                else:
+                    # givewp subscription
+                    subscription_id = subscription_obj.id
+                    try:
+                        subscription = Subscription.objects.get(profile_id=subscription_id)
+                        can_skip_donation_id = True
+                    except Subscription.DoesNotExist:
+                        raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
 
         # Finally init and return the Stripe Gateway Manager
         if not donation_id and not can_skip_donation_id:
@@ -174,6 +194,7 @@ class Factory_Stripe(PaymentGatewayFactory):
             kwargs['event'] = event
             kwargs['payment_intent'] = payment_intent
             kwargs['subscription_obj'] = subscription_obj
+            kwargs['invoice'] = invoice
             return Factory_Stripe.initGateway(request, donation, subscription, **kwargs)
         except Donation.DoesNotExist:
             raise ValueError(_('No matching Donation found, donation_id: ')+str(donation_id))

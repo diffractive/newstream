@@ -127,6 +127,7 @@ def donation_details(request):
 
 def thank_you(request):
     reminders_html = None
+    extra_text = None
     if 'error-title' in request.session or 'error-message' in request.session:
         error_title = request.session.pop('error-title', '')
         error_message = request.session.pop('error-message', '')
@@ -142,8 +143,11 @@ def thank_you(request):
         if donation.gateway.is_offline():
             offlineSettings = getOfflineSettings(request)
             reminders_html = offlineSettings.offline_thankyou_text
-        return render(request, 'donations/thankyou.html', {'reminders_html': reminders_html, 'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
-    return render(request, 'donations/thankyou.html', {'reminders_html': reminders_html, 'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
+        # display extra text for certain scenarios
+        if donation.gateway.is_paypal() and donation.payment_status == STATUS_PROCESSING:
+            extra_text = _('Your donation should be complete in 1-2 minutes.')
+        return render(request, 'donations/thankyou.html', {'reminders_html': reminders_html, 'isValid': True, 'extra_text': extra_text, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
+    return render(request, 'donations/thankyou.html', {'reminders_html': reminders_html, 'isValid': False, 'extra_text': extra_text, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
 
 def cancelled(request):

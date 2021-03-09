@@ -13,7 +13,7 @@
         <div class="mb-4">
             <div class="label-div">{% trans 'Account Removal' %}</div>
             <button class="ns-dark-btn inline-block" id="delete-account-btn" action-href="{% url 'delete-account' %}"
-                {% if not deletable %}disabled{% endif %}>{% trans 'Delete My Account' %}</button>
+                {% if not deletable %}action-blocked="true"{% endif %}>{% trans 'Delete My Account' %}</button>
         </div>
         <p class="text-red-500">
             {% if deletable %}
@@ -29,8 +29,13 @@
 {% block extra_js %}
 {% if deletable %}
 <script>
+    cannot_delete_text = '{{ cannot_delete_text }}';
     window.addEventListener('load', function () {
         document.getElementById('delete-account-btn').addEventListener('click', function (e) {
+            isActionBlocked = e.target.getAttribute('action-blocked');
+            if (isActionBlocked) {
+                alert(cannot_delete_text);
+            }
             window.location.href = e.target.getAttribute('action-href');
         })
     });

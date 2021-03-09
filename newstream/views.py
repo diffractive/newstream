@@ -68,12 +68,13 @@ def security(request):
 @login_required
 def advanced_settings(request):
     # check if user can delete account or not
+    cannot_delete_text = _('You need to cancel all your recurring donations before you are allowed to delete your account.')
     subs = Subscription.objects.filter(user=request.user, recurring_status__in=[STATUS_ACTIVE, STATUS_PAUSED, STATUS_PROCESSING])
     if len(subs) > 0:
         deletable = False
     else:
         deletable = True
-    return render(request, 'profile_settings/advanced_settings.html', {'deletable': deletable})
+    return render(request, 'profile_settings/advanced_settings.html', {'deletable': deletable, 'cannot_delete_text': cannot_delete_text})
 
 
 @login_required

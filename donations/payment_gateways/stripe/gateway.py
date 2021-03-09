@@ -168,8 +168,14 @@ class Gateway_Stripe(PaymentGatewayManager):
         # self.donation is not initialized here, reason refer to Factory_Stripe.initGatewayByVerification
         if self.event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_DELETED and hasattr(self, 'subscription_obj'):
             # update subscription recurring_status
-            self.subscription.recurring_status = STATUS_CANCELLED
-            self.subscription.save()
+            self.donation.subscription.recurring_status = STATUS_CANCELLED
+            self.donation.subscription.save()
+
+            # email notifications here because cancellation might occur manually at the stripe dashboard
+            sendRecurringCancelledNotifToAdmins(
+                self.request, self.donation.subscription)
+            sendRecurringCancelledNotifToDonor(
+                self.request, self.donation.subscription)
 
             return HttpResponse(status=200)
         
@@ -267,11 +273,6 @@ class Gateway_Stripe(PaymentGatewayManager):
             # update newstream model
             self.subscription.recurring_status = STATUS_CANCELLED
             self.subscription.save()
-            # email notifications
-            sendRecurringCancelledNotifToAdmins(
-                self.request, self.subscription)
-            sendRecurringCancelledNotifToDonor(
-                self.request, self.subscription)
         else:
             raise RuntimeError(_('Subscription object returned from stripe having status %(status)s instead of canceled') % {'status': cancelled_subscription.status})
 

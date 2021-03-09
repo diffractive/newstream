@@ -10,7 +10,9 @@
     {% if isValid %}
     <h1 class="mb-5">{% trans 'Thank you!' %}</h1>
     <p class="mb-1 text-center">{% blocktrans with status=donation.payment_status %}Your payment is {{ status }}. {% endblocktrans %}
+        {% if extra_text %}
         {{ extra_text }}
+        {% endif %}
         {% with has_socialaccount=donation.user|has_socialaccount %}
         {% if isFirstTime and not has_socialaccount %}
         <span>

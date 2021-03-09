@@ -88,6 +88,18 @@ function resizeVideoIframe() {
         }
     })(window, document);
 }
+function resetWhiteLoadingBtn() {
+    for (let btn of document.getElementsByClassName('need-white-loading-btn')) {
+        btn.disabled = false;
+        btn.classList.remove('white-loading-btn');
+    }
+}
+function resetBlackLoadingBtn() {
+    for (let btn of document.getElementsByClassName('need-black-loading-btn')) {
+        btn.disabled = false;
+        btn.classList.remove('black-loading-btn');
+    }
+}
 function whiteLoadingBtnEvent(event) {
     el = event.currentTarget;
     el.disabled = true;

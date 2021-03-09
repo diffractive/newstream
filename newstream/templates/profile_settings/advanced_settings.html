@@ -34,6 +34,7 @@
             isActionBlocked = e.target.getAttribute('action-blocked');
             if (isActionBlocked) {
                 alert(cannot_delete_text);
+                return false;
             }
             window.location.href = e.target.getAttribute('action-href');
         })

@@ -92,6 +92,7 @@ def donation_details(request):
                     dpmeta = DonationPaymentMeta(
                         donation=donation, field_key='is_user_first_donation', field_value=request.session['first_time_registration'])
                     dpmeta.save()
+                    request.session.pop('first_time_registration')
 
                 # redirect to payment_gateway
                 gatewayManager = InitPaymentGateway(

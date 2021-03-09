@@ -249,7 +249,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                     _("You have just reset your recurring donation's billing cycle to today's date.")))
 
                 messages.add_message(self.request, messages.SUCCESS, _(
-                    'Your recurring donation at Stripe is set to bill on today\'s date every month.'))
+                    'Your recurring donation via Stripe is set to bill on today\'s date every month.'))
             else:
                 raise RuntimeError(_('Cannot update stripe subscription. Stripe API returned none.'))
 
@@ -303,7 +303,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 return {
                     'button-html': '<span class="btn-text">'+str(_('Resume Recurring Donation'))+'</span><span class="icon"></span>',
                     'recurring-status': STATUS_PAUSED,
-                    'success-message': str(_('Your recurring donation is paused.'))
+                    'success-message': str(_('Your recurring donation via Stripe is paused.'))
                 }
             if toggle_obj == '' and updated_subscription['pause_collection'] == None:
                 # update newstream model
@@ -317,7 +317,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 return {
                     'button-html': '<span class="btn-text">'+str(_('Pause Recurring Donation'))+'</span><span class="icon"></span>',
                     'recurring-status': STATUS_ACTIVE,
-                    'success-message': str(_('Your recurring donation is resumed.'))
+                    'success-message': str(_('Your recurring donation via Stripe is resumed.'))
                 }
         else:
             raise ValueError(_('Subscription object returned from stripe does not have valid pause_collection value'))

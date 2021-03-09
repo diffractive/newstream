@@ -154,7 +154,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                 _("You have just updated your recurring donation amount.")))
 
             messages.add_message(self.request, messages.SUCCESS, _(
-                'Your recurring donation amount at Stripe is updated successfully.'))
+                'Your recurring donation amount via PayPal is updated successfully.'))
 
 
     def cancel_recurring_payment(self):
@@ -189,7 +189,7 @@ class Gateway_Paypal(PaymentGatewayManager):
             return {
                 'button-html': '<span class="btn-text">'+str(_('Pause Recurring Donation'))+'</span><span class="icon"></span>',
                 'recurring-status': STATUS_ACTIVE,
-                'success-message': str(_('Your recurring donation is resumed.'))
+                'success-message': str(_('Your recurring donation via PayPal  is resumed.'))
             }
         # elif self.subscription.recurring_status == STATUS_ACTIVE:
         elif req_subscription['status'] == "ACTIVE":
@@ -206,7 +206,7 @@ class Gateway_Paypal(PaymentGatewayManager):
             return {
                 'button-html': '<span class="btn-text">'+str(_('Resume Recurring Donation'))+'</span><span class="icon"></span>',
                 'recurring-status': STATUS_PAUSED,
-                'success-message': str(_('Your recurring donation is paused.'))
+                'success-message': str(_('Your recurring donation via PayPal  is paused.'))
             }
         else:
             raise ValueError(_('Subscription object is neither Active or Paused'))

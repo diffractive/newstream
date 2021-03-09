@@ -27,7 +27,6 @@
 {% endblock content %}
 
 {% block extra_js %}
-{% if deletable %}
 <script>
     cannot_delete_text = '{{ cannot_delete_text }}';
     window.addEventListener('load', function () {
@@ -40,5 +39,4 @@
         })
     });
 </script>
-{% endif %}
 {% endblock %}

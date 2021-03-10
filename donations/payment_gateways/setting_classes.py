@@ -73,7 +73,7 @@ def getPayPalLegacySettings(request):
 def getStripeSettings(request):
     siteSettings = getSiteSettings(request)
     if (siteSettings.sandbox_mode):
-        return SettingsStripe(siteSettings.sandbox_mode, siteSettings.stripe_webhook_secret, siteSettings.stripe_testing_product_id, siteSettings.stripe_testing_api_publishable_key, siteSettings.stripe_testing_api_secret_key)
+        return SettingsStripe(siteSettings.sandbox_mode, siteSettings.stripe_testing_webhook_secret, siteSettings.stripe_testing_product_id, siteSettings.stripe_testing_api_publishable_key, siteSettings.stripe_testing_api_secret_key)
     return SettingsStripe(siteSettings.sandbox_mode, siteSettings.stripe_webhook_secret, siteSettings.stripe_product_id, siteSettings.stripe_api_publishable_key, siteSettings.stripe_api_secret_key)
 
 

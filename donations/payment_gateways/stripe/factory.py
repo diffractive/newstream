@@ -2,8 +2,9 @@ import stripe
 from django.utils.translation import gettext_lazy as _
 
 from newstream.classes import WebhookNotProcessedError
-from newstream.functions import getSiteSettings, _debug
+from newstream.functions import _debug
 from donations.models import Donation, DonationPaymentMeta, Subscription
+from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.stripe.gateway import Gateway_Stripe
 from donations.payment_gateways.stripe.functions import initStripeApiKey
@@ -24,7 +25,7 @@ class Factory_Stripe(PaymentGatewayFactory):
         thus I will not apply the same checking here but run the same stripe_signature header check instead.
         '''
         initStripeApiKey(request)
-        siteSettings = getSiteSettings(request)
+        stripeSettings = getStripeSettings(request)
 
         payload = request.body
         sig_header = request.META['HTTP_STRIPE_SIGNATURE']
@@ -42,7 +43,7 @@ class Factory_Stripe(PaymentGatewayFactory):
 
         # the following call will raise ValueError/stripe.error.SignatureVerificationError
         event = stripe.Webhook.construct_event(
-            payload, sig_header, siteSettings.stripe_webhook_secret
+            payload, sig_header, stripeSettings.webhook_secret
         )
 
         # for events not being processed

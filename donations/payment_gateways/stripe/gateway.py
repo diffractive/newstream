@@ -93,6 +93,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                     _debug("[stripe recurring] First time subscription")
                     # save charge id as donation.transaction_id
                     self.donation.transaction_id = self.invoice.charge
+                    self.donation.payment_status = STATUS_COMPLETE
                     self.donation.save()
 
                     # also save the invoice number as a DonationPaymentMeta

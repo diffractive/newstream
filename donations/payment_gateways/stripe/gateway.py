@@ -94,10 +94,15 @@ class Gateway_Stripe(PaymentGatewayManager):
                     # save charge id as donation.transaction_id
                     self.donation.transaction_id = self.invoice.charge
                     self.donation.save()
+
                     # also save the invoice number as a DonationPaymentMeta
                     dpmeta = DonationPaymentMeta(
                         donation=self.donation, field_key='stripe_invoice_number', field_value=self.invoice.number)
                     dpmeta.save()
+
+                    # donation email notifications sent here instead of at EVENT_BILLING_SUBSCRIPTION_ACTIVATED
+                    sendDonationReceiptToDonor(self.request, self.donation)
+                    sendDonationNotifToAdmins(self.request, self.donation)
                 elif len(invoices['data']) > 1:
                     _debug("[stripe recurring] About to add renewal donation")
                     # create a new donation record + then send donation receipt to user
@@ -148,9 +153,11 @@ class Gateway_Stripe(PaymentGatewayManager):
                     self.donation.payment_status = STATUS_COMPLETE
                     self.donation.save()
 
-                    # send the donation receipt to donor and notification to admins as subscription is just created
-                    sendDonationReceiptToDonor(self.request, self.donation)
-                    sendDonationNotifToAdmins(self.request, self.donation)
+                    # send the subscription updatecd notifs to admins and donor as subscription is just active
+                    admin_email_wordings = str(_("A new recurring donation has become active on your website:"))
+                    donor_email_wordings = str(_("Your new recurring donation has become active."))
+                    sendRecurringUpdatedNotifToAdmins(self.request, self.donation.subscription, admin_email_wordings)
+                    sendRecurringUpdatedNotifToDonor(self.request, self.donation.subscription, donor_email_wordings)
                 else:
                     # check if pause_collection is marked_uncollectible
                     if self.subscription_obj['pause_collection'] and self.subscription_obj['pause_collection']['behavior'] == 'mark_uncollectible':

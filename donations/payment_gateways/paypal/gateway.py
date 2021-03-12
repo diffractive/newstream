@@ -68,8 +68,10 @@ class Gateway_Paypal(PaymentGatewayManager):
                     self.donation.save()
 
                     # send the donation receipt to donor and notification to admins as subscription is just created
-                    sendDonationReceiptToDonor(self.request, self.donation)
-                    sendDonationNotifToAdmins(self.request, self.donation)
+                    admin_email_wordings = str(_("A new recurring donation has become active on your website:"))
+                    donor_email_wordings = str(_("Your new recurring donation has become active."))
+                    sendRecurringUpdatedNotifToAdmins(self.request, self.donation.subscription, admin_email_wordings)
+                    sendRecurringUpdatedNotifToDonor(self.request, self.donation.subscription, donor_email_wordings)
 
                 return HttpResponse(status=200)
             else:
@@ -129,6 +131,10 @@ class Gateway_Paypal(PaymentGatewayManager):
                     # save DonationPaymentMeta as proof of first time subscription payment
                     dpmeta = DonationPaymentMeta(donation=self.donation, field_key='paypal_first_cycle', field_value='completed')
                     dpmeta.save()
+
+                    # donation email notifications sent here instead of at EVENT_BILLING_SUBSCRIPTION_ACTIVATED
+                    sendDonationReceiptToDonor(self.request, self.donation)
+                    sendDonationNotifToAdmins(self.request, self.donation)
 
                 return HttpResponse(status=200)
             else:

@@ -11,6 +11,7 @@ from django.utils import translation
 
 from wagtail.contrib.modeladmin.views import InstanceSpecificView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper, AdminURLHelper
+from wagtail.core.templatetags.wagtailcore_tags import richtext
 
 from newstream.functions import generateIDSecretHash, getFullReverseUrl
 from email_campaigns.models import Campaign
@@ -99,7 +100,7 @@ class SendCampaignView(InstanceSpecificView):
                 else:
                     translation.activate(settings.LANGUAGE_CODE)
                 num = send_mail(template.subject, self.textAppendUnsubscribeLink(request, recipient, template.plain_text), model.from_address, [
-                                recipient], html_message=self.htmlAppendUnsubscribeLink(request, recipient, template.html_body))
+                                recipient], html_message=self.htmlAppendUnsubscribeLink(request, recipient, richtext(template.html_body)))
                 if num == 0:
                     self.refused_list.append(recipient)
                 self.mails_sent += num

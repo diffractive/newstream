@@ -2,6 +2,7 @@ var gulp = require('gulp');
 const { watch } = require('gulp');
 var sass = require('gulp-sass');
 var postcss = require('gulp-postcss');
+var rename = require('gulp-rename');
 const cleanCSS = require('gulp-clean-css');
 const through2 = require('through2');
 const srcpath = 'newstream/static/scss/main.scss';
@@ -21,6 +22,7 @@ function css() {
       file.stat.mtime = date;
       cb(null, file);
     }))
+    .pipe(rename('main_1_1.css'))
     .pipe(gulp.dest(destpath))
 }
 

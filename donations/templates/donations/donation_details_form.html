@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static common_tags widget_tweaks i18n %}
+{% load static common_tags widget_tweaks wagtailcore_tags i18n %}
 
 {% block title %}{% trans 'Donation Details' %}{% endblock %}
 
@@ -62,12 +62,12 @@
                 {% endfor %}
 
                 <div id="offline-instructions-div" class="mb-8">
-                    {{ offline_instructions_html|safe }}
+                    {{ offline_instructions_html|richtext }}
                 </div>
 
                 <button class="ns-wide-btn right-arrow-btn need-white-loading-btn"
                     type="submit">{% trans 'Continue' %}<span class="icon"></span></button>
-                <div class="form-footer-text">{{ form.footer_html|safe }}</div>
+                <div class="form-footer-text">{{ form.footer_html|richtext }}</div>
             </div>
         </div>
     </form>

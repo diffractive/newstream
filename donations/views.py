@@ -146,6 +146,8 @@ def thank_you(request):
         # display extra text for certain scenarios
         if donation.gateway.is_paypal() and donation.payment_status == STATUS_PROCESSING:
             extra_text = _('Your donation should be complete in 1-2 minutes.')
+        if donation.gateway.is_offline() and donation.payment_status == STATUS_PROCESSING:
+            extra_text = _('Please complete your donation by following either one of the payment methods stated below.')
         return render(request, 'donations/thankyou.html', {'reminders_html': reminders_html, 'isValid': True, 'extra_text': extra_text, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
     return render(request, 'donations/thankyou.html', {'reminders_html': reminders_html, 'isValid': False, 'extra_text': extra_text, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 

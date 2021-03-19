@@ -92,6 +92,11 @@
                     boxid: 'confirm-remove-email-box',
                     header_text: message,
                     ok: function() {
+                        var submit_form = document.getElementById("account_email_form");
+                        var hidden_input = document.createElement("input");
+                        hidden_input.setAttribute('type', 'hidden');
+                        hidden_input.setAttribute('name', 'action_remove');
+                        submit_form.appendChild(hidden_input);
                         document.getElementById("account_email_form").submit();
                     },
                     cancel: function() {

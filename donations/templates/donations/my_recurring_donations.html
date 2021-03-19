@@ -139,6 +139,7 @@
 {% endblock content %}
 
 {% block extra_js %}
+<script type="text/javascript" src="{% static 'js/confirm_box.js' %}"></script>
 <script>
     function removeLoadingState(el) {
         // remove loading state
@@ -169,8 +170,11 @@
         for (let wrapper of document.getElementsByClassName("cancel-recurring-donation")) {
             wrapper.addEventListener("click", function (event) {
                 let subscription_id = wrapper.getAttribute('data-id');
-                if (confirm('Confirm Cancel Recurring Donation?')) {
-                    postData('{% url "donations:cancel-recurring" %}', { subscription_id: subscription_id })
+                var cancelBox = new ConfirmBox( {
+                    boxid: 'confirm-cancel-box',
+                    header_text: "We're sorry to hear you want to cancel your monthly donation. Your donation is so important to us. Are you sure you want to cancel?",
+                    ok: function() {
+                        postData('{% url "donations:cancel-recurring" %}', { subscription_id: subscription_id })
                         .then(data => {
                             removeLoadingState(wrapper);
                             if (data['status'] == 'success') {
@@ -193,17 +197,23 @@
                                 alert(data['reason']);
                             }
                         });
-                } else {
-                    removeLoadingState(wrapper);
-                }
+                    },
+                    cancel: function() {
+                        removeLoadingState(wrapper);
+                    }
+                });
+                cancelBox.show();
             });
         }
         for (let wrapper of document.getElementsByClassName("toggle-recurring-donation")) {
             wrapper.addEventListener("click", function (event) {
                 let subscription_id = wrapper.getAttribute('data-id');
                 let innerHTML = wrapper.getElementsByClassName("btn-text")[0].innerHTML;
-                if (confirm('Confirm ' + innerHTML + '?')) {
-                    postData('{% url "donations:toggle-recurring" %}', { subscription_id: subscription_id })
+                var toggleBox = new ConfirmBox( {
+                    boxid: 'confirm-cancel-box',
+                    header_text: 'Confirm ' + innerHTML + '?',
+                    ok: function() {
+                        postData('{% url "donations:toggle-recurring" %}', { subscription_id: subscription_id })
                         .then(data => {
                             removeLoadingState(wrapper);
                             if (data['status'] == 'success') {
@@ -218,9 +228,12 @@
                                 alert(data['reason']);
                             }
                         });
-                } else {
-                    removeLoadingState(wrapper);
-                }
+                    },
+                    cancel: function() {
+                        removeLoadingState(wrapper);
+                    }
+                });
+                toggleBox.show();
             });
         }
         for (let wrapper of document.getElementsByClassName("view-recurring-donation")) {

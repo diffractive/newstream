@@ -1,7 +1,7 @@
 {% load common_tags %}
 
 {% if messages %}
-<div class="z-50 fixed w-screen top-0 pb-4" id="messages-wrapper">
+<div class="z-50 w-screen" id="messages-wrapper">
     <div class="messages smpad-container flex flex-col">
         {% for message in messages %}
         <div class="{% if message.tags %}{{ message.tags|alert_class }}{% endif %}">

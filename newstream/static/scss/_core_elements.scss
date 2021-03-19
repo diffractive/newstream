@@ -482,6 +482,10 @@ span.no-icon {
         left: 50%;
         margin: -100px 0 0 -150px;
         padding: 1.5rem;
+
+        @screen lg {
+            width: 500px;
+        }
     }
 
     #confirm-buttons {

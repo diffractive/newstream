@@ -140,6 +140,7 @@
 
 {% block extra_js %}
 <script type="text/javascript" src="{% static 'js/confirm_box_1_2.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/alert_box.js' %}"></script>
 <script>
     function threeDotsLoading(subscription_id) {
         for (let el of document.querySelectorAll(`span.three-dots-icon[data-id='${subscription_id}']`)) {
@@ -190,7 +191,7 @@
                             removeLoadingState(wrapper);
                             threeDotsNormal(subscription_id);
                             if (data['status'] == 'success') {
-                                alert('Recurring donation cancelled!');
+                                nsAlert('Recurring donation cancelled!');
                                 for (let buttonsDiv of document.querySelectorAll(`div.payment-recurring-options-div[data-id='${subscription_id}']`)) {
                                     if (buttonsDiv.querySelector('button.edit-recurring-donation')) {
                                         buttonsDiv.querySelector('button.edit-recurring-donation').disabled = true;
@@ -206,7 +207,7 @@
                                     statusTd.innerHTML = data['recurring-status'];
                                 }
                             } else {
-                                alert(data['reason']);
+                                nsAlert(data['reason']);
                             }
                         });
                     },
@@ -232,7 +233,7 @@
                             removeLoadingState(wrapper);
                             threeDotsNormal(subscription_id);
                             if (data['status'] == 'success') {
-                                alert(data['success-message']);
+                                nsAlert(data['success-message']);
                                 for (let toggleBtn of document.querySelectorAll(`button.toggle-recurring-donation[data-id='${subscription_id}']`)) {
                                     toggleBtn.innerHTML = data['button-html'];
                                 }
@@ -240,7 +241,7 @@
                                     statusTd.innerHTML = data['recurring-status'];
                                 }
                             } else {
-                                alert(data['reason']);
+                                nsAlert(data['reason']);
                             }
                         });
                     },

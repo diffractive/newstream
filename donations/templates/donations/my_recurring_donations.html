@@ -139,8 +139,8 @@
 {% endblock content %}
 
 {% block extra_js %}
-<script type="text/javascript" src="{% static 'js/confirm_box_1_2.js' %}"></script>
-<script type="text/javascript" src="{% static 'js/alert_box_1_1.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/confirm_box.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/alert_box.js' %}"></script>
 <script>
     function threeDotsLoading(subscription_id) {
         for (let el of document.querySelectorAll(`span.three-dots-icon[data-id='${subscription_id}']`)) {

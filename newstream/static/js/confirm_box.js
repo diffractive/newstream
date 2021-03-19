@@ -20,7 +20,7 @@ ConfirmBox.prototype = {
             var wrapper = document.createElement( "div" );
             wrapper.id = this.params.boxid;
             wrapper.classList.add('confirm-wrappers');
-            var html = `<div id='confirm-box'><h2 id='confirm-header'>${this.params.header_text}</h2>`;
+            var html = `<div id='confirm-box'><h4 id='confirm-header'>${this.params.header_text}</h4>`;
             html += "<div id='confirm-buttons'><button id='confirm-ok'>Confirm</button><button type='button' id='confirm-cancel'>Cancel</button></div>";
             html += "</div>";
             
@@ -44,7 +44,7 @@ ConfirmBox.prototype = {
         this.instance.style.opacity = 0;
         setTimeout(function() {
             this.instance.style.display = "none";
-        }, 1000);
+        }, 300);
     },
     actions: function() {
         var self = this;
@@ -54,7 +54,7 @@ ConfirmBox.prototype = {
             self.hide();
             setTimeout(function() {
                 self.params.ok();
-            }, 1000);
+            }, 300);
         }, false);
         
         
@@ -63,7 +63,7 @@ ConfirmBox.prototype = {
             self.hide();
             setTimeout(function() {
                 self.params.cancel();
-            }, 1000);
+            }, 300);
         }, false);
     }
 };

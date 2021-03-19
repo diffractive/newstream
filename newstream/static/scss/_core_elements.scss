@@ -484,6 +484,7 @@ span.no-icon {
         padding: 1.5rem;
 
         @screen lg {
+            margin: -100px 0 0 -250px;
             width: 500px;
         }
     }

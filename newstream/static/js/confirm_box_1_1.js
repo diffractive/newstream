@@ -40,10 +40,10 @@ ConfirmBox.prototype = {
         this.instance.style.display = "block";
         this.instance.style.opacity = 1;
     },
-    hide: function() {
-        this.instance.style.opacity = 0;
+    hide: function( element ) {
+        element.style.opacity = 0;
         setTimeout(function() {
-            this.instance.style.display = "none";
+            element.style.display = "none";
         }, 300);
     },
     actions: function() {
@@ -51,7 +51,7 @@ ConfirmBox.prototype = {
         
         self.instance.querySelector( "#confirm-ok" ).
         addEventListener( "click", function() {
-            self.hide();
+            self.hide( self.instance );
             setTimeout(function() {
                 self.params.ok();
             }, 300);
@@ -60,7 +60,7 @@ ConfirmBox.prototype = {
         
         self.instance.querySelector( "#confirm-cancel" ).
         addEventListener( "click", function() {
-            self.hide();
+            self.hide( self.instance );
             setTimeout(function() {
                 self.params.cancel();
             }, 300);

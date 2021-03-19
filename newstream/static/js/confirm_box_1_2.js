@@ -54,6 +54,8 @@ ConfirmBox.prototype = {
             self.hide( self.instance );
             setTimeout(function() {
                 self.params.ok();
+                // remove confirm-wrapper to prevent listeners from registering more than once
+                document.querySelector( '#'+self.params.boxid ).remove();
             }, 300);
         }, false);
         
@@ -63,6 +65,8 @@ ConfirmBox.prototype = {
             self.hide( self.instance );
             setTimeout(function() {
                 self.params.cancel();
+                // remove confirm-wrapper to prevent listeners from registering more than once
+                document.querySelector( '#'+self.params.boxid ).remove();
             }, 300);
         }, false);
     }

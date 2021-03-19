@@ -27,13 +27,14 @@
 {% endblock content %}
 
 {% block extra_js %}
+<script type="text/javascript" src="{% static 'js/alert_box.js' %}"></script>
 <script>
     cannot_delete_text = '{{ cannot_delete_text }}';
     window.addEventListener('load', function () {
         document.getElementById('delete-account-btn').addEventListener('click', function (e) {
             isActionBlocked = e.target.getAttribute('action-blocked');
             if (isActionBlocked) {
-                alert(cannot_delete_text);
+                nsAlert(cannot_delete_text);
                 return false;
             }
             window.location.href = e.target.getAttribute('action-href');

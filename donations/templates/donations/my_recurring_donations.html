@@ -28,7 +28,7 @@
                                 id="md_dropdown-toggle-checkbox{{forloop.counter}}" class="dropdown-toggle-checkbox">
                             <label for="md_dropdown-toggle-checkbox{{forloop.counter}}"
                                 class="dropdown-toggle-label"></label>
-                            <span class="three-dots-icon"></span>
+                            <span class="three-dots-icon" data-id="{{ subscription.id }}"></span>
                             <div
                                 class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch recurring-donation-menu">
                                 {% if request.user.is_email_verified %}
@@ -101,7 +101,7 @@
                             id="md2_dropdown-toggle-checkbox{{forloop.counter}}" class="dropdown-toggle-checkbox">
                         <label for="md2_dropdown-toggle-checkbox{{forloop.counter}}"
                             class="dropdown-toggle-label"></label>
-                        <span class="three-dots-icon"></span>
+                        <span class="three-dots-icon" data-id="{{ subscription.id }}"></span>
                         <div
                             class="more-dropdown-menu dropdown-menu-popup flex flex-col items-stretch recurring-donation-menu">
                             {% if request.user.is_email_verified %}
@@ -141,6 +141,16 @@
 {% block extra_js %}
 <script type="text/javascript" src="{% static 'js/confirm_box_1_2.js' %}"></script>
 <script>
+    function threeDotsLoading(subscription_id) {
+        for (let el of document.querySelectorAll(`span.three-dots-icon[data-id='${subscription_id}']`)) {
+            el.classList.add('loading');
+        }
+    }
+    function threeDotsNormal(subscription_id) {
+        for (let el of document.querySelectorAll(`span.three-dots-icon[data-id='${subscription_id}']`)) {
+            el.classList.remove('loading');
+        }
+    }
     function removeLoadingState(el) {
         // remove loading state
         el.classList.remove('black-loading-btn');
@@ -170,6 +180,7 @@
         for (let wrapper of document.getElementsByClassName("cancel-recurring-donation")) {
             wrapper.addEventListener("click", function (event) {
                 let subscription_id = wrapper.getAttribute('data-id');
+                threeDotsLoading(subscription_id);
                 var cancelBox = new ConfirmBox( {
                     boxid: 'confirm-cancel-box',
                     header_text: "We're sorry to hear you want to cancel your monthly donation. Your donation is so important to us. Are you sure you want to cancel?",
@@ -177,6 +188,7 @@
                         postData('{% url "donations:cancel-recurring" %}', { subscription_id: subscription_id })
                         .then(data => {
                             removeLoadingState(wrapper);
+                            threeDotsNormal(subscription_id);
                             if (data['status'] == 'success') {
                                 alert('Recurring donation cancelled!');
                                 for (let buttonsDiv of document.querySelectorAll(`div.payment-recurring-options-div[data-id='${subscription_id}']`)) {
@@ -200,6 +212,7 @@
                     },
                     cancel: function() {
                         removeLoadingState(wrapper);
+                        threeDotsNormal(subscription_id);
                     }
                 });
                 cancelBox.show();
@@ -208,6 +221,7 @@
         for (let wrapper of document.getElementsByClassName("toggle-recurring-donation")) {
             wrapper.addEventListener("click", function (event) {
                 let subscription_id = wrapper.getAttribute('data-id');
+                threeDotsLoading(subscription_id);
                 let innerHTML = wrapper.getElementsByClassName("btn-text")[0].innerHTML;
                 var toggleBox = new ConfirmBox( {
                     boxid: 'confirm-toggle-box',
@@ -216,6 +230,7 @@
                         postData('{% url "donations:toggle-recurring" %}', { subscription_id: subscription_id })
                         .then(data => {
                             removeLoadingState(wrapper);
+                            threeDotsNormal(subscription_id);
                             if (data['status'] == 'success') {
                                 alert(data['success-message']);
                                 for (let toggleBtn of document.querySelectorAll(`button.toggle-recurring-donation[data-id='${subscription_id}']`)) {
@@ -231,6 +246,7 @@
                     },
                     cancel: function() {
                         removeLoadingState(wrapper);
+                        threeDotsNormal(subscription_id);
                     }
                 });
                 toggleBox.show();

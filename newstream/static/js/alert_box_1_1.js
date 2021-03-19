@@ -19,7 +19,7 @@ AlertBox.prototype = {
             wrapper.id = this.params.boxid;
             wrapper.classList.add('confirm-wrappers');
             var html = `<div id='confirm-box'><h4 id='confirm-header'>${this.params.header_text}</h4>`;
-            html += "<div id='confirm-buttons'><button id='confirm-ok'>Confirm</button></div>";
+            html += "<div id='confirm-buttons'><button id='confirm-ok'>OK</button></div>";
             html += "</div>";
             
             wrapper.innerHTML = html;

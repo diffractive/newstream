@@ -210,7 +210,7 @@
                 let subscription_id = wrapper.getAttribute('data-id');
                 let innerHTML = wrapper.getElementsByClassName("btn-text")[0].innerHTML;
                 var toggleBox = new ConfirmBox( {
-                    boxid: 'confirm-cancel-box',
+                    boxid: 'confirm-toggle-box',
                     header_text: 'Confirm ' + innerHTML + '?',
                     ok: function() {
                         postData('{% url "donations:toggle-recurring" %}', { subscription_id: subscription_id })

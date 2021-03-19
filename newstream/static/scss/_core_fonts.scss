@@ -79,4 +79,9 @@ p {
 ul {
     list-style: disc;
     padding-inline-start: 40px;
+    
+    &.email-addresses-ul {
+        list-style: none;
+        padding-inline-start: 0px;
+    }
 }

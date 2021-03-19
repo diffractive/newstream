@@ -22,7 +22,7 @@ function css() {
       file.stat.mtime = date;
       cb(null, file);
     }))
-    .pipe(rename('main_1_2.css'))
+    .pipe(rename('main_1_3.css'))
     .pipe(gulp.dest(destpath))
 }
 

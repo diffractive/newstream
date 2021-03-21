@@ -27,6 +27,11 @@ class HeadingBlock(StructBlock):
         ('h5', 'H5'),
         ('h6', 'H6'),
     ])
+    alignment_css = ChoiceBlock(choices=[
+        ('justify-center', _('center')),
+        ('justify-start', _('left')),
+        ('justify-end', _('right')),
+    ], label=_("Horizontal Alignment of Heading"), required=False)
     heading_text = CharBlock()
 
     class Meta:

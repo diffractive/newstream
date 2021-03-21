@@ -1,6 +1,6 @@
 from django.utils.translation import gettext_lazy as _
 
-from wagtail.core.blocks import StructBlock, StreamBlock, RichTextBlock, ChoiceBlock, IntegerBlock, CharBlock, RawHTMLBlock, URLBlock, ListBlock
+from wagtail.core.blocks import StructBlock, StreamBlock, RichTextBlock, ChoiceBlock, IntegerBlock, CharBlock, RawHTMLBlock, URLBlock, ListBlock, TextBlock
 from wagtail.images.blocks import ImageChooserBlock
 
 
@@ -75,6 +75,22 @@ class ResponsiveVideoIframeBlock(StructBlock):
         label = _('Responsive Video iFrame')
 
 
+class ImageBlock(StructBlock):
+    image = ImageChooserBlock()
+    alignment_css = ChoiceBlock(choices=[
+        ('justify-center', _('center')),
+        ('justify-start', _('left')),
+        ('justify-end', _('right')),
+    ], label=_("Horizontal Alignment of Image"))
+    width_css = TextBlock(required=False, label=_("Css Value for Width attribute"))
+    alt_text = TextBlock(required=False, label=_("Alt Text"))
+
+    class Meta:
+        icon = 'image'
+        label = _('Image Block')
+        template = 'pages/blocks/image_block.html'
+
+
 class ColumnContentBlock(StreamBlock):
     heading_block = HeadingBlock()
     text_block = RichTextBlock(
@@ -86,6 +102,7 @@ class ColumnContentBlock(StreamBlock):
     accordion_block = AccordionBlock()
     pagebreaker_block = PageBreaker()
     resp_video_iframe_block = ResponsiveVideoIframeBlock()
+    image_block = ImageBlock()
 
     class Meta:
         icon = 'form'

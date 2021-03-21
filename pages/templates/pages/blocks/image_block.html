@@ -1,0 +1,6 @@
+{% load wagtailcore_tags wagtailcore_tags wagtailimages_tags %}
+{% image value.image original as img %}
+
+<div class="column-element flex {{ value.alignment_css }}">
+    <img src="{{ img.url }}" alt="{{ value.alt_text }}" style="width:{{ value.width_css|default:'auto' }};"/>
+</div>

@@ -139,9 +139,9 @@ input.ns-accordion-cb {
         font-weight: 600;
         cursor: pointer;
         /* Icon */
-        &:hover {
-            background: $border-grey-color;
-        }
+        // &:hover {
+        //     background: $border-grey-color;
+        // }
         &:after {
             content: "\276F";
             @apply text-primary;

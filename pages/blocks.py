@@ -81,7 +81,7 @@ class ImageBlock(StructBlock):
         ('justify-center', _('center')),
         ('justify-start', _('left')),
         ('justify-end', _('right')),
-    ], label=_("Horizontal Alignment of Image"))
+    ], label=_("Horizontal Alignment of Image"), required=False)
     width_css = TextBlock(required=False, label=_("Css Value for Width attribute"))
     alt_text = TextBlock(required=False, label=_("Alt Text"))
 

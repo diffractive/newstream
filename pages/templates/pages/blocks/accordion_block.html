@@ -3,9 +3,9 @@
 <div class="column-element ns-accordion">
     {% for block in value.items %}
     <div class="ns-accordion-item">
-        <input type="checkbox" id="ns-accordion-cb-{{ block.id }}-{{ forloop.counter }}" class="ns-accordion-cb" name="ns-accordion-cb">
+        <input type="checkbox" id="ns-accordion-cb-{{ block_id }}-{{ forloop.counter }}" class="ns-accordion-cb" name="ns-accordion-cb">
         <label class="ns-accordion-item-label"
-            for="ns-accordion-cb-{{ block.id }}-{{ forloop.counter }}">{{ block.item_title }}</label>
+            for="ns-accordion-cb-{{ block_id }}-{{ forloop.counter }}">{{ block.item_title }}</label>
         <div class="ns-accordion-item-content">
             {{ block.item_content }}
         </div>

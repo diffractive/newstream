@@ -2,6 +2,6 @@
 
 <div class="w-full container-row {{ value.alignment_css }}">
     {% for block in value.content %}
-    {% include_block block %}
+    {% include_block block with block_id=block.id %}
     {% endfor %}
 </div>

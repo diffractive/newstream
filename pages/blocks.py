@@ -43,7 +43,7 @@ class AccordionItem(StructBlock):
 class AccordionBlock(StructBlock):
     items = ListBlock(
         AccordionItem())
-    footer = RichTextBlock()
+    footer = RichTextBlock(required=False)
 
     class Meta:
         icon = 'list-ul'

@@ -110,7 +110,7 @@ a {
 }
 
 /* Accordion styles */
-input.ns-accordion-rd {
+input.ns-accordion-cb {
     position: absolute;
     opacity: 0;
     z-index: -1;
@@ -166,9 +166,9 @@ input.ns-accordion-rd {
     }
 }
 // :checked
-input.ns-accordion-rd:checked {
+input.ns-accordion-cb:checked {
   + .ns-accordion-item-label {
-    background: $border-grey-color;
+    // background: $border-grey-color;
     &:after {
       transform: rotate(90deg);
     }

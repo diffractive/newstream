@@ -24,6 +24,9 @@ BASE_DIR = os.path.dirname(PROJECT_DIR)
 # for processing paypal legacy ipns (12M)
 DATA_UPLOAD_MAX_MEMORY_SIZE = 12582912
 
+# for editing home page which could break the default limit of 1000
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
+
 # django needs this to redirects user correctly when he stumbles upon a logn_required route
 LOGIN_URL = "/accounts/login"
 LOGIN_REDIRECT_URL = "/"

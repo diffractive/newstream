@@ -114,7 +114,7 @@ class ColumnBlock(StructBlock):
         ('column-horz-align-center', _('center')),
         ('column-horz-align-start', _('left')),
         ('column-horz-align-end', _('right')),
-    ], label=_("Horizontal Alignment of Column Content"))
+    ], label=_("Horizontal Alignment of Column Content"), required=False)
 
     class Meta:
         icon = 'placeholder'

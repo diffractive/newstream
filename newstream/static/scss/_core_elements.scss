@@ -109,6 +109,19 @@ a {
     }
 }
 
+/* heading + anchor link styles */
+.ns-headings {
+    position: relative;
+}
+.ns-anchor-links {
+    position: absolute;
+    top: -80px;
+
+    @screen lg {
+        top: -122px;
+    }
+}
+
 /* Accordion styles */
 input.ns-accordion-cb {
     position: absolute;

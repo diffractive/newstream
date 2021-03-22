@@ -2,9 +2,9 @@
 {% image request|brand_logo max-120x120 as brand_logo %}
 
 {% include "common/mobile_main_menu.html" %}
-<div id="newstream-header" class='z-50 bg-white fixed'>
+<div id="newstream-header" class='z-50 bg-transparent fixed'>
     <div id="newstream-topnav"
-        class="flex justify-end lg:justify-between items-center w-screen py-6 px-8 lg:py-10 lg:px-10 xl:px-16">
+        class="flex justify-end lg:justify-between items-center w-screen bg-white py-6 px-8 lg:py-10 lg:px-10 xl:px-16">
         <div class="flex items-center lg:pr-8">
             <div id="nav-toggle" class="lg:hidden focus:outline-none cursor-pointer" onclick="toggleSidenav();">
                 <span></span>

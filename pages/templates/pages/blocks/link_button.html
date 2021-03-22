@@ -1,1 +1,2 @@
-<a class="ns-dark-btn m-4" href="{{ value.button_link }}" target="{{ value.target_window }}">{{ value.button_text }}</a>
+{% load wagtailcore_tags %}
+<a class="ns-dark-btn m-4" href="{{ value.button_link|default:'#' }}" target="{{ value.target_window }}" rel="noopener noreferrer">{{ value.button_text }}</a>

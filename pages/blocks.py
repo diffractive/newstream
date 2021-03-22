@@ -6,7 +6,7 @@ from wagtail.images.blocks import ImageChooserBlock
 
 class LinkButtonBlock(StructBlock):
     button_text = CharBlock()
-    button_link = URLBlock()
+    button_link = CharBlock()
     target_window = ChoiceBlock(choices=[
         ('_blank', _('New Tab')),
         ('_self', _('Same Tab')),

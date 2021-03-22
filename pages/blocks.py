@@ -33,7 +33,7 @@ class HeadingBlock(StructBlock):
         ('justify-end', _('right')),
     ], label=_("Horizontal Alignment of Heading"), required=False)
     heading_text = CharBlock()
-    heading_anchor_id = CharBlock(label=_("ID for Anchor Links"))
+    heading_anchor_id = CharBlock(label=_("ID for Anchor Links"), required=False)
 
     class Meta:
         icon = 'title'

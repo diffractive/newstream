@@ -136,6 +136,14 @@
                 left: 50%;
                 transform: translateX(-50%);
             }
+
+            img {
+                max-height: 70px;
+
+                @screen lg {
+                    max-height: 100px;
+                }
+            }
         }
         &.menu-item {
             text-transform: uppercase;
@@ -212,6 +220,14 @@
                 transform: scaleX(1);
             }
         }
+    }
+}
+
+#base-content-wrapper {
+    padding-top: 80px;
+
+    @screen lg {
+        padding-top: 122px;
     }
 }
 

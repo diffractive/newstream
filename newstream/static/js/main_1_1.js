@@ -41,14 +41,6 @@ for (let wrapper of document.getElementsByClassName("dropdown-toggle-label")) {
     }, 4000); // invisible transition is 1s
 })();
 
-function pushContentDownFromHeader() {
-    // calculate drop distance for content below fixed header
-    headerHeight = document.getElementById('newstream-topnav').offsetHeight;
-    document.getElementById('base-content-wrapper').style.paddingTop = headerHeight + 'px';
-    // if (document.getElementById('messages-wrapper')) {
-    //     document.getElementById('messages-wrapper').style.top = (headerHeight + 16) + 'px';
-    // }
-}
 function resizeVideoIframe() {
     // Resizing JS for responsive video iframe block
     // Vanilla version of FitVids
@@ -126,9 +118,6 @@ function registerLoadingButtons() {
     }
 }
 window.addEventListener('load', function () {
-    // for fixed header
-    pushContentDownFromHeader();
-
     // resize video iframes: currently just support youtube and vimeo
     resizeVideoIframe();
 
@@ -136,6 +125,5 @@ window.addEventListener('load', function () {
     registerLoadingButtons();
 });
 window.addEventListener('resize', function () {
-    pushContentDownFromHeader();
     resizeVideoIframe();
 });

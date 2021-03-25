@@ -51,28 +51,9 @@ def create_checkout_session(request):
             session_kwargs['customer_email'] = donation.user.email
 
         # Product should have been created by admin manually at the dashboard
-        # if no product exists, create one here(double safety net)
         # todo: make sure the product_id in site_settings has been set by some kind of configuration enforcement before site is launched
-        product_list = stripe.Product.list(active=True)
-        product = None
-        if len(product_list['data']) == 0:
-            # create new product here
-            product = stripe.Product.create(name=str(_(
-                "Newstream Default Product for Donation")), idempotency_key=uuid4_str())
-            # Update product id in site_settings & stripe settings
-            if siteSettings.sandbox_mode:
-                siteSettings.stripe_testing_product_id = product.id
-            else:
-                siteSettings.stripe_product_id = product.id
-            siteSettings.save()
-            stripeSettings.product_id = product.id
-        else:
-            # get the product, should aim at the product with the specific product id
-            for prod in product_list['data']:
-                if prod.id == stripeSettings.product_id:
-                    product = prod
-        if product == None:
-            raise ValueError(_('Cannot initialize/get the stripe product instance'))
+        # stripe.error.InvalidRequestError would be raised if the product_id is either not found or empty/None
+        product = stripe.Product.retrieve(stripeSettings.product_id)
 
         # ad-hoc price is used
         amount_str = formatDonationAmount(

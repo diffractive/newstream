@@ -19,7 +19,7 @@ def email_submission_to_admins(instance, form):
     admin_list = [admin_email.email for admin_email in siteSettings.admin_emails.all()]
 
     txt_content = ['Please see below submission\n', ]
-    html_content = ['<table cellpadding="10" cellspacing="0" style="width: 100%;"> <tr> <th style="width: 100%;text-align: left;"> <h2 style="font-weight: bold;">', str(_('Please see below submission:')), '</h2> </th> </tr><tr> <td style="width: 100%;"> <table cellpadding="10">']
+    html_content = ['<table cellpadding="10" cellspacing="0" style="width: 100%;"> <tr> <th style="width: 100%;text-align: left;"> <h2 style="font-weight: bold;">', str(_('Please see below submission:')), '</h2> </th> </tr><tr> <td style="width: 100%;"> <table cellpadding="8" style="margin-bottom: 30px;">']
     from_address = settings.DEFAULT_FROM_EMAIL
     subject = 'New Form Submission : %s' % instance.title
 

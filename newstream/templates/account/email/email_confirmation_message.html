@@ -8,16 +8,16 @@
 
 {% block content %}
 {% autoescape off %}
-<h2 style="font-family:Arial,Helvetica;font-size:22px;font-weight:bold;margin:0;Margin-bottom:25px">{% trans 'Please Confirm Your E-mail Address' %}</h2>
+<h2 style="{{ 'heading'|email_css }}">{% trans 'Please Confirm Your E-mail Address' %}</h2>
 
-<p style="font-family:Arial,Helvetica;font-size:16px;font-weight:normal;margin:0;Margin-bottom:15px">{% blocktrans with site_name=current_site.name %}Hello from {{ site_name }}!{% endblocktrans %}</p>
+<p style="{{ 'parag'|email_css }}">{% blocktrans with site_name=current_site.name %}Hello from {{ site_name }}!{% endblocktrans %}</p>
 
-<p style="font-family:Arial,Helvetica;font-size:16px;font-weight:normal;margin:0;Margin-bottom:15px">{% blocktrans %}You're receiving this e-mail because user {{ user_display }} has given yours as an e-mail address to connect their account.{% endblocktrans %}</p>
+<p style="{{ 'parag'|email_css }}">{% blocktrans %}You're receiving this e-mail because user {{ user_display }} has given yours as an e-mail address to connect their account.{% endblocktrans %}</p>
 
-<p style="font-family:Arial,Helvetica;font-size:16px;font-weight:normal;margin:0;Margin-bottom:25px">{% blocktrans %}To confirm this is correct, go to {{ activate_url }}.{% endblocktrans %}</p>
+<p style="{{ 'last-parag'|email_css }}">{% blocktrans %}To confirm this is correct, go to {{ activate_url }}.{% endblocktrans %}</p>
 
-<p style="font-family:Arial,Helvetica;font-size:16px;font-weight:normal;margin:0;Margin-bottom:15px">{% blocktrans with site_name=current_site.name %}Thank you from {{ site_name }}!{% endblocktrans %}</p>
+<p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 
-<p style="font-family:Arial,Helvetica;font-size:16px;font-weight:normal;margin:0;Margin-bottom:15px">{{ current_site.name }}</p>
+<p style="{{ 'parag'|email_css }}">{{ current_site.name }}</p>
 {% endautoescape %}
 {% endblock %}

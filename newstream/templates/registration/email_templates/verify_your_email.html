@@ -18,12 +18,10 @@
         <td style="width: 100%;">
             <p>{% blocktrans %}Dear {{ fullname }},{% endblocktrans %}</p>
             <p>{% blocktrans %}Your account has been created. Please verify your email by clicking this
-                <a href="{{ fullurl }}" target="_blank">link</a> in order to fully
+                <a href="{{ fullurl }}" target="_blank" rel="noopener noreferrer">link</a> in order to fully
                 manage
                 your donations and account.{% endblocktrans %}</p>
-            <p>{% trans 'Thank you,' %}</p>
-            <p>{{ request|site_name }}</p>
-        </td>
-    </tr>
-</table>
+<p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
+
+<p style="{{ 'parag'|email_css }}">{{ request|site_name }}</p>
 {% endblock %}

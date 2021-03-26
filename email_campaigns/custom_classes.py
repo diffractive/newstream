@@ -75,7 +75,7 @@ class SendCampaignView(InstanceSpecificView):
     def htmlAppendUnsubscribeLink(self, request, email, html):
         fullurl = self.getUnsubscriptionLink(request, email)
         html += '<br><a href="' + fullurl + \
-            '" target="_blank">' + str(_('Unsubscribe')) + '</a>'
+            '" target="_blank" rel="noopener noreferrer">' + str(_('Unsubscribe')) + '</a>'
         return html
 
     def send_emails(self, request):

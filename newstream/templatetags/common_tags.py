@@ -86,6 +86,16 @@ def returnSiteName(req):
     return getSiteName(req)
 
 
+@register.filter(name='email_css')
+def returnEmailInlineCss(element):
+    if element == 'heading':
+        return 'font-family:Arial,Helvetica;font-size:22px;font-weight:bold;margin:0;margin-bottom:30px'
+    elif element == 'last-parag':
+        return 'font-family:Arial,Helvetica;font-size:16px;font-weight:normal;margin:0;margin-bottom:30px'
+    else:
+        return 'font-family:Arial,Helvetica;font-size:16px;font-weight:normal;margin:0;margin-bottom:15px'
+
+
 @register.filter(name='alert_class')
 def getAlertClass(tags):
     if 'debug' in tags or 'info' in tags:

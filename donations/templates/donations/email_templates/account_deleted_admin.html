@@ -6,30 +6,24 @@
 {% endblock %}
 
 {% block content %}
-<table cellpadding="10" cellspacing="0" style="width: 100%;">
+<h2 style="{{ 'heading'|email_css }}">{% trans "A Donor Account is deleted" %}</h2>
+
+<p style="{{ 'parag'|email_css }}">{% trans 'Hi Admins,' %}</p>
+              
+<p style="{{ 'parag'|email_css }}">{% trans 'This email is to inform you that a donor account has been deleted on your website:' %}</p>
+
+<p style="{{ 'parag'|email_css }}">
+    <a href="{{ request|domain }}/admin/users/" target="_blank" rel="noopener noreferrer">{{ request|domain }}/admin/users/</a>
+</p>
+                
+<table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
-        <th style="width: 100%;text-align: left;">
-            <h2 style="font-weight: bold;">
-                {% trans "A Donor Account is deleted" %}
-            </h2>
-        </th>
-    </tr>
-    <tr>
-        <td style="width: 100%;">
-            <p>{% trans 'Hi Admins,' %}</p>
-            <p>
-                {% trans 'This email is to inform you that a donor account has been deleted on your website:' %}<br>
-                <a href="{{ request|domain }}/admin/users/" target="_blank">{{ request|domain }}/admin/users/</a>
-            </p>
-            <table cellpadding="10">
-                <tr>
-                    <td style="font-weight: bold;">{% trans 'Donor' %}</td>
-                    <td>{{ user.fullname }}</td>
-                </tr>
-            </table>
-            <p>{% trans "Thank you," %}</p>
-            <p>{{ request|site_name }}</p>
-        </td>
+        <td style="font-weight: bold;">{% trans 'Donor' %}</td>
+        <td>{{ user.fullname }}</td>
     </tr>
 </table>
+
+<p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
+
+<p style="{{ 'parag'|email_css }}">{{ request|site_name }}</p>
 {% endblock %}

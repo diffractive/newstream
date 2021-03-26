@@ -6,50 +6,39 @@
 {% endblock %}
 
 {% block content %}
-<table cellpadding="10" cellspacing="0" style="width: 100%;">
+<h2 style="{{ 'heading'|email_css }}">{% trans "Your Donation Payment Status has been updated" %}</h2>
+<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.user.fullname }},</p>
+{% if donation.is_recurring %}
+{% url 'donations:my-renewals' donation.subscription.id as donations_url %}
+{% else %}
+{% url 'donations:my-onetime-donations' as donations_url %}
+{% endif %}
+<p style="{{ 'parag'|email_css }}">
+    {% blocktrans with donations_full_url=request|fullurl:donations_url%}Here are the details of your donation at <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a>.{% endblocktrans %}
+</p>
+<table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
-        <th style="width: 100%;text-align: left;">
-            <h2 style="font-weight: bold;">
-                {% trans "Your Donation Payment Status has been updated" %}
-            </h2>
-        </th>
+        <td style="font-weight: bold;">{% trans "Transaction ID" %}</td>
+        <td>{{ donation.transaction_id }}</td>
     </tr>
     <tr>
-        <td style="width: 100%;">
-            <p>{% trans "Dear" %} {{ donation.user.fullname }},</p>
-            {% if donation.is_recurring %}
-            {% url 'donations:my-renewals' donation.subscription.id as donations_url %}
-            {% else %}
-            {% url 'donations:my-onetime-donations' as donations_url %}
-            {% endif %}
-            <p>
-                {% blocktrans with donations_full_url=request|fullurl:donations_url%}Here are the details of your donation at <a href="{{donations_full_url}}" target="_blank">here</a>.{% endblocktrans %}
-            </p>
-            <table cellpadding="10">
-                <tr>
-                    <td style="font-weight: bold;">{% trans "Transaction ID" %}</td>
-                    <td>{{ donation.transaction_id }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold;">{% trans "Donation Frequency" %}</td>
-                    <td>{{ donation.donation_frequency }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold;">{% trans "Currency" %}</td>
-                    <td>{{ donation.currency }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold;">{% trans "Donation Amount" %}</td>
-                    <td>{{ donation|amount_with_currency }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold;">{% trans "Payment Status" %}</td>
-                    <td>{{ donation.payment_status|title }}</td>
-                </tr>
-            </table>
-            <p>{% trans "Thank you," %}</p>
-            <p>{{ request|site_name }}</p>
-        </td>
+        <td style="font-weight: bold;">{% trans "Donation Frequency" %}</td>
+        <td>{{ donation.donation_frequency }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans "Currency" %}</td>
+        <td>{{ donation.currency }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans "Donation Amount" %}</td>
+        <td>{{ donation|amount_with_currency }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans "Payment Status" %}</td>
+        <td>{{ donation.payment_status|title }}</td>
     </tr>
 </table>
+<p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
+
+<p style="{{ 'parag'|email_css }}">{{ request|site_name }}</p>
 {% endblock %}

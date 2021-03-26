@@ -6,46 +6,37 @@
 {% endblock %}
 
 {% block content %}
-<table cellpadding="10" cellspacing="0" style="width: 100%;">
+<h2 style="{{ 'heading'|email_css }}">{% trans "A Recurring Donation is updated" %}</h2>
+<p style="{{ 'parag'|email_css }}">{% trans 'Hi Admins,' %}</p>
+<p style="{{ 'parag'|email_css }}">
+    {{ message }}
+</p>
+<p style="{{ 'parag'|email_css }}">
+    <a href="{{ request|domain }}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}" target="_blank" rel="noopener noreferrer">{{ request|domain }}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}</a>
+</p>
+<table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
-        <th style="width: 100%;text-align: left;">
-            <h2 style="font-weight: bold;">
-                {% trans "A Recurring Donation is updated" %}
-            </h2>
-        </th>
+        <td style="font-weight: bold;">{% trans 'Donor' %}</td>
+        <td>{{ subscription.user.fullname }}</td>
     </tr>
     <tr>
-        <td style="width: 100%;">
-            <p>{% trans 'Hi Admins,' %}</p>
-            <p>
-                {{ message }}<br>
-                <a href="{{ request|domain }}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}" target="_blank">{{ request|domain }}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}</a>
-            </p>
-            <table cellpadding="10">
-                <tr>
-                    <td style="font-weight: bold;">{% trans 'Donor' %}</td>
-                    <td>{{ subscription.user.fullname }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold;">{% trans "Recurring Donation Identifier" %}</td>
-                    <td>{{ subscription.profile_id }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold;">{% trans "Currency" %}</td>
-                    <td>{{ subscription.currency }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold;">{% trans "Recurring Donation Amount" %}</td>
-                    <td>{{ subscription|recurring_amount_with_currency }}</td>
-                </tr>
-                <tr>
-                    <td style="font-weight: bold;">{% trans 'Recurring Donation Status' %}</td>
-                    <td>{{ subscription.recurring_status|title }}</td>
-                </tr>
-            </table>
-            <p>{% trans "Thank you," %}</p>
-            <p>{{ request|site_name }}</p>
-        </td>
+        <td style="font-weight: bold;">{% trans "Recurring Donation Identifier" %}</td>
+        <td>{{ subscription.profile_id }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans "Currency" %}</td>
+        <td>{{ subscription.currency }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans "Recurring Donation Amount" %}</td>
+        <td>{{ subscription|recurring_amount_with_currency }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans 'Recurring Donation Status' %}</td>
+        <td>{{ subscription.recurring_status|title }}</td>
     </tr>
 </table>
+<p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
+
+<p style="{{ 'parag'|email_css }}">{{ request|site_name }}</p>
 {% endblock %}

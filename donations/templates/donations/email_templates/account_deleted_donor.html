@@ -6,23 +6,15 @@
 {% endblock %}
 
 {% block content %}
-<table cellpadding="10" cellspacing="0" style="width: 100%;">
-    <tr>
-        <th style="width: 100%;text-align: left;">
-            <h2 style="font-weight: bold;">
-                {% trans "Your Account is deleted" %}
-            </h2>
-        </th>
-    </tr>
-    <tr>
-        <td style="width: 100%;">
-            <p>{% trans "Dear" %} {{ user.fullname }},</p>
-            <p>
-                {% trans "You have just deleted your account. Thank you for your support all the way!" %}
-            </p>
-            <p>{% trans "Thank you," %}</p>
-            <p>{{ request|site_name }}</p>
-        </td>
-    </tr>
-</table>
+<h2 style="{{ 'heading'|email_css }}">{% trans "Your Account is deleted" %}</h2>
+         
+<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ user.fullname }},</p>
+
+<p style="{{ 'last-parag'|email_css }}">
+    {% trans "You have just deleted your account. Thank you for your support all the way!" %}
+</p>
+
+<p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
+
+<p style="{{ 'parag'|email_css }}">{{ request|site_name }}</p>
 {% endblock %}

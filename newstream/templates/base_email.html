@@ -1,3 +1,5 @@
+{% load static wagtailimages_tags %}
+{% image request|brand_logo max-120x120 as brand_logo %}
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 
@@ -14,7 +16,51 @@
 </head>
 
 <body>
-    {% block content %}{% endblock %}
+    <div style="background-color:#e7edef;min-width:100%!important;width:100%;font-family:Arial,Helvetica;font-size:14px;line-height:1.4;margin:0;padding:0">
+        <table border="0" cellpadding="0" cellspacing="0" style="border-collapse:separate;width:100%">
+            <tbody>
+                <tr>
+                    <td style="font-family:Arial,Helvetica;font-size:14px;vertical-align:top;display:block;margin:0 auto;padding:10px 0 20px;max-width:500px;width:100%;min-width:320px">
+                        <div style="box-sizing:border-box;display:block;Margin:0 auto">
+                            <span style="color:transparent;display:none;height:0;max-height:0;max-width:0;opacity:0;overflow:hidden;width:0">Please click to confirm your Guardian account.</span>
+                            <table class="m_-6514366338500301734header" style="border-collapse:separate;width:100%;text-align:left">
+                                <tbody>
+                                    <tr height="15px">
+                                        <td></td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <img src="{{ brand_logo.url }}" alt="{{ brand_logo.alt }}" width="{{ brand_logo.width }}" height="{{ brand_logo.height }}">
+                                        </td>
+                                    </tr>
+                                    <tr height="15px">
+                                        <td></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <table cellspacing="0" cellpadding="0" style="border-top:1px solid #dcdcdc;border-collapse:separate;width:100%;background:#ffffff">
+                                <tbody>
+                                    <tr>
+                                        <td style="font-family:Arial,Helvetica;font-size:14px;vertical-align:top;box-sizing:border-box;padding:20px">
+                                            <table border="0" cellpadding="0" cellspacing="0" style="border-collapse:separate;width:100%">
+                                                <tbody>
+                                                    <tr>
+                                                        <td style="font-family:Arial,Helvetica;font-size:14px;vertical-align:top">
+                                                        {% block content %}{% endblock %}
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </body>
 
 </html>

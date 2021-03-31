@@ -107,7 +107,7 @@
         let registerBtnDiv = document.getElementById('register-btn-unit');
         let registerAlert = document.getElementById('register-alert');
         let registerReminder = document.getElementById('register-reminder');
-        let isLoggedIn = document.querySelector("logged-in-div");
+        let isLoggedIn = document.querySelector(".logged-in-div");
         amountSelect.onchange = (event) => {
             if (event.target.value == 'custom') {
                 customAmountDiv.classList.remove('hidden');
@@ -151,9 +151,6 @@
                     registerReminder.classList.add('hidden');
                     registerAlert.classList.remove('hidden');
                 }
-            }
-            if (isLoggedIn) {
-
             }
         };
         frequencySelect.dispatchEvent(new Event("change"));

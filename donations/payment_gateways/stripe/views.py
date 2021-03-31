@@ -49,7 +49,7 @@ def create_checkout_session(request):
         if len(customers['data']) > 0:
             session_kwargs['customer'] = customers['data'][0]['id']
         else:
-            session_kwargs['customer_email'] = donor_email.email
+            session_kwargs['customer_email'] = donor_email
 
         # Product should have been created by admin manually at the dashboard
         # todo: make sure the product_id in site_settings has been set by some kind of configuration enforcement before site is launched

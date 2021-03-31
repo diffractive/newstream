@@ -88,6 +88,7 @@ class DonationDetailsForm(forms.Form):
             self.fields['email'].initial = tmpd.guest_email
             self.fields['currency'].initial = tmpd.currency
             if tmpd.is_amount_custom:
+                self.fields['donation_amount'].initial = 'custom'
                 self.fields['donation_amount_custom'].initial = tmpd.donation_amount
             else:
                 self.fields['donation_amount'].initial = tmpd.donation_amount

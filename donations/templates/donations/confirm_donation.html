@@ -28,7 +28,7 @@
                 </div>
                 {% endif %}
                 
-                <div class="confirm-donation-wrapper p-4 lg:py-8 lg:px-24 border-2 rounded border-gray-200">
+                <div class="confirm-donation-wrapper p-4 sm:p-8 border-2 rounded border-gray-200">
                     <p class="field-label">Donor</p>
                     <p class="field-value text-primary font-bold mb-4">{% if request.user.is_authenticated %}{{ request.user.fullname }}{% else %}{{ tmpd.guest_email }}{% endif %}</p>
                     <p class="field-label">Donation amount</p>
@@ -48,7 +48,7 @@
                         <button class="{% if isGatewayHosted %}has-secondary-text{% endif %} ns-wide-btn right-arrow-btn need-white-loading-btn"
                             type="submit" name="submit-choice" value="confirm-submit">{% trans 'Confirm Donation' %}<span class="icon"></span></button>
                         {% if isGatewayHosted %}
-                            <p class="secondary-text">{% blocktrans %}You will be redirected to {{tmpd.gateway.title}}-hosted payment page.{% endblocktrans %}</p>
+                            <p class="secondary-text">{% blocktrans with gateway=tmpd.gateway.title %}You will be redirected to {{gateway}}-hosted payment page.{% endblocktrans %}</p>
                         {% endif %}
                     </div>
                 </div>

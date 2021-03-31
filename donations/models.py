@@ -138,7 +138,7 @@ class TempDonationMeta(models.Model):
     '''
     donation = ParentalKey(
         'TempDonation',
-        related_name='tempMetas',
+        related_name='temp_metas',
         on_delete=models.CASCADE,
     )
     field_key = models.CharField(max_length=255)

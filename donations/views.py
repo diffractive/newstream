@@ -55,7 +55,7 @@ def donate(request):
                     donation_amount=donation_amount,
                     currency=form.cleaned_data['currency'],
                     status=STATUS_PENDING,
-                    metas=temp_donation_metas,
+                    temp_metas=temp_donation_metas,
                     guest_email=form.cleaned_data.get('email', ''),
                 )
                 temp_donation.save()
@@ -125,7 +125,7 @@ def confirm_donation(request):
                     currency=tmpd.currency,
                     guest_email=tmpd.guest_email if not request.user.is_authenticated else '',
                     payment_status=STATUS_PROCESSING,
-                    metas=tmpd.tempMetas,
+                    metas=tmpd.temp_metas,
                     donation_date=datetime.now(timezone.utc),
                 )
                 # create a processing subscription if is_recurring

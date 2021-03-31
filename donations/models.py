@@ -16,16 +16,20 @@ from newstream.edit_handlers import ReadOnlyPanel
 
 User = get_user_model()
 
+# Donation/Subscription Statuses
 STATUS_ACTIVE = 'active'
 STATUS_INACTIVE = 'inactive'
 STATUS_COMPLETE = 'complete'
-STATUS_PENDING = 'pending'
 STATUS_REFUNDED = 'refunded'
 STATUS_REVOKED = 'revoked'
 STATUS_FAILED = 'failed'
 STATUS_CANCELLED = 'cancelled'
 STATUS_PAUSED = 'paused'
 STATUS_PROCESSING = 'processing'
+
+# Temp Donation Statuses
+STATUS_PENDING = 'pending'
+STATUS_PROCESSED = 'processed'
 
 
 class DonationMetaField(AbstractFormField):
@@ -123,6 +127,30 @@ class DonationMeta(models.Model):
         ordering = ['-id']
         verbose_name = _('Donation Meta')
         verbose_name_plural = _('Donation Metas')
+
+    def __str__(self):
+        return self.field_key
+
+
+class TempDonationMeta(models.Model):
+    '''
+    TempDonationMeta is used for storing meta data entered by the donor in the frontend, which is defined by the website admin at first.
+    '''
+    donation = ParentalKey(
+        'TempDonation',
+        related_name='tempMetas',
+        on_delete=models.CASCADE,
+    )
+    field_key = models.CharField(max_length=255)
+    field_value = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    deleted = models.BooleanField(default=False)
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = _('Temp Donation Meta')
+        verbose_name_plural = _('Temp Donation Metas')
 
     def __str__(self):
         return self.field_key
@@ -277,6 +305,7 @@ class Donation(ClusterableModel):
     payment_status = models.CharField(
         max_length=255, choices=PAYMENT_STATUS_CHOICES)
     donation_date = models.DateTimeField()
+    guest_email = models.EmailField(null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
@@ -349,6 +378,51 @@ class Donation(ClusterableModel):
 
     def isOnGoing(self):
         return 'Yes' if self.is_recurring and self.subscription.recurring_status == STATUS_ACTIVE else 'No'
+
+
+class TempDonation(ClusterableModel):
+    STATUS_CHOICES = [
+        (STATUS_PENDING, _(STATUS_PENDING.capitalize())),
+        (STATUS_PROCESSED, _(STATUS_PROCESSED.capitalize())),
+    ]
+    form = models.ForeignKey(
+        'DonationForm',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+    gateway = models.ForeignKey(
+        'site_settings.PaymentGateway',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    is_test = models.BooleanField(default=False)
+    is_amount_custom = models.BooleanField(default=False)
+    donation_amount = models.DecimalField(max_digits=20, decimal_places=2)
+    is_recurring = models.BooleanField(default=False)
+    currency = models.CharField(max_length=20)
+    guest_email = models.EmailField(null=True)
+    status = models.CharField(
+        max_length=255, choices=STATUS_CHOICES)
+
+    class Meta:
+        ordering = ['-id']
+        verbose_name = _('Temp Donation')
+        verbose_name_plural = _('Temp Donations')
+
+    def __str__(self):
+        return '#'+str(self.id)
+
+    def isRecurring(self):
+        return 'Yes' if self.is_recurring else 'No'
+
+    @property
+    def donation_frequency(self):
+        return 'Monthly' if self.is_recurring else 'One-time'
+
+    @donation_frequency.setter
+    def donation_frequency(self, val):
+        pass
 
 
 @receiver(pre_delete, sender=User)

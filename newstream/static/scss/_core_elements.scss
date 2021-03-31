@@ -25,6 +25,28 @@ a {
     margin: 1rem 0rem;
     color: white;
 }
+.ns-wide-btn-group {
+    margin: 1rem 0rem;
+
+    .btn-unit {
+        margin: 0 0 1rem;
+
+        .ns-wide-btn {
+            margin: 0px;
+        }
+        .ns-wide-btn.has-secondary-text {
+            margin: 0 0 2px;
+        }
+
+        .secondary-text {
+            margin: 0px !important;
+        }
+    }
+
+    .btn-unit:last-child {
+        margin: 0px;
+    }
+}
 .ns-wide-dark-btn {
     @extend .ns-wide-btn;
     @apply bg-primary-dark;
@@ -60,6 +82,12 @@ a {
     @extend .svg-icon-btn;
     span.icon {
         background-image: url("../svg/white-arrow-forward.svg");
+    }
+}
+.left-arrow-btn {
+    @extend .svg-icon-btn;
+    span.icon {
+        background-image: url("../svg/white-arrow-backward.svg");
     }
 }
 .white-loading-btn {

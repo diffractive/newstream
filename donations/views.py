@@ -13,93 +13,63 @@ from django.views.decorators.csrf import csrf_exempt
 from newstream.functions import getSiteSettings, _exception, uuid4_str
 from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
-from donations.models import DonationPaymentMeta, Subscription, Donation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING
+from donations.models import DonationPaymentMeta, Subscription, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
 from donations.forms import DONATION_DETAILS_FIELDS, DonationDetailsForm
-from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, process_donation_meta
-from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml
+from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, process_temp_donation_meta
+from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml, isGatewayHosted
 from donations.payment_gateways.setting_classes import getOfflineSettings
 User = get_user_model()
 
 
 def donate(request):
-    if request.user.is_authenticated:
-        # skip step 1 (personal info) and go to step 2 (donation details)
-        return redirect('donations:donation-details')
-    else:
-        # show login or sign-up options page
-        return render(request, 'donations/signin_method.html')
-
-
-def donation_details(request):
     try:
         siteSettings = getSiteSettings(request)
-        if not request.user.is_authenticated:
-            return redirect('donations:donate')
         form_template = 'donations/donation_details_form.html'
         form_blueprint = siteSettings.donation_form
         if not form_blueprint:
-            raise Exception('Donation Form not yet set.')
+            raise Exception(_('Donation Form not yet set.'))
         if request.method == 'POST':
             form = DonationDetailsForm(
                 request.POST, request=request, blueprint=form_blueprint, label_suffix='')
             if form.is_valid():
-                # process meta data
-                donation_metas = process_donation_meta(request)
+                # process temp meta data
+                temp_donation_metas = process_temp_donation_meta(request)
 
                 # process donation amount
-                if 'donation_amount_custom' in form.cleaned_data and form.cleaned_data['donation_amount_custom'] and form.cleaned_data['donation_amount_custom'] > 0:
+                if form.cleaned_data.get('donation_amount_custom', None) and form.cleaned_data['donation_amount_custom'] > 0:
+                    is_amount_custom = True
                     donation_amount = form.cleaned_data['donation_amount_custom']
                 else:
+                    is_amount_custom = False
                     donation_amount = form.cleaned_data['donation_amount']
 
-                # create processing donation
+                # create a pending temporary donation object
                 payment_gateway = PaymentGateway.objects.get(
                     pk=form.cleaned_data['payment_gateway'])
-                transaction_id = gen_transaction_id(gateway=payment_gateway)
-                donation = Donation(
+                temp_donation = TempDonation(
                     is_test=siteSettings.sandbox_mode,
-                    transaction_id=transaction_id,
-                    user=request.user,
                     form=form_blueprint,
                     gateway=payment_gateway,
+                    is_amount_custom=is_amount_custom,
                     is_recurring=True if form.cleaned_data['donation_frequency'] == 'monthly' else False,
                     donation_amount=donation_amount,
                     currency=form.cleaned_data['currency'],
-                    payment_status=STATUS_PROCESSING,
-                    metas=donation_metas,
-                    donation_date=datetime.now(timezone.utc),
+                    status=STATUS_PENDING,
+                    metas=temp_donation_metas,
+                    guest_email=form.cleaned_data.get('email', ''),
                 )
-                # create a processing subscription if is_recurring
-                if form.cleaned_data['donation_frequency'] == 'monthly':
-                    # create new Subscription object, with a temporary profile_id created by uuidv4
-                    subscription = Subscription(
-                        is_test=siteSettings.sandbox_mode,
-                        profile_id=uuid4_str(),
-                        user=request.user,
-                        gateway=payment_gateway,
-                        recurring_amount=donation_amount,
-                        currency=form.cleaned_data['currency'],
-                        recurring_status=STATUS_PROCESSING,
-                        subscribe_date=datetime.now(timezone.utc)
-                    )
-                    subscription.save()
-                    # link subscription to the donation
-                    donation.subscription = subscription
+                temp_donation.save()
+                request.session['temp_donation_id'] = temp_donation.id
 
-                donation.save()
-
-                if 'first_time_registration' in request.session:
-                    dpmeta = DonationPaymentMeta(
-                        donation=donation, field_key='is_user_first_donation', field_value=request.session['first_time_registration'])
-                    dpmeta.save()
-                    request.session.pop('first_time_registration')
-
-                # redirect to payment_gateway
-                gatewayManager = InitPaymentGateway(
-                    request, donation=donation)
-                return gatewayManager.redirect_to_gateway_url()
-            else:
-                pprint(form.errors)
+                # determine path based on submit-choice
+                if form.cleaned_data.get('submit-choice', '') == 'guest-submit' or form.cleaned_data.get('submit-choice', '') == 'loggedin-submit':
+                    # skip to step 3 which is Donation Confirmation
+                    return redirect('donations:confirm-donation')
+                elif form.cleaned_data.get('submit-choice', '') == 'register-submit':
+                    # proceed to step 2 which is Register or Login
+                    return redirect('donations:register-signin')
+                else:
+                    raise Exception(_('No valid submit-choice is being submitted.'))
         else:
             form = DonationDetailsForm(
                 request=request, blueprint=form_blueprint, label_suffix='')
@@ -107,10 +77,10 @@ def donation_details(request):
         # see: https://docs.djangoproject.com/en/3.0/ref/forms/api/#django.forms.Form.field_order
         if form_blueprint.isAmountSteppedCustom():
             form.order_fields(
-                ['donation_amount', 'donation_amount_custom', 'donation_frequency', 'payment_gateway'])
+                ['donation_amount', 'donation_amount_custom', 'donation_frequency', 'payment_gateway', 'email'])
         else:
             form.order_fields(
-                ['donation_amount', 'donation_frequency', 'payment_gateway'])
+                ['donation_amount', 'donation_frequency', 'payment_gateway', 'email'])
     except Exception as e:
         # Should rarely happen, but in case some bugs or order id repeats itself
         _exception(str(e))
@@ -123,6 +93,82 @@ def donation_details(request):
     offline_instructions_html = offlineSettings.offline_instructions_text
     
     return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS, 'offline_gateway_id': offline_gateway_id, 'offline_instructions_html': offline_instructions_html})
+
+
+def register_signin(request):
+    return render(request, 'donations/signin_method.html')
+
+
+def confirm_donation(request):
+    try:
+        siteSettings = getSiteSettings(request)
+        tmpd = TempDonation.objects.get(pk=request.session.get('temp_donation_id', None))
+        paymentMethod = getattr(siteSettings, tmpd.gateway.frontend_label_attr_name, tmpd.gateway.title)
+        isGatewayHosted = isGatewayHosted(tmpd.gateway)
+        if request.method == 'POST':
+            # determine path based on submit-choice
+            if request.POST.get('submit-choice', '') == 'change-submit':
+                # goes back to step 1 which is donation details
+                return redirect('donations:donate')
+            elif request.POST.get('submit-choice', '') == 'confirm-submit':
+                # proceed with the rest of the payment procedures
+                # create processing donation
+                transaction_id = gen_transaction_id(gateway=tmpd.gateway)
+                donation = Donation(
+                    is_test=tmpd.is_test,
+                    transaction_id=transaction_id,
+                    user=request.user if request.user.is_authenticated else None,
+                    form=tmpd.form,
+                    gateway=tmpd.gateway,
+                    is_recurring=tmpd.is_recurring,
+                    donation_amount=tmpd.donation_amount,
+                    currency=tmpd.currency,
+                    payment_status=STATUS_PROCESSING,
+                    metas=tmpd.tempMetas,
+                    donation_date=datetime.now(timezone.utc),
+                )
+                # create a processing subscription if is_recurring
+                if tmpd.is_recurring:
+                    # create new Subscription object, with a temporary profile_id created by uuidv4
+                    # user should have been authenticated according to flow logic
+                    subscription = Subscription(
+                        is_test=tmpd.is_test,
+                        profile_id=uuid4_str(),
+                        user=request.user if request.user.is_authenticated else None,
+                        gateway=tmpd.gateway,
+                        recurring_amount=tmpd.donation_amount,
+                        currency=tmpd.currency,
+                        recurring_status=STATUS_PROCESSING,
+                        subscribe_date=datetime.now(timezone.utc)
+                    )
+                    subscription.save()
+                    # link subscription to the donation
+                    donation.subscription = subscription
+
+                donation.save()
+                request.session.pop('temp_donation_id')
+                # delete temp donation instead of saving it as processed
+                tmpd.delete()
+                # tmpd.status = STATUS_PROCESSED
+                # tmpd.save()
+
+                if 'first_time_registration' in request.session:
+                    dpmeta = DonationPaymentMeta(
+                        donation=donation, field_key='is_user_first_donation', field_value=request.session['first_time_registration'])
+                    dpmeta.save()
+                    request.session.pop('first_time_registration')
+
+                # redirect to payment_gateway
+                gatewayManager = InitPaymentGateway(
+                    request, donation=donation)
+                return gatewayManager.redirect_to_gateway_url()
+            else:
+                raise Exception(_('No valid submit-choice is being submitted.'))
+
+    except Exception as e:
+        # Should rarely happen, but in case some bugs or order id repeats itself
+        _exception(str(e))
+    return render(request, 'donations/confirm_donation.html', {'tmpd': tmpd, 'paymentMethod': paymentMethod, 'isGatewayHosted': isGatewayHosted})
 
 
 def thank_you(request):

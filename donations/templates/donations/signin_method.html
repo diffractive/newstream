@@ -6,28 +6,33 @@
 {% block body_class %}newstream-signin-method-page{% endblock %}
 
 {% block content %}
+
+<div class="flex donation-header">
+    <div class="step-div w-30 md:w-40 p-6 text-right">{% trans 'Step 2 of 3' %}</div>
+    <div class="step-label-div flex-1 p-6 text-left text-white">{% trans 'Register or Login' %}</div>
+</div>
+
 <div class="container-tight flex flex-col items-center">
-    <h2 class="mb-4">{% trans 'Sign in to donate' %}</h2>
-    {% url 'donations:donation-details' as donate_url %}
+    {% url 'donations:confirm-donation' as confirm_url %}
     {% with sociallogin_enabled=request|sociallogin_enabled %}
     {% if sociallogin_enabled %}
     <div class="social-signin-div">
         {% with googlelogin_enabled=request|googlelogin_enabled %}
         {% if googlelogin_enabled %}
-        <a href="{% provider_login_url 'google' next=donate_url %}"
+        <a href="{% provider_login_url 'google' next=confirm_url %}"
             class="ns-wide-btn right-google-btn block">{% trans 'Sign in with Google' %}<span class="icon"></span></a>
         {% endif %}
         {% endwith %}
         {% with facebooklogin_enabled=request|facebooklogin_enabled %}
         {% if facebooklogin_enabled %}
-        <a href="{% provider_login_url 'facebook' next=donate_url %}"
+        <a href="{% provider_login_url 'facebook' next=confirm_url %}"
             class="ns-wide-btn right-facebook-btn block">{% trans 'Sign in with Facebook' %}<span
                 class="icon"></span></a>
         {% endif %}
         {% endwith %}
         {% with twitterlogin_enabled=request|twitterlogin_enabled %}
         {% if twitterlogin_enabled %}
-        <a href="{% provider_login_url 'twitter' next=donate_url %}"
+        <a href="{% provider_login_url 'twitter' next=confirm_url %}"
             class="ns-wide-btn right-twitter-btn block">{% trans 'Sign in with Twitter' %}<span class="icon"></span></a>
         {% endif %}
         {% endwith %}
@@ -41,9 +46,9 @@
     {% endif %}
     {% endwith %}
     <div class="email-signin-div">
-        <a href="{% url 'account_login' %}?next={{ donate_url }}"
+        <a href="{% url 'account_login' %}?next={{ confirm_url }}"
             class="ns-wide-btn right-arrow-btn block">{% trans 'Sign in with Email' %}<span class="icon"></span></a>
-        <a href="{% url 'account_signup' %}?next={{ donate_url }}"
+        <a href="{% url 'account_signup' %}?next={{ confirm_url }}"
             class="ns-wide-btn right-arrow-btn block">{% trans 'Continue with Email Sign up' %}<span
                 class="icon"></span></a>
     </div>

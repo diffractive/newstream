@@ -69,6 +69,12 @@ def donate(request):
                     # proceed to step 2 which is Register or Login
                     return redirect('donations:register-signin')
                 else:
+                    if form_blueprint.isAmountSteppedCustom():
+                        form.order_fields(
+                            ['donation_amount', 'donation_amount_custom', 'donation_frequency', 'payment_gateway', 'email'])
+                    else:
+                        form.order_fields(
+                            ['donation_amount', 'donation_frequency', 'payment_gateway', 'email'])
                     raise Exception(_('No valid submit-choice is being submitted.'))
         else:
             form = DonationDetailsForm(

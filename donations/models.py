@@ -327,6 +327,7 @@ class Donation(ClusterableModel):
         FieldPanel('is_test', heading=_('Is Test Donation?')),
         FieldPanel('transaction_id', heading=_('Transaction ID')),
         FieldPanel('donation_amount', heading=_('Donation Amount')),
+        FieldPanel('guest_email', heading=_('Guest Email - for non-registered donors')),
         FieldPanel('is_recurring', heading=_('Is Recurring Donation?')),
         FieldPanel('currency', heading=_('Currency')),
         FieldPanel('payment_status', heading=_('Payment Status')),

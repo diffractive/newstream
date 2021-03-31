@@ -137,16 +137,23 @@
                     guestBtnDiv.classList.remove('hidden');
                     registerReminder.classList.remove('hidden');
                     registerAlert.classList.add('hidden');
-                }
-            } else {
-                if (!isLoggedIn)  {
+                } else {
                     emailDiv.classList.add('hidden');
                     email.value = '';
                     email.required = false;
+                }
+            } else {
+                emailDiv.classList.add('hidden');
+                email.value = '';
+                email.required = false;
+                if (!isLoggedIn)  {
                     guestBtnDiv.classList.add('hidden');
                     registerReminder.classList.add('hidden');
                     registerAlert.classList.remove('hidden');
                 }
+            }
+            if (isLoggedIn) {
+
             }
         };
         frequencySelect.dispatchEvent(new Event("change"));

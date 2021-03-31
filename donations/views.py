@@ -142,7 +142,7 @@ def confirm_donation(request):
                     currency=tmpd.currency,
                     guest_email=tmpd.guest_email if not request.user.is_authenticated else '',
                     payment_status=STATUS_PROCESSING,
-                    metas=tmpd.temp_metas,
+                    metas=tmpd.temp_metas.all(),
                     donation_date=datetime.now(timezone.utc),
                 )
                 # create a processing subscription if is_recurring

@@ -62,10 +62,10 @@ def donate(request):
                 request.session['temp_donation_id'] = temp_donation.id
 
                 # determine path based on submit-choice
-                if form.cleaned_data.get('submit-choice', '') == 'guest-submit' or form.cleaned_data.get('submit-choice', '') == 'loggedin-submit':
+                if request.POST.get('submit-choice', '') == 'guest-submit' or request.POST.get('submit-choice', '') == 'loggedin-submit':
                     # skip to step 3 which is Donation Confirmation
                     return redirect('donations:confirm-donation')
-                elif form.cleaned_data.get('submit-choice', '') == 'register-submit':
+                elif request.POST.get('submit-choice', '') == 'register-submit':
                     # proceed to step 2 which is Register or Login
                     return redirect('donations:register-signin')
                 else:

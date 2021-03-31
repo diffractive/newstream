@@ -123,7 +123,7 @@ def confirm_donation(request):
                     is_recurring=tmpd.is_recurring,
                     donation_amount=tmpd.donation_amount,
                     currency=tmpd.currency,
-                    guest_email=tmpd.guest_email
+                    guest_email=tmpd.guest_email,
                     payment_status=STATUS_PROCESSING,
                     metas=tmpd.tempMetas,
                     donation_date=datetime.now(timezone.utc),

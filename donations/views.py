@@ -110,7 +110,7 @@ def confirm_donation(request):
         siteSettings = getSiteSettings(request)
         tmpd = TempDonation.objects.get(pk=request.session.get('temp_donation_id', None))
         paymentMethod = getattr(siteSettings, tmpd.gateway.frontend_label_attr_name, tmpd.gateway.title)
-        isGatewayHosted = isGatewayHosted(tmpd.gateway)
+        isGatewayHostedBool = isGatewayHosted(tmpd.gateway)
         if request.method == 'POST':
             # determine path based on submit-choice
             if request.POST.get('submit-choice', '') == 'change-submit':
@@ -175,7 +175,7 @@ def confirm_donation(request):
     except Exception as e:
         # Should rarely happen, but in case some bugs or order id repeats itself
         _exception(str(e))
-    return render(request, 'donations/confirm_donation.html', {'tmpd': tmpd, 'paymentMethod': paymentMethod, 'isGatewayHosted': isGatewayHosted})
+    return render(request, 'donations/confirm_donation.html', {'tmpd': tmpd, 'paymentMethod': paymentMethod, 'isGatewayHosted': isGatewayHostedBool})
 
 
 def thank_you(request):

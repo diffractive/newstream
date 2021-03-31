@@ -1,7 +1,7 @@
 {% load common_tags %}
 
 {% if messages %}
-<div class="z-50 pt-4 pr-4 hidden sm:block" id="messages-wrapper">
+<div class="z-50 pt-4 pr-4 sm:hidden" id="messages-wrapper">
     <div class="messages flex flex-col items-end bg-transparent">
         {% for message in messages %}
         <div class="{% if message.tags %}{{ message.tags|alert_class }}{% endif %}">

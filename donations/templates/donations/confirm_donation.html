@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% load static common_tags wagtailcore_tags i18n %}
+
+{% block title %}{% trans 'Donation Confirmation' %}{% endblock %}
+
+{% block body_class %}newstream-confirm-donation-page{% endblock %}
+
+{% block content %}
+
+<div class="flex donation-header">
+    <div class="step-div w-30 md:w-40 p-6 text-right">{% trans 'Step 3 of 3' %}</div>
+    <div class="step-label-div flex-1 p-6 text-left text-white">{% trans 'Donation Confirmation' %}</div>
+</div>
+
+<div class="donation-form-div container-tight w-full">
+    {% url 'donations:donate' as donate_url %}
+    {# Form Area #}
+    <form method='POST' action='' class="action-form">
+        <div class="flex flex-row justify-center mb-4">
+            {% csrf_token %}
+            <div class="donation-details-section w-full">
+                <h2 class="mb-2">{% trans 'Confirm your donation' %}</h2>
+                {% if request.user.is_authenticated %}
+                <div class="mb-6 logged-in-div">
+                    <p>{% blocktrans with username=request.user|display_username %}Logged in as
+                        {{ username }}.{% endblocktrans %} <a
+                            href="{% url 'account_logout' %}?next={{donate_url}}">{% trans 'Logout' %}</a></p>
+                </div>
+                {% endif %}
+                
+                <div class="confirm-donation-wrapper p-4 sm:p-8 border-2 rounded border-gray-200">
+                    <p class="field-label">Donor</p>
+                    <p class="field-value text-primary font-bold mb-4">{% if request.user.is_authenticated %}{{ request.user.fullname }}{% else %}{{ tmpd.guest_email }}{% endif %}</p>
+                    <p class="field-label">Donation amount</p>
+                    <p class="field-value text-primary font-bold mb-4">{{ tmpd|amount_with_currency }}</p>
+                    <p class="field-label">Donation frequency</p>
+                    <p class="field-value text-primary font-bold mb-4">{{ tmpd.donation_frequency }}</p>
+                    <p class="field-label">Payment method</p>
+                    <p class="field-value text-primary font-bold">{{ paymentMethod }}</p>
+                </div>
+                
+                <div class="ns-wide-btn-group">
+                    <div class="btn-unit" id="change-btn-unit">
+                        <button class="ns-wide-btn left-arrow-btn need-white-loading-btn"
+                            type="submit" name="submit-choice" value="change-submit">{% trans 'Change Donation Details' %}<span class="icon"></span></button>
+                    </div>
+                    <div class="btn-unit" id="confirm-btn-unit">
+                        <button class="{% if isGatewayHosted %}has-secondary-text{% endif %} ns-wide-btn right-arrow-btn need-white-loading-btn"
+                            type="submit" name="submit-choice" value="confirm-submit">{% trans 'Confirm Donation' %}<span class="icon"></span></button>
+                        {% if isGatewayHosted %}
+                            <p class="secondary-text">{% blocktrans with gateway=tmpd.gateway.title %}You will be redirected to {{gateway}}-hosted payment page.{% endblocktrans %}</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock content %}

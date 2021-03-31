@@ -1,12 +1,14 @@
 import html
 from django import forms
 from django.contrib.auth import get_user_model
+from django.core.exceptions import ValidationError
 from django.utils.translation import gettext_lazy as _
 
 from wagtail.contrib.forms.forms import FormBuilder
 
 from newstream.functions import getSiteSettings
 from donations.functions import getCurrencyDictAt
+from donations.models import TempDonation
 User = get_user_model()
 
 
@@ -17,14 +19,7 @@ DONATION_DETAILS_FIELDS = [
     'donation_frequency',
     'donation_amount',
     'donation_amount_custom',
-]
-PERSONAL_INFO_FIELDS = [
-    'first_name',
-    'last_name',
-    'email'
-]
-OTHER_FIELDS = [
-    'opt_in_mailing_list'
+    'email',
 ]
 
 
@@ -34,6 +29,7 @@ class DonationDetailsForm(forms.Form):
         ('onetime', _('One-time')),
     ])
     currency = forms.CharField(widget=forms.HiddenInput())
+    email = forms.EmailField(required=False)
 
     def __init__(self, *args, request=None, blueprint=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -83,3 +79,29 @@ class DonationDetailsForm(forms.Form):
                 self.fields["donationmetalist_"+key] = val
             else:
                 self.fields["donationmeta_"+key] = val
+
+        # prefill values if tempDonation is found
+        try:
+            tmpd = TempDonation.objects.get(pk=request.session.get('temp_donation_id', None))
+            self.fields['payment_gateway'].initial = tmpd.gateway.id
+            self.fields['donation_frequency'].initial = 'monthly' if tmpd.is_recurring else 'onetime'
+            self.fields['email'].initial = tmpd.guest_email
+            self.fields['currency'].initial = tmpd.currency
+            if tmpd.is_amount_custom:
+                self.fields['donation_amount'].initial = 'custom'
+                self.fields['donation_amount_custom'].initial = tmpd.donation_amount
+            else:
+                self.fields['donation_amount'].initial = tmpd.donation_amount
+        except TempDonation.DoesNotExist as e:
+            pass
+
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get("email")
+        donation_frequency = cleaned_data.get("donation_frequency")
+
+        # only requires email field if not logged in and donation-frequency is one-time
+        if donation_frequency == 'onetime' and not self.request.user.is_authenticated and not email:
+            raise ValidationError(
+                _("You are required to fill in your email address.")
+            )

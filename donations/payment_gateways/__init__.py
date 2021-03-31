@@ -87,6 +87,13 @@ def getAPICapabilitiesFromPaymentGateway(paymentGateway):
         return []
 
 
+def isGatewayHosted(paymentGateway):
+    hosted_gateways = [GATEWAY_2C2P, GATEWAY_PAYPAL, GATEWAY_STRIPE]
+    if paymentGateway.title in hosted_gateways:
+        return True
+    return False
+
+
 def isGatewayEditSubSupported(gateway):
     if GATEWAY_CAN_EDIT_SUBSCRIPTION in getAPICapabilitiesFromPaymentGateway(gateway):
         return True

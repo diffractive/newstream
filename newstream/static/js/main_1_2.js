@@ -97,7 +97,17 @@ function whiteLoadingBtnEvent(event) {
     el.disabled = true;
     el.classList.add('white-loading-btn');
     // submit form
-    el.closest('form.action-form') && el.closest('form.action-form').submit();
+    if (el.closest('form.action-form')) {
+        var submit_form = el.closest('form.action-form');
+        if (el.getAttribute('name')) {
+            var hidden_input = document.createElement("input");
+            hidden_input.setAttribute('type', 'hidden');
+            hidden_input.setAttribute('name', el.getAttribute('name'));
+            hidden_input.setAttribute('value', el.getAttribute('value'));
+            submit_form.appendChild(hidden_input);
+        }
+        submit_form.submit();
+    }
 }
 function blackLoadingBtnEvent(event) {
     el = event.currentTarget;
@@ -107,7 +117,17 @@ function blackLoadingBtnEvent(event) {
     }
     el.classList.add('black-loading-btn');
     // submit form
-    el.closest('form.action-form') && el.closest('form.action-form').submit();
+    if (el.closest('form.action-form')) {
+        var submit_form = el.closest('form.action-form');
+        if (el.getAttribute('name')) {
+            var hidden_input = document.createElement("input");
+            hidden_input.setAttribute('type', 'hidden');
+            hidden_input.setAttribute('name', el.getAttribute('name'));
+            hidden_input.setAttribute('value', el.getAttribute('value'));
+            submit_form.appendChild(hidden_input);
+        }
+        submit_form.submit();
+    }
 }
 function registerLoadingButtons() {
     for (let btn of document.getElementsByClassName('need-white-loading-btn')) {

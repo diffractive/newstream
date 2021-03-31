@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 
 from newstream.classes import WebhookNotProcessedError
-from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, _exception
+from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, _exception, object_to_json
 from donations.models import Donation, DonationPaymentMeta
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.stripe.functions import initStripeApiKey, formatDonationAmount

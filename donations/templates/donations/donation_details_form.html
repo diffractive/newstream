@@ -8,7 +8,7 @@
 {% block content %}
 
 <div class="flex donation-header">
-    <div class="step-div w-30 md:w-40 p-6 text-right">{% trans 'Step 2 of 3' %}</div>
+    <div class="step-div w-30 md:w-40 p-6 text-right">{% trans 'Step 1 of 3' %}</div>
     <div class="step-label-div flex-1 p-6 text-left text-white">{% trans 'Donation Details' %}</div>
 </div>
 
@@ -26,7 +26,7 @@
             <div class="donation-details-section w-full">
                 <h2 class="mb-2">{% trans 'Donation Details' %}</h2>
                 {% if request.user.is_authenticated %}
-                <div class="mb-6">
+                <div class="mb-6 logged-in-div">
                     <p>{% blocktrans with username=request.user|display_username %}Logged in as
                         {{ username }}.{% endblocktrans %} <a
                             href="{% url 'account_logout' %}?next={{request.path}}">{% trans 'Logout' %}</a></p>
@@ -64,9 +64,26 @@
                 <div id="offline-instructions-div" class="mb-8">
                     {{ offline_instructions_html|richtext }}
                 </div>
-
+                
+                {% if request.user.is_authenticated %}
                 <button class="ns-wide-btn right-arrow-btn need-white-loading-btn"
-                    type="submit">{% trans 'Continue' %}<span class="icon"></span></button>
+                    type="submit" name="submit-choice" value="loggedin-submit">{% trans 'Continue' %}<span class="icon"></span></button>
+                {% else %}
+                <div class="ns-wide-btn-group">
+                    <div class="btn-unit" id="guest-btn-unit">
+                        <button class="has-secondary-text ns-wide-btn right-arrow-btn need-white-loading-btn"
+                            type="submit" name="submit-choice" value="guest-submit">{% trans 'Continue as guest' %}<span class="icon"></span></button>
+                        <p class="secondary-text">{% trans 'Donate without account creation.' %}</p>
+                    </div>
+                    <div class="btn-unit" id="register-btn-unit">
+                        <button class="has-secondary-text ns-wide-btn right-arrow-btn need-white-loading-btn"
+                            type="submit" name="submit-choice" value="register-submit">{% trans 'Register or Login' %}<span class="icon"></span></button>
+                        <p id="register-alert" class="secondary-text" style="color: red;">{% trans 'You need to register to become a monthly donor.' %}</p>
+                        <p id="register-reminder" class="secondary-text">{% trans 'Manage donations with an account.' %}</p>
+                    </div>
+                </div>
+                {% endif %}
+                
                 <div class="form-footer-text">{{ form.footer_html|richtext }}</div>
             </div>
         </div>
@@ -80,9 +97,17 @@
         let offlineGatewayId = {{ offline_gateway_id }};
         let amountSelect = document.getElementById('id_donation_amount');
         let gatewaySelect = document.getElementById('id_payment_gateway');
+        let frequencySelect = document.getElementById('id_donation_frequency');
         let customAmount = document.getElementById('id_donation_amount_custom');
         let customAmountDiv = document.getElementById('id_donation_amount_custom').parentNode.parentNode;
+        let email = document.getElementById('id_email');
+        let emailDiv = document.getElementById('id_email').parentNode.parentNode;
         let offlineInstructionsDiv = document.getElementById('offline-instructions-div');
+        let guestBtnDiv = document.getElementById('guest-btn-unit');
+        let registerBtnDiv = document.getElementById('register-btn-unit');
+        let registerAlert = document.getElementById('register-alert');
+        let registerReminder = document.getElementById('register-reminder');
+        let isLoggedIn = document.querySelector(".logged-in-div");
         amountSelect.onchange = (event) => {
             if (event.target.value == 'custom') {
                 customAmountDiv.classList.remove('hidden');
@@ -103,6 +128,32 @@
             }
         };
         gatewaySelect.dispatchEvent(new Event("change"));
+
+        frequencySelect.onchange = (event) => {
+            if (event.target.value == 'onetime') {
+                if (!isLoggedIn)  {
+                    emailDiv.classList.remove('hidden');
+                    email.required = true;
+                    guestBtnDiv.classList.remove('hidden');
+                    registerReminder.classList.remove('hidden');
+                    registerAlert.classList.add('hidden');
+                } else {
+                    emailDiv.classList.add('hidden');
+                    email.value = '';
+                    email.required = false;
+                }
+            } else {
+                emailDiv.classList.add('hidden');
+                email.value = '';
+                email.required = false;
+                if (!isLoggedIn)  {
+                    guestBtnDiv.classList.add('hidden');
+                    registerReminder.classList.add('hidden');
+                    registerAlert.classList.remove('hidden');
+                }
+            }
+        };
+        frequencySelect.dispatchEvent(new Event("change"));
     });
 </script>
 {% endblock extra_js %}

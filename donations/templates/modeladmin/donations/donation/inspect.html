@@ -109,18 +109,22 @@
             </div>
             <div class="two-column-flex">
                 <div class="column-1-2">
+                    <dt>{{ fields.guest_email.label }}</dt>
+                    <dd>{{ fields.guest_email.value }}</dd>
+                </div>
+                <div class="column-1-2">
+                    <dt>{{ fields.linked_user_deleted.label }}</dt>
+                    <dd>{{ fields.linked_user_deleted.value }}</dd>
+                </div>
+            </div>
+            <div class="two-column-flex">
+                <div class="column-1-2">
                     <dt>{{ fields.created_at.label }}</dt>
                     <dd>{{ fields.created_at.value }}</dd>
                 </div>
                 <div class="column-1-2">
                     <dt>{{ fields.updated_at.label }}</dt>
                     <dd>{{ fields.updated_at.value }}</dd>
-                </div>
-            </div>
-            <div class="two-column-flex">
-                <div class="column-1-2">
-                    <dt>{{ fields.linked_user_deleted.label }}</dt>
-                    <dd>{{ fields.linked_user_deleted.value }}</dd>
                 </div>
             </div>
             {% endif %}

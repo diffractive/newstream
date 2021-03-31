@@ -9,7 +9,9 @@ from donations.payment_gateways.paypal_legacy.views import verify_paypal_legacy_
 app_name = 'donations'
 urlpatterns = [
     path('donate/', views.donate, name='donate'),
-    path('donation-details/', views.donation_details, name='donation-details'),
+    path('register-signin/', views.register_signin, name='register-signin'),
+    path('confirm-donation/', views.confirm_donation, name='confirm-donation'),
+    # path('donation-details/', views.donation_details, name='donation-details'),
     path('edit-recurring/<int:id>/', views.edit_recurring, name='edit-recurring'),
     path('toggle-recurring/', views.toggle_recurring, name='toggle-recurring'),
     path('cancel-recurring/', views.cancel_recurring, name='cancel-recurring'),

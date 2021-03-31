@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .includes.currency_dictionary import currency_dict
 from newstream.functions import getSiteSettings, getSuperUserTimezone, _debug
-from donations.models import DonationMeta
+from donations.models import DonationMeta, TempDonationMeta
 from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
 
 
@@ -117,19 +117,19 @@ def getRecurringDateNextMonth(date_format):
     return nextmonthdate.strftime(date_format)
 
 
-def process_donation_meta(request):
+def process_temp_donation_meta(request):
     donation_metas = []
     for key, val in request.POST.items():
         donationmeta_key = re.match("^donationmeta_([a-z_-]+)$", key)
         donationmetalist_key = re.match("^donationmetalist_([a-z_-]+)$", key)
         if donationmeta_key:
-            donation_metas.append(DonationMeta(
+            donation_metas.append(TempDonationMeta(
                 field_key=donationmeta_key.group(1), field_value=val))
         elif donationmetalist_key:
             listval = request.POST.getlist(key)
             if len(listval) > 0:
                 # using comma-linebreak as the separator
-                donation_metas.append(DonationMeta(
+                donation_metas.append(TempDonationMeta(
                     field_key=donationmetalist_key.group(1), field_value=',\n'.join(listval)))
     return donation_metas
 

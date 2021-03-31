@@ -43,23 +43,34 @@ def donate(request):
                     is_amount_custom = False
                     donation_amount = form.cleaned_data['donation_amount']
 
-                # create a pending temporary donation object
+                # create/edit a pending temporary donation object
                 payment_gateway = PaymentGateway.objects.get(
                     pk=form.cleaned_data['payment_gateway'])
-                temp_donation = TempDonation(
-                    is_test=siteSettings.sandbox_mode,
-                    form=form_blueprint,
-                    gateway=payment_gateway,
-                    is_amount_custom=is_amount_custom,
-                    is_recurring=True if form.cleaned_data['donation_frequency'] == 'monthly' else False,
-                    donation_amount=donation_amount,
-                    currency=form.cleaned_data['currency'],
-                    status=STATUS_PENDING,
-                    temp_metas=temp_donation_metas,
-                    guest_email=form.cleaned_data.get('email', ''),
-                )
-                temp_donation.save()
-                request.session['temp_donation_id'] = temp_donation.id
+                if request.session.get('temp_donation_id', ''):
+                    temp_donation = TempDonation.objects.get(pk=request.session.get('temp_donation_id'))
+                    temp_donation.gateway = payment_gateway
+                    temp_donation.is_amount_custom = is_amount_custom
+                    temp_donation.is_recurring = True if form.cleaned_data['donation_frequency'] == 'monthly' else False
+                    temp_donation.donation_amount = donation_amount
+                    temp_donation.currency = form.cleaned_data['currency']
+                    temp_donation.temp_metas = temp_donation_metas
+                    temp_donation.guest_email = form.cleaned_data.get('email', '')
+                    temp_donation.save()
+                else:
+                    temp_donation = TempDonation(
+                        is_test=siteSettings.sandbox_mode,
+                        form=form_blueprint,
+                        gateway=payment_gateway,
+                        is_amount_custom=is_amount_custom,
+                        is_recurring=True if form.cleaned_data['donation_frequency'] == 'monthly' else False,
+                        donation_amount=donation_amount,
+                        currency=form.cleaned_data['currency'],
+                        status=STATUS_PENDING,
+                        temp_metas=temp_donation_metas,
+                        guest_email=form.cleaned_data.get('email', ''),
+                    )
+                    temp_donation.save()
+                    request.session['temp_donation_id'] = temp_donation.id
 
                 # determine path based on submit-choice
                 if request.POST.get('submit-choice', '') == 'guest-submit' or request.POST.get('submit-choice', '') == 'loggedin-submit':

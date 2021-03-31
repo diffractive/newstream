@@ -24,7 +24,7 @@ def get_new_donation_text(request, donation):
         %(sitename)s
     """) % {
         'url': getFullReverseUrl(request, 'donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
-        'name': donation.user.fullname,
+        'name': donation.donor_name(),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
         'currency': donation.currency,
@@ -53,7 +53,7 @@ def get_donation_receipt_text(request, donation):
         Thank you,\n
         %(sitename)s
     """) % {
-        'name': donation.user.fullname,
+        'name': donation.donor_name(),
         'url': getFullReverseUrl(request, 'donations:my-recurring-donations') if donation.is_recurring else getFullReverseUrl(request, 'donations:my-onetime-donations'),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
@@ -81,7 +81,7 @@ def get_donation_status_change_text(request, donation):
         Thank you,\n
         %(sitename)s
     """) % {
-        'name': donation.user.fullname,
+        'name': donation.donor_name(),
         'url': getFullReverseUrl(request, 'donations:my-renewals', kwargs={'id': donation.subscription.id}) if donation.is_recurring else getFullReverseUrl(request, 'donations:my-onetime-donations'),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
@@ -494,7 +494,7 @@ def get_donation_error_admin_text(request, donation, error_title, error_descript
     """) % {
         'url': getFullReverseUrl(request, 'donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
         'order': donation.transaction_id,
-        'name': donation.user.fullname,
+        'name': donation.donor_name(),
         'error_title': error_title,
         'error_description': error_description,
         'sitename': getSiteName(request)

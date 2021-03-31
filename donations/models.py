@@ -350,6 +350,12 @@ class Donation(ClusterableModel):
     def isRecurring(self):
         return 'Yes' if self.is_recurring else 'No'
 
+    def donor_name(self):
+        if self.user:
+            return self.user.fullname
+        else:
+            return self.guest_email
+
     @property
     def is_user_first_donation(self):
         resultSet = DonationPaymentMeta.objects.filter(

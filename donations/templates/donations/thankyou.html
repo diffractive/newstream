@@ -13,12 +13,14 @@
         {% if extra_text %}
         {{ extra_text }}
         {% endif %}
+        {% if donation.user %}
         {% with has_socialaccount=donation.user|has_socialaccount %}
         {% if isFirstTime and not has_socialaccount %}
         <span>
             {% trans 'You will be receiving a verification email shortly, click on the link in the email to verify your email.' %}</span>
         {% endif %}
         {% endwith %}
+        {% endif %}
     </p>
     <p class="mb-5 text-center">{% trans 'We are so grateful for your support.' %}</p>
     {% if reminders_html %}
@@ -30,7 +32,7 @@
         <table class="thankyou-table mb-8">
             <tr>
                 <td>{% trans 'Donor' %}</td>
-                <td>{{ donation.user.fullname }}</td>
+                <td>{{ donation.donor_name }}</td>
             </tr>
             <tr>
                 <td>{% trans 'Transaction ID' %}</td>

@@ -84,7 +84,7 @@ def donate(request):
     except Exception as e:
         # Should rarely happen, but in case some bugs or order id repeats itself
         _exception(str(e))
-        form.add_error(None, 'Server error, please retry.')
+        messages.add_message(request, messages.ERROR, str(e))
 
     # get offline gateway id and instructions text
     offline_gateway = PaymentGateway.objects.get(title=GATEWAY_OFFLINE)
@@ -123,6 +123,7 @@ def confirm_donation(request):
                     is_recurring=tmpd.is_recurring,
                     donation_amount=tmpd.donation_amount,
                     currency=tmpd.currency,
+                    guest_email=tmpd.guest_email
                     payment_status=STATUS_PROCESSING,
                     metas=tmpd.tempMetas,
                     donation_date=datetime.now(timezone.utc),

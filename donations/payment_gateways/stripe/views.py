@@ -44,11 +44,12 @@ def create_checkout_session(request):
         }
 
         # try to get existing stripe customer
-        customers = stripe.Customer.list(email=donation.user.email, limit=1)
+        donor_email = donation.user.email if donation.user else donation.guest_email
+        customers = stripe.Customer.list(email=donor_email, limit=1)
         if len(customers['data']) > 0:
             session_kwargs['customer'] = customers['data'][0]['id']
         else:
-            session_kwargs['customer_email'] = donation.user.email
+            session_kwargs['customer_email'] = donor_email.email
 
         # Product should have been created by admin manually at the dashboard
         # todo: make sure the product_id in site_settings has been set by some kind of configuration enforcement before site is launched

@@ -1,10 +1,10 @@
 {% load common_tags %}
 
 {% if messages %}
-<div class="z-50 pt-4 pr-4 sm:hidden" id="messages-wrapper">
+<div class="sm:hidden" id="messages-wrapper">
     <div class="messages flex flex-col items-end bg-transparent">
         {% for message in messages %}
-        <div class="{% if message.tags %}{{ message.tags|alert_class }}{% endif %}">
+        <div class="w-screen {% if message.tags %}{{ message.tags|alert_class }}{% endif %}">
             <p class="font-bold p-4 lg:text-center">{{ message }}</p>
         </div>
         {% endfor %}

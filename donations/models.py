@@ -305,7 +305,7 @@ class Donation(ClusterableModel):
     payment_status = models.CharField(
         max_length=255, choices=PAYMENT_STATUS_CHOICES)
     donation_date = models.DateTimeField()
-    guest_email = models.EmailField(null=True)
+    guest_email = models.EmailField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
@@ -401,7 +401,7 @@ class TempDonation(ClusterableModel):
     donation_amount = models.DecimalField(max_digits=20, decimal_places=2)
     is_recurring = models.BooleanField(default=False)
     currency = models.CharField(max_length=20)
-    guest_email = models.EmailField(null=True)
+    guest_email = models.EmailField(blank=True)
     status = models.CharField(
         max_length=255, choices=STATUS_CHOICES)
 

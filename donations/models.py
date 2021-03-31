@@ -278,6 +278,7 @@ class Donation(ClusterableModel):
     user = models.ForeignKey(
         'newstream_user.User',
         on_delete=models.SET_NULL,
+        blank=True,
         null=True
     )
     form = models.ForeignKey(

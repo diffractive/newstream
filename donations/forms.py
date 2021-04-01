@@ -29,7 +29,7 @@ class DonationDetailsForm(forms.Form):
         ('onetime', _('One-time')),
     ])
     currency = forms.CharField(widget=forms.HiddenInput())
-    email = forms.EmailField(required=False)
+    email = forms.EmailField(required=False, widget=forms.TextInput(attrs={'placeholder': 'Enter your email address'}))
 
     def __init__(self, *args, request=None, blueprint=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -101,7 +101,7 @@ class DonationDetailsForm(forms.Form):
         donation_frequency = cleaned_data.get("donation_frequency")
 
         # only requires email field if not logged in and donation-frequency is one-time
-        if donation_frequency == 'onetime' and not self.request.user.is_authenticated and not email:
+        if donation_frequency == 'onetime' and not self.request.user.is_authenticated and self.request.POST.get('submit-choice') == 'guest-submit' and not email:
             raise ValidationError(
                 _("You are required to fill in your email address.")
             )

@@ -80,12 +80,6 @@ def donate(request):
                     # proceed to step 2 which is Register or Login
                     return redirect('donations:register-signin')
                 else:
-                    if form_blueprint.isAmountSteppedCustom():
-                        form.order_fields(
-                            ['donation_amount', 'donation_amount_custom', 'donation_frequency', 'payment_gateway', 'email'])
-                    else:
-                        form.order_fields(
-                            ['donation_amount', 'donation_frequency', 'payment_gateway', 'email'])
                     raise Exception(_('No valid submit-choice is being submitted.'))
         else:
             form = DonationDetailsForm(
@@ -102,6 +96,7 @@ def donate(request):
         # Should rarely happen, but in case some bugs or order id repeats itself
         _exception(str(e))
         messages.add_message(request, messages.ERROR, str(e))
+        return redirect('donations:donate')
 
     # get offline gateway id and instructions text
     offline_gateway = PaymentGateway.objects.get(title=GATEWAY_OFFLINE)

@@ -48,7 +48,7 @@
                         <button class="{% if isGatewayHosted %}has-secondary-text{% endif %} ns-wide-btn right-arrow-btn need-white-loading-btn"
                             type="submit" name="submit-choice" value="confirm-submit">{% trans 'Confirm Donation' %}<span class="icon"></span></button>
                         {% if isGatewayHosted %}
-                            <p class="secondary-text">{% blocktrans with gateway=tmpd.gateway.title %}You will be redirected to {{gateway}}-hosted payment page.{% endblocktrans %}</p>
+                            <p class="secondary-text">{% blocktrans with gateway=tmpd.gateway.title %}You will be redirected to the {{gateway}}-hosted payment page.{% endblocktrans %}</p>
                         {% endif %}
                     </div>
                 </div>

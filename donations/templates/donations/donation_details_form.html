@@ -34,12 +34,22 @@
                 {% endif %}
                 {% for field in form.visible_fields %}
                 {% if field.html_name in donation_details_fields %}
+                {% if field.html_name == 'email' %}
+                <div class="mb-4">
+                    <div class="label-div">{{ field.label_tag }}</div>
+                    <div class="field-div widget_{{ field|widget_type }}" style="margin-bottom: 2px;">
+                        {{ field }}
+                    </div>
+                    <p class="secondary-text m-0" style="color: red;">Only required for guests donating one-time.</p>
+                </div>
+                {% else %}
                 <div class="mb-4">
                     <div class="label-div">{{ field.label_tag }}</div>
                     <div class="field-div widget_{{ field|widget_type }}">
                         {{ field }}
                     </div>
                 </div>
+                {% endif %}
                 {% endif %}
                 {% endfor %}
 

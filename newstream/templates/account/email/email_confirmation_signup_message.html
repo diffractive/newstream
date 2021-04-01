@@ -1,0 +1,23 @@
+{% extends "base_email.html" %}
+{% load common_tags i18n account %}
+{% user_display user as user_display %}
+
+{% block title %}
+{% trans 'Please Confirm Your E-mail Address' %}
+{% endblock %}
+
+{% block content %}
+{% autoescape off %}
+<h2 style="{{ 'heading'|email_css }}">{% trans 'Please Confirm Your E-mail Address' %}</h2>
+
+<p style="{{ 'parag'|email_css }}">{% blocktrans with site_name=current_site.name %}Hello from {{ site_name }}!{% endblocktrans %}</p>
+
+<p style="{{ 'parag'|email_css }}">{% blocktrans %}You're receiving this e-mail because user {{ user_display }} has given yours as an e-mail address to connect their account.{% endblocktrans %}</p>
+
+<p style="{{ 'last-parag'|email_css }}">{% blocktrans %}To confirm this is correct, go to {{ activate_url }}.{% endblocktrans %}</p>
+
+<p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
+
+<p style="{{ 'parag'|email_css }}">{{ current_site.name }}</p>
+{% endautoescape %}
+{% endblock %}

@@ -4,7 +4,7 @@ from django import template
 from django.utils.safestring import mark_safe
 
 from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
-from newstream.functions import getSiteName, printvars, getSiteSettings
+from newstream.functions import getSiteName, printvars, getSiteSettings, getSiteSettings_from_default_site, getDefaultSite
 
 register = template.Library()
 
@@ -66,12 +66,15 @@ def domain(req):
 
 @register.filter(name='fullurl')
 def fullurl(req, relurl):
-    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + req.get_host() + relurl
+    # getting defaultSite's hostname instead of req.get_host() since this method might be used by allauth email templates which do not have access to request object
+    defaultSite = getDefaultSite()
+    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + re.sub(r'^(https://|http//)', '', defaultSite.hostname) + '/' + relurl
 
 
 @register.filter(name='brand_logo')
 def getBrandLogo(req):
-    settings = getSiteSettings(req)
+    # using getSiteSettings_from_default_site instead since this functionn might be used by allauth email templates which do not have access to request object
+    settings = getSiteSettings_from_default_site()
     return settings.brand_logo
 
 

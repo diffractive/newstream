@@ -115,6 +115,10 @@ def getSiteSettings_from_default_site():
     return SiteSettings.for_site(site)
 
 
+def getDefaultSite():
+    return Site.objects.get(is_default_site=True)
+
+
 def trans_next_url(next_url, lang_code):
     parts = next_url.split('/')
     lang_codes = [x[0] for x in settings.LANGUAGES]

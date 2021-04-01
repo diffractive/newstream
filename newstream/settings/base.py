@@ -29,8 +29,9 @@ DATA_UPLOAD_MAX_NUMBER_FIELDS = 5000
 
 # django needs this to redirects user correctly when he stumbles upon a logn_required route
 LOGIN_URL = "/accounts/login"
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
+# hardcode fix for the redirected to other languages issue
+LOGIN_REDIRECT_URL = "/en"
+LOGOUT_REDIRECT_URL = "/en"
 
 # django-allauth
 ACCOUNT_AUTHENTICATION_METHOD = "email"

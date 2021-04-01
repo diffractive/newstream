@@ -29,13 +29,13 @@
                 {% endif %}
                 
                 <div class="confirm-donation-wrapper p-4 sm:p-8 border-2 rounded border-gray-200">
-                    <p class="field-label">Donor</p>
+                    <p class="field-label">{% trans 'Donor' %}</p>
                     <p class="field-value text-primary font-bold mb-4">{% if request.user.is_authenticated %}{{ request.user.fullname }}{% else %}{{ tmpd.guest_email }}{% endif %}</p>
-                    <p class="field-label">Donation amount</p>
+                    <p class="field-label">{% trans 'Donation amount' %}</p>
                     <p class="field-value text-primary font-bold mb-4">{{ tmpd|amount_with_currency }}</p>
-                    <p class="field-label">Donation frequency</p>
+                    <p class="field-label">{% trans 'Donation frequency' %}</p>
                     <p class="field-value text-primary font-bold mb-4">{{ tmpd.donation_frequency }}</p>
-                    <p class="field-label">Payment method</p>
+                    <p class="field-label">{% trans 'Payment method' %}</p>
                     <p class="field-value text-primary font-bold">{{ paymentMethod }}</p>
                 </div>
                 

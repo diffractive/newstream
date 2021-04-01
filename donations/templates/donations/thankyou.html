@@ -28,39 +28,25 @@
         {{ reminders_html|richtext }}
     </div>
     {% endif %}
-    <div class="p-1 sm:p-2 md:p-4 lg:py-8 lg:px-24 border-2 rounded border-gray-200">
-        <table class="thankyou-table mb-8">
-            <tr>
-                <td>{% trans 'Donor' %}</td>
-                <td>{{ donation.donor_name }}</td>
-            </tr>
-            <tr>
-                <td>{% trans 'Transaction ID' %}</td>
-                <td style="word-break: break-all;">{{ donation.transaction_id }}</td>
-            </tr>
-            <tr>
-                <td>{% trans 'Donation Frequency' %}</td>
-                <td>{{ donation.donation_frequency }}</td>
-            </tr>
-            <tr>
-                <td>{% trans 'Currency' %}</td>
-                <td>{{ donation.currency }}</td>
-            </tr>
-            <tr>
-                <td>{% trans 'Donation Amount' %}</td>
-                <td>{{ donation|amount_with_currency }}</td>
-            </tr>
-            <tr>
-                <td>{% trans 'Payment Status' %}</td>
-                <td>{{ donation.payment_status|title }}</td>
-            </tr>
-            {% if donation.is_recurring %}
-            <tr>
-                <td>{% trans 'Recurring Donation Status' %}</td>
-                <td>{% if donation.subscription %}{{ donation.subscription.recurring_status|title }}{% else %}{% trans 'Processing' %}{% endif %}</td>
-            </tr>
-            {% endif %}
-        </table>
+    <div class="p-4 lg:py-8 lg:px-24 border-2 rounded border-gray-200">
+        <p class="field-label">{% trans 'Donor' %}</p>
+        <p class="field-value text-primary font-bold mb-4">{{ donation.donor_name }}</p>
+        <p class="field-label">{% trans 'Transaction ID' %}</p>
+        <p class="field-value text-primary font-bold mb-4" style="word-break: break-all;">{{ donation.transaction_id }}</p>
+        <p class="field-label">{% trans 'Donation frequency' %}</p>
+        <p class="field-value text-primary font-bold mb-4">{{ donation.donation_frequency }}</p>
+        <p class="field-label">{% trans 'Payment method' %}</p>
+        <p class="field-value text-primary font-bold">{{ paymentMethod }}</p>
+        <p class="field-label">{% trans 'Currency' %}</p>
+        <p class="field-value text-primary font-bold">{{ donation.currency }}</p>
+        <p class="field-label">{% trans 'Donation amount' %}</p>
+        <p class="field-value text-primary font-bold">{{ donation|amount_with_currency }}</p>
+        <p class="field-label">{% trans 'Payment status' %}</p>
+        <p class="field-value text-primary font-bold">{{ donation.payment_status|title }}</p>
+        {% if donation.is_recurring %}
+        <p class="field-label">{% trans 'Recurring Donation Status' %}</p>
+        <p class="field-value text-primary font-bold">{% if donation.subscription %}{{ donation.subscription.recurring_status|title }}{% else %}{% trans 'Processing' %}{% endif %}</p>
+        {% endif %}
     </div>
     <br>
     {% else %}

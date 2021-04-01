@@ -199,6 +199,7 @@ def thank_you(request):
     if 'return-donation-id' in request.session:
         donation = Donation.objects.get(
             pk=request.session['return-donation-id'])
+        paymentMethod = getattr(getSiteSettings(request), donation.gateway.frontend_label_attr_name, donation.gateway.title)
         # logs user in
         if donation.user:
             login(request, donation.user,
@@ -212,7 +213,7 @@ def thank_you(request):
             extra_text = _('Your donation should be complete in 1-2 minutes.')
         if donation.gateway.is_offline() and donation.payment_status == STATUS_PROCESSING:
             extra_text = _('Please complete your donation by following either one of the payment methods stated below.')
-        return render(request, 'donations/thankyou.html', {'reminders_html': reminders_html, 'isValid': True, 'extra_text': extra_text, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
+        return render(request, 'donations/thankyou.html', {'reminders_html': reminders_html, 'isValid': True, 'paymentMethod': paymentMethod, 'extra_text': extra_text, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
     return render(request, 'donations/thankyou.html', {'reminders_html': reminders_html, 'isValid': False, 'extra_text': extra_text, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
 
@@ -224,6 +225,7 @@ def cancelled(request):
     if 'return-donation-id' in request.session:
         donation = Donation.objects.get(
             pk=request.session['return-donation-id'])
+        paymentMethod = getattr(getSiteSettings(request), donation.gateway.frontend_label_attr_name, donation.gateway.title)
         donation.payment_status = STATUS_CANCELLED
         # No need to update recurring_status as no subscription object has been created yet
         donation.save()
@@ -231,7 +233,7 @@ def cancelled(request):
         if donation.user:
             login(request, donation.user,
                   backend='django.contrib.auth.backends.ModelBackend')
-        return render(request, 'donations/cancelled.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
+        return render(request, 'donations/cancelled.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'paymentMethod': paymentMethod, 'donation': donation})
     return render(request, 'donations/cancelled.html', {'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
 
@@ -243,6 +245,7 @@ def revoked(request):
     if 'return-donation-id' in request.session:
         donation = Donation.objects.get(
             pk=request.session['return-donation-id'])
+        paymentMethod = getattr(getSiteSettings(request), donation.gateway.frontend_label_attr_name, donation.gateway.title)
         donation.payment_status = STATUS_REVOKED
         # No need to update recurring_status as no subscription object has been created yet
         donation.save()
@@ -250,7 +253,7 @@ def revoked(request):
         if donation.user:
             login(request, donation.user,
                   backend='django.contrib.auth.backends.ModelBackend')
-        return render(request, 'donations/revoked.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'donation': donation})
+        return render(request, 'donations/revoked.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'paymentMethod': paymentMethod, 'donation': donation})
     return render(request, 'donations/revoked.html', {'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
 

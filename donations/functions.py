@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from .includes.currency_dictionary import currency_dict
-from newstream.functions import getSiteSettings, getSuperUserTimezone, _debug
+from newstream.functions import getSiteSettings, getSuperUserTimezone, _debug, getSiteSettings_from_default_site
 from donations.models import DonationMeta, TempDonationMeta
 from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
 

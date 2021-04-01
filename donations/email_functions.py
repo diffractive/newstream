@@ -9,6 +9,7 @@ from django.utils.translation import gettext_lazy as _
 from allauth.account.utils import send_email_confirmation
 
 from newstream.functions import getSiteSettings, getDefaultFromEmail, setDefaultFromEmail
+from donations.functions import getDonationEmail
 from donations.templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text, get_donation_status_change_text, get_subscription_status_change_text, get_new_renewal_text, get_renewal_receipt_text, get_recurring_updated_admin_text, get_recurring_updated_donor_text, get_recurring_paused_admin_text, get_recurring_paused_donor_text, get_recurring_resumed_admin_text, get_recurring_resumed_donor_text, get_recurring_cancelled_admin_text, get_recurring_cancel_request_admin_text, get_recurring_cancelled_donor_text, get_account_created_admin_text, get_account_deleted_admin_text, get_account_deleted_donor_text, get_donation_error_admin_text
 from donations.models import STATUS_REVOKED
 
@@ -18,19 +19,19 @@ def setDonorLanguagePreference(user):
         translation.activate(user.language_preference)
 
 
-def sendEmailNotificationsToDonor(request, user, subject, textStr, htmlStr):
-    setDonorLanguagePreference(user)
+def sendEmailNotificationsToDonor(request, user_email, subject, textStr, htmlStr):
+    # setDonorLanguagePreference(user)
     try:
         send_mail(
             subject,
             textStr,
             getDefaultFromEmail(request),
-            [user.email],
+            [user_email],
             html_message=htmlStr
         )
     except Exception as e:
         print("Cannot send '"+subject+"' to '" +
-              user.email+"': "+str(e), flush=True)
+              user_email+"': "+str(e), flush=True)
 
 
 def sendEmailNotificationsToAdmins(request, siteSettings, subject, textStr, htmlStr):
@@ -73,19 +74,19 @@ def sendDonationReceiptToDonor(request, donation):
     mail_title = str(_("Thank You! This is your Donation Receipt."))
     if donation.payment_status == STATUS_REVOKED:
         mail_title += str(_("(Revoked)"))
-    sendEmailNotificationsToDonor(request, donation.user, mail_title, get_donation_receipt_text(
+    sendEmailNotificationsToDonor(request, getDonationEmail(donation), mail_title, get_donation_receipt_text(
         request, donation), render_to_string('donations/email_templates/donation_receipt.html', context={'donation': donation}, request=request))
 
 
 def sendDonationStatusChangeToDonor(request, donation):
     mail_title = str(_("Your Donation Payment Status has been updated."))
-    sendEmailNotificationsToDonor(request, donation.user, mail_title, get_donation_status_change_text(
+    sendEmailNotificationsToDonor(request, getDonationEmail(donation), mail_title, get_donation_status_change_text(
         request, donation), render_to_string('donations/email_templates/donation_status_change.html', context={'donation': donation}, request=request))
 
 
 def sendSubscriptionStatusChangeToDonor(request, subscription):
     mail_title = str(_("Your Subscription Payment Status has been updated."))
-    sendEmailNotificationsToDonor(request, subscription.user, mail_title, get_subscription_status_change_text(
+    sendEmailNotificationsToDonor(request, subscription.user.email, mail_title, get_subscription_status_change_text(
         request, subscription), render_to_string('donations/email_templates/subscription_status_change.html', context={'subscription': subscription}, request=request))
 
 
@@ -97,7 +98,7 @@ def sendRenewalNotifToAdmins(request, donation):
 
 
 def sendRenewalReceiptToDonor(request, donation):
-    sendEmailNotificationsToDonor(request, donation.user, str(_("Thank You! This is your Renewal Donation Receipt.")), get_renewal_receipt_text(
+    sendEmailNotificationsToDonor(request, donation.user.email, str(_("Thank You! This is your Renewal Donation Receipt.")), get_renewal_receipt_text(
         request, donation), render_to_string('donations/email_templates/renewal_receipt.html', context={'donation': donation}, request=request))
 
 
@@ -109,7 +110,7 @@ def sendRecurringUpdatedNotifToAdmins(request, subscription, message):
 
 
 def sendRecurringUpdatedNotifToDonor(request, subscription, message):
-    sendEmailNotificationsToDonor(request, subscription.user, "Your Recurring Donation is updated", get_recurring_updated_donor_text(
+    sendEmailNotificationsToDonor(request, subscription.user.email, "Your Recurring Donation is updated", get_recurring_updated_donor_text(
         request, subscription, message), render_to_string('donations/email_templates/recurring_updated_donor.html', context={'subscription': subscription, 'message': message}, request=request))
 
 
@@ -121,7 +122,7 @@ def sendRecurringPausedNotifToAdmins(request, subscription):
 
 
 def sendRecurringPausedNotifToDonor(request, subscription):
-    sendEmailNotificationsToDonor(request, subscription.user, str(_("Your Recurring Donation is paused")), get_recurring_paused_donor_text(
+    sendEmailNotificationsToDonor(request, subscription.user.email, str(_("Your Recurring Donation is paused")), get_recurring_paused_donor_text(
         request, subscription), render_to_string('donations/email_templates/recurring_paused_donor.html', context={'subscription': subscription}, request=request))
 
 
@@ -133,7 +134,7 @@ def sendRecurringResumedNotifToAdmins(request, subscription):
 
 
 def sendRecurringResumedNotifToDonor(request, subscription):
-    sendEmailNotificationsToDonor(request, subscription.user, str(_("Your Recurring Donation is resumed")), get_recurring_resumed_donor_text(
+    sendEmailNotificationsToDonor(request, subscription.user.email, str(_("Your Recurring Donation is resumed")), get_recurring_resumed_donor_text(
         request, subscription), render_to_string('donations/email_templates/recurring_resumed_donor.html', context={'subscription': subscription}, request=request))
 
 
@@ -151,7 +152,7 @@ def sendRecurringCancelRequestNotifToAdmins(request, subscription):
 
 
 def sendRecurringCancelledNotifToDonor(request, subscription):
-    sendEmailNotificationsToDonor(request, subscription.user, str(_("Your Recurring Donation is cancelled")), get_recurring_cancelled_donor_text(
+    sendEmailNotificationsToDonor(request, subscription.user.email, str(_("Your Recurring Donation is cancelled")), get_recurring_cancelled_donor_text(
         request, subscription), render_to_string('donations/email_templates/recurring_cancelled_donor.html', context={'subscription': subscription}, request=request))
 
 
@@ -170,7 +171,7 @@ def sendAccountDeletedNotifToAdmins(request, user):
 
 
 def sendAccountDeletedNotifToDonor(request, user):
-    sendEmailNotificationsToDonor(request, user, str(_("Your Account is deleted")), get_account_deleted_donor_text(
+    sendEmailNotificationsToDonor(request, user.email, str(_("Your Account is deleted")), get_account_deleted_donor_text(
         request, user), render_to_string('donations/email_templates/account_deleted_donor.html', context={'user': user}, request=request))
 
 

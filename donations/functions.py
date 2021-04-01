@@ -41,6 +41,13 @@ def isTestMode(request):
     return siteSettings.sandbox_mode
 
 
+def getDonationEmail(donation):
+    if donation.user:
+        return donation.user.email
+    else:
+        return donation.guest_email
+
+
 def isUpdateSubsFrequencyLimitationPassed(gatewayManager):
     if gatewayManager.global_settings.limit_fiveactions_per_fivemins:
         # get count of the actions carried out by the same donor in the last 5 minutes

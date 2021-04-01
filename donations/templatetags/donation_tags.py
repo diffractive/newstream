@@ -1,10 +1,16 @@
 from django import template
 from django.utils.translation import gettext_lazy as _
 
+from donations.functions import displayGateway
 from donations.models import STATUS_PAUSED, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_CANCELLED, STATUS_INACTIVE
 from donations.payment_gateways import isGatewayEditSubSupported, isGatewayToggleSubSupported, isGatewayCancelSubSupported
 
 register = template.Library()
+
+
+@register.filter(name='display_gateway')
+def display_gateway(instance):
+    return displayGateway(instance)
 
 
 @register.filter(name='toggle_text')

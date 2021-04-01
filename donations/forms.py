@@ -50,8 +50,8 @@ class DonationDetailsForm(forms.Form):
 
         # construct donation amount field
         currency_set = getCurrencyDictAt(self.global_settings.currency)
-        amount_label = _('Donation Amount in ') + html.unescape(currency_set['admin_label'])
-        custom_amount_label = _('Custom Donation Amount in ') + html.unescape(currency_set['admin_label'])
+        amount_label = _('Donation amount in ') + html.unescape(currency_set['admin_label'])
+        custom_amount_label = _('Custom Donation amount in ') + html.unescape(currency_set['admin_label'])
         if form.isAmountFixed():
             self.fields["donation_amount"] = forms.DecimalField(
                 initial=form.fixed_amount, label=amount_label)

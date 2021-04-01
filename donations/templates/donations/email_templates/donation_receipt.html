@@ -1,5 +1,5 @@
 {% extends "base_email.html" %}
-{% load common_tags i18n %}
+{% load common_tags donation_tags i18n %}
 
 {% block title %}
 {% trans 'Donation Receipt' %}
@@ -26,24 +26,24 @@
         <td>{{ donation.transaction_id }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">{% trans "Donation Frequency" %}</td>
+        <td style="font-weight: bold;">{% trans "Donation frequency" %}</td>
         <td>{{ donation.donation_frequency }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">{% trans "Currency" %}</td>
-        <td>{{ donation.currency }}</td>
+        <td style="font-weight: bold;">{% trans "Payment method" %}</td>
+        <td>{{ donation|display_gateway }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">{% trans "Donation Amount" %}</td>
+        <td style="font-weight: bold;">{% trans "Donation amount" %}</td>
         <td>{{ donation|amount_with_currency }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">{% trans "Payment Status" %}</td>
+        <td style="font-weight: bold;">{% trans "Payment status" %}</td>
         <td>{{ donation.payment_status|title }}</td>
     </tr>
     {% if donation.is_recurring and donation.subscription %}
     <tr>
-        <td style="font-weight: bold;">{% trans 'Recurring Donation Status' %}</td>
+        <td style="font-weight: bold;">{% trans 'Recurring donation status' %}</td>
         <td>{{ donation.subscription.recurring_status|title }}</td>
     </tr>
     {% endif %}

@@ -141,6 +141,12 @@ def process_temp_donation_meta(request):
     return donation_metas
 
 
+def displayGateway(instance):
+    ''' instance can be either TempDonation, Donation or Subscription'''
+    siteSettings = getSiteSettings_from_default_site()
+    return getattr(siteSettings, instance.gateway.frontend_label_attr_name, instance.gateway.title)
+
+
 def displayDonationAmountWithCurrency(donation):
     currency_set = getCurrencyDictAt(donation.currency)
     return mark_safe(html.unescape(donation.currency+" "+currency_set['symbol']+str(donation.donation_amount if currency_set['setting']['number_decimals'] != 0 else int(donation.donation_amount))))

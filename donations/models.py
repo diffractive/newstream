@@ -74,10 +74,10 @@ class DonationForm(ClusterableModel):
     panels = [
         FieldPanel('title', heading=_('Title')),
         FieldPanel('description', heading=_('Description')),
-        FieldPanel('amount_type', heading=_('Donation Amount Type')),
+        FieldPanel('amount_type', heading=_('Donation amount Type')),
         FieldPanel(
-            'fixed_amount', heading=_('Define Fixed Donation Amount')),
-        InlinePanel('amount_steps', label=_('Fixed Amount Steps'), heading=_('Define Fixed Donation Amount Steps'),
+            'fixed_amount', heading=_('Define Fixed Donation amount')),
+        InlinePanel('amount_steps', label=_('Fixed Amount Steps'), heading=_('Define Fixed Donation amount Steps'),
                     help_text=_('Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type.')),
         AutocompletePanel('allowed_gateways', heading=_(
             'Allowed Payment Gateways')),
@@ -327,11 +327,11 @@ class Donation(ClusterableModel):
         FieldPanel('subscription', heading=_('Subscription')),
         FieldPanel('is_test', heading=_('Is Test Donation?')),
         FieldPanel('transaction_id', heading=_('Transaction ID')),
-        FieldPanel('donation_amount', heading=_('Donation Amount')),
+        FieldPanel('donation_amount', heading=_('Donation amount')),
         FieldPanel('guest_email', heading=_('Guest Email - for non-registered donors')),
         FieldPanel('is_recurring', heading=_('Is Recurring Donation?')),
         FieldPanel('currency', heading=_('Currency')),
-        FieldPanel('payment_status', heading=_('Payment Status')),
+        FieldPanel('payment_status', heading=_('Payment status')),
         FieldPanel('donation_date', heading=_('Donation Date')),
         InlinePanel('metas', label=_('Donation Meta'), heading=_('Donation Meta Data'),
                     help_text=_('Meta data about this donation is recorded here')),

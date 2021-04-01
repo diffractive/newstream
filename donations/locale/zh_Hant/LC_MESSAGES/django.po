@@ -54,7 +54,7 @@ msgstr ""
 #: donations/templates/donations/email_templates/donation_receipt.html:37
 #: donations/templates/donations/email_templates/new_donation.html:42
 #: donations/templates/donations/my_donations.html:62
-msgid "Donation Amount"
+msgid "Donation amount"
 msgstr ""
 
 #: donations/models.py:38 donations/models.py:103
@@ -104,11 +104,11 @@ msgid "Is Active"
 msgstr ""
 
 #: donations/models.py:106
-msgid "Donation Amount Type"
+msgid "Donation amount Type"
 msgstr ""
 
 #: donations/models.py:108
-msgid "Define Fixed Donation Amount"
+msgid "Define Fixed Donation amount"
 msgstr ""
 
 #: donations/models.py:108
@@ -122,7 +122,7 @@ msgid "Fixed Amount Steps"
 msgstr ""
 
 #: donations/models.py:109
-msgid "Define Fixed Donation Amount Steps"
+msgid "Define Fixed Donation amount Steps"
 msgstr ""
 
 #: donations/models.py:110
@@ -174,7 +174,7 @@ msgstr ""
 #: donations/models.py:187
 #: donations/templates/donations/email_templates/donation_receipt.html:45
 #: donations/templates/donations/email_templates/new_donation.html:50
-msgid "Payment Status"
+msgid "Payment status"
 msgstr "付款狀態"
 
 #: donations/models.py:188
@@ -262,7 +262,7 @@ msgstr ""
 #: donations/templates/donations/email_templates/donation_receipt.html:29
 #: donations/templates/donations/email_templates/new_donation.html:34
 #: donations/templates/donations/my_donations.html:63
-msgid "Donation Frequency"
+msgid "Donation frequency"
 msgstr ""
 
 #: donations/templates/donations/email_templates/donation_receipt.html:41
@@ -312,15 +312,15 @@ msgid ""
 "\n"
 "        Order Number: %(order_number)s\n"
 "\n"
-"        Donation Frequency: %(frequency)s\n"
+"        Donation frequency: %(frequency)s\n"
 "\n"
 "        Currency: %(currency)s\n"
 "\n"
-"        Donation Amount: %(amount)s\n"
+"        Donation amount: %(amount)s\n"
 "\n"
 "        Opt in Mailing List? %(opt_in)s\n"
 "\n"
-"        Payment Status: %(status)s\n"
+"        Payment status: %(status)s\n"
 "\n"
 "        \n"
 "\n"
@@ -347,15 +347,15 @@ msgid ""
 "\n"
 "        Order Number: %(order_number)s\n"
 "\n"
-"        Donation Frequency: %(frequency)s\n"
+"        Donation frequency: %(frequency)s\n"
 "\n"
 "        Currency: %(currency)s\n"
 "\n"
-"        Donation Amount: %(amount)s\n"
+"        Donation amount: %(amount)s\n"
 "\n"
 "        Opt in Mailing List? %(opt_in)s\n"
 "\n"
-"        Payment Status: %(status)s\n"
+"        Payment status: %(status)s\n"
 "\n"
 "        \n"
 "\n"

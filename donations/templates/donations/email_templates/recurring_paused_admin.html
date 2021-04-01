@@ -20,19 +20,19 @@
         <td>{{ subscription.user.fullname }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">{% trans "Recurring Donation Identifier" %}</td>
+        <td style="font-weight: bold;">{% trans "Recurring donation identifier" %}</td>
         <td>{{ subscription.profile_id }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">{% trans "Currency" %}</td>
-        <td>{{ subscription.currency }}</td>
+        <td style="font-weight: bold;">{% trans "Payment method" %}</td>
+        <td>{{ subscription.gateway }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">{% trans "Recurring Donation Amount" %}</td>
+        <td style="font-weight: bold;">{% trans "Recurring donation amount" %}</td>
         <td>{{ subscription|recurring_amount_with_currency }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">{% trans 'Recurring Donation Status' %}</td>
+        <td style="font-weight: bold;">{% trans 'Recurring donation status' %}</td>
         <td>{{ subscription.recurring_status|title }}</td>
     </tr>
 </table>

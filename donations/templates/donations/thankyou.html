@@ -42,7 +42,7 @@
         <p class="field-label">{% trans 'Payment status' %}</p>
         <p class="field-value text-primary font-bold">{{ donation.payment_status|title }}</p>
         {% if donation.is_recurring %}
-        <p class="field-label">{% trans 'Recurring Donation Status' %}</p>
+        <p class="field-label">{% trans 'Recurring donation status' %}</p>
         <p class="field-value text-primary font-bold">{% if donation.subscription %}{{ donation.subscription.recurring_status|title }}{% else %}{% trans 'Processing' %}{% endif %}</p>
         {% endif %}
     </div>

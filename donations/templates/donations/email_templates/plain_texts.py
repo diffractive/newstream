@@ -1,7 +1,7 @@
 from django.utils.translation import gettext as _
 
 from newstream.functions import getSiteName, getFullReverseUrl
-from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
+from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency, displayGateway
 
 
 def get_new_donation_text(request, donation):
@@ -14,10 +14,10 @@ def get_new_donation_text(request, donation):
         \n
         Donor: %(name)s\n
         Transaction ID: %(transaction_id)s\n
-        Donation Frequency: %(frequency)s\n
-        Currency: %(currency)s\n
-        Donation Amount: %(amount)s\n
-        Payment Status: %(status)s\n
+        Donation frequency: %(frequency)s\n
+        Payment method: %(gateway)s\n
+        Donation amount: %(amount)s\n
+        Payment status: %(status)s\n
         %(recurring_status)s
         \n
         Thank you,\n
@@ -27,7 +27,7 @@ def get_new_donation_text(request, donation):
         'name': donation.donor_name(),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
-        'currency': donation.currency,
+        'gateway': donation.gateway,
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
         'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring and donation.subscription else '',
@@ -49,10 +49,10 @@ def get_donation_receipt_text(request, donation):
         Here are the details of your donation:\n
         \n
         Transaction ID: %(transaction_id)s\n
-        Donation Frequency: %(frequency)s\n
-        Currency: %(currency)s\n
-        Donation Amount: %(amount)s\n
-        Payment Status: %(status)s\n
+        Donation frequency: %(frequency)s\n
+        Payment method: %(gateway)s\n
+        Donation amount: %(amount)s\n
+        Payment status: %(status)s\n
         %(recurring_status)s
         \n
         Thank you,\n
@@ -62,7 +62,7 @@ def get_donation_receipt_text(request, donation):
         'url_text': url_text,
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
-        'currency': donation.currency,
+        'gateway': displayGateway(donation),
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
         'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring and donation.subscription else '',
@@ -77,16 +77,16 @@ def get_donation_status_change_text(request, donation):
     else:
         url_text = ''
     return _("""
-        Your Donation Payment Status has been updated\n
+        Your Donation Payment status has been updated\n
         \n
         Dear %(name)s,\n
         Listed below are the updated details of your donation. %(url_text)s:\n
         \n
         Transaction ID: %(transaction_id)s\n
-        Donation Frequency: %(frequency)s\n
-        Currency: %(currency)s\n
-        Donation Amount: %(amount)s\n
-        Payment Status: %(status)s\n
+        Donation frequency: %(frequency)s\n
+        Payment method: %(gateway)s\n
+        Donation amount: %(amount)s\n
+        Payment status: %(status)s\n
         \n
         Thank you,\n
         %(sitename)s
@@ -95,7 +95,7 @@ def get_donation_status_change_text(request, donation):
         'url_text': url_text,
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
-        'currency': donation.currency,
+        'gateway': displayGateway(donation),
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
         'sitename': getSiteName(request)
@@ -104,13 +104,13 @@ def get_donation_status_change_text(request, donation):
 
 def get_subscription_status_change_text(request, subscription):
     return _("""
-        Your Recurring Donation Status has been updated\n
+        Your Recurring donation status has been updated\n
         \n
         Dear %(name)s,\n
         Listed below are the updated details of your recurring donation. Go to %(url)s to see more.\n
         \n
         Profile ID: %(profile_id)s\n
-        Currency: %(currency)s\n
+        Payment method: %(gateway)s\n
         Recurring Amount: %(amount)s\n
         Status: %(status)s\n
         \n
@@ -120,7 +120,7 @@ def get_subscription_status_change_text(request, subscription):
         'name': subscription.user.fullname,
         'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
-        'currency': subscription.currency,
+        'gateway': displayGateway(subscription),
         'amount': displayRecurringAmountWithCurrency(subscription),
         'status': subscription.recurring_status,
         'sitename': getSiteName(request)
@@ -137,10 +137,10 @@ def get_new_renewal_text(request, donation):
         \n
         Donor: %(name)s\n
         Transaction ID: %(transaction_id)s\n
-        Donation Frequency: %(frequency)s\n
-        Currency: %(currency)s\n
-        Donation Amount: %(amount)s\n
-        Payment Status: %(status)s\n
+        Donation frequency: %(frequency)s\n
+        Payment method: %(gateway)s\n
+        Donation amount: %(amount)s\n
+        Payment status: %(status)s\n
         %(recurring_status)s
         \n
         Thank you,\n
@@ -150,7 +150,7 @@ def get_new_renewal_text(request, donation):
         'name': donation.user.fullname,
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
-        'currency': donation.currency,
+        'gateway': donation.gateway,
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
         'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring else '',
@@ -167,10 +167,10 @@ def get_renewal_receipt_text(request, donation):
         Here are the details of your renewal donation:\n
         \n
         Transaction ID: %(transaction_id)s\n
-        Donation Frequency: %(frequency)s\n
-        Currency: %(currency)s\n
-        Donation Amount: %(amount)s\n
-        Payment Status: %(status)s\n
+        Donation frequency: %(frequency)s\n
+        Payment method: %(gateway)s\n
+        Donation amount: %(amount)s\n
+        Payment status: %(status)s\n
         %(recurring_status)s
         \n
         Thank you,\n
@@ -180,7 +180,7 @@ def get_renewal_receipt_text(request, donation):
         'url': getFullReverseUrl(request, 'donations:my-renewals', kwargs={'id': donation.subscription.id}),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
-        'currency': donation.currency,
+        'gateway': displayGateway(donation),
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
         'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring else '',
@@ -197,9 +197,9 @@ def get_recurring_updated_admin_text(request, subscription, message):
         %(url)s\n
         \n
         Donor: %(name)s\n
-        Recurring Donation Identifier: %(profile_id)s\n
-        Currency: %(currency)s\n
-        Recurring Donation Amount: %(amount)s\n
+        Recurring donation identifier: %(profile_id)s\n
+        Payment method: %(gateway)s\n
+        Recurring donation amount: %(amount)s\n
         Recurring Status: %(recurring_status)s\n
         \n
         Thank you,\n
@@ -209,7 +209,7 @@ def get_recurring_updated_admin_text(request, subscription, message):
         'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
-        'currency': subscription.currency,
+        'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
         'sitename': getSiteName(request)
@@ -225,9 +225,9 @@ def get_recurring_updated_donor_text(request, subscription, message):
         Here are the details of your recurring donation:\n
         \n
         Donor: %(name)s\n
-        Recurring Donation Identifier: %(profile_id)s\n
-        Currency: %(currency)s\n
-        Recurring Donation Amount: %(amount)s\n
+        Recurring donation identifier: %(profile_id)s\n
+        Payment method: %(gateway)s\n
+        Recurring donation amount: %(amount)s\n
         Recurring Status: %(recurring_status)s\n
         \n
         Thank you,\n
@@ -237,7 +237,7 @@ def get_recurring_updated_donor_text(request, subscription, message):
         'message': message,
         'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
-        'currency': subscription.currency,
+        'gateway': displayGateway(subscription),
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
         'sitename': getSiteName(request)
@@ -253,9 +253,9 @@ def get_recurring_paused_admin_text(request, subscription):
         %(url)s\n
         \n
         Donor: %(name)s\n
-        Recurring Donation Identifier: %(profile_id)s\n
-        Currency: %(currency)s\n
-        Recurring Donation Amount: %(amount)s\n
+        Recurring donation identifier: %(profile_id)s\n
+        Payment method: %(gateway)s\n
+        Recurring donation amount: %(amount)s\n
         Recurring Status: %(recurring_status)s\n
         \n
         Thank you,\n
@@ -264,7 +264,7 @@ def get_recurring_paused_admin_text(request, subscription):
         'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
-        'currency': subscription.currency,
+        'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
         'sitename': getSiteName(request)
@@ -280,9 +280,9 @@ def get_recurring_paused_donor_text(request, subscription):
         Here are the details of your recurring donation:\n
         \n
         Donor: %(name)s\n
-        Recurring Donation Identifier: %(profile_id)s\n
-        Currency: %(currency)s\n
-        Recurring Donation Amount: %(amount)s\n
+        Recurring donation identifier: %(profile_id)s\n
+        Payment method: %(gateway)s\n
+        Recurring donation amount: %(amount)s\n
         Recurring Status: %(recurring_status)s\n
         \n
         Thank you,\n
@@ -291,7 +291,7 @@ def get_recurring_paused_donor_text(request, subscription):
         'name': subscription.user.fullname,
         'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
-        'currency': subscription.currency,
+        'gateway': displayGateway(subscription),
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
         'sitename': getSiteName(request)
@@ -307,9 +307,9 @@ def get_recurring_resumed_admin_text(request, subscription):
         %(url)s\n
         \n
         Donor: %(name)s\n
-        Recurring Donation Identifier: %(profile_id)s\n
-        Currency: %(currency)s\n
-        Recurring Donation Amount: %(amount)s\n
+        Recurring donation identifier: %(profile_id)s\n
+        Payment method: %(gateway)s\n
+        Recurring donation amount: %(amount)s\n
         Recurring Status: %(recurring_status)s\n
         \n
         Thank you,\n
@@ -318,7 +318,7 @@ def get_recurring_resumed_admin_text(request, subscription):
         'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
-        'currency': subscription.currency,
+        'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
         'sitename': getSiteName(request)
@@ -334,9 +334,9 @@ def get_recurring_resumed_donor_text(request, subscription):
         Here are the details of your recurring donation:\n
         \n
         Donor: %(name)s\n
-        Recurring Donation Identifier: %(profile_id)s\n
-        Currency: %(currency)s\n
-        Recurring Donation Amount: %(amount)s\n
+        Recurring donation identifier: %(profile_id)s\n
+        Payment method: %(gateway)s\n
+        Recurring donation amount: %(amount)s\n
         Recurring Status: %(recurring_status)s\n
         \n
         Thank you,\n
@@ -345,7 +345,7 @@ def get_recurring_resumed_donor_text(request, subscription):
         'name': subscription.user.fullname,
         'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
-        'currency': subscription.currency,
+        'gateway': displayGateway(subscription),
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
         'sitename': getSiteName(request)
@@ -361,9 +361,9 @@ def get_recurring_cancelled_admin_text(request, subscription):
         %(url)s\n
         \n
         Donor: %(name)s\n
-        Recurring Donation Identifier: %(profile_id)s\n
-        Currency: %(currency)s\n
-        Recurring Donation Amount: %(amount)s\n
+        Recurring donation identifier: %(profile_id)s\n
+        Payment method: %(gateway)s\n
+        Recurring donation amount: %(amount)s\n
         Recurring Status: %(recurring_status)s\n
         \n
         Thank you,\n
@@ -372,7 +372,7 @@ def get_recurring_cancelled_admin_text(request, subscription):
         'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
-        'currency': subscription.currency,
+        'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
         'sitename': getSiteName(request)
@@ -388,9 +388,9 @@ def get_recurring_cancel_request_admin_text(request, subscription):
         %(url)s\n
         \n
         Donor: %(name)s\n
-        Recurring Donation Identifier: %(profile_id)s\n
-        Currency: %(currency)s\n
-        Recurring Donation Amount: %(amount)s\n
+        Recurring donation identifier: %(profile_id)s\n
+        Payment method: %(gateway)s\n
+        Recurring donation amount: %(amount)s\n
         Recurring Status: %(recurring_status)s\n
         \n
         Thank you,\n
@@ -399,7 +399,7 @@ def get_recurring_cancel_request_admin_text(request, subscription):
         'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
-        'currency': subscription.currency,
+        'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
         'sitename': getSiteName(request)
@@ -415,9 +415,9 @@ def get_recurring_cancelled_donor_text(request, subscription):
         Here are the details of your recurring donation:\n
         \n
         Donor: %(name)s\n
-        Recurring Donation Identifier: %(profile_id)s\n
-        Currency: %(currency)s\n
-        Recurring Donation Amount: %(amount)s\n
+        Recurring donation identifier: %(profile_id)s\n
+        Payment method: %(gateway)s\n
+        Recurring donation amount: %(amount)s\n
         Recurring Status: %(recurring_status)s\n
         \n
         Thank you,\n
@@ -426,7 +426,7 @@ def get_recurring_cancelled_donor_text(request, subscription):
         'name': subscription.user.fullname,
         'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
-        'currency': subscription.currency,
+        'gateway': displayGateway(subscription),
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
         'sitename': getSiteName(request)
@@ -494,10 +494,10 @@ def get_donation_error_admin_text(request, donation, error_title, error_descript
         This email is to inform you that a donation error has occurred on your website:\n
         %(url)s\n
         \n
-        Donation Transaction ID: %(order)s\n
+        Donation transaction ID: %(order)s\n
         Donor: %(name)s\n
-        Error Title: %(error_title)s\n
-        Error Description: %(error_description)s\n
+        Error title: %(error_title)s\n
+        Error description: %(error_description)s\n
         \n
         Thank you,\n
         %(sitename)s

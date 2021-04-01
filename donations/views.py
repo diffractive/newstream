@@ -15,7 +15,7 @@ from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
 from donations.models import DonationPaymentMeta, Subscription, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
 from donations.forms import DONATION_DETAILS_FIELDS, DonationDetailsForm
-from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, process_temp_donation_meta
+from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, process_temp_donation_meta, displayGateway
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml, isGatewayHosted
 from donations.payment_gateways.setting_classes import getOfflineSettings
 User = get_user_model()
@@ -115,7 +115,7 @@ def confirm_donation(request):
     try:
         siteSettings = getSiteSettings(request)
         tmpd = TempDonation.objects.get(pk=request.session.get('temp_donation_id', None))
-        paymentMethod = getattr(siteSettings, tmpd.gateway.frontend_label_attr_name, tmpd.gateway.title)
+        paymentMethod = displayGateway(tmpd)
         isGatewayHostedBool = isGatewayHosted(tmpd.gateway)
         if request.method == 'POST':
             # determine path based on submit-choice
@@ -194,7 +194,7 @@ def thank_you(request):
     if 'return-donation-id' in request.session:
         donation = Donation.objects.get(
             pk=request.session['return-donation-id'])
-        paymentMethod = getattr(getSiteSettings(request), donation.gateway.frontend_label_attr_name, donation.gateway.title)
+        paymentMethod = displayGateway(donation)
         # logs user in
         if donation.user:
             login(request, donation.user,
@@ -220,7 +220,7 @@ def cancelled(request):
     if 'return-donation-id' in request.session:
         donation = Donation.objects.get(
             pk=request.session['return-donation-id'])
-        paymentMethod = getattr(getSiteSettings(request), donation.gateway.frontend_label_attr_name, donation.gateway.title)
+        paymentMethod = displayGateway(donation)
         donation.payment_status = STATUS_CANCELLED
         # No need to update recurring_status as no subscription object has been created yet
         donation.save()
@@ -240,7 +240,7 @@ def revoked(request):
     if 'return-donation-id' in request.session:
         donation = Donation.objects.get(
             pk=request.session['return-donation-id'])
-        paymentMethod = getattr(getSiteSettings(request), donation.gateway.frontend_label_attr_name, donation.gateway.title)
+        paymentMethod = displayGateway(donation)
         donation.payment_status = STATUS_REVOKED
         # No need to update recurring_status as no subscription object has been created yet
         donation.save()

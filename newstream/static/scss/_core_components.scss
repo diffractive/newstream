@@ -326,16 +326,11 @@ span.multilang-icon {
     }
 }
 
-/* Thankyou Table */
-.thankyou-table {
-    tr td  {
-        padding: 1rem;
-        &:nth-child(1) {
-            text-align: right;
-        }
-        &:nth-child(2) {
-            text-align: left;
-        }
+/* Thankyou/Cancelled/Revokeds Page */
+.donation-info-box {
+    min-width: 100%;
+    @screen md {
+        min-width: 360px;
     }
 }
 

@@ -68,7 +68,7 @@ def domain(req):
 def fullurl(req, relurl):
     # getting defaultSite's hostname instead of req.get_host() since this method might be used by allauth email templates which do not have access to request object
     defaultSite = getDefaultSite()
-    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + re.sub(r'^(https://|http//)', '', defaultSite.hostname) + '/' + relurl
+    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + re.sub(r'^(https://|http//)', '', defaultSite.hostname) + relurl
 
 
 @register.filter(name='brand_logo')

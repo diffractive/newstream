@@ -36,11 +36,16 @@ def get_new_donation_text(request, donation):
 
 
 def get_donation_receipt_text(request, donation):
+    donation_url = getFullReverseUrl(request, 'donations:my-recurring-donations') if donation.is_recurring else getFullReverseUrl(request, 'donations:my-onetime-donations')
+    if donation.user:
+        url_text = str(_('Go to %(url)s to view your donation on the website.') % {'url': donation_url})
+    else:
+        url_text = ''
     return _("""
         Donation Receipt\n
         \n
         Dear %(name)s,\n
-        Thank you for your generosity! Your support means a lot to us. Go to %(url)s to view your donation on the website.\n
+        Thank you for your generosity! Your support means a lot to us. %(url_text)s\n
         Here are the details of your donation:\n
         \n
         Transaction ID: %(transaction_id)s\n
@@ -54,7 +59,7 @@ def get_donation_receipt_text(request, donation):
         %(sitename)s
     """) % {
         'name': donation.donor_name(),
-        'url': getFullReverseUrl(request, 'donations:my-recurring-donations') if donation.is_recurring else getFullReverseUrl(request, 'donations:my-onetime-donations'),
+        'url_text': url_text,
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
         'currency': donation.currency,
@@ -66,11 +71,16 @@ def get_donation_receipt_text(request, donation):
 
 
 def get_donation_status_change_text(request, donation):
+    donation_url = getFullReverseUrl(request, 'donations:my-renewals', kwargs={'id': donation.subscription.id}) if donation.is_recurring else getFullReverseUrl(request, 'donations:my-onetime-donations')
+    if donation.user:
+        url_text = str(_('Go to %(url)s to see more.') % {'url': donation_url})
+    else:
+        url_text = ''
     return _("""
         Your Donation Payment Status has been updated\n
         \n
         Dear %(name)s,\n
-        Here are the latest details of your donation at %(url)s:\n
+        Listed below are the updated details of your donation. %(url_text)s:\n
         \n
         Transaction ID: %(transaction_id)s\n
         Donation Frequency: %(frequency)s\n
@@ -82,7 +92,7 @@ def get_donation_status_change_text(request, donation):
         %(sitename)s
     """) % {
         'name': donation.donor_name(),
-        'url': getFullReverseUrl(request, 'donations:my-renewals', kwargs={'id': donation.subscription.id}) if donation.is_recurring else getFullReverseUrl(request, 'donations:my-onetime-donations'),
+        'url_text': url_text,
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
         'currency': donation.currency,
@@ -97,7 +107,7 @@ def get_subscription_status_change_text(request, subscription):
         Your Recurring Donation Status has been updated\n
         \n
         Dear %(name)s,\n
-        Here are the latest details of your recurring donation at %(url)s:\n
+        Listed below are the updated details of your recurring donation. Go to %(url)s to see more.\n
         \n
         Profile ID: %(profile_id)s\n
         Currency: %(currency)s\n

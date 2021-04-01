@@ -14,7 +14,10 @@
 {% url 'donations:my-onetime-donations' as donations_url %}
 {% endif %}
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with donations_full_url=request|fullurl:donations_url%}Here are the details of your donation at <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a>.{% endblocktrans %}
+    {% trans 'Listed below are the updated details of your donation. ' %}
+    {% if donation.user %}
+    {% blocktrans with donations_full_url=request|fullurl:donations_url%}Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to see more.{% endblocktrans %}
+    {% endif %}
 </p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>

@@ -24,21 +24,19 @@
     </p>
     <p class="mb-5 text-center">{% trans 'We are so grateful for your support.' %}</p>
     {% if reminders_html %}
-    <div class="mb-5 p-4 md:p-4 lg:py-8 lg:px-24 border-2 rounded border-gray-200">
+    <div class="w-full mb-5 p-4 md:p-4 lg:py-8 lg:px-24 border-2 rounded border-gray-200">
         {{ reminders_html|richtext }}
     </div>
     {% endif %}
-    <div class="donation-info-box p-4 lg:p-8 border-2 rounded border-gray-200">
+    <div class="{% if reminders_html %}w-full lg:px-24{% else %}donation-info-box{% endif %} info-spacing-css p-4 lg:p-8 border-2 rounded border-gray-200">
         <p class="field-label">{% trans 'Donor' %}</p>
-        <p class="field-value text-primary font-bold mb-4">{{ donation.donor_name }}</p>
+        <p class="field-value text-primary font-bold">{{ donation.donor_name }}</p>
         <p class="field-label">{% trans 'Transaction ID' %}</p>
-        <p class="field-value text-primary font-bold mb-4" style="word-break: break-all;">{{ donation.transaction_id }}</p>
+        <p class="field-value text-primary font-bold" style="word-break: break-all;">{{ donation.transaction_id }}</p>
         <p class="field-label">{% trans 'Donation frequency' %}</p>
-        <p class="field-value text-primary font-bold mb-4">{{ donation.donation_frequency }}</p>
+        <p class="field-value text-primary font-bold">{{ donation.donation_frequency }}</p>
         <p class="field-label">{% trans 'Payment method' %}</p>
         <p class="field-value text-primary font-bold">{{ paymentMethod }}</p>
-        <p class="field-label">{% trans 'Currency' %}</p>
-        <p class="field-value text-primary font-bold">{{ donation.currency }}</p>
         <p class="field-label">{% trans 'Donation amount' %}</p>
         <p class="field-value text-primary font-bold">{{ donation|amount_with_currency }}</p>
         <p class="field-label">{% trans 'Payment status' %}</p>

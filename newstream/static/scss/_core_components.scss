@@ -333,6 +333,11 @@ span.multilang-icon {
         min-width: 360px;
     }
 }
+.info-spacing-css {
+    .field-value:not(:last-child) {
+        margin-bottom: 1.25rem;
+    }
+}
 
 /* Login Container */
 .login-container, .reset-pwd-container, .new-pwd-container {

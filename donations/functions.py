@@ -143,9 +143,9 @@ def process_temp_donation_meta(request):
 
 def displayDonationAmountWithCurrency(donation):
     currency_set = getCurrencyDictAt(donation.currency)
-    return mark_safe(html.unescape(currency_set['symbol']+" "+str(donation.donation_amount if currency_set['setting']['number_decimals'] != 0 else int(donation.donation_amount))))
+    return mark_safe(html.unescape(donation.currency+" "+currency_set['symbol']+str(donation.donation_amount if currency_set['setting']['number_decimals'] != 0 else int(donation.donation_amount))))
 
 
 def displayRecurringAmountWithCurrency(subscription):
     currency_set = getCurrencyDictAt(subscription.currency)
-    return mark_safe(html.unescape(currency_set['symbol']+" "+str(subscription.recurring_amount if currency_set['setting']['number_decimals'] != 0 else int(subscription.recurring_amount))))
+    return mark_safe(html.unescape(subscription.currency+" "+currency_set['symbol']+str(subscription.recurring_amount if currency_set['setting']['number_decimals'] != 0 else int(subscription.recurring_amount))))

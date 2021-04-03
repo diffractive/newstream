@@ -227,10 +227,10 @@ LANGUAGE_CODE = 'en'
 
 LANGUAGES = [
     ('en', _('English')),
-    ('zh-hant', _('Traditional Chinese')),
-    ('ms', _('Malay')),
-    ('id-id', _('Indonesian')),
-    ('tl', _('Tagalog')),
+    # ('zh-hant', _('Traditional Chinese')),
+    # ('ms', _('Malay')),
+    # ('id-id', _('Indonesian')),
+    # ('tl', _('Tagalog')),
 ]
 
 EXTRA_LANG_INFO = {

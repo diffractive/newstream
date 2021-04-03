@@ -124,7 +124,7 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
 
             # email notifications
             # sendRecurringCancelledNotifToDonor(self.request, self.donation.subscription)
-            sendRecurringUpdatedNotifToDonor(self.request, self.donation.subscription, str(_("Your recurring donation has been cancelled by the admin.")))
+            sendRecurringUpdatedNotifToDonor(self.request, self.donation.subscription, str(_("Your recurring donation has been cancelled.")))
             sendRecurringCancelledNotifToAdmins(self.request, self.donation.subscription)
 
             return HttpResponse(status=200)

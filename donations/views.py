@@ -177,7 +177,9 @@ def confirm_donation(request):
                 return gatewayManager.redirect_to_gateway_url()
             else:
                 raise Exception(_('No valid submit-choice is being submitted.'))
-
+    except TempDonation.DoesNotExist as e:
+        messages.add_message(request, messages.ERROR, str(_('Session data has expired. Please enter the donation details again.')))
+        return redirect('donations:donate')
     except Exception as e:
         # Should rarely happen, but in case some bugs or order id repeats itself
         _exception(str(e))

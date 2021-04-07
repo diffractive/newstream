@@ -13,6 +13,10 @@ from newstream.forms import PersonalInfoForm, DeleteAccountForm
 User = get_user_model()
 
 
+def maintenance(request):
+    return render(request, 'maintenance.html')
+
+
 def unsubscribe(request, email, hash):
     failure = False
     try:

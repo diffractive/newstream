@@ -19,6 +19,7 @@ urlpatterns = [
     path('i18n/', include('django.conf.urls.i18n')),
     path('admin/autocomplete/', include(autocomplete_admin_urls)),
     path('admin/', include(wagtailadmin_urls)),
+    path('maintenance/', user_views.maintenance, name='maintenance'),
 ]
 
 urlpatterns += i18n_patterns(

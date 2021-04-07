@@ -134,9 +134,6 @@ def return_from_paypal(request):
                     gatewayManager.donation.payment_status = STATUS_COMPLETE
                     gatewayManager.donation.donation_date = datetime.now(timezone.utc)
                     gatewayManager.donation.save()
-                    # send email notifs
-                    sendDonationReceiptToDonor(request, gatewayManager.donation)
-                    sendDonationNotifToAdmins(request, gatewayManager.donation)
             else:
                 _debug('PayPal: Order status after Paypal returns: '+gatewayManager.order_status)
     except IOError as error:

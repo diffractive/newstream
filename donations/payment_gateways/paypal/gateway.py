@@ -46,9 +46,10 @@ class Gateway_Paypal(PaymentGatewayManager):
             if self.donation.payment_status != STATUS_COMPLETE:
                 self.donation.payment_status = STATUS_COMPLETE
                 self.donation.save()
-                # send email notifs
-                sendDonationReceiptToDonor(self.request, self.donation)
-                sendDonationNotifToAdmins(self.request, self.donation)
+            
+            # send email notifs
+            sendDonationReceiptToDonor(self.request, self.donation)
+            sendDonationNotifToAdmins(self.request, self.donation)
 
             return HttpResponse(status=200)
 

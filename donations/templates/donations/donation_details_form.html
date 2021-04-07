@@ -35,7 +35,7 @@
                 {% for field in form.visible_fields %}
                 {% if field.html_name in donation_details_fields %}
                 {% if field.html_name == 'email' %}
-                <div class="mb-4">
+                <div class="mb-4 hidden">
                     <div class="label-div">{{ field.label_tag }}</div>
                     <div class="field-div widget_{{ field|widget_type }}" style="margin-bottom: 2px;">
                         {{ field }}

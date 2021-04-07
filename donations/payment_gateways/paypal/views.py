@@ -128,11 +128,12 @@ def return_from_paypal(request):
             # further capture payment if detected order approved, if not just set payment as processing and leave it to webhook processing
             if gatewayManager.order_status == 'APPROVED':
                 # might raise IOError/HttpError
-                capture_status = capture_paypal_order(request, gatewayManager.donation, gatewayManager.order_id)
-                if capture_status == 'COMPLETED':
+                capture_response = capture_paypal_order(request, gatewayManager.donation, gatewayManager.order_id)
+                if capture_response.status == 'COMPLETED':
                     _debug('PayPal: Order Captured. Payment Completed.')
                     gatewayManager.donation.payment_status = STATUS_COMPLETE
                     gatewayManager.donation.donation_date = datetime.now(timezone.utc)
+                    gatewayManager.donation.transaction_id = capture_response.purchase_units[0].payments.captures[0].id
                     gatewayManager.donation.save()
             else:
                 _debug('PayPal: Order status after Paypal returns: '+gatewayManager.order_status)

@@ -11,7 +11,7 @@ from paypalhttp import HttpError
 from donations.models import STATUS_FAILED
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.email_functions import sendDonationErrorNotifToAdmins
-from newstream.functions import getSiteName, getFullReverseUrl, uuid4_str, _debug
+from newstream.functions import getSiteName, getFullReverseUrl, uuid4_str, _debug, printvars
 
 def common_headers(request):
     return ['Content-Type: application/json', 'Authorization: Bearer %s' % (request.session['paypal_token']), 'PayPal-Request-Id: %s' % (uuid4_str())]
@@ -273,7 +273,7 @@ def capture_paypal_order(request, donation, order_id):
         donation.payment_status = STATUS_FAILED
         donation.save()
         raise IOError(fail_reason)
-    return response.result.status
+    return response.result
 
 
 def build_onetime_request_body(request, donation):

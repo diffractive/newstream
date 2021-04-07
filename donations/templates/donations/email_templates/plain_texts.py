@@ -77,7 +77,7 @@ def get_donation_status_change_text(request, donation):
     else:
         url_text = ''
     return _("""
-        Your Donation Payment status has been updated\n
+        Your Donation Payment Status has been updated\n
         \n
         Dear %(name)s,\n
         Listed below are the updated details of your donation. %(url_text)s:\n
@@ -104,7 +104,7 @@ def get_donation_status_change_text(request, donation):
 
 def get_subscription_status_change_text(request, subscription):
     return _("""
-        Your Recurring donation status has been updated\n
+        Your Recurring Donation Status has been updated\n
         \n
         Dear %(name)s,\n
         Listed below are the updated details of your recurring donation. Go to %(url)s to see more.\n

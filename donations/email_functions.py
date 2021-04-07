@@ -79,13 +79,13 @@ def sendDonationReceiptToDonor(request, donation):
 
 
 def sendDonationStatusChangeToDonor(request, donation):
-    mail_title = str(_("Your Donation Payment status has been updated."))
+    mail_title = str(_("Your Donation Payment Status has been updated."))
     sendEmailNotificationsToDonor(request, getDonationEmail(donation), mail_title, get_donation_status_change_text(
         request, donation), render_to_string('donations/email_templates/donation_status_change.html', context={'donation': donation}, request=request))
 
 
 def sendSubscriptionStatusChangeToDonor(request, subscription):
-    mail_title = str(_("Your Subscription Payment status has been updated."))
+    mail_title = str(_("Your Recurring Donation Status has been updated."))
     sendEmailNotificationsToDonor(request, subscription.user.email, mail_title, get_subscription_status_change_text(
         request, subscription), render_to_string('donations/email_templates/subscription_status_change.html', context={'subscription': subscription}, request=request))
 

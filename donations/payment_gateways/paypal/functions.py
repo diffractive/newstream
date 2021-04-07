@@ -29,7 +29,7 @@ def curlPaypal(url, headers, userpwd='', post_data='', verb='GET'):
     if post_data:
         c.setopt(c.POSTFIELDS, post_data)
     if verb == 'POST':
-        c.setopt(c.POST, 1)
+        c.setopt(c.CUSTOMREQUEST, 'POST')
     elif verb == 'PATCH':
         c.setopt(c.CUSTOMREQUEST, 'PATCH')
     c.setopt(c.VERBOSE, True)

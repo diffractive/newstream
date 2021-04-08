@@ -3,9 +3,11 @@ from django.contrib import messages
 from django.utils.translation import gettext_lazy as _
 
 from donations.models import STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED
+from newstream_user.models import SUBS_ACTION_CANCEL
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getOfflineSettings
-from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
+from donations.functions import addUpdateSubsActionLog
+from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelRequestNotifToAdmins
 
 
 class Gateway_Offline(PaymentGatewayManager):
@@ -53,13 +55,18 @@ class Gateway_Offline(PaymentGatewayManager):
         if not self.subscription:
             raise ValueError(_('Subscription object is None. Cannot cancel recurring payment.'))
         # update newstream model
-        self.subscription.recurring_status = STATUS_CANCELLED
+        self.subscription.recurring_status = STATUS_PROCESSING
         self.subscription.save()
+
+        # add to the update actions log
+        addUpdateSubsActionLog(self.subscription, SUBS_ACTION_CANCEL, action_notes='Cancellation Request')
+
         # email notifications
-        sendRecurringCancelledNotifToAdmins(
+        sendRecurringCancelRequestNotifToAdmins(
             self.request, self.subscription)
-        sendRecurringCancelledNotifToDonor(
-            self.request, self.subscription)
+
+        # raise error so that main code goes to failure path
+        raise Exception(_('Direct cancellation of subscription is not supported for this gateway. Email has been sent to site admin to take further action. Site admin will manually cancel this subscription.'))
 
     def toggle_recurring_payment(self):
         if self.subscription.recurring_status == STATUS_PAUSED:

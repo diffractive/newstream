@@ -7,6 +7,7 @@ from wagtail.contrib.modeladmin.views import InspectView, DeleteView, CreateView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper
 
 from newstream.functions import getSiteSettings_from_default_site
+from site_settings.models import GATEWAY_OFFLINE, GATEWAY_PAYPAL_LEGACY
 from donations.models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING, STATUS_INACTIVE
 from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
 from donations.payment_gateways import isGatewayEditSubSupported, isGatewayToggleSubSupported, isGatewayCancelSubSupported
@@ -119,6 +120,8 @@ class SubscriptionInspectView(InspectView):
         return UserSubscriptionUpdatesLog.objects.filter(subscription=self.instance).order_by('-created_at')
 
     def get_context_data(self, **kwargs):
+        toggle_exclusion = [GATEWAY_OFFLINE, GATEWAY_PAYPAL_LEGACY]
+        cancel_exclusion = [GATEWAY_OFFLINE, GATEWAY_PAYPAL_LEGACY]
         context = {
             'fields': self.get_fields_dict_as_dict(),
             'subscription': self.instance,
@@ -128,8 +131,8 @@ class SubscriptionInspectView(InspectView):
             'status_processing': STATUS_PROCESSING,
             'status_inactive': STATUS_INACTIVE,
             'gateway_editsub_supported': isGatewayEditSubSupported(self.instance.gateway),
-            'gateway_togglesub_supported': isGatewayToggleSubSupported(self.instance.gateway),
-            'gateway_cancelsub_supported': isGatewayCancelSubSupported(self.instance.gateway),
+            'gateway_togglesub_supported': isGatewayToggleSubSupported(self.instance.gateway) and self.instance.gateway.title not in toggle_exclusion,
+            'gateway_cancelsub_supported': isGatewayCancelSubSupported(self.instance.gateway) and self.instance.gateway.title not in cancel_exclusion,
             'metas': self.get_meta_data(),
             'renewals': self.get_renewals(),
             'action_logs': self.get_action_logs(),

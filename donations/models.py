@@ -255,7 +255,7 @@ class Subscription(ClusterableModel):
     ]
 
     def __str__(self):
-        return '#'+str(self.id)+' - '+self.user.fullname
+        return '#'+str(self.id)+' - '+self.profile_id
 
     def isRecurringCancelled(self):
         return True if self.recurring_status == STATUS_CANCELLED else False
@@ -348,7 +348,7 @@ class Donation(ClusterableModel):
         verbose_name_plural = _('Donations')
 
     def __str__(self):
-        return '#'+str(self.id)+' - '+self.donor_name()
+        return '#'+str(self.id)+' - '+self.transaction_id
 
     def isRecurring(self):
         return 'Yes' if self.is_recurring else 'No'

@@ -176,13 +176,16 @@ input.ns-accordion-cb {
     &-label {
         display: flex;
         justify-content: space-between;
-        padding: 1.5rem 4rem;
+        padding: 1rem 2rem;
         font-weight: 600;
         cursor: pointer;
         /* Icon */
         // &:hover {
         //     background: $border-grey-color;
         // }
+        @screen md {
+            padding: 1.5rem 4rem;
+        }
         &:after {
             content: "\276F";
             @apply text-primary;

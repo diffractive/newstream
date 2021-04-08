@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="container-tight flex flex-col items-center">
-    <h1 class="mb-5">{% blocktrans with sitename=request|site_name %}Login to {{ sitename }}{% endblocktrans %}</h1>
+    <h1 class="mb-5 text-center">{% blocktrans with sitename=request|site_name %}Login to {{ sitename }}{% endblocktrans %}</h1>
     {% with sociallogin_enabled=request|sociallogin_enabled %}
     {% if sociallogin_enabled %}
     <div class="social-signin-div w-full">

@@ -6,7 +6,7 @@
 
 {% block content %}
 <div class="container-tight flex flex-col items-center">
-    <h1 class="mb-5">{% trans 'Goodbye!' %}</h1>
+    <h1 class="mb-5 text-center">{% trans 'Goodbye!' %}</h1>
     {% with url 'login' as loginurl %}
     <p class="text-center">{% blocktrans %}Log back in <a href="{{ loginurl }}">Here</a>{% endblocktrans %}</p>
     {% endwith %}

@@ -7,13 +7,13 @@
 {% block content %}
 <div class="container-tight flex flex-col items-center">
     {% if failure %}
-    <h1 class="mb-5">{% trans 'Failed to unsubscribe' %}</h1>
+    <h1 class="mb-5 text-center">{% trans 'Failed to unsubscribe' %}</h1>
     <p class="text-center mb-5">{% blocktrans %}We failed to unsubscribe you <span class="font-bold">({{email}})</span>
         from us, your
         unsubscription link is invalid.{% endblocktrans %}
     </p>
     {% else %}
-    <h1 class="mb-5">{% trans 'Successful' %}</h1>
+    <h1 class="mb-5 text-center">{% trans 'Successful' %}</h1>
     <p class="text-center mb-5">{% blocktrans %}You <span class="font-bold">({{email}})</span> have unsubscribed from
         us. You can
         subscribe back to us anytime you like

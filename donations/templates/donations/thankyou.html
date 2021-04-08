@@ -8,7 +8,7 @@
 {% block content %}
 <div class="container-tight flex flex-col items-center">
     {% if isValid %}
-    <h1 class="mb-5">{% trans 'Thank you!' %}</h1>
+    <h1 class="mb-5 text-center">{% trans 'Thank you!' %}</h1>
     <p class="mb-1 text-center">{% blocktrans with status=donation.payment_status %}Your payment is {{ status }}. {% endblocktrans %}
         {% if extra_text %}
         {{ extra_text }}

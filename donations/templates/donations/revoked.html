@@ -8,7 +8,7 @@
 {% block content %}
 <div class="container-tight flex flex-col items-center">
     {% if isValid %}
-    <h1 class="mb-5">{% trans 'Donation Revoked' %}</h1>
+    <h1 class="mb-5 text-center">{% trans 'Donation Revoked' %}</h1>
     <p class="mb-1 text-center">{% trans 'Your payment is revoked.' %}
         {% with has_socialaccount=donation.user|has_socialaccount %}
         {% if isFirstTime and not has_socialaccount %}

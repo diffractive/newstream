@@ -144,6 +144,8 @@ class Command(BaseCommand):
                             allDonors = cursor.fetchall()
                             donorids_list = [row[0] for row in allDonors]
 
+                        total_donor_number = len(donorids_list)
+
                         # get source wordpress db timezone setting
                         timezone_query = "select option_value from wp_options where option_name = 'timezone_string';"
                         cursor.execute(timezone_query)
@@ -151,12 +153,11 @@ class Command(BaseCommand):
                         timezone_string = timezoneResult[0][0]
                         sourcedb_tz = pytimezone(timezone_string)
 
-                        for donor_id in donorids_list:
-
+                        for num, donor_id in enumerate(donorids_list, 1):
                             select_donor_lj_meta_query = "select id, email, name, date_created, dnm.* from wp_give_donors dn left join wp_give_donormeta dnm on dn.id = dnm.donor_id where dn.id = %d;" % donor_id
                             select_donor_donations_query = "select distinct donation_id from wp_give_donationmeta where meta_key = '_give_payment_donor_id' and meta_value = %d;" % donor_id
                             select_subscriptions_query = "select * from wp_give_subscriptions where customer_id = %d;" % donor_id
-                            self.print("...Now processing queries of givewp donor %d" % donor_id)
+                            self.print("[%d/%d]...Now processing queries of givewp donor %d" % (num, total_donor_number, donor_id))
                             cursor.execute(select_donor_lj_meta_query)
                             donorMetaResult = cursor.fetchall()
                             cursor.execute(select_donor_donations_query)
@@ -189,10 +190,10 @@ class Command(BaseCommand):
                                     um.save()
 
                             newUser.save()
-                            self.print("[√] Created Newstream User (email: %s, name: %s)." % (newUser.email, newUser.fullname))
+                            # self.print("[√] Created Newstream User (email: %s, name: %s)." % (newUser.email, newUser.fullname))
 
                             # add subscriptions
-                            self.print("...Now processing queries of subscriptions of givewp donor %d" % donor_id)
+                            # self.print("...Now processing queries of subscriptions of givewp donor %d" % donor_id)
                             cursor.execute(select_subscriptions_query)
                             subscriptionsResult = cursor.fetchall()
                             newSubscription = None
@@ -244,7 +245,7 @@ class Command(BaseCommand):
                                     subscribe_date=givewp_subscription_created.replace(tzinfo=timezone.utc)
                                 )
                                 newSubscription.save()
-                                self.print("[√] Created Newstream Subscription (id: %d, profile_id: %s)" % (newSubscription.id, newSubscription.profile_id))
+                                # self.print("[√] Created Newstream Subscription (id: %d, profile_id: %s)" % (newSubscription.id, newSubscription.profile_id))
 
                                 # add donations linked to this subscription(need to link with the new subscription id in Newstream)
                                 # need to add the parent payment first, so it gets the smallest id among the renewals
@@ -265,7 +266,7 @@ class Command(BaseCommand):
                                 migrated_donations += 1
                                 # remove parentDonation id from donationids_list
                                 donationids_list.remove(givewp_parent_donation_id)
-                                self.print("[√] Created Newstream Parent Donation (id: %d, amount: %s)" % (parentDonation.id, parentDonation.donation_amount))
+                                # self.print("[√] Created Newstream Parent Donation (id: %d, amount: %s)" % (parentDonation.id, parentDonation.donation_amount))
 
                                 # save all meta data as DonationPaymentMeta
                                 for key, value in parentDonationMetaDict.items():
@@ -315,7 +316,7 @@ class Command(BaseCommand):
                                     migrated_donations += 1
                                     # remove renewalDonation id from donationids_list
                                     donationids_list.remove(givewp_renewal_donation_id)
-                                    self.print("[√] Created Newstream Renewal Donation (id: %d, amount: %s)" % (renewalDonation.id, renewalDonation.donation_amount))
+                                    # self.print("[√] Created Newstream Renewal Donation (id: %d, amount: %s)" % (renewalDonation.id, renewalDonation.donation_amount))
 
                                     # save all meta data as DonationPaymentMeta
                                     for key, value in renewalDonationMetaDict.items():
@@ -356,7 +357,7 @@ class Command(BaseCommand):
                                 )
                                 singleDonation.save()
                                 migrated_donations += 1
-                                self.print("[√] Created Newstream (onetime) Donation (id: %d, amount: %s)" % (singleDonation.id, str(singleDonation.donation_amount)))
+                                # self.print("[√] Created Newstream (onetime) Donation (id: %d, amount: %s)" % (singleDonation.id, str(singleDonation.donation_amount)))
 
                 self.print('==============================')
                 self.print("Total Migrated Donations: %d" % migrated_donations)

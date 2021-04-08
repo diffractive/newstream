@@ -254,6 +254,9 @@ class Subscription(ClusterableModel):
         FieldPanel('linked_user_deleted', heading=_('Donor User Deleted?')),
     ]
 
+    def __str__(self):
+        return '#'+str(self.id)+' - '+self.user.fullname
+
     def isRecurringCancelled(self):
         return True if self.recurring_status == STATUS_CANCELLED else False
 
@@ -345,7 +348,7 @@ class Donation(ClusterableModel):
         verbose_name_plural = _('Donations')
 
     def __str__(self):
-        return '#'+str(self.id)+' - '+str(self.user)
+        return '#'+str(self.id)+' - '+self.donor_name()
 
     def isRecurring(self):
         return 'Yes' if self.is_recurring else 'No'

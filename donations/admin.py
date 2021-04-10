@@ -228,10 +228,10 @@ class DonationAdmin(ModelAdmin):
     add_to_settings_menu = False
     exclude_from_explorer = False
     list_display = ('donation_amount', 'gateway',
-                    'is_recurring', 'payment_status', 'user_column', 'donation_date',)
-    list_filter = ('is_recurring', 'payment_status', 'donation_date',)
+                    'is_recurring', 'payment_status', 'donor_column', 'donation_date',)
+    list_filter = ('is_test', 'is_recurring', 'payment_status', 'donation_date',)
     search_fields = ('transaction_id', 'donation_amount',
-                     'payment_status', 'is_recurring', 'donation_date',)
+                     'guest_email', 'user__email', 'donation_date',)
     inspect_view_enabled = True
     create_view_class = DonationCreateView
     inspect_view_class = DonationInspectView
@@ -245,11 +245,11 @@ class DonationAdmin(ModelAdmin):
         qs = super().get_queryset(request)
         return qs.filter(deleted=False)
     
-    def user_column(self, obj):
-        return obj.user.email if obj.user else '-'
+    def donor_column(self, obj):
+        return obj.user.email if obj.user else (obj.guest_email if obj.guest_email else '-')
 
-    user_column.admin_order_field = 'user'  # Allows column order sorting
-    user_column.short_description = _('User Email')  # Renames column head
+    donor_column.admin_order_field = 'user'  # Allows column order sorting
+    donor_column.short_description = _('Donor Email')  # Renames column head
 
 
 class SubscriptionAdmin(ModelAdmin):
@@ -261,10 +261,10 @@ class SubscriptionAdmin(ModelAdmin):
     add_to_settings_menu = False
     exclude_from_explorer = False
     list_display = ('recurring_amount', 'gateway',
-                    'recurring_status', 'user_column', 'subscribe_date',)
-    list_filter = ('recurring_status', 'subscribe_date',)
+                    'recurring_status', 'donor_column', 'subscribe_date',)
+    list_filter = ('is_test', 'recurring_status', 'subscribe_date',)
     search_fields = ('profile_id', 'recurring_amount',
-                     'recurring_status', 'subscribe_date',)
+                     'user__email', 'subscribe_date',)
     inspect_view_enabled = True
     create_view_class = SubscriptionCreateView
     inspect_view_class = SubscriptionInspectView
@@ -273,7 +273,7 @@ class SubscriptionAdmin(ModelAdmin):
     delete_view_class = SubscriptionDeleteView
     form_fields_exclude = ['created_by']
 
-    def user_column(self, obj):
+    def donor_column(self, obj):
         return obj.user.email if obj.user else '-'
 
     def get_queryset(self, request):
@@ -281,8 +281,8 @@ class SubscriptionAdmin(ModelAdmin):
         qs = super().get_queryset(request)
         return qs.filter(deleted=False)
 
-    user_column.admin_order_field = 'user'  # Allows column order sorting
-    user_column.short_description = _('User Email')  # Renames column head
+    donor_column.admin_order_field = 'user'  # Allows column order sorting
+    donor_column.short_description = _('Donor Email')  # Renames column head
 
 
 class DonationFormAdmin(ModelAdmin):

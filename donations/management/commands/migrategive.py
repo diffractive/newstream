@@ -56,9 +56,9 @@ class Command(BaseCommand):
 
         # Named (optional) arguments
         parser.add_argument(
-            '--backupdb',
+            '--verbose',
             action='store_true',
-            help='Tell script to backup newstream db before migration',
+            help='print all detailed process logs',
         )
 
     def subscription_status_mapping(self, givewp_status):
@@ -112,14 +112,6 @@ class Command(BaseCommand):
         self.stdout.write(msg)
 
     def handle(self, *args, **options):
-        # ask user if backup the newstream database
-        if options['backupdb']:
-            subp = Popen(["/bin/bash", "/srv/www/newstream/backup-db"], stdin=PIPE, stdout=PIPE)
-            outputs, errors = subp.communicate()
-            self.print("[√] Saved a backup of the newstream database at .backups/")
-        else:
-            self.print("...skipping database backup")
-
         password = getpass("Enter %s password: " % options['source_db'])
         try:
             with connect(
@@ -190,10 +182,12 @@ class Command(BaseCommand):
                                     um.save()
 
                             newUser.save()
-                            # self.print("[√] Created Newstream User (email: %s, name: %s)." % (newUser.email, newUser.fullname))
+                            if options['verbose']:
+                                self.print("[√] Created Newstream User (email: %s, name: %s)." % (newUser.email, newUser.fullname))
 
                             # add subscriptions
-                            # self.print("...Now processing queries of subscriptions of givewp donor %d" % donor_id)
+                            if options['verbose']:
+                                self.print("...Now processing queries of subscriptions of givewp donor %d" % donor_id)
                             cursor.execute(select_subscriptions_query)
                             subscriptionsResult = cursor.fetchall()
                             newSubscription = None
@@ -245,7 +239,8 @@ class Command(BaseCommand):
                                     subscribe_date=givewp_subscription_created.replace(tzinfo=timezone.utc)
                                 )
                                 newSubscription.save()
-                                # self.print("[√] Created Newstream Subscription (id: %d, profile_id: %s)" % (newSubscription.id, newSubscription.profile_id))
+                                if options['verbose']:
+                                    self.print("[√] Created Newstream Subscription (id: %d, profile_id: %s)" % (newSubscription.id, newSubscription.profile_id))
 
                                 # add donations linked to this subscription(need to link with the new subscription id in Newstream)
                                 # need to add the parent payment first, so it gets the smallest id among the renewals
@@ -266,7 +261,8 @@ class Command(BaseCommand):
                                 migrated_donations += 1
                                 # remove parentDonation id from donationids_list
                                 donationids_list.remove(givewp_parent_donation_id)
-                                # self.print("[√] Created Newstream Parent Donation (id: %d, amount: %s)" % (parentDonation.id, parentDonation.donation_amount))
+                                if options['verbose']:
+                                    self.print("[√] Created Newstream Parent Donation (id: %d, amount: %s)" % (parentDonation.id, parentDonation.donation_amount))
 
                                 # save all meta data as DonationPaymentMeta
                                 for key, value in parentDonationMetaDict.items():
@@ -316,7 +312,8 @@ class Command(BaseCommand):
                                     migrated_donations += 1
                                     # remove renewalDonation id from donationids_list
                                     donationids_list.remove(givewp_renewal_donation_id)
-                                    # self.print("[√] Created Newstream Renewal Donation (id: %d, amount: %s)" % (renewalDonation.id, renewalDonation.donation_amount))
+                                    if options['verbose']:
+                                        self.print("[√] Created Newstream Renewal Donation (id: %d, amount: %s)" % (renewalDonation.id, renewalDonation.donation_amount))
 
                                     # save all meta data as DonationPaymentMeta
                                     for key, value in renewalDonationMetaDict.items():
@@ -357,7 +354,8 @@ class Command(BaseCommand):
                                 )
                                 singleDonation.save()
                                 migrated_donations += 1
-                                # self.print("[√] Created Newstream (onetime) Donation (id: %d, amount: %s)" % (singleDonation.id, str(singleDonation.donation_amount)))
+                                if options['verbose']:
+                                    self.print("[√] Created Newstream (onetime) Donation (id: %d, amount: %s)" % (singleDonation.id, str(singleDonation.donation_amount)))
 
                 self.print('==============================')
                 self.print("Total Migrated Donations: %d" % migrated_donations)

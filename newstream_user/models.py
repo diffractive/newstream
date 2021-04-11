@@ -131,6 +131,7 @@ class UserDonationUpdatesLog(models.Model):
 class User(AbstractUser, ClusterableModel):
     # todo: let admin view/edit user meta at admin panel
     username = None
+    first_name = models.CharField(_('first name'), max_length=150, blank=True)
     email = models.EmailField(_('email address'), unique=True)
     opt_in_mailing_list = models.BooleanField(default=False)
     language_preference = models.CharField(

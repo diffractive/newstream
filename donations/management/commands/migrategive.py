@@ -210,6 +210,19 @@ class Command(BaseCommand):
                                 parent_donation_query = "select * from wp_posts where ID = %d;" % givewp_parent_donation_id
                                 cursor.execute(parent_donation_query)
                                 parentDonationResult = cursor.fetchone()
+                                if parentDonationResult is None:
+                                    # donation_id might not exist in wp_posts, probably deleted
+                                    # see https://givewp.com/documentation/core/donors/delete-donor
+                                    self.print("[x] Could not obtain post %i" % givewp_parent_donation_id)
+                                    # remove parentDonation id from donationids_list
+                                    donationids_list.remove(givewp_parent_donation_id)
+                                    # remove renewalDonation ids from donationids_list, query data for renewals of the subscription first
+                                    renewals_query = "select distinct donation_id from wp_give_donationmeta where meta_key = 'subscription_id' and meta_value = %d;" % givewp_subscription_id
+                                    cursor.execute(renewals_query)
+                                    renewalsResult = cursor.fetchall()
+                                    for renewalID in renewalsResult:
+                                        donationids_list.remove(renewalID[0])
+                                    continue
                                 parent_donation_status = parentDonationResult[7]
                                 parent_donation_datetime_local = sourcedb_tz.localize(parentDonationResult[2])
                                 parent_donation_datetime = parent_donation_datetime_local.astimezone(pytz.utc)
@@ -283,6 +296,13 @@ class Command(BaseCommand):
                                     renewal_donation_query = "select * from wp_posts where ID = %d" % givewp_renewal_donation_id
                                     cursor.execute(renewal_donation_query)
                                     renewalDonationResult = cursor.fetchone()
+                                    if renewalDonationResult is None:
+                                        # donation_id fetched from wp_give_donationmeta might not exist in wp_posts, probably deleted
+                                        # see https://givewp.com/documentation/core/donors/delete-donor
+                                        self.print("[x] Could not obtain post %i" % givewp_renewal_donation_id)
+                                        # remove renewalDonation id from donationids_list
+                                        donationids_list.remove(givewp_renewal_donation_id)
+                                        continue
                                     givewp_renewal_donation_status = renewalDonationResult[7]
                                     givewp_renewal_donation_datetime_local = sourcedb_tz.localize(renewalDonationResult[2])
                                     givewp_renewal_donation_datetime = givewp_renewal_donation_datetime_local.astimezone(pytz.utc)
@@ -321,10 +341,17 @@ class Command(BaseCommand):
                                         dpm.save()
 
                             # loop remaining (one-time) donations from donationids_list
+                            if options['verbose']:
+                                self.print("...Now processing one-time donations of givewp donor %d" % donor_id)
                             for givewp_donation_id in donationids_list:
                                 givewp_donation_query = "select * from wp_posts where ID = %d;" % givewp_donation_id
                                 cursor.execute(givewp_donation_query)
                                 givewpDonationResult = cursor.fetchone()
+                                if givewpDonationResult is None:
+                                    # donation_id fetched from wp_give_donationmeta might not exist in wp_posts, probably deleted
+                                    # see https://givewp.com/documentation/core/donors/delete-donor
+                                    self.print("[x] Could not obtain post %i" % givewp_donation_id)
+                                    continue
                                 givewp_donation_status = givewpDonationResult[7]
                                 givewp_donation_datetime_local = sourcedb_tz.localize(givewpDonationResult[2])
                                 givewp_donation_datetime = givewp_donation_datetime_local.astimezone(pytz.utc)

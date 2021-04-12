@@ -264,7 +264,7 @@ class Subscription(ClusterableModel):
         return True if self.recurring_status == STATUS_PROCESSING else False
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-subscribe_date', '-created_at']
         verbose_name = _('Subscription')
         verbose_name_plural = _('Subscriptions')
 
@@ -343,7 +343,7 @@ class Donation(ClusterableModel):
     ]
 
     class Meta:
-        ordering = ['-created_at']
+        ordering = ['-donation_date', '-created_at']
         verbose_name = _('Donation')
         verbose_name_plural = _('Donations')
 

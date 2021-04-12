@@ -132,7 +132,7 @@ class TodayStatisticsPanel:
         midnight = tz.localize(datetime.combine(today, time(0, 0)), is_dst=None)
         utc_dt = midnight.astimezone(utc) 
         today_donations = Donation.objects.filter(donation_date__gte=utc_dt, payment_status=STATUS_COMPLETE, deleted=False).count()
-        today_subscriptions = Subscription.objects.filter(created_at__gte=utc_dt, recurring_status=STATUS_ACTIVE, deleted=False).count()
+        today_subscriptions = Subscription.objects.filter(subscribe_date__gte=utc_dt, recurring_status=STATUS_ACTIVE, deleted=False).count()
         today_donors = User.objects.filter(date_joined__gte=utc_dt, is_staff=False).count()
         return mark_safe("<section class=\"summary nice-padding today-stats-panel\"><h1><strong>Today's Statistics ({})</strong></h1><ul class=\"stats\"><li><span>{}</span>New Completed Donations</li><li><span>{}</span>New Active Subscriptions</li><li><span>{}</span>New Donors</li></ul></section>".format(today, today_donations, today_subscriptions, today_donors))
 

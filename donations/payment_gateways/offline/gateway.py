@@ -79,7 +79,7 @@ class Gateway_Offline(PaymentGatewayManager):
             sendRecurringResumedNotifToDonor(
                 self.request, self.subscription)
             return {
-                'button-html': '<span class="btn-text">'+str(_('Pause Recurring Donation'))+'</span><span class="icon"></span>',
+                'button-text': str(_('Pause Recurring Donation')),
                 'recurring-status': STATUS_ACTIVE,
                 'success-message': str(_('Your recurring donation is resumed.'))
             }
@@ -93,7 +93,7 @@ class Gateway_Offline(PaymentGatewayManager):
             sendRecurringPausedNotifToDonor(
                 self.request, self.subscription)
             return {
-                'button-html': '<span class="btn-text">'+str(_('Resume Recurring Donation'))+'</span><span class="icon"></span>',
+                'button-text': str(_('Resume Recurring Donation')),
                 'recurring-status': STATUS_PAUSED,
                 'success-message': str(_('Your recurring donation is paused.'))
             }

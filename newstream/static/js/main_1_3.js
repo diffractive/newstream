@@ -1,3 +1,17 @@
+// Common functions
+function toggleSidenav() {
+    document.body.classList.toggle('sidenav-active');
+    document.body.classList.toggle('noscroll');
+}
+function escapeHtml(unsafe) {
+    return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
 // Close the popup menus if click elsewhere
 window.addEventListener("click", function () {
     //Hide the menus if visible

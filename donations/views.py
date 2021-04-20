@@ -273,7 +273,7 @@ def cancel_recurring(request):
                 gatewayManager.cancel_recurring_payment()
                 # add to the update actions log
                 addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL)
-                return JsonResponse({'status': 'success', 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
+                return JsonResponse({'status': 'success', 'button-text': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
             else:
                 raise PermissionError(_('You are not authorized to cancel subscription %(id)d.') % {'id': subscription_id})
         else:
@@ -303,7 +303,7 @@ def toggle_recurring(request):
                 resultSet = gatewayManager.toggle_recurring_payment()
                 # add to the update actions log
                 addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_PAUSE if resultSet['recurring-status'] == STATUS_PAUSED else SUBS_ACTION_RESUME)
-                return JsonResponse({'status': 'success', 'button-html': resultSet['button-html'], 'recurring-status': str(_(resultSet['recurring-status'].capitalize())), 'success-message': resultSet['success-message']})
+                return JsonResponse({'status': 'success', 'button-text': resultSet['button-text'], 'recurring-status': str(_(resultSet['recurring-status'].capitalize())), 'success-message': resultSet['success-message']})
             else:
                 raise PermissionError(_('You are not authorized to pause/resume subscription %(id)d.') % {'id': subscription_id})
         else:

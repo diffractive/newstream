@@ -33,13 +33,6 @@
     {% block extra_head %}
     {# Override this in templates to add extra stuff in the head #}
     {% endblock %}
-
-    <script>
-        function toggleSidenav() {
-            document.body.classList.toggle('sidenav-active');
-            document.body.classList.toggle('noscroll');
-        }
-    </script>
 </head>
 
 <body class="{% block body_class %}{% endblock %}">
@@ -57,7 +50,7 @@
     {% include "footer.html" %}
 
     {# Global javascript #}
-    <script type="text/javascript" src="{% static 'js/main_1_2.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/main_1_3.js' %}"></script>
 
     {% block extra_js %}
     {# Override this in templates to add extra javascript #}

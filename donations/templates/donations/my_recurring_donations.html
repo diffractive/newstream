@@ -204,7 +204,7 @@
                                     }
                                 }
                                 for (let statusTd of document.querySelectorAll(`td.recurring-status-td[data-id='${subscription_id}']`)) {
-                                    statusTd.innerHTML = data['recurring-status'];
+                                    statusTd.innerText = data['recurring-status'];
                                 }
                             } else {
                                 nsAlert(data['reason']);
@@ -223,10 +223,10 @@
             wrapper.addEventListener("click", function (event) {
                 let subscription_id = wrapper.getAttribute('data-id');
                 threeDotsLoading(subscription_id);
-                let innerHTML = wrapper.getElementsByClassName("btn-text")[0].innerHTML;
+                let innerText = wrapper.getElementsByClassName("btn-text")[0].innerText;
                 var toggleBox = new ConfirmBox( {
                     boxid: 'confirm-toggle-box',
-                    header_text: 'Confirm ' + innerHTML + '?',
+                    header_text: 'Confirm ' + innerText + '?',
                     ok: function() {
                         postData('{% url "donations:toggle-recurring" %}', { subscription_id: subscription_id })
                         .then(data => {
@@ -235,10 +235,10 @@
                             if (data['status'] == 'success') {
                                 nsAlert(data['success-message']);
                                 for (let toggleBtn of document.querySelectorAll(`button.toggle-recurring-donation[data-id='${subscription_id}']`)) {
-                                    toggleBtn.innerHTML = data['button-html'];
+                                    toggleBtn.querySelector('.btn-text').innerText = data['button-text'];
                                 }
                                 for (let statusTd of document.querySelectorAll(`td.recurring-status-td[data-id='${subscription_id}']`)) {
-                                    statusTd.innerHTML = data['recurring-status'];
+                                    statusTd.innerText = data['recurring-status'];
                                 }
                             } else {
                                 nsAlert(data['reason']);

@@ -56,14 +56,14 @@
                 if (result.error) {
                     document.getElementsByClassName('redirect-loading-div')[0].classList.add('hidden');
                     document.getElementsByClassName('error-div')[0].classList.remove('hidden');
-                    document.getElementById('error-msg-stripe').innerHTML = result.error.message;
+                    document.getElementById('error-msg-stripe').innerText = result.error.message;
                 }
             })
             .catch(function (error) {
                 console.error('Error:', error);
                 document.getElementsByClassName('redirect-loading-div')[0].classList.add('hidden');
                 document.getElementsByClassName('error-div')[0].classList.remove('hidden');
-                document.getElementById('error-msg-stripe').innerHTML = error;
+                document.getElementById('error-msg-stripe').innerText = error;
             });
     }, 100);
 </script>

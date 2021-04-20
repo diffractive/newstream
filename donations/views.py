@@ -267,21 +267,18 @@ def cancel_recurring(request):
                 return HttpResponse(status=400)
             subscription_id = int(json_data['subscription_id'])
             subscription = get_object_or_404(Subscription, id=subscription_id)
-            gatewayManager = InitPaymentGateway(
-                request, subscription=subscription)
-            gatewayManager.cancel_recurring_payment()
-            # add to the update actions log
-            addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL)
-            return JsonResponse({'status': 'success', 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
+            if subscription.user == request.user:
+                gatewayManager = InitPaymentGateway(
+                    request, subscription=subscription)
+                gatewayManager.cancel_recurring_payment()
+                # add to the update actions log
+                addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL)
+                return JsonResponse({'status': 'success', 'button-html': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
+            else:
+                raise PermissionError(_('You are not authorized to cancel subscription %(id)d.') % {'id': subscription_id})
         else:
             return HttpResponse(400)
-    except ValueError as e:
-        _exception(str(e))
-        return JsonResponse({'status': 'failure', 'reason': str(e)})
-    except RuntimeError as e:
-        _exception(str(e))
-        return JsonResponse({'status': 'failure', 'reason': str(e)})
-    except Exception as e:
+    except (ValueError, PermissionError, RuntimeError, Exception) as e:
         _exception(str(e))
         return JsonResponse({'status': 'failure', 'reason': str(e)})
 
@@ -297,24 +294,21 @@ def toggle_recurring(request):
                 return HttpResponse(status=400)
             subscription_id = int(json_data['subscription_id'])
             subscription = get_object_or_404(Subscription, id=subscription_id)
-            gatewayManager = InitPaymentGateway(
-                request, subscription=subscription)
-            # check if frequency limitation is enabled and passed
-            if not isUpdateSubsFrequencyLimitationPassed(gatewayManager):
-                raise Exception(_('You have already carried out 5 subscription update action in the last 5 minutes, our current limit is 5 subscription update actions(edit/pause/resume) every 5 minutes.'))
-            resultSet = gatewayManager.toggle_recurring_payment()
-            # add to the update actions log
-            addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_PAUSE if resultSet['recurring-status'] == STATUS_PAUSED else SUBS_ACTION_RESUME)
-            return JsonResponse({'status': 'success', 'button-html': resultSet['button-html'], 'recurring-status': str(_(resultSet['recurring-status'].capitalize())), 'success-message': resultSet['success-message']})
+            if subscription.user == request.user:
+                gatewayManager = InitPaymentGateway(
+                    request, subscription=subscription)
+                # check if frequency limitation is enabled and passed
+                if not isUpdateSubsFrequencyLimitationPassed(gatewayManager):
+                    raise Exception(_('You have already carried out 5 subscription update action in the last 5 minutes, our current limit is 5 subscription update actions(edit/pause/resume) every 5 minutes.'))
+                resultSet = gatewayManager.toggle_recurring_payment()
+                # add to the update actions log
+                addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_PAUSE if resultSet['recurring-status'] == STATUS_PAUSED else SUBS_ACTION_RESUME)
+                return JsonResponse({'status': 'success', 'button-html': resultSet['button-html'], 'recurring-status': str(_(resultSet['recurring-status'].capitalize())), 'success-message': resultSet['success-message']})
+            else:
+                raise PermissionError(_('You are not authorized to pause/resume subscription %(id)d.') % {'id': subscription_id})
         else:
             return HttpResponse(400)
-    except ValueError as e:
-        _exception(str(e))
-        return JsonResponse({'status': 'failure', 'reason': str(e)})
-    except RuntimeError as e:
-        _exception(str(e))
-        return JsonResponse({'status': 'failure', 'reason': str(e)})
-    except Exception as e:
+    except (ValueError, PermissionError, RuntimeError, Exception) as e:
         _exception(str(e))
         return JsonResponse({'status': 'failure', 'reason': str(e)})
 
@@ -323,29 +317,30 @@ def toggle_recurring(request):
 def edit_recurring(request, id):
     try:
         subscription = get_object_or_404(Subscription, id=id)
-        # Form object is initialized according to the specific gateway and if request.method=='POST'
-        form = InitEditRecurringPaymentForm(request, subscription)
-        if request.method == 'POST':
-            if form.is_valid():
-                # use gatewayManager to process the data in form.cleaned_data as required
-                gatewayManager = InitPaymentGateway(
-                    request, subscription=subscription)
-                # check if frequency limitation is enabled and passed
-                if not isUpdateSubsFrequencyLimitationPassed(gatewayManager):
-                    raise Exception(_('You have already carried out 5 subscription update action in the last 5 minutes, our current limit is 5 subscription update actions(edit/pause/resume) every 5 minutes.'))
-                original_value = gatewayManager.subscription.recurring_amount
-                gatewayManager.update_recurring_payment(form.cleaned_data)
-                new_value = gatewayManager.subscription.recurring_amount
-                # add to the update actions log
-                addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_UPDATE, 'Recurring Amount: %s -> %s' % (str(original_value), str(new_value)))
-                return redirect('donations:edit-recurring', id=id)
-    except ValueError as e:
+        if subscription.user == request.user:
+            # Form object is initialized according to the specific gateway and if request.method=='POST'
+            form = InitEditRecurringPaymentForm(request, subscription)
+            if request.method == 'POST':
+                if form.is_valid():
+                    # use gatewayManager to process the data in form.cleaned_data as required
+                    gatewayManager = InitPaymentGateway(
+                        request, subscription=subscription)
+                    # check if frequency limitation is enabled and passed
+                    if not isUpdateSubsFrequencyLimitationPassed(gatewayManager):
+                        raise Exception(_('You have already carried out 5 subscription update action in the last 5 minutes, our current limit is 5 subscription update actions(edit/pause/resume) every 5 minutes.'))
+                    original_value = gatewayManager.subscription.recurring_amount
+                    gatewayManager.update_recurring_payment(form.cleaned_data)
+                    new_value = gatewayManager.subscription.recurring_amount
+                    # add to the update actions log
+                    addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_UPDATE, 'Recurring Amount: %s -> %s' % (str(original_value), str(new_value)))
+                    return redirect('donations:edit-recurring', id=id)
+        else:
+            raise PermissionError(_('You are not authorized to edit subscription %(id)d.') % {'id': id})
+    except PermissionError as e:
         _exception(str(e))
         messages.add_message(request, messages.ERROR, str(e))
-    except RuntimeError as e:
-        _exception(str(e))
-        messages.add_message(request, messages.ERROR, str(e))
-    except Exception as e:
+        return redirect('donations:my-recurring-donations')
+    except (ValueError, RuntimeError, Exception) as e:
         _exception(str(e))
         messages.add_message(request, messages.ERROR, str(e))
     return render(request, getEditRecurringPaymentHtml(subscription), {'form': form, 'subscription': subscription})

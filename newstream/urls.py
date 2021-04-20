@@ -25,7 +25,7 @@ urlpatterns = [
 urlpatterns += i18n_patterns(
     path('documents/', include(wagtaildocs_urls)),
 
-    path('search/', search_views.search, name='search'),
+    # path('search/', search_views.search, name='search'),
 
     path('donations/', include('donations.urls')),
 

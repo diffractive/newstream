@@ -369,7 +369,15 @@ def my_recurring_donations(request):
 def my_renewals(request, id):
     # deleted=False should be valid whether soft-delete mode is on or off
     subscription = get_object_or_404(Subscription, id=id, deleted=False)
-    renewals = Donation.objects.filter(
-        subscription=subscription, deleted=False).order_by('-donation_date')
-    siteSettings = getSiteSettings(request)
-    return render(request, 'donations/my_renewals.html', {'subscription': subscription, 'renewals': renewals, 'siteSettings': siteSettings})
+    try:
+        if subscription.user == request.user:
+            renewals = Donation.objects.filter(
+                subscription=subscription, deleted=False).order_by('-donation_date')
+            siteSettings = getSiteSettings(request)
+            return render(request, 'donations/my_renewals.html', {'subscription': subscription, 'renewals': renewals, 'siteSettings': siteSettings})
+        else:
+            raise PermissionError(_('You are not authorized to view renewals of subscription %(id)d.') % {'id': id})
+    except PermissionError as e:
+        _exception(str(e))
+        messages.add_message(request, messages.ERROR, str(e))
+        return redirect('donations:my-recurring-donations')

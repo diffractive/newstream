@@ -103,7 +103,7 @@ def verify_paypal_response(request):
             return gatewayManager.process_webhook_response()
     except WebhookNotProcessedError as error:
         # beware: this exception should be reserved for the incoming but not processed webhook events
-        _exception(str(error))
+        _debug(str(error))
         # return 200 to prevent resending of paypal server of those requests
         return HttpResponse(status=200)
     except ValueError as error:

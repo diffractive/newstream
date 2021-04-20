@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 
 from newstream.classes import WebhookNotProcessedError
-from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, _exception, object_to_json
+from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, _exception, _debug, object_to_json
 from donations.models import Donation, DonationPaymentMeta
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.stripe.functions import initStripeApiKey, formatDonationAmount
@@ -132,7 +132,7 @@ def verify_stripe_response(request):
         return gatewayManager.process_webhook_response()
     except WebhookNotProcessedError as error:
         # beware: this exception should be reserved for the incoming but not processed webhook events, or events processed but data not needed further action
-        _exception(str(error))
+        _debug(str(error))
         # return 200 for attaining a higher rate of successful response rate at Stripe backend
         return HttpResponse(status=200)
     except ValueError as e:

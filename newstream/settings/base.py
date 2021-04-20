@@ -176,6 +176,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Using secure cookies, see https://docs.djangoproject.com/en/3.0/topics/security/#ssl-https
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,

@@ -23,7 +23,7 @@ def create_checkout_session(request):
         stripeSettings = getStripeSettings(request)
         siteSettings = getSiteSettings(request)
 
-        donation_id = request.session.get('donation_id', None)
+        donation_id = request.session.pop('donation_id', None)
         if not donation_id:
             raise ValueError(_("No donation_id in session"))
 

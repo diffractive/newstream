@@ -25,7 +25,7 @@ def create_paypal_transaction(request):
     try:
         paypalSettings = getPayPalSettings(request)
 
-        donation_id = request.session.get('donation_id', None)
+        donation_id = request.session.pop('donation_id', None)
         if not donation_id:
             raise ValueError(_("Missing donation_id in session"))
         donation = Donation.objects.get(pk=int(donation_id))

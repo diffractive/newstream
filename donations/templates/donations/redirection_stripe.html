@@ -17,6 +17,7 @@
 </div>
 
 <div class="container-tight redirect-loading-div flex flex-col justify-center items-center">
+    {% csrf_token %}
     <img src="{% static 'img/loading-spinner.gif' %}" class="w-10 h-10 lg:w-16 lg:h-16 mb-4" alt="loading-spinner">
     <p>{% trans 'Redirecting to Payment Gateway Page...' %}</p>
 </div>
@@ -27,15 +28,22 @@
     <p id='error-msg-stripe'></p>
 </div>
 
+{% endblock content %}
+
+{% block extra_js %}
 <script type="text/javascript">
     // Create an instance of the Stripe object with your publishable API key
     var stripe = Stripe('{{ publishable_key }}');
     let serverError = false;
+    let data = new FormData();
+    data.append('csrfmiddlewaretoken', getCookie('csrftoken'));
 
     setTimeout(() => {
         // Create a new Checkout Session using the server-side endpoint you
         fetch('{% url "donations:create-stripe-session" %}', {
             method: 'POST',
+            body: data,
+            credentials: 'same-origin',
         })
             .then(function (response) {
                 if (!response.ok) { // not 2xx codes
@@ -45,7 +53,7 @@
             })
             .then(function (session) {
                 if (serverError) {
-                    throw new Error(`${data['issue']}: ${data['description']}`)
+                    throw new Error(`${session['issue']}: ${session['description']}`)
                 }
                 return stripe.redirectToCheckout({ sessionId: session.id });
             })
@@ -67,4 +75,4 @@
             });
     }, 100);
 </script>
-{% endblock content %}
+{% endblock extra_js %}

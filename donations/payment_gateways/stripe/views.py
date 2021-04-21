@@ -12,7 +12,6 @@ from donations.payment_gateways.stripe.functions import initStripeApiKey, format
 from donations.payment_gateways.stripe.factory import Factory_Stripe
 
 
-@csrf_exempt
 def create_checkout_session(request):
     errorObj = {
         "issue": "Exception",

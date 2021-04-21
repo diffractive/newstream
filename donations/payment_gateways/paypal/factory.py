@@ -6,7 +6,7 @@ from paypalrestsdk.notifications import WebhookEvent
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import _debug
-from donations.models import Donation
+from donations.models import Donation, DonationPaymentMeta
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.paypal.gateway import Gateway_Paypal
 from donations.payment_gateways.paypal.constants import *

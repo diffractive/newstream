@@ -29,6 +29,9 @@
     <p id='error-msg-stripe'></p>
 </div>
 
+{% endblock content %}
+
+{% block extra_js %}
 <script>
     let serverError = false;
     let data = new FormData();
@@ -61,4 +64,4 @@
             });
     }, 100);
 </script>
-{% endblock content %}
+{% endblock extra_js %}

@@ -36,9 +36,15 @@
     let serverError = false;
     let data = new FormData();
     data.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+    let request = new Request(
+        '{% url "donations:create-paypal-transaction" %}',
+        {headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        }}
+    );
     setTimeout(() => {
         // Create a new Checkout Session using the server-side endpoint you
-        fetch('{% url "donations:create-paypal-transaction" %}', {
+        fetch(request, {
             method: 'POST',
             body: data,
             credentials: 'same-origin',

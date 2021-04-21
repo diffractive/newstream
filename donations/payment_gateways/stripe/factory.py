@@ -223,6 +223,13 @@ class Factory_Stripe(PaymentGatewayFactory):
             donation = Donation.objects.get(pk=donation_id)
             kwargs = {}
             kwargs['session'] = session
+            # raise error if stripe_session_id already found in DonationPaymentMeta
+            dpm = DonationPaymentMeta.objects.filter(donation=donation, field_key='stripe_session_id', field_value=session_id)
+            if len(dpm) >= 1:
+                raise ValueError(_("Stripe session id found. Return request from Stripe is already invalid."))
+            else:
+                dpm = DonationPaymentMeta(donation=donation, field_key='stripe_session_id', field_value=session_id)
+                dpm.save()
             return Factory_Stripe.initGateway(request, donation, None, **kwargs)
         except Donation.DoesNotExist:
             raise ValueError(_('No matching Donation found, donation_id: ')+str(donation_id))

@@ -142,6 +142,23 @@ class Factory_Paypal(PaymentGatewayFactory):
         
         try:
             donation = Donation.objects.get(pk=donation_id)
+
+            if request.GET.get('subscription_id', None):
+                # raise error if paypal_subscription_id already found in DonationPaymentMeta
+                dpm = DonationPaymentMeta.objects.filter(donation=donation, field_key='paypal_subscription_id', field_value=request.GET.get('subscription_id'))
+                if len(dpm) >= 1:
+                    raise ValueError(_("PayPal subscription id found. Return request from PayPal is already invalid."))
+                else:
+                    dpm = DonationPaymentMeta(donation=donation, field_key='paypal_subscription_id', field_value=request.GET.get('subscription_id'))
+                    dpm.save()
+            elif request.GET.get('token', None):
+                # raise error if paypal_token already found in DonationPaymentMeta
+                dpm = DonationPaymentMeta.objects.filter(donation=donation, field_key='paypal_token', field_value=request.GET.get('token'))
+                if len(dpm) >= 1:
+                    raise ValueError(_("PayPal token found. Return request from PayPal is already invalid."))
+                else:
+                    dpm = DonationPaymentMeta(donation=donation, field_key='paypal_token', field_value=request.GET.get('token'))
+                    dpm.save()
             return Factory_Paypal.initGateway(request, donation, None, **kwargs)
         except Donation.DoesNotExist:
             raise ValueError(_("Donation object not found by id: ")+str(donation_id))

@@ -17,6 +17,7 @@
 </div>
 
 <div class="container-tight redirect-loading-div flex flex-col justify-center items-center">
+    {% csrf_token %}
     <img src="{% static 'img/loading-spinner.gif' %}" class="w-10 h-10 lg:w-16 lg:h-16 mb-4" alt="loading-spinner">
     <p>{% trans 'Redirecting to Payment Gateway Page...' %}</p>
     <!-- <div id="paypal-button-container"></div> -->
@@ -30,10 +31,14 @@
 
 <script>
     let serverError = false;
+    let data = new FormData();
+    data.append('csrfmiddlewaretoken', getCookie('csrftoken'));
     setTimeout(() => {
         // Create a new Checkout Session using the server-side endpoint you
         fetch('{% url "donations:create-paypal-transaction" %}', {
             method: 'POST',
+            body: data,
+            credentials: 'same-origin',
         })
             .then(function (response) {
                 if (!response.ok) { // not 2xx codes

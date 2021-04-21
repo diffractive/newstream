@@ -15,7 +15,6 @@ from donations.payment_gateways import Factory_Paypal
 from donations.payment_gateways.paypal.functions import create_paypal_order, capture_paypal_order, listProducts, createProduct, createPlan, createSubscription
 
 
-@csrf_exempt
 def create_paypal_transaction(request):
     errorObj = {
         "issue": "Exception",

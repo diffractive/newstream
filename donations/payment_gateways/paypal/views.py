@@ -136,6 +136,10 @@ def return_from_paypal(request):
                     gatewayManager.donation.save()
             else:
                 _debug('PayPal: Order status after Paypal returns: '+gatewayManager.order_status)
+        else:
+            # save the subscription_id as profile_id
+            gatewayManager.donation.subscription.profile_id = request.GET.get('subscription_id')
+            gatewayManager.donation.subscription.save()
     except IOError as error:
         request.session['error-title'] = str(_("IOError"))
         request.session['error-message'] = str(error)

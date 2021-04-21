@@ -106,7 +106,7 @@ INSTALLED_APPS = [
 
     # newstream apps
     'pages',
-    'search',
+    # 'search',
     'site_settings',
     'donations',
     'email_campaigns',

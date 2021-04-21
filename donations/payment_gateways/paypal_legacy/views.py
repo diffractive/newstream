@@ -13,12 +13,11 @@ def verify_paypal_legacy_response(request):
 
         if gatewayManager:
             return gatewayManager.process_webhook_response()
+        else:
+            raise Exception(_('gatewayManager for paypal-legacy not initialized.'))
     except ValueError as error:
         _exception(str(error))
         return HttpResponse(status=500)
     except Exception as error:
         _exception(str(error))
         return HttpResponse(status=500)
-        
-    # return fine for now, only testing purposes
-    return HttpResponse(status=200)

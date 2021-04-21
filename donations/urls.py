@@ -22,7 +22,6 @@ urlpatterns = [
     path('return-from-stripe/', return_from_stripe, name='return-from-stripe'),
     path('cancel-from-stripe/', cancel_from_stripe, name='cancel-from-stripe'),
     path('create-paypal-transaction/', create_paypal_transaction, name='create-paypal-transaction'),
-    path('capture-paypal-order/', capture_paypal_order, name='capture-paypal-order'),
     path('return-from-paypal/', return_from_paypal, name='return-from-paypal'),
     path('cancel-from-paypal/', cancel_from_paypal, name='cancel-from-paypal'),
     path('verify-paypal-response/', verify_paypal_response, name='verify-paypal-response'),

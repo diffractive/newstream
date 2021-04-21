@@ -226,8 +226,10 @@ def cancelled(request):
             pk=request.session['return-donation-id'])
         paymentMethod = displayGateway(donation)
         donation.payment_status = STATUS_CANCELLED
-        # No need to update recurring_status as no subscription object has been created yet
         donation.save()
+        if donation.subscription:
+            donation.subscription.recurring_status = STATUS_CANCELLED
+            donation.subscription.save()
         # logs user in
         if donation.user:
             login(request, donation.user,

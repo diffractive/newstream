@@ -259,7 +259,6 @@ def revoked(request):
 
 
 @login_required
-@csrf_exempt
 def cancel_recurring(request):
     try:
         if request.method == 'POST':
@@ -286,7 +285,6 @@ def cancel_recurring(request):
 
 
 @login_required
-@csrf_exempt
 def toggle_recurring(request):
     try:
         if request.method == 'POST':

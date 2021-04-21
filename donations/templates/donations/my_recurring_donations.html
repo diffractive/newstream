@@ -14,6 +14,7 @@
     </div>
 </div>
 <div class="container">
+    {% csrf_token %}
     {% include "donations/donation_view_switcher.html" %}
     <div class="lg:hidden flex flex-col">
         {% if subscriptions %}
@@ -186,7 +187,7 @@
                     boxid: 'confirm-cancel-box',
                     header_text: "We're sorry to hear you want to cancel your monthly donation. Your donation is so important to us. Are you sure you want to cancel?",
                     ok: function() {
-                        postData('{% url "donations:cancel-recurring" %}', { subscription_id: subscription_id })
+                        postData('{% url "donations:cancel-recurring" %}', { subscription_id: subscription_id, csrfmiddlewaretoken: getCookie('csrftoken') })
                         .then(data => {
                             removeLoadingState(wrapper);
                             threeDotsNormal(subscription_id);
@@ -228,7 +229,7 @@
                     boxid: 'confirm-toggle-box',
                     header_text: 'Confirm ' + innerText + '?',
                     ok: function() {
-                        postData('{% url "donations:toggle-recurring" %}', { subscription_id: subscription_id })
+                        postData('{% url "donations:toggle-recurring" %}', { subscription_id: subscription_id, csrfmiddlewaretoken: getCookie('csrftoken') })
                         .then(data => {
                             removeLoadingState(wrapper);
                             threeDotsNormal(subscription_id);

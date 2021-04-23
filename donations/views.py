@@ -260,6 +260,18 @@ def revoked(request):
 
 @login_required
 def cancel_recurring(request):
+    """ This is called when the user clicks confirm when cancelling a recurring donation on page donations.views.my_recurring_donations
+        We only cancel the subscription if it is owned by request.user
+        Action is logged for the corresponding subscription, action logs can be viewed by inspecting the subscription's 'Action Log' tab
+
+        Sample (JSON) request: {
+            'subscription_id': 1,
+            'csrfmiddlewaretoken': 'LZSpOsb364pn9R3gEPXdw2nN3dBEi7RWtMCBeaCse2QawCFIndu93fD3yv9wy0ij'
+        }
+        
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
     try:
         if request.method == 'POST':
             json_data = json.loads(request.body)
@@ -286,6 +298,18 @@ def cancel_recurring(request):
 
 @login_required
 def toggle_recurring(request):
+    """ This is called when the user clicks the 'Pause/Resume recurring donation' button on page donations.views.my_recurring_donations
+        We only update the subscription if it is owned by request.user
+        Action is logged for the corresponding subscription, action logs can be viewed by inspecting the subscription's 'Action Log' tab
+
+        Sample request: {
+            'subscription_id': 1,
+            'csrfmiddlewaretoken': 'LZSpOsb364pn9R3gEPXdw2nN3dBEi7RWtMCBeaCse2QawCFIndu93fD3yv9wy0ij'
+        }
+        
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
     try:
         if request.method == 'POST':
             json_data = json.loads(request.body)
@@ -315,6 +339,18 @@ def toggle_recurring(request):
 
 @login_required
 def edit_recurring(request, id):
+    """ This is called when the user clicks the 'Edit recurring donation' button on page donations.views.my_recurring_donations
+        We only update the subscription if it is owned by request.user
+        Action is logged for the corresponding subscription, action logs can be viewed by inspecting the subscription's 'Action Log' tab
+
+        Sample (Form) request: {
+            'recurring_amount': 10.00,
+            'billing_cycle_now': 'on'
+        }
+        * only Stripe's form has the billing_cycle_now option
+        
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
     try:
         subscription = get_object_or_404(Subscription, id=id)
         if subscription.user == request.user:

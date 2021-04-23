@@ -13,6 +13,19 @@ from donations.payment_gateways.stripe.factory import Factory_Stripe
 
 
 def create_checkout_session(request):
+    """ When the user reaches last step after confirming the donation,
+        user is redirected via gatewayManager.redirect_to_gateway_url(), which renders redirection_stripe.html
+        
+        This function calls to Stripe Api to create a Stripe Session object,
+        then this function returns the stripe session id to the stripe js api 'stripe.redirectToCheckout({ sessionId: session.id })' for the redirection to Stripe's checkout page
+
+        Sample (JSON) request: {
+            'csrfmiddlewaretoken': 'LZSpOsb364pn9R3gEPXdw2nN3dBEi7RWtMCBeaCse2QawCFIndu93fD3yv9wy0ij'
+        }
+        
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
     errorObj = {
         "issue": "Exception",
         "description": ""
@@ -124,6 +137,22 @@ def create_checkout_session(request):
 
 @csrf_exempt
 def verify_stripe_response(request):
+    """ This endpoint should be set as the listening endpoint for the webhook set in Stripe's dashboard
+        The verification of the incoming Stripe requests is done via Factory_Stripe.initGatewayByVerification(request)
+        The webhook should be set with the following events only:
+            payment_intent.succeeded
+            customer.subscription.deleted
+            customer.subscription.updated
+            invoice.paid
+            invoice.created
+            checkout.session.completed
+
+        For more info on how to build this webhook endpoint, refer to Stripe documentation:
+        https://stripe.com/docs/webhooks
+        
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
     try:
         # Set up gateway manager object with its linking donation, session, etc...
         gatewayManager = Factory_Stripe.initGatewayByVerification(request)
@@ -153,6 +182,18 @@ def verify_stripe_response(request):
 
 @csrf_exempt
 def return_from_stripe(request):
+    """ This endpoint is submitted as the success_url when creating the Stripe session at create_checkout_session(request)
+        This url should receive a single GET param: 'stripe_session_id'
+        In Factory_Stripe.initGatewayByReturn(request), we save the stripe_session_id into the donationPaymentMeta data upon a successful request;
+        exception will be raised if the endpoint is reached but a previous meta value is found,
+        this is done to prevent this endpoint being called unlimitedly
+
+        For more info on how to build this endpoint, refer to Stripe documentation:
+        https://stripe.com/docs/payments/checkout/custom-success-page
+        
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
     try:
         gatewayManager = Factory_Stripe.initGatewayByReturn(request)
         request.session['return-donation-id'] = gatewayManager.donation.id
@@ -174,6 +215,15 @@ def return_from_stripe(request):
 
 @csrf_exempt
 def cancel_from_stripe(request):
+    """ This endpoint is submitted as the cancel_url when creating the Stripe session at create_checkout_session(request)
+        This url should receive a single GET param: 'stripe_session_id'
+        In Factory_Stripe.initGatewayByReturn(request), we save the stripe_session_id into the donationPaymentMeta data upon a successful request;
+        exception will be raised if the endpoint is reached but a previous meta value is found,
+        this is done to prevent this endpoint being called unlimitedly, which would set the payment status as Cancelled each time
+
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
     try:
         gatewayManager = Factory_Stripe.initGatewayByReturn(request)
         request.session['return-donation-id'] = gatewayManager.donation.id

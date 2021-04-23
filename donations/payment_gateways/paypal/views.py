@@ -16,6 +16,19 @@ from donations.payment_gateways.paypal.functions import create_paypal_order, cap
 
 
 def create_paypal_transaction(request):
+    """ When the user reaches last step after confirming the donation,
+        user is redirected via gatewayManager.redirect_to_gateway_url(), which renders redirection_paypal.html
+        
+        This function calls to PayPal Api to create a PayPal subscription object or PayPal order(one-time donation),
+        then this function returns the approval_link to frontend js and to redirect to PayPal's checkout page
+
+        Sample (JSON) request: {
+            'csrfmiddlewaretoken': 'LZSpOsb364pn9R3gEPXdw2nN3dBEi7RWtMCBeaCse2QawCFIndu93fD3yv9wy0ij'
+        }
+        
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
     errorObj = {
         "issue": "Exception",
         "description": ""
@@ -94,6 +107,21 @@ def create_paypal_transaction(request):
 
 @csrf_exempt
 def verify_paypal_response(request):
+    """ This endpoint should be set as the listening endpoint for the webhook set in PayPal's developer dashboard(within a REST API App)
+        The verification of the incoming PayPal requests is done via Factory_Paypal.initGatewayByVerification(request)
+        The webhook should be set with the following events only:
+            Billing subscription activated
+            Billing subscription cancelled
+            Billing subscription updated
+            Payment capture completed
+            Payment sale completed
+
+        For more info on how to build this webhook endpoint, refer to PayPal documentation:
+        https://developer.paypal.com/docs/subscriptions/integrate/
+        
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
     try:
         # Set up gateway manager object with its linking donation, session, etc...
         gatewayManager = Factory_Paypal.initGatewayByVerification(request)
@@ -117,6 +145,15 @@ def verify_paypal_response(request):
 
 @csrf_exempt
 def return_from_paypal(request):
+    """ This endpoint is submitted as the return_url when creating the PayPal Subscription/Order at create_paypal_transaction(request)
+        This url should receive GET params: 'token' and 'subscription_id'(only recurring payments); 'ba_token' is not used
+        In Factory_PayPal.initGatewayByReturn(request), we save the subscription_id/token into the donationPaymentMeta data upon a successful request;
+        exception will be raised if the endpoint is reached but a previous meta value is found,
+        this is done to prevent this endpoint being called unlimitedly
+
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
     try:
         gatewayManager = Factory_Paypal.initGatewayByReturn(request)
         request.session['return-donation-id'] = gatewayManager.donation.id
@@ -156,6 +193,15 @@ def return_from_paypal(request):
 
 @csrf_exempt
 def cancel_from_paypal(request):
+    """ This endpoint is submitted as the cancel_url when creating the PayPal Subscription/Order at create_paypal_transaction(request)
+        This url should receive GET params: 'token' and 'subscription_id'(only recurring payments); 'ba_token' is not used
+        In Factory_PayPal.initGatewayByReturn(request), we save the subscription_id/token into the donationPaymentMeta data upon a successful request;
+        exception will be raised if the endpoint is reached but a previous meta value is found,
+        this is done to prevent this endpoint being called unlimitedly, which would set the payment status as Cancelled each time
+
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
     try:
         gatewayManager = Factory_Paypal.initGatewayByReturn(request)
         request.session['return-donation-id'] = gatewayManager.donation.id

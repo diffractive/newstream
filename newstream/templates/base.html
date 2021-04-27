@@ -12,7 +12,9 @@
         {% endblock %}
         {% block title_suffix %}
         {% with self.get_site.site_name as site_name %}
-        {% if site_name %}- {{ site_name }}{% endif %}
+        {% if not self.seo_title %}
+            {% if site_name %}- {{ site_name }}{% endif %}
+        {% endif %}
         {% endwith %}
         {% endblock %}
     </title>

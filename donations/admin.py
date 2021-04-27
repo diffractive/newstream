@@ -294,6 +294,7 @@ class DonationFormAdmin(ModelAdmin):
     exclude_from_explorer = False
     list_display = ('title', 'description')
     search_fields = ('title', 'description')
+    form_view_extra_js = ['js/admin_defaultstep.js']
 
 
 class DonationGroup(ModelAdminGroup):

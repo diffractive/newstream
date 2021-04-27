@@ -147,11 +147,15 @@ def displayGateway(instance):
     return getattr(siteSettings, instance.gateway.frontend_label_attr_name, instance.gateway.title)
 
 
+def displayAmountWithCurrency(currency_code, amount, trim_decimals=False):
+    currency_set = getCurrencyDictAt(currency_code)
+    if trim_decimals and (amount % 1 == 0):
+        amount = int(amount)
+    return mark_safe(html.unescape(currency_code+" "+currency_set['symbol']+str(amount if currency_set['setting']['number_decimals'] != 0 else int(amount))))
+
 def displayDonationAmountWithCurrency(donation):
-    currency_set = getCurrencyDictAt(donation.currency)
-    return mark_safe(html.unescape(donation.currency+" "+currency_set['symbol']+str(donation.donation_amount if currency_set['setting']['number_decimals'] != 0 else int(donation.donation_amount))))
+    return displayAmountWithCurrency(donation.currency, donation.donation_amount)
 
 
 def displayRecurringAmountWithCurrency(subscription):
-    currency_set = getCurrencyDictAt(subscription.currency)
-    return mark_safe(html.unescape(subscription.currency+" "+currency_set['symbol']+str(subscription.recurring_amount if currency_set['setting']['number_decimals'] != 0 else int(subscription.recurring_amount))))
+    return displayAmountWithCurrency(subscription.currency, subscription.recurring_amount)

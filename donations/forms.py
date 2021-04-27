@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.contrib.forms.forms import FormBuilder
 
 from newstream.functions import getSiteSettings
-from donations.functions import getCurrencyDictAt
+from donations.functions import getCurrencyDictAt, displayAmountWithCurrency
 from donations.models import TempDonation
 User = get_user_model()
 
@@ -59,14 +59,13 @@ class DonationDetailsForm(forms.Form):
         elif form.isAmountStepped():
             amountSteps = form.amount_steps.all()
             self.fields["donation_amount"] = forms.ChoiceField(
-                choices=[(x.step, html.unescape(currency_set['symbol']) + ' ' + str(x.step)) for x in amountSteps], label=amount_label)
+                choices=[(x.step, displayAmountWithCurrency(self.global_settings.currency, x.step, True)) for x in amountSteps], label=amount_label)
         elif form.isAmountCustom():
             self.fields["donation_amount"] = forms.DecimalField(
                 label=custom_amount_label, decimal_places=currency_set['setting']['number_decimals'])
         elif form.isAmountSteppedCustom():
             amountSteps = form.amount_steps.all()
-            select_choices = [('custom', _('Custom Amount')), *[(x.step, html.unescape(
-                currency_set['symbol']) + ' ' + str(x.step)) for x in amountSteps]]
+            select_choices = [('custom', _('Custom Amount')), *[(x.step, displayAmountWithCurrency(self.global_settings.currency, x.step, True)) for x in amountSteps]]
             if len(amountSteps) > 10:
                 select_choices.append(('custom', _('Custom Amount')))
             self.fields["donation_amount"] = forms.ChoiceField(

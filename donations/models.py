@@ -42,9 +42,11 @@ class AmountStep(models.Model):
                        related_name='amount_steps')
     step = models.DecimalField(default=Decimal(
         0), max_digits=20, decimal_places=2)
+    default = models.BooleanField(default=False)
 
     panels = [
         FieldPanel('step', heading=_('Step')),
+        FieldPanel('default', heading=_('Is Default?'), classname='is-default-amount-step'),
     ]
 
     class Meta:

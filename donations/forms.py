@@ -65,10 +65,15 @@ class DonationDetailsForm(forms.Form):
                 label=custom_amount_label, decimal_places=currency_set['setting']['number_decimals'])
         elif form.isAmountSteppedCustom():
             amountSteps = form.amount_steps.all()
-            select_choices = [*[(x.step, html.unescape(
-                currency_set['symbol']) + ' ' + str(x.step)) for x in amountSteps], ('custom', _('Custom Amount'))]
+            select_choices = [('custom', _('Custom Amount')), *[(x.step, html.unescape(
+                currency_set['symbol']) + ' ' + str(x.step)) for x in amountSteps]]
+            if len(amountSteps) > 10:
+                select_choices.append(('custom', _('Custom Amount')))
             self.fields["donation_amount"] = forms.ChoiceField(
                 choices=select_choices, label=amount_label)
+            for amountstep in amountSteps:
+                if amountstep.default:
+                    self.fields["donation_amount"].initial = amountstep.step
             self.fields["donation_amount_custom"] = forms.DecimalField(required=False, label=custom_amount_label, decimal_places=currency_set['setting']['number_decimals'])
 
         # construct donation meta fields from form configuration

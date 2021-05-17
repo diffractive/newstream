@@ -43,6 +43,12 @@ class DonationDetailsForm(forms.Form):
         self.global_settings = getSiteSettings(request)
         self.fields["currency"].initial = self.global_settings.currency
 
+        # set default donation frequency
+        if form.isDefaultMonthly():
+            self.fields["donation_frequency"].initial = 'monthly'
+        else:
+            self.fields["donation_frequency"].initial = 'onetime'
+
         # construct payment gateway field
         gateways = form.allowed_gateways.all()
         self.fields["payment_gateway"] = forms.ChoiceField(

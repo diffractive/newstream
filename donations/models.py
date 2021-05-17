@@ -3,6 +3,7 @@ from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
 from django.contrib.auth import get_user_model
+from django.forms.widgets import RadioSelect
 from django.utils.translation import gettext_lazy as _
 
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, RichTextField
@@ -61,8 +62,14 @@ class DonationForm(ClusterableModel):
         ('custom', _('Custom Amount')),
         ('stepped_custom', _('Fixed Steps with Custom Amount Option')),
     ]
+    DEFAULT_FREQ_CHOICES = [
+        ('onetime', _('One-time')),
+        ('monthly', _('Monthly')),
+    ]
     title = models.CharField(max_length=191, unique=True)
     description = models.TextField(blank=True)
+    default_frequency = models.CharField(
+        max_length=20, choices=DEFAULT_FREQ_CHOICES, blank=False, default='onetime')
     amount_type = models.CharField(
         max_length=20, choices=AMOUNT_TYPE_CHOICES)
     fixed_amount = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=2,
@@ -76,6 +83,7 @@ class DonationForm(ClusterableModel):
     panels = [
         FieldPanel('title', heading=_('Title')),
         FieldPanel('description', heading=_('Description')),
+        FieldPanel('default_frequency', heading=_('Default Donation Frequency'), widget=RadioSelect),
         FieldPanel('amount_type', heading=_('Donation amount Type')),
         FieldPanel(
             'fixed_amount', heading=_('Define Fixed Donation amount')),
@@ -96,6 +104,9 @@ class DonationForm(ClusterableModel):
 
     def __str__(self):
         return self.title
+
+    def isDefaultMonthly(self):
+        return self.default_frequency == 'monthly'
 
     def isAmountFixed(self):
         return self.amount_type == 'fixed'

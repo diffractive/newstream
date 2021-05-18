@@ -52,6 +52,7 @@ tablib==2.0.0
 Unidecode==1.1.1
 urllib3==1.25.10
 wagtail==2.9.3
+wagtail-2fa==1.4.2
 wagtail-autocomplete==0.6
 wagtail-modelchooser==2.3.3
 wagtail-modeltranslation==0.10.14

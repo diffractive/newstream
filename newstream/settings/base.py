@@ -104,6 +104,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sites',
 
+    'wagtail_2fa',
+
+    'django_otp',
+    'django_otp.plugins.otp_totp',
+
     # newstream apps
     'pages',
     # 'search',
@@ -126,6 +131,8 @@ MIDDLEWARE = [
     'wagtail.contrib.redirects.middleware.RedirectMiddleware',
 
     'newstream.view_middleware.DisableSocialLoginMiddleware',
+
+    'wagtail_2fa.middleware.VerifyUserMiddleware',
 ]
 
 ROOT_URLCONF = 'newstream.urls'

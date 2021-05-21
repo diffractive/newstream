@@ -15,8 +15,8 @@ from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.stripe.constants import *
 from donations.functions import gen_transaction_id
-from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
-from newstream.functions import uuid4_str, get_site_name, reverse_with_site_url, printvars, raiseObjectNone, _debug
+from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendNewRecurringNotifToAdmins, sendNewRecurringNotifToDonor, sendRecurringAdjustedNotifToAdmins, sendRecurringAdjustedNotifToDonor, sendRecurringRescheduledNotifToAdmins, sendRecurringRescheduledNotifToDonor, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
+from newstream.functions import _debug
 from donations.payment_gateways.stripe.functions import initStripeApiKey, formatDonationAmount, formatDonationAmountFromGateway
 
 
@@ -67,7 +67,6 @@ class Gateway_Stripe(PaymentGatewayManager):
         # Should be handled for onetime donations
         if self.event['type'] == EVENT_PAYMENT_INTENT_SUCCEEDED:
             # Update payment transaction_id as the charge id
-            printvars(self.payment_intent)
             self.donation.transaction_id = self.payment_intent['charges']['data'][0]['id']
             self.donation.save()
 
@@ -154,11 +153,9 @@ class Gateway_Stripe(PaymentGatewayManager):
                     self.donation.payment_status = STATUS_COMPLETE
                     self.donation.save()
 
-                    # send the subscription updatecd notifs to admins and donor as subscription is just active
-                    admin_email_wordings = str(_("A new recurring donation has become active on your website:"))
-                    donor_email_wordings = str(_("Your new recurring donation has become active."))
-                    sendRecurringUpdatedNotifToAdmins(self.donation.subscription, admin_email_wordings)
-                    sendRecurringUpdatedNotifToDonor(self.donation.subscription, donor_email_wordings)
+                    # send the new recurring notifs to admins and donor as subscription is just active
+                    sendNewRecurringNotifToAdmins(self.donation.subscription)
+                    sendNewRecurringNotifToDonor(self.donation.subscription)
                 else:
                     # check if pause_collection is marked_uncollectible
                     if self.subscription_obj['pause_collection'] and self.subscription_obj['pause_collection']['behavior'] == 'mark_uncollectible':
@@ -231,10 +228,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                     self.subscription.save()
 
                     # email notifications
-                    sendRecurringUpdatedNotifToAdmins(self.subscription, str(
-                        _("A Recurring Donation's amount has been updated on your website:")))
-                    sendRecurringUpdatedNotifToDonor(self.subscription, str(
-                        _("You have just updated your recurring donation amount.")))
+                    sendRecurringAdjustedNotifToAdmins(self.subscription)
+                    sendRecurringAdjustedNotifToDonor(self.subscription)
 
                     messages.add_message(self.request, messages.SUCCESS, _(
                         'Your recurring donation amount at Stripe is updated successfully.'))
@@ -255,10 +250,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                 raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
             if updateRes:
                 # email notifications
-                sendRecurringUpdatedNotifToAdmins(self.subscription, str(
-                    _("A Recurring Donation's billing cycle has been reset to today's date on your website:")))
-                sendRecurringUpdatedNotifToDonor(self.subscription, str(
-                    _("You have just reset your recurring donation's billing cycle to today's date.")))
+                sendRecurringRescheduledNotifToAdmins(self.subscription)
+                sendRecurringRescheduledNotifToDonor(self.subscription)
 
                 messages.add_message(self.request, messages.SUCCESS, _(
                     'Your recurring donation via Stripe is set to bill on today\'s date every month.'))

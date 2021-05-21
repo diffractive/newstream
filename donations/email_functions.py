@@ -10,8 +10,7 @@ from allauth.account.utils import send_email_confirmation
 
 from newstream.functions import get_site_settings_from_default_site, set_default_from_email
 from donations.functions import getDonationEmail
-from donations.templates.donations.email_templates.plain_texts import get_new_donation_text, get_donation_receipt_text, get_donation_status_change_text, get_subscription_status_change_text, get_new_renewal_text, get_renewal_receipt_text, get_recurring_updated_admin_text, get_recurring_updated_donor_text, get_recurring_paused_admin_text, get_recurring_paused_donor_text, get_recurring_resumed_admin_text, get_recurring_resumed_donor_text, get_recurring_cancelled_admin_text, get_recurring_cancel_request_admin_text, get_recurring_cancelled_donor_text, get_account_created_admin_text, get_account_deleted_admin_text, get_account_deleted_donor_text, get_donation_error_admin_text
-from donations.models import STATUS_REVOKED
+from donations.templates.donations.email_templates.plain_texts import get_donation_revoked_admin_text, get_donation_revoked_donor_text, get_new_donation_text, get_donation_receipt_text, get_donation_status_change_text, get_new_recurring_admin_text, get_new_recurring_donor_text, get_recurring_rescheduled_admin_text, get_recurring_rescheduled_donor_text, get_subscription_status_change_text, get_new_renewal_text, get_renewal_receipt_text, get_recurring_adjusted_admin_text, get_recurring_adjusted_donor_text, get_recurring_paused_admin_text, get_recurring_paused_donor_text, get_recurring_resumed_admin_text, get_recurring_resumed_donor_text, get_recurring_cancelled_admin_text, get_recurring_cancel_request_admin_text, get_recurring_cancelled_donor_text, get_account_created_admin_text, get_account_deleted_admin_text, get_account_deleted_donor_text, get_donation_error_admin_text
 
 
 def setDonorLanguagePreference(user):
@@ -38,7 +37,7 @@ def sendEmailNotificationsToDonor(user_email, subject, textStr, htmlStr):
 
 def sendEmailNotificationsToAdmins(site_settings, subject, textStr, htmlStr):
     # set default language for admins' emails
-    translation.activate(settings.LANGUAGE_CODE)
+    # translation.activate(settings.LANGUAGE_CODE)
 
     admin_list = [
         admin_email.email for admin_email in site_settings.admin_emails.all()]
@@ -65,8 +64,6 @@ def sendDonationErrorNotifToAdmins(donation, error_title, error_description):
 def sendDonationNotifToAdmins(donation):
     siteSettings = get_site_settings_from_default_site()
     mail_title = str(_("New Donation"))
-    if donation.payment_status == STATUS_REVOKED:
-        mail_title += str(_("(Revoked)"))
     if siteSettings.admin_receive_checkout_emails:
         sendEmailNotificationsToAdmins(siteSettings, mail_title, get_new_donation_text(donation), render_to_string(
             'donations/email_templates/new_donation.html', context={'donation': donation}))
@@ -74,9 +71,20 @@ def sendDonationNotifToAdmins(donation):
 
 def sendDonationReceiptToDonor(donation):
     mail_title = str(_("Thank You! This is your Donation Receipt."))
-    if donation.payment_status == STATUS_REVOKED:
-        mail_title += str(_("(Revoked)"))
     sendEmailNotificationsToDonor(getDonationEmail(donation), mail_title, get_donation_receipt_text(donation), render_to_string('donations/email_templates/donation_receipt.html', context={'donation': donation}))
+
+
+def sendDonationRevokedToAdmins(donation):
+    siteSettings = get_site_settings_from_default_site()
+    mail_title = str(_("A Donation is revoked"))
+    if siteSettings.admin_receive_revoked_emails:
+        sendEmailNotificationsToAdmins(siteSettings, mail_title, get_donation_revoked_admin_text(donation), render_to_string(
+            'donations/email_templates/donation_revoked_admin.html', context={'donation': donation}))
+
+
+def sendDonationRevokedToDonor(donation):
+    mail_title = str(_("Your Donation is revoked."))
+    sendEmailNotificationsToDonor(getDonationEmail(donation), mail_title, get_donation_revoked_donor_text(donation), render_to_string('donations/email_templates/donation_revoked_donor.html', context={'donation': donation}))
 
 
 def sendDonationStatusChangeToDonor(donation):
@@ -100,15 +108,37 @@ def sendRenewalReceiptToDonor(donation):
     sendEmailNotificationsToDonor(donation.user.email, str(_("Thank You! This is your Renewal Donation Receipt.")), get_renewal_receipt_text(donation), render_to_string('donations/email_templates/renewal_receipt.html', context={'donation': donation}))
 
 
-def sendRecurringUpdatedNotifToAdmins(subscription, message):
+def sendRecurringAdjustedNotifToAdmins(subscription):
     siteSettings = get_site_settings_from_default_site()
-    if siteSettings.admin_receive_update_recurring_emails:
-        sendEmailNotificationsToAdmins(siteSettings, "A Recurring Donation is updated", get_recurring_updated_admin_text(subscription, message), render_to_string(
-            'donations/email_templates/recurring_updated_admin.html', context={'subscription': subscription, 'message': message}))
+    if siteSettings.admin_receive_adjusted_recurring_emails:
+        sendEmailNotificationsToAdmins(siteSettings, "A Recurring Donation Amount is Adjusted", get_recurring_adjusted_admin_text(subscription), render_to_string(
+            'donations/email_templates/recurring_adjusted_admin.html', context={'subscription': subscription}))
 
 
-def sendRecurringUpdatedNotifToDonor(subscription, message):
-    sendEmailNotificationsToDonor(subscription.user.email, "Your Recurring Donation is updated", get_recurring_updated_donor_text(subscription, message), render_to_string('donations/email_templates/recurring_updated_donor.html', context={'subscription': subscription, 'message': message}))
+def sendRecurringAdjustedNotifToDonor(subscription):
+    sendEmailNotificationsToDonor(subscription.user.email, "Your Recurring Donation is Adjusted", get_recurring_adjusted_donor_text(subscription), render_to_string('donations/email_templates/recurring_adjusted_donor.html', context={'subscription': subscription}))
+
+
+def sendNewRecurringNotifToAdmins(subscription):
+    siteSettings = get_site_settings_from_default_site()
+    if siteSettings.admin_receive_new_recurring_emails:
+        sendEmailNotificationsToAdmins(siteSettings, "New Recurring Donation", get_new_recurring_admin_text(subscription), render_to_string(
+            'donations/email_templates/new_recurring_donation.html', context={'subscription': subscription}))
+
+
+def sendNewRecurringNotifToDonor(subscription):
+    sendEmailNotificationsToDonor(subscription.user.email, "Your New Recurring Donation is Activated", get_new_recurring_donor_text(subscription), render_to_string('donations/email_templates/recurring_activated.html', context={'subscription': subscription}))
+
+
+def sendRecurringRescheduledNotifToAdmins(subscription):
+    siteSettings = get_site_settings_from_default_site()
+    if siteSettings.admin_receive_rescheduled_recurring_emails:
+        sendEmailNotificationsToAdmins(siteSettings, "A Recurring Donation is Rescheduled", get_recurring_rescheduled_admin_text(subscription), render_to_string(
+            'donations/email_templates/recurring_rescheduled_admin.html', context={'subscription': subscription}))
+
+
+def sendRecurringRescheduledNotifToDonor(subscription):
+    sendEmailNotificationsToDonor(subscription.user.email, "Your Recurring Donation is Rescheduled", get_recurring_rescheduled_donor_text(subscription), render_to_string('donations/email_templates/recurring_rescheduled_donor.html', context={'subscription': subscription}))
 
 
 def sendRecurringPausedNotifToAdmins(subscription):
@@ -168,7 +198,7 @@ def sendAccountDeletedNotifToDonor(user):
     sendEmailNotificationsToDonor(user.email, str(_("Your Account is deleted")), get_account_deleted_donor_text(user), render_to_string('donations/email_templates/account_deleted_donor.html', context={'user': user}))
 
 
-def sendVerificationEmail(request, user):
+def sendVerificationEmail(user):
     set_default_from_email()
     # allauth's email confirmation uses DEFAULT_FROM_EMAIL
-    send_email_confirmation(request, user, True)
+    send_email_confirmation(user, True)

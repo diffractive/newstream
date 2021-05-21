@@ -1,0 +1,54 @@
+{% extends "base_email.html" %}
+{% load common_tags donation_tags i18n %}
+
+{% block title %}
+{% trans 'Your Donation is revoked.' %}
+{% endblock %}
+
+{% block content %}
+<h2 style="{{ 'heading'|email_css }}">{% trans "Donation Revoked" %}</h2>
+<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.donor_name }},</p>
+{% if donation.is_recurring %}
+{% url 'donations:my-recurring-donations' as donations_url %}
+{% else %}
+{% url 'donations:my-onetime-donations' as donations_url %}
+{% endif %}
+<p style="{{ 'parag'|email_css }}">
+    {% trans 'Your donation is unfortunately revoked by the payment gateway. ' %}
+    {% if donation.user %}
+    {% blocktrans with donations_full_url=donations_url|site_rel_url%}Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to view your donation on the website.{% endblocktrans %}
+    {% endif %}
+</p>
+<p style="{{ 'parag'|email_css }}">{% trans "Here are the details of your donation:" %}</p>
+<table cellpadding="8" style="margin-bottom: 30px;">
+    <tr>
+        <td style="font-weight: bold;">{% trans "Transaction ID" %}</td>
+        <td>{{ donation.transaction_id }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans "Donation frequency" %}</td>
+        <td>{{ donation.donation_frequency }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans "Payment method" %}</td>
+        <td>{{ donation|display_gateway }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans "Donation amount" %}</td>
+        <td>{{ donation|amount_with_currency }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans "Payment status" %}</td>
+        <td>{{ donation.payment_status|title }}</td>
+    </tr>
+    {% if donation.is_recurring and donation.subscription %}
+    <tr>
+        <td style="font-weight: bold;">{% trans 'Recurring donation status' %}</td>
+        <td>{{ donation.subscription.recurring_status|title }}</td>
+    </tr>
+    {% endif %}
+</table>
+<p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
+
+<p style="{{ 'parag'|email_css }}">{% site_name %}</p>
+{% endblock %}

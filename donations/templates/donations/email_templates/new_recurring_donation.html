@@ -1,19 +1,18 @@
 {% extends "base_email.html" %}
-{% load common_tags donation_tags i18n %}
+{% load common_tags i18n %}
 
 {% block title %}
-{% trans 'Your Recurring Donation is cancelled' %}
+{% trans 'New Recurring Donation' %}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "Your Recurring Donation is cancelled" %}</h2>
-<p>{% trans "Dear" %} {{ subscription.user.fullname }},</p>
-{% url 'donations:my-recurring-donations' as donations_url %}
+<h2 style="{{ 'heading'|email_css }}">{% trans "New Recurring Donation" %}</h2>
+<p style="{{ 'parag'|email_css }}">{% trans 'Hi Admins,' %}</p>
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with donations_full_url=donations_url|site_rel_url%}Your recurring donation has been cancelled. Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to view your recurring donations on the website.{% endblocktrans %}
+    {% trans "A new recurring donation has been activated on your website:" %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    {% trans "Here are the details of your recurring donation:" %}
+    <a href="{% site_url %}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}" target="_blank" rel="noopener noreferrer">{% site_url %}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}</a>
 </p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
@@ -26,7 +25,7 @@
     </tr>
     <tr>
         <td style="font-weight: bold;">{% trans "Payment method" %}</td>
-        <td>{{ subscription|display_gateway }}</td>
+        <td>{{ subscription.gateway }}</td>
     </tr>
     <tr>
         <td style="font-weight: bold;">{% trans "Recurring donation amount" %}</td>

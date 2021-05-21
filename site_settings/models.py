@@ -129,8 +129,11 @@ class SiteSettings(BaseSetting, ClusterableModel):
     admin_receive_account_created_emails = models.BooleanField(default=True)
     admin_receive_account_deleted_emails = models.BooleanField(default=True)
     admin_receive_checkout_emails = models.BooleanField(default=True)
+    admin_receive_revoked_emails = models.BooleanField(default=True)
     admin_receive_renewal_emails = models.BooleanField(default=False)
-    admin_receive_update_recurring_emails = models.BooleanField(default=True)
+    admin_receive_new_recurring_emails = models.BooleanField(default=True)
+    admin_receive_adjusted_recurring_emails = models.BooleanField(default=True)
+    admin_receive_rescheduled_recurring_emails = models.BooleanField(default=True)
     admin_receive_pause_recurring_emails = models.BooleanField(default=True)
     admin_receive_resume_recurring_emails = models.BooleanField(default=True)
     admin_receive_cancel_recurring_emails = models.BooleanField(default=True)
@@ -142,10 +145,16 @@ class SiteSettings(BaseSetting, ClusterableModel):
                    heading=_('Allow admins receive notifications of donor accounts being deleted?')),
         FieldPanel('admin_receive_checkout_emails',
                    heading=_('Allow admins receive notifications of donation completions? (donor returning from gateway page)')),
+        FieldPanel('admin_receive_revoked_emails',
+                   heading=_('Allow admins receive notifications of revoked donations?')),
         FieldPanel('admin_receive_renewal_emails',
                    heading=_('Allow admins receive notifications of recurring donation renewals?')),
-        FieldPanel('admin_receive_update_recurring_emails',
-                   heading=_('Allow admins receive notifications of recurring donations being updated?')),
+        FieldPanel('admin_receive_new_recurring_emails',
+                   heading=_('Allow admins receive notifications of new recurring donations?')),
+        FieldPanel('admin_receive_adjusted_recurring_emails',
+                   heading=_('Allow admins receive notifications of recurring donations with adjusted amounts?')),
+        FieldPanel('admin_receive_rescheduled_recurring_emails',
+                   heading=_('Allow admins receive notifications of recurring donations with rescheduled billing dates?')),
         FieldPanel('admin_receive_pause_recurring_emails',
                    heading=_('Allow admins receive notifications of recurring donations being paused?')),
         FieldPanel('admin_receive_resume_recurring_emails',

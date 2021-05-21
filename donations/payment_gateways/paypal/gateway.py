@@ -8,7 +8,7 @@ from paypalcheckoutsdk.core import PayPalHttpClient
 
 from newstream.functions import _debug, round_half_up
 from donations.models import STATUS_PROCESSING, STATUS_FAILED, STATUS_ACTIVE, STATUS_CANCELLED, STATUS_COMPLETE, STATUS_PAUSED, Donation, Subscription, SubscriptionPaymentMeta, DonationPaymentMeta
-from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
+from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendNewRecurringNotifToAdmins, sendNewRecurringNotifToDonor, sendRecurringAdjustedNotifToAdmins, sendRecurringAdjustedNotifToDonor, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
 from donations.functions import gen_transaction_id
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getPayPalSettings
@@ -64,11 +64,9 @@ class Gateway_Paypal(PaymentGatewayManager):
                     self.donation.subscription.recurring_status = STATUS_ACTIVE
                     self.donation.subscription.save()
 
-                    # send the subscription updatecd notifs to admins and donor as subscription is just active
-                    admin_email_wordings = str(_("A new recurring donation has become active on your website:"))
-                    donor_email_wordings = str(_("Your new recurring donation has become active."))
-                    sendRecurringUpdatedNotifToAdmins(self.request, self.donation.subscription, admin_email_wordings)
-                    sendRecurringUpdatedNotifToDonor(self.request, self.donation.subscription, donor_email_wordings)
+                    # send the new recurring notifs to admins and donor as subscription is just active
+                    sendNewRecurringNotifToAdmins(self.request, self.donation.subscription)
+                    sendNewRecurringNotifToDonor(self.request, self.donation.subscription)
 
                 return HttpResponse(status=200)
             else:
@@ -167,10 +165,8 @@ class Gateway_Paypal(PaymentGatewayManager):
             self.subscription.save()
 
             # email notifications
-            sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, str(
-                _("A Recurring Donation's amount has been updated on your website:")))
-            sendRecurringUpdatedNotifToDonor(self.request, self.subscription, str(
-                _("You have just updated your recurring donation amount.")))
+            sendRecurringAdjustedNotifToAdmins(self.request, self.subscription)
+            sendRecurringAdjustedNotifToDonor(self.request, self.subscription)
 
             messages.add_message(self.request, messages.SUCCESS, _(
                 'Your recurring donation amount via PayPal is updated successfully.'))

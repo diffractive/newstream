@@ -2,15 +2,15 @@
 {% load common_tags donation_tags i18n %}
 
 {% block title %}
-{% trans 'Your Recurring Donation is updated' %}
+{% trans 'Your New Recurring Donation is Activated' %}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "Your Recurring Donation is updated" %}</h2>
+<h2 style="{{ 'heading'|email_css }}">{% trans "Your New Recurring Donation is Activated" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ subscription.user.fullname }},</p>
 {% url 'donations:my-recurring-donations' as donations_url %}
 <p style="{{ 'parag'|email_css }}">
-    {{message}}{% blocktrans with donations_full_url=request|fullurl:donations_url%} Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to view your recurring donations on the website.{% endblocktrans %}
+    {% trans "Your new recurring donation has just been activated." %}{% blocktrans with donations_full_url=request|fullurl:donations_url%} Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to view your recurring donations on the website.{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
     {% trans "Here are the details of your recurring donation:" %}

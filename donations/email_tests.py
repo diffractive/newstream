@@ -1,18 +1,17 @@
+from decimal import Decimal
+from datetime import datetime, timezone
+from django.conf import settings
 from django.test import TestCase
 from django.http import HttpRequest
 from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
 from wagtail.core.models import Site
 
-from donations.models import Donation, Subscription
+from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE
 from donations.email_functions import *
+from site_settings.models import PaymentGateway, GATEWAY_STRIPE
 User = get_user_model()
 
-# tweak these settings for your tests
-TEST_DOMAIN_NAME = "newstream.hongkongfp.com"
-DONATION_ID = 599
-SUBSCRIPTION_ID = 80
-USER_ID = 42
 
 @override_settings(EMAIL_BACKEND='django.core.mail.backends.smtp.EmailBackend')
 class EmailTests(TestCase):
@@ -25,13 +24,38 @@ class EmailTests(TestCase):
         self.request.method = 'POST'
 
         # add the absolute url to be be included in email
-        self.request.META['HTTP_HOST'] = 'newstream.hongkongfp.com'
+        if settings.DEBUG:
+            self.request.META['HTTP_HOST'] = 'newstream-staging.diffractive.io'
+        else:
+            self.request.META['HTTP_HOST'] = 'support.hongkongfp.com'
         self.request.META['SERVER_PORT'] = 443
         self.request.site = Site.objects.get(pk=1)
 
-        self.donation = Donation.objects.get(pk=DONATION_ID)
-        self.subscription = Subscription.objects.get(pk=SUBSCRIPTION_ID)
-        self.user = User.objects.get(pk=USER_ID)
+        self.user = User.objects.create_user(email="franky+testemail@diffractive.io", password="12345678")
+        self.user.first_name = 'Franky'
+        self.user.last_name = 'Hung'
+        self.donation = Donation(
+            is_test=True,
+            transaction_id="TEST-ABCDE12345",
+            user=self.user,
+            gateway=PaymentGateway.objects.get(title=GATEWAY_STRIPE),
+            is_recurring=False,
+            donation_amount=Decimal("10.00"),
+            currency="HKD",
+            guest_email='',
+            payment_status=STATUS_COMPLETE,
+            donation_date=datetime.now(timezone.utc),
+        )
+        self.subscription = Subscription(
+            is_test=True,
+            profile_id='TEST-FGHIJ67890',
+            user=self.user,
+            gateway=PaymentGateway.objects.get(title=GATEWAY_STRIPE),
+            recurring_amount=Decimal("10.00"),
+            currency="HKD",
+            recurring_status=STATUS_ACTIVE,
+            subscribe_date=datetime.now(timezone.utc)
+        )
 
     def testDonationErrorNotifToAdmins(self):
         sendDonationErrorNotifToAdmins(self.request, self.donation, 'ERROR TITLE', 'ERROR DESCRIPTION')
@@ -41,6 +65,12 @@ class EmailTests(TestCase):
 
     def testDonationReceiptToDonor(self):
         sendDonationReceiptToDonor(self.request, self.donation)
+
+    def testDonationRevokedNotifToAdmins(self):
+        sendDonationRevokedToAdmins(self.request, self.donation)
+
+    def testDonationRevokedToDonor(self):
+        sendDonationRevokedToDonor(self.request, self.donation)
 
     def testDonationStatusChangeToDonor(self):
         sendDonationStatusChangeToDonor(self.request, self.donation)
@@ -54,11 +84,23 @@ class EmailTests(TestCase):
     def testRenewalReceiptToDonor(self):
         sendRenewalReceiptToDonor(self.request, self.donation)
 
-    def testRecurringUpdatedNotifToAdmins(self):
-        sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, 'TEXT MESSAGE')
+    def testNewRecurringNotifToAdmins(self):
+        sendNewRecurringNotifToAdmins(self.request, self.subscription)
 
-    def testRecurringUpdatedNotifToDonor(self):
-        sendRecurringUpdatedNotifToDonor(self.request, self.subscription, 'TEXT MESSAGE')
+    def testNewRecurringNotifToDonor(self):
+        sendNewRecurringNotifToDonor(self.request, self.subscription)
+
+    def testRecurringAdjustedNotifToAdmins(self):
+        sendRecurringAdjustedNotifToAdmins(self.request, self.subscription)
+
+    def testRecurringAdjustedNotifToDonor(self):
+        sendRecurringAdjustedNotifToDonor(self.request, self.subscription)
+
+    def testRecurringRescheduledNotifToAdmins(self):
+        sendRecurringRescheduledNotifToAdmins(self.request, self.subscription)
+
+    def testRecurringRescheduledNotifToDonor(self):
+        sendRecurringRescheduledNotifToDonor(self.request, self.subscription)
 
     def testRecurringPausedNotifToAdmins(self):
         sendRecurringPausedNotifToAdmins(self.request, self.subscription)

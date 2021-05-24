@@ -31,9 +31,14 @@ class EmailTests(TestCase):
         self.request.META['SERVER_PORT'] = 443
         self.request.site = Site.objects.get(pk=1)
 
+        # todo: find a way to let the tester input a different recipient email before running these tests
+        self.recipient_email = 'franky+testemail@diffractive.io'
+
+        # create test user
         self.user = User.objects.create_user(email="franky+testemail@diffractive.io", password="12345678")
         self.user.first_name = 'Franky'
         self.user.last_name = 'Hung'
+        # create test Donation
         self.donation = Donation(
             is_test=True,
             transaction_id="TEST-ABCDE12345",
@@ -46,6 +51,7 @@ class EmailTests(TestCase):
             payment_status=STATUS_COMPLETE,
             donation_date=datetime.now(timezone.utc),
         )
+        # create test Subscription
         self.subscription = Subscription(
             is_test=True,
             profile_id='TEST-FGHIJ67890',
@@ -56,78 +62,122 @@ class EmailTests(TestCase):
             recurring_status=STATUS_ACTIVE,
             subscribe_date=datetime.now(timezone.utc)
         )
-
-    def testDonationErrorNotifToAdmins(self):
-        sendDonationErrorNotifToAdmins(self.request, self.donation, 'ERROR TITLE', 'ERROR DESCRIPTION')
-
-    def testDonationNotifToAdmins(self):
-        sendDonationNotifToAdmins(self.request, self.donation)
+        # create test Renewal Donation
+        self.renewal_donation = Donation(
+            is_test=True,
+            transaction_id="TEST-ABCDE12345",
+            user=self.user,
+            gateway=PaymentGateway.objects.get(title=GATEWAY_STRIPE),
+            is_recurring=True,
+            subscription=self.subscription,
+            donation_amount=Decimal("10.00"),
+            currency="HKD",
+            guest_email='',
+            payment_status=STATUS_COMPLETE,
+            donation_date=datetime.now(timezone.utc),
+        )
+        
 
     def testDonationReceiptToDonor(self):
-        sendDonationReceiptToDonor(self.request, self.donation)
-
-    def testDonationRevokedNotifToAdmins(self):
-        sendDonationRevokedToAdmins(self.request, self.donation)
+        result_code = sendDonationReceiptToDonor(self.request, self.donation, override_email=self.recipient_email)
+        self.assertEqual(result_code, 1)
 
     def testDonationRevokedToDonor(self):
-        sendDonationRevokedToDonor(self.request, self.donation)
+        result_code = sendDonationRevokedToDonor(self.request, self.donation, override_email=self.recipient_email)
+        self.assertEqual(result_code, 1)
 
     def testDonationStatusChangeToDonor(self):
-        sendDonationStatusChangeToDonor(self.request, self.donation)
+        result_code = sendDonationStatusChangeToDonor(self.request, self.donation, override_email=self.recipient_email)
+        self.assertEqual(result_code, 1)
 
     def testSubscriptionStatusChangeToDonor(self):
-        sendSubscriptionStatusChangeToDonor(self.request, self.subscription)
-
-    def testRenewalNotifToAdmins(self):
-        sendRenewalNotifToAdmins(self.request, self.donation)
+        result_code = sendSubscriptionStatusChangeToDonor(self.request, self.subscription, override_email=self.recipient_email)
+        self.assertEqual(result_code, 1)
 
     def testRenewalReceiptToDonor(self):
-        sendRenewalReceiptToDonor(self.request, self.donation)
-
-    def testNewRecurringNotifToAdmins(self):
-        sendNewRecurringNotifToAdmins(self.request, self.subscription)
+        result_code = sendRenewalReceiptToDonor(self.request, self.renewal_donation, override_email=self.recipient_email)
+        self.assertEqual(result_code, 1)
 
     def testNewRecurringNotifToDonor(self):
-        sendNewRecurringNotifToDonor(self.request, self.subscription)
-
-    def testRecurringAdjustedNotifToAdmins(self):
-        sendRecurringAdjustedNotifToAdmins(self.request, self.subscription)
+        result_code = sendNewRecurringNotifToDonor(self.request, self.subscription, override_email=self.recipient_email)
+        self.assertEqual(result_code, 1)
 
     def testRecurringAdjustedNotifToDonor(self):
-        sendRecurringAdjustedNotifToDonor(self.request, self.subscription)
-
-    def testRecurringRescheduledNotifToAdmins(self):
-        sendRecurringRescheduledNotifToAdmins(self.request, self.subscription)
+        result_code = sendRecurringAdjustedNotifToDonor(self.request, self.subscription, override_email=self.recipient_email)
+        self.assertEqual(result_code, 1)
 
     def testRecurringRescheduledNotifToDonor(self):
-        sendRecurringRescheduledNotifToDonor(self.request, self.subscription)
-
-    def testRecurringPausedNotifToAdmins(self):
-        sendRecurringPausedNotifToAdmins(self.request, self.subscription)
+        result_code = sendRecurringRescheduledNotifToDonor(self.request, self.subscription, override_email=self.recipient_email)
+        self.assertEqual(result_code, 1)
 
     def testRecurringPausedNotifToDonor(self):
-        sendRecurringPausedNotifToDonor(self.request, self.subscription)
-
-    def testRecurringResumedNotifToAdmins(self):
-        sendRecurringResumedNotifToAdmins(self.request, self.subscription)
+        result_code = sendRecurringPausedNotifToDonor(self.request, self.subscription, override_email=self.recipient_email)
+        self.assertEqual(result_code, 1)
 
     def testRecurringResumedNotifToDonor(self):
-        sendRecurringResumedNotifToDonor(self.request, self.subscription)
-
-    def testRecurringCancelledNotifToAdmins(self):
-        sendRecurringCancelledNotifToAdmins(self.request, self.subscription)
+        result_code = sendRecurringResumedNotifToDonor(self.request, self.subscription, override_email=self.recipient_email)
+        self.assertEqual(result_code, 1)
 
     def testRecurringCancelledNotifToDonor(self):
-        sendRecurringCancelledNotifToDonor(self.request, self.subscription)
-
-    def testAccountCreatedNotifToAdmins(self):
-        sendAccountCreatedNotifToAdmins(self.request, self.user)
-
-    def testAccountDeletedNotifToAdmins(self):
-        sendAccountDeletedNotifToAdmins(self.request, self.user)
+        result_code = sendRecurringCancelledNotifToDonor(self.request, self.subscription, override_email=self.recipient_email)
+        self.assertEqual(result_code, 1)
 
     def testAccountDeletedNotifToDonor(self):
-        sendAccountDeletedNotifToDonor(self.request, self.user)
+        result_code = sendAccountDeletedNotifToDonor(self.request, self.user, override_email=self.recipient_email)
+        self.assertEqual(result_code, 1)
+
+    def testDonationErrorNotifToAdmins(self):
+        result_code = sendDonationErrorNotifToAdmins(self.request, self.donation, 'ERROR TITLE', 'ERROR DESCRIPTION', override_flag=True, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
+
+    def testDonationNotifToAdmins(self):
+        result_code = sendDonationNotifToAdmins(self.request, self.donation, override_flag=True, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
+
+    def testDonationRevokedNotifToAdmins(self):
+        result_code = sendDonationRevokedToAdmins(self.request, self.donation, override_flag=True, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
+
+    def testRenewalNotifToAdmins(self):
+        result_code = sendRenewalNotifToAdmins(self.request, self.renewal_donation, override_flag=True, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
+
+    def testNewRecurringNotifToAdmins(self):
+        result_code = sendNewRecurringNotifToAdmins(self.request, self.subscription, override_flag=True, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
+
+    def testRecurringAdjustedNotifToAdmins(self):
+        result_code = sendRecurringAdjustedNotifToAdmins(self.request, self.subscription, override_flag=True, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
+
+    def testRecurringRescheduledNotifToAdmins(self):
+        result_code = sendRecurringRescheduledNotifToAdmins(self.request, self.subscription, override_flag=True, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
+
+    def testRecurringPausedNotifToAdmins(self):
+        result_code = sendRecurringPausedNotifToAdmins(self.request, self.subscription, override_flag=True, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
+
+    def testRecurringResumedNotifToAdmins(self):
+        result_code = sendRecurringResumedNotifToAdmins(self.request, self.subscription, override_flag=True, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
+
+    def testRecurringCancelledNotifToAdmins(self):
+        result_code = sendRecurringCancelledNotifToAdmins(self.request, self.subscription, override_flag=True, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
+
+    def testRecurringCancelRequestNotifToAdmins(self):
+        result_code = sendRecurringCancelRequestNotifToAdmins(self.request, self.subscription, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
+
+    def testAccountCreatedNotifToAdmins(self):
+        result_code = sendAccountCreatedNotifToAdmins(self.request, self.user, override_flag=True, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
+
+    def testAccountDeletedNotifToAdmins(self):
+        result_code = sendAccountDeletedNotifToAdmins(self.request, self.user, override_flag=True, override_emails=[self.recipient_email])
+        self.assertEqual(result_code, 1)
 
     def testVerificationEmail(self):
-        sendVerificationEmail(self.request, self.user)
+        result_code = sendVerificationEmail(self.request, self.user)
+        self.assertEqual(result_code, 1)

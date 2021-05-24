@@ -161,8 +161,12 @@ class Gateway_2C2P(PaymentGatewayManager):
                 self.donation.save()
 
                 # send the donation receipt to donor and notification to admins if subscription is just created
-                sendDonationReceiptToDonor(self.request, self.donation)
-                sendDonationNotifToAdmins(self.request, self.donation)
+                if self.donation.payment_status == STATUS_REVOKED:
+                    sendDonationRevokedToDonor(self.request, self.donation)
+                    sendDonationRevokedToAdmins(self.request, self.donation)
+                else:
+                    sendDonationReceiptToDonor(self.request, self.donation)
+                    sendDonationNotifToAdmins(self.request, self.donation)
 
                 return HttpResponse(200)
             else:

@@ -264,14 +264,14 @@ def capture_paypal_order(request, donation, order_id):
         response = client.execute(req)
     except IOError as ioe:
         fail_reason = str(ioe)
+        # update donation status to failed before sending error email notif to admins in process_capture_failure
+        donation.payment_status = STATUS_FAILED
+        donation.save()
         if isinstance(ioe, HttpError):
             # Something went wrong server-side
             httpError = json.loads(ioe.message)
             if 'details' in httpError and len(httpError['details']) > 0:
                 fail_reason = process_capture_failure(request, donation, httpError['details'][0]['issue'], httpError['details'][0]['description'])
-        # update donation status to failed
-        donation.payment_status = STATUS_FAILED
-        donation.save()
         raise IOError(fail_reason)
     return response.result
 

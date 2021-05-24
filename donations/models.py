@@ -12,7 +12,6 @@ from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 from wagtailmodelchooser import register_model_chooser
-
 from newstream.edit_handlers import ReadOnlyPanel
 
 User = get_user_model()
@@ -459,3 +458,32 @@ def update_deleted_users_donations(sender, instance, using, **kwargs):
     for subscription in subscriptions:
         subscription.linked_user_deleted = True
         subscription.save()
+
+
+class EmailTemplate(models.Model):
+    '''
+    EmailTemplate allows the admin to edit the email templates of the automatic system emails sent by Newstream.
+    '''
+    template_id = models.CharField(max_length=50, unique=True)
+    usage = models.TextField()
+    email_subject = models.CharField(max_length=255)
+    email_text_body = models.TextField()
+    email_html_body = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    panels = [
+        ReadOnlyPanel('template_id', heading='Template ID'),
+        ReadOnlyPanel('usage', heading='Usage'),
+        FieldPanel('email_subject'),
+        FieldPanel('email_text_body'),
+        FieldPanel('email_html_body'),
+    ]
+
+    class Meta:
+        ordering = ['id']
+        verbose_name = _('Email Template')
+        verbose_name_plural = _('Email Templates')
+
+    def __str__(self):
+        return self.template_id

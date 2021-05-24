@@ -1,11 +1,11 @@
 from modeltranslation.translator import TranslationOptions
 from modeltranslation.decorators import register
 
-from .models import EmailTemplate
+from .models import CampaignEmailTemplate
 
 
-@register(EmailTemplate)
-class EmailTemplateTrans(TranslationOptions):
+@register(CampaignEmailTemplate)
+class CampaignEmailTemplateTrans(TranslationOptions):
     fields = (
         'subject',
         'plain_text',

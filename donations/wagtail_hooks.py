@@ -158,6 +158,9 @@ def send_sample_email(request):
                 payment_status=STATUS_COMPLETE,
                 donation_date=datetime.now(timezone.utc),
             )
+            # just set the subscription id to an arbitrary number
+            # to prevent the django.urls.exceptions.NoReverseMatch error when using getFullReverseUrl in plain_texts.get_renewal_receipt_text
+            sample_renewal_donation.subscription.id = 1
             
             if template_id == ET_DNR_DONATION_RECEIPT:
                 result_code = sendDonationReceiptToDonor(request, sample_donation, override_email=to_email)

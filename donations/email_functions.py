@@ -23,12 +23,13 @@ def setDonorLanguagePreference(user):
 
 def sendEmailNotificationsToDonor(request, user_email, subject, textStr, htmlStr):
     # setDonorLanguagePreference(user)
+    siteSettings = getSiteSettings(request)
     try:
         # The return value will be the number of successfully delivered messages (which can be 0 or 1 since it can only send one message).
         return send_mail(
             subject,
             textStr,
-            getDefaultFromEmail(request),
+            '%s <%s>' % (siteSettings.default_from_name, getDefaultFromEmail(request)),
             [user_email],
             html_message=htmlStr
         )
@@ -50,7 +51,7 @@ def sendEmailNotificationsToAdmins(request, siteSettings, subject, textStr, html
         return send_mail(
             subject,
             textStr,
-            getDefaultFromEmail(request),
+            '%s <%s>' % (siteSettings.default_from_name, getDefaultFromEmail(request)),
             admin_list,  # requires admin list to be set in siteSettings
             html_message=htmlStr
         )

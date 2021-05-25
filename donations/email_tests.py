@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
 from wagtail.core.models import Site
 
-from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE
+from donations.models import Donation, STATUS_CANCELLED, STATUS_FAILED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_REVOKED, Subscription, STATUS_COMPLETE, STATUS_ACTIVE
 from donations.email_functions import *
 from site_settings.models import PaymentGateway, GATEWAY_STRIPE
 User = get_user_model()
@@ -84,6 +84,7 @@ class EmailTests(TestCase):
         self.assertEqual(result_code, 1)
 
     def testDonationRevokedToDonor(self):
+        self.donation.payment_status = STATUS_REVOKED
         result_code = sendDonationRevokedToDonor(self.request, self.donation, override_email=self.recipient_email)
         self.assertEqual(result_code, 1)
 
@@ -112,6 +113,7 @@ class EmailTests(TestCase):
         self.assertEqual(result_code, 1)
 
     def testRecurringPausedNotifToDonor(self):
+        self.subscription.recurring_status = STATUS_PAUSED
         result_code = sendRecurringPausedNotifToDonor(self.request, self.subscription, override_email=self.recipient_email)
         self.assertEqual(result_code, 1)
 
@@ -120,6 +122,7 @@ class EmailTests(TestCase):
         self.assertEqual(result_code, 1)
 
     def testRecurringCancelledNotifToDonor(self):
+        self.subscription.recurring_status = STATUS_CANCELLED
         result_code = sendRecurringCancelledNotifToDonor(self.request, self.subscription, override_email=self.recipient_email)
         self.assertEqual(result_code, 1)
 
@@ -128,6 +131,7 @@ class EmailTests(TestCase):
         self.assertEqual(result_code, 1)
 
     def testDonationErrorNotifToAdmins(self):
+        self.donation.payment_status = STATUS_FAILED
         result_code = sendDonationErrorNotifToAdmins(self.request, self.donation, 'ERROR TITLE', 'ERROR DESCRIPTION', override_flag=True, override_emails=[self.recipient_email])
         self.assertEqual(result_code, 1)
 
@@ -136,6 +140,7 @@ class EmailTests(TestCase):
         self.assertEqual(result_code, 1)
 
     def testDonationRevokedNotifToAdmins(self):
+        self.donation.payment_status = STATUS_REVOKED
         result_code = sendDonationRevokedToAdmins(self.request, self.donation, override_flag=True, override_emails=[self.recipient_email])
         self.assertEqual(result_code, 1)
 
@@ -156,6 +161,7 @@ class EmailTests(TestCase):
         self.assertEqual(result_code, 1)
 
     def testRecurringPausedNotifToAdmins(self):
+        self.subscription.recurring_status = STATUS_PAUSED
         result_code = sendRecurringPausedNotifToAdmins(self.request, self.subscription, override_flag=True, override_emails=[self.recipient_email])
         self.assertEqual(result_code, 1)
 
@@ -164,10 +170,12 @@ class EmailTests(TestCase):
         self.assertEqual(result_code, 1)
 
     def testRecurringCancelledNotifToAdmins(self):
+        self.subscription.recurring_status = STATUS_CANCELLED
         result_code = sendRecurringCancelledNotifToAdmins(self.request, self.subscription, override_flag=True, override_emails=[self.recipient_email])
         self.assertEqual(result_code, 1)
 
     def testRecurringCancelRequestNotifToAdmins(self):
+        self.subscription.recurring_status = STATUS_PROCESSING
         result_code = sendRecurringCancelRequestNotifToAdmins(self.request, self.subscription, override_emails=[self.recipient_email])
         self.assertEqual(result_code, 1)
 

@@ -14,7 +14,7 @@ from wagtail.core import hooks
 from donations.email_template_ids import ET_ADN_ACCOUNT_CREATED, ET_ADN_ACCOUNT_DELETED, ET_ADN_DONATION_ERROR, ET_ADN_DONATION_REVOKED, ET_ADN_NEW_DONATION, ET_ADN_NEW_SUBSCRIPTION, ET_ADN_RENEWAL_DONATION, ET_ADN_SUBSCRIPTION_ADJUSTED, ET_ADN_SUBSCRIPTION_CANCELLED, ET_ADN_SUBSCRIPTION_CANCEL_REQUEST, ET_ADN_SUBSCRIPTION_PAUSED, ET_ADN_SUBSCRIPTION_RESCHEDULED, ET_ADN_SUBSCRIPTION_RESUMED, ET_DNR_ACCOUNT_DELETED, ET_DNR_DONATION_RECEIPT, ET_DNR_DONATION_REVOKED, ET_DNR_DONATION_STATUS_UPDATED, ET_DNR_NEW_SUBSCRIPTION, ET_DNR_RENEWAL_RECEIPT, ET_DNR_SUBSCRIPTION_ADJUSTED, ET_DNR_SUBSCRIPTION_CANCELLED, ET_DNR_SUBSCRIPTION_PAUSED, ET_DNR_SUBSCRIPTION_RESCHEDULED, ET_DNR_SUBSCRIPTION_RESUMED, ET_DNR_SUBSCRIPTION_STATUS_UPDATED
 from newstream.functions import _exception, getUserTimezone
 from newstream_user.models import SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL, SUBS_ACTION_MANUAL, DONATION_ACTION_MANUAL
-from donations.models import Donation, STATUS_FAILED, STATUS_REVOKED, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED
+from donations.models import Donation, STATUS_CANCELLED, STATUS_FAILED, STATUS_PROCESSING, STATUS_REVOKED, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED
 from donations.payment_gateways import InitPaymentGateway
 from donations.functions import addUpdateSubsActionLog, addUpdateDonationActionLog
 from donations.email_functions import sendAccountCreatedNotifToAdmins, sendAccountDeletedNotifToAdmins, sendAccountDeletedNotifToDonor, sendDonationErrorNotifToAdmins, sendDonationNotifToAdmins, sendDonationReceiptToDonor, sendDonationRevokedToAdmins, sendDonationRevokedToDonor, sendDonationStatusChangeToDonor, sendNewRecurringNotifToAdmins, sendNewRecurringNotifToDonor, sendRecurringAdjustedNotifToAdmins, sendRecurringAdjustedNotifToDonor, sendRecurringCancelRequestNotifToAdmins, sendRecurringCancelledNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringRescheduledNotifToAdmins, sendRecurringRescheduledNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRenewalNotifToAdmins, sendRenewalReceiptToDonor, sendSubscriptionStatusChangeToDonor
@@ -180,10 +180,12 @@ def send_sample_email(request):
             if template_id == ET_DNR_SUBSCRIPTION_RESCHEDULED:
                 result_code = sendRecurringRescheduledNotifToDonor(request, sample_subscription, override_email=to_email)
             if template_id == ET_DNR_SUBSCRIPTION_PAUSED:
+                sample_subscription.recurring_status = STATUS_PAUSED
                 result_code = sendRecurringPausedNotifToDonor(request, sample_subscription, override_email=to_email)
             if template_id == ET_DNR_SUBSCRIPTION_RESUMED:
                 result_code = sendRecurringResumedNotifToDonor(request, sample_subscription, override_email=to_email)
             if template_id == ET_DNR_SUBSCRIPTION_CANCELLED:
+                sample_subscription.recurring_status = STATUS_CANCELLED
                 result_code = sendRecurringCancelledNotifToDonor(request, sample_subscription, override_email=to_email)
             if template_id == ET_DNR_ACCOUNT_DELETED:
                 result_code = sendAccountDeletedNotifToDonor(request, request.user, override_email=to_email)
@@ -204,12 +206,15 @@ def send_sample_email(request):
             if template_id == ET_ADN_RENEWAL_DONATION:
                 result_code = sendRenewalNotifToAdmins(request, sample_renewal_donation, override_flag=True, override_emails=[to_email])
             if template_id == ET_ADN_SUBSCRIPTION_PAUSED:
+                sample_subscription.recurring_status = STATUS_PAUSED
                 result_code = sendRecurringPausedNotifToAdmins(request, sample_subscription, override_flag=True, override_emails=[to_email])
             if template_id == ET_ADN_SUBSCRIPTION_RESUMED:
                 result_code = sendRecurringResumedNotifToAdmins(request, sample_subscription, override_flag=True, override_emails=[to_email])
             if template_id == ET_ADN_SUBSCRIPTION_CANCELLED:
+                sample_subscription.recurring_status = STATUS_CANCELLED
                 result_code = sendRecurringCancelledNotifToAdmins(request, sample_subscription, override_flag=True, override_emails=[to_email])
             if template_id == ET_ADN_SUBSCRIPTION_CANCEL_REQUEST:
+                sample_subscription.recurring_status = STATUS_PROCESSING
                 result_code = sendRecurringCancelRequestNotifToAdmins(request, sample_subscription, override_emails=[to_email])
             if template_id == ET_ADN_ACCOUNT_CREATED:
                 result_code = sendAccountCreatedNotifToAdmins(request, request.user, override_flag=True, override_emails=[to_email])

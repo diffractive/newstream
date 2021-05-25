@@ -16,9 +16,9 @@ User = get_user_model()
 
 
 class EmailTemplateButtonHelper(ButtonHelper):
-    '''
-    This class adds a 'Preview Email' button for each email template in the IndexView
-    '''
+    """
+    This class adds a 'Send Sample Email' button for each email template in the IndexView
+    """
 
     send_button_classnames = ['button-small', 'button-secondary']
 
@@ -54,9 +54,7 @@ class SendSampleEmailTemplateView(InstanceSpecificView):
         super().__init__(model_admin, instance_pk)
 
     def check_action_permitted(self, user):
-        return user.is_authenticated
-        # todo: refactor to the right way to deal with permissions
-        # return self.permission_helper.user_can_inspect_obj(user, self.instance)
+        return self.permission_helper.user_can_edit_obj(user, self.instance)
 
     def get_context_data(self, **kwargs):
         model = self.instance
@@ -74,8 +72,8 @@ class SendSampleEmailTemplateView(InstanceSpecificView):
 
 class SendSampleEmailMixin(object):
     """
-    A mixin to add to your model admin which hooks the different helpers, the view
-    and register the new urls.
+    A mixin to add to the EmailTemplateAdmin which hooks the EmailTemplateButtonHelper and AdminURLHelper,
+    the SendSampleEmailTemplateView and register the new url for 'send-sample-email'.
     """
 
     button_helper_class = EmailTemplateButtonHelper

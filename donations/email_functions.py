@@ -173,8 +173,8 @@ def sendAccountDeletedNotifToDonor(request, user, override_email=None):
     emailTemplate = getEmailTemplateByID(ET_DNR_ACCOUNT_DELETED)
     mail_subject = emailTemplate.email_subject if emailTemplate and emailTemplate.email_subject else str(_("Your Account is deleted"))
     mail_text = get_account_deleted_donor_text(request, user, text=emailTemplate.email_text_body) if emailTemplate and emailTemplate.email_text_body else get_account_deleted_donor_text(request, user)
-    mail_html = Template(emailTemplate.email_html_body).render(RequestContext(request, {'user': user})) if emailTemplate and emailTemplate.email_html_body else render_to_string(
-        'donations/email_templates/account_deleted_donor.html', context={'user': user}, request=request)
+    mail_html = Template(emailTemplate.email_html_body).render(RequestContext(request, {'account': user})) if emailTemplate and emailTemplate.email_html_body else render_to_string(
+        'donations/email_templates/account_deleted_donor.html', context={'account': user}, request=request)
     return sendEmailNotificationsToDonor(request, user.email if not override_email else override_email, mail_subject, mail_text, mail_html)
 
 
@@ -304,8 +304,8 @@ def sendAccountCreatedNotifToAdmins(request, user, override_flag=False, override
         emailTemplate = getEmailTemplateByID(ET_ADN_ACCOUNT_CREATED)
         mail_subject = emailTemplate.email_subject if emailTemplate and emailTemplate.email_subject else str(_("A Donor Account is created"))
         mail_text = get_account_created_admin_text(request, user, text=emailTemplate.email_text_body) if emailTemplate and emailTemplate.email_text_body else get_account_created_admin_text(request, user)
-        mail_html = Template(emailTemplate.email_html_body).render(RequestContext(request, {'user': user})) if emailTemplate and emailTemplate.email_html_body else render_to_string(
-            'donations/email_templates/account_created_admin.html', context={'user': user}, request=request)
+        mail_html = Template(emailTemplate.email_html_body).render(RequestContext(request, {'account': user})) if emailTemplate and emailTemplate.email_html_body else render_to_string(
+            'donations/email_templates/account_created_admin.html', context={'account': user}, request=request)
         return sendEmailNotificationsToAdmins(request, siteSettings, mail_subject, mail_text, mail_html, admin_list=override_emails)
 
 
@@ -315,8 +315,8 @@ def sendAccountDeletedNotifToAdmins(request, user, override_flag=False, override
         emailTemplate = getEmailTemplateByID(ET_ADN_ACCOUNT_DELETED)
         mail_subject = emailTemplate.email_subject if emailTemplate and emailTemplate.email_subject else str(_("A Donor Account is deleted"))
         mail_text = get_account_deleted_admin_text(request, user, text=emailTemplate.email_text_body) if emailTemplate and emailTemplate.email_text_body else get_account_deleted_admin_text(request, user)
-        mail_html = Template(emailTemplate.email_html_body).render(RequestContext(request, {'user': user})) if emailTemplate and emailTemplate.email_html_body else render_to_string(
-            'donations/email_templates/account_deleted_admin.html', context={'user': user}, request=request)
+        mail_html = Template(emailTemplate.email_html_body).render(RequestContext(request, {'account': user})) if emailTemplate and emailTemplate.email_html_body else render_to_string(
+            'donations/email_templates/account_deleted_admin.html', context={'account': user}, request=request)
         return sendEmailNotificationsToAdmins(request, siteSettings, mail_subject, mail_text, mail_html, admin_list=override_emails)
 
 

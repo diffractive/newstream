@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.forms.widgets import CheckboxSelectMultiple
+from django.db.models.fields import Field
 from django.utils.translation import gettext_lazy as _
 
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, RichTextField
@@ -10,12 +11,11 @@ from wagtailautocomplete.edit_handlers import AutocompletePanel
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from modelcluster.models import ClusterableModel
 
-
 class CustomCheckboxMultiple(CheckboxSelectMultiple):
     template_name = 'django/forms/widgets/custom_checkbox_select.html'
 
 
-class EmailTemplate(models.Model):
+class CampaignEmailTemplate(models.Model):
     title = models.CharField(max_length=255)
     subject = models.CharField(max_length=255)
     plain_text = models.TextField()
@@ -32,8 +32,8 @@ class EmailTemplate(models.Model):
         return self.title
 
     class Meta:
-        verbose_name = _('Email Template')
-        verbose_name_plural = _('Email Templates')
+        verbose_name = _('Campaign Email Template')
+        verbose_name_plural = _('Campaign Email Templates')
 
 
 class TargetGroup(ClusterableModel):
@@ -61,7 +61,7 @@ class Campaign(ClusterableModel):
     from_address = models.EmailField()
     recipients = models.ManyToManyField(TargetGroup)
     template = models.ForeignKey(
-        EmailTemplate, on_delete=models.SET_NULL, null=True)
+        CampaignEmailTemplate, on_delete=models.SET_NULL, null=True)
     sent = models.BooleanField(default=False, editable=False)
     sent_at = models.DateTimeField(blank=True, null=True)
 

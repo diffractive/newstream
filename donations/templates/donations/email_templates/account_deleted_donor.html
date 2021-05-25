@@ -8,7 +8,7 @@
 {% block content %}
 <h2 style="{{ 'heading'|email_css }}">{% trans "Your Account is deleted" %}</h2>
          
-<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ user.fullname }},</p>
+<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ account.fullname }},</p>
 
 <p style="{{ 'last-parag'|email_css }}">
     {% trans "You have just deleted your account. Thank you for your support all the way!" %}

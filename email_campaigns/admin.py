@@ -3,13 +3,13 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
 
-from email_campaigns.models import EmailTemplate, TargetGroup, Campaign
+from email_campaigns.models import CampaignEmailTemplate, TargetGroup, Campaign
 from email_campaigns.custom_classes import SendCampaignMAMixin
 
 
-class EmailTemplateAdmin(ModelAdmin):
-    model = EmailTemplate
-    menu_label = _('Email Templates')
+class CampaignEmailTemplateAdmin(ModelAdmin):
+    model = CampaignEmailTemplate
+    menu_label = _('Campaign Email Templates')
     menu_icon = 'pilcrow'
     menu_order = 100
     add_to_settings_menu = False
@@ -44,7 +44,7 @@ class CampaignGroup(ModelAdminGroup):
     menu_label = _('Email Campaigns')
     menu_icon = 'folder-open-inverse'
     menu_order = 300
-    items = (EmailTemplateAdmin, TargetGroupAdmin, CampaignAdmin)
+    items = (CampaignEmailTemplateAdmin, TargetGroupAdmin, CampaignAdmin)
 
 
 modeladmin_register(CampaignGroup)

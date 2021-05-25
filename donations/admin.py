@@ -1,3 +1,4 @@
+from donations.custom_classes import SendSampleEmailMixin
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
@@ -5,10 +6,11 @@ from wagtail.contrib.modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
 from wagtail.contrib.modeladmin.views import InspectView, DeleteView, CreateView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper
+from wagtail.contrib.modeladmin.helpers import PermissionHelper
 
 from newstream.functions import getSiteSettings_from_default_site
 from site_settings.models import GATEWAY_OFFLINE, GATEWAY_PAYPAL_LEGACY
-from donations.models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING, STATUS_INACTIVE
+from donations.models import EmailTemplate, Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING, STATUS_INACTIVE
 from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
 from donations.payment_gateways import isGatewayEditSubSupported, isGatewayToggleSubSupported, isGatewayCancelSubSupported
 
@@ -305,3 +307,25 @@ class DonationGroup(ModelAdminGroup):
 
 
 modeladmin_register(DonationGroup)
+
+
+class EmailTemplatePermissionHelper(PermissionHelper):
+    def user_can_create(self, user):
+        return False
+    
+    def user_can_delete_obj(self, user, obj):
+        return False
+
+
+class EmailTemplateAdmin(SendSampleEmailMixin, ModelAdmin):
+    model = EmailTemplate
+    menu_label = _('Email Templates')
+    menu_icon = 'mail'
+    menu_order = 250
+    add_to_settings_menu = False
+    exclude_from_explorer = False
+    list_display = ('template_id', 'email_subject', 'usage', 'updated_at')
+    search_fields = ('template_id', 'email_subject', 'usage')
+    permission_helper_class = EmailTemplatePermissionHelper
+
+modeladmin_register(EmailTemplateAdmin)

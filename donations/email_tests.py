@@ -24,12 +24,10 @@ class EmailTests(TestCase):
         self.request.method = 'POST'
 
         # add the absolute url to be be included in email
-        if settings.DEBUG:
-            self.request.META['HTTP_HOST'] = 'newstream-staging.diffractive.io'
-        else:
-            self.request.META['HTTP_HOST'] = 'support.hongkongfp.com'
+        currentSite = Site.objects.get(pk=1)
+        self.request.META['HTTP_HOST'] = currentSite.hostname
         self.request.META['SERVER_PORT'] = 443
-        self.request.site = Site.objects.get(pk=1)
+        self.request.site = currentSite
 
         # todo: find a way to let the tester input a different recipient email before running these tests
         self.recipient_email = 'franky+testemail@diffractive.io'

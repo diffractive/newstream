@@ -36,23 +36,23 @@ def InitPaymentGateway(request, donation=None, subscription=None):
         raise ValueError(_('The Provided gateway has not been implemented yet'))
 
 
-def InitEditRecurringPaymentForm(request, subscription):
+def InitEditRecurringPaymentForm(post_dict, request_method, subscription):
     if not subscription:
         raise ValueError(_('Needs subscription to init the edit form for the recurring payment'))
     if subscription.gateway.is_2c2p():
-        form =  RecurringPaymentForm_2C2P(request.POST, request=request, subscription=subscription, label_suffix='') if request.method == 'POST' else RecurringPaymentForm_2C2P(request=request, subscription=subscription, label_suffix='')
+        form =  RecurringPaymentForm_2C2P(post_dict, subscription=subscription, label_suffix='') if request_method == 'POST' else RecurringPaymentForm_2C2P(subscription=subscription, label_suffix='')
         form.order_fields(
             ['subscription_id', 'currency', 'recurring_amount', 'billing_cycle_now'])
         return form
     elif subscription.gateway.is_paypal():
-        return RecurringPaymentForm_Paypal(request.POST, request=request, subscription=subscription, label_suffix='') if request.method == 'POST' else RecurringPaymentForm_Paypal(request=request, subscription=subscription, label_suffix='')
+        return RecurringPaymentForm_Paypal(post_dict, subscription=subscription, label_suffix='') if request_method == 'POST' else RecurringPaymentForm_Paypal(subscription=subscription, label_suffix='')
     elif subscription.gateway.is_stripe():
-        form = RecurringPaymentForm_Stripe(request.POST, request=request, subscription=subscription, label_suffix='') if request.method == 'POST' else RecurringPaymentForm_Stripe(request=request, subscription=subscription, label_suffix='')
+        form = RecurringPaymentForm_Stripe(post_dict, subscription=subscription, label_suffix='') if request_method == 'POST' else RecurringPaymentForm_Stripe(subscription=subscription, label_suffix='')
         form.order_fields(
             ['subscription_id', 'currency', 'recurring_amount', 'billing_cycle_now'])
         return form
     elif subscription.gateway.is_offline():
-        return RecurringPaymentForm_Offline(request.POST, request=request, subscription=subscription, label_suffix='') if request.method == 'POST' else RecurringPaymentForm_Offline(request=request, subscription=subscription, label_suffix='')
+        return RecurringPaymentForm_Offline(post_dict, subscription=subscription, label_suffix='') if request_method == 'POST' else RecurringPaymentForm_Offline(subscription=subscription, label_suffix='')
     else:
         raise ValueError(_('The Provided gateway has not been implemented yet'))
 

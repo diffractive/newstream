@@ -5,8 +5,8 @@ from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.functions import getCurrencyDictAt
 
 
-def initStripeApiKey(request):
-    stripeSettings = getStripeSettings(request)
+def initStripeApiKey():
+    stripeSettings = getStripeSettings()
     stripe.api_key = stripeSettings.secret_key
     # see Network errors: https://stripe.com/docs/error-handling#network-errors
     stripe.max_network_retries = 2

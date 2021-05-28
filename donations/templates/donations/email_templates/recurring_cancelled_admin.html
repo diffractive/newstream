@@ -12,7 +12,7 @@
     {% trans 'This email is to inform you that a recurring donation has been cancelled on your website:' %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    <a href="{{ request|domain }}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}" target="_blank" rel="noopener noreferrer">{{ request|domain }}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}</a>
+    <a href="{% site_url %}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}" target="_blank" rel="noopener noreferrer">{% site_url %}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}</a>
 </p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
@@ -38,5 +38,5 @@
 </table>
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 
-<p style="{{ 'parag'|email_css }}">{{ request|site_name }}</p>
+<p style="{{ 'parag'|email_css }}">{% site_name %}</p>
 {% endblock %}

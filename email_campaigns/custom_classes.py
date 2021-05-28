@@ -13,7 +13,7 @@ from wagtail.contrib.modeladmin.views import InstanceSpecificView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper, AdminURLHelper
 from wagtail.core.templatetags.wagtailcore_tags import richtext
 
-from newstream.functions import generateIDSecretHash, getFullReverseUrl
+from newstream.functions import generateIDSecretHash, reverse_with_site_url
 from email_campaigns.models import Campaign
 User = get_user_model()
 
@@ -61,24 +61,23 @@ class SendCampaignView(InstanceSpecificView):
         # todo: refactor to the right way to deal with permissions
         # return self.permission_helper.user_can_inspect_obj(user, self.instance)
 
-    def getUnsubscriptionLink(self, request, email):
+    def getUnsubscriptionLink(self, email):
         user = get_object_or_404(User, email=email)
         digest = generateIDSecretHash(user.id)
-        return getFullReverseUrl(
-            request, 'unsubscribe', kwargs={'email': email, 'hash': digest})
+        return reverse_with_site_url('unsubscribe', kwargs={'email': email, 'hash': digest})
 
-    def textAppendUnsubscribeLink(self, request, email, text):
-        fullurl = self.getUnsubscriptionLink(request, email)
+    def textAppendUnsubscribeLink(self, email, text):
+        fullurl = self.getUnsubscriptionLink(email)
         text += "\n" + str(_("Link to unsubscribe: ")) + fullurl
         return text
 
-    def htmlAppendUnsubscribeLink(self, request, email, html):
-        fullurl = self.getUnsubscriptionLink(request, email)
+    def htmlAppendUnsubscribeLink(self, email, html):
+        fullurl = self.getUnsubscriptionLink(email)
         html += '<br><a href="' + fullurl + \
             '" target="_blank" rel="noopener noreferrer">' + str(_('Unsubscribe')) + '</a>'
         return html
 
-    def send_emails(self, request):
+    def send_emails(self):
         if isinstance(self.instance, Campaign):
             original_lang = translation.get_language()
 
@@ -99,8 +98,8 @@ class SendCampaignView(InstanceSpecificView):
                     translation.activate(lang_pref)
                 else:
                     translation.activate(settings.LANGUAGE_CODE)
-                num = send_mail(template.subject, self.textAppendUnsubscribeLink(request, recipient, template.plain_text), model.from_address, [
-                                recipient], html_message=self.htmlAppendUnsubscribeLink(request, recipient, richtext(template.html_body)))
+                num = send_mail(template.subject, self.textAppendUnsubscribeLink(recipient, template.plain_text), model.from_address, [
+                                recipient], html_message=self.htmlAppendUnsubscribeLink(recipient, richtext(template.html_body)))
                 if num == 0:
                     self.refused_list.append(recipient)
                 self.mails_sent += num
@@ -131,7 +130,7 @@ class SendCampaignView(InstanceSpecificView):
     @method_decorator(login_required)
     def dispatch(self, request, *args, **kwargs):
         # send emails before dispatch
-        self.send_emails(request)
+        self.send_emails()
         # in dispatch, the handler corresponding with the appropriate http verb (e.g. get post...) will be called
         # get_context_data is called in the get handler
         return super().dispatch(request, *args, **kwargs)

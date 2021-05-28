@@ -12,7 +12,7 @@ from allauth.account.utils import filter_users_by_email, user_email
 from allauth.socialaccount import app_settings
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 
-from newstream.functions import getSiteSettings
+from newstream.functions import get_site_settings_from_default_site
 
 
 class PersonalInfoForm(forms.Form):
@@ -32,13 +32,13 @@ class PersonalInfoForm(forms.Form):
         # 'language_preference'
     ]
 
-    def __init__(self, *args, request=None, **kwargs):
+    def __init__(self, *args, user=None, **kwargs):
         super().__init__(*args, **kwargs)
-        if not request:
-            raise ValueError(_('Please provide request object'))
-        site_settings = getSiteSettings(request)
+        if not user:
+            raise ValueError(_('Please provide user object'))
+        site_settings = get_site_settings_from_default_site()
         usermeta_dict = {}
-        for um in request.user.metas.all():
+        for um in user.metas.all():
             usermeta_dict[um.field_key] = um.field_value
 
         # construct user meta fields from site settings configuration
@@ -55,14 +55,14 @@ class PersonalInfoForm(forms.Form):
                             key].initial = usermeta_dict[key] if key in usermeta_dict else None
 
         # Fill up values
-        self.fields["first_name"].widget.attrs['value'] = request.user.first_name
-        self.fields["last_name"].widget.attrs['value'] = request.user.last_name
-        self.fields["email"].widget.attrs['value'] = request.user.email
+        self.fields["first_name"].widget.attrs['value'] = user.first_name
+        self.fields["last_name"].widget.attrs['value'] = user.last_name
+        self.fields["email"].widget.attrs['value'] = user.email
         self.fields["email"].widget.attrs['disabled'] = True
         self.fields["email"].label += ' ' + \
-            str(request.user.email_verification_status())
-        self.fields["opt_in_mailing_list"].initial = request.user.opt_in_mailing_list
-        self.fields["language_preference"].initial = request.user.language_preference
+            str(user.email_verification_status())
+        self.fields["opt_in_mailing_list"].initial = user.opt_in_mailing_list
+        self.fields["language_preference"].initial = user.language_preference
 
 
 class NewstreamSAAdapter(DefaultSocialAccountAdapter):
@@ -70,7 +70,7 @@ class NewstreamSAAdapter(DefaultSocialAccountAdapter):
     def is_auto_signup_allowed(self, request, sociallogin):
         # Very Important: if connect is made in pre_social_login, this method should then be never called! (According to allauth source code)
         # then decide if social login can skip signup form (draw flag from siteSettings)
-        siteSettings = getSiteSettings(request)
+        siteSettings = get_site_settings_from_default_site()
         return siteSettings.social_skip_signup
 
     def pre_social_login(self, request, sociallogin):

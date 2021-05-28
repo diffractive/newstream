@@ -5,7 +5,7 @@ from django.conf import settings
 
 from wagtail.contrib.forms.forms import FormBuilder
 
-from newstream.functions import setDefaultFromEmail, getSiteSettings_from_default_site, process_user_meta
+from newstream.functions import set_default_from_email, get_site_settings_from_default_site, process_user_meta
 
 
 class BaseSignupForm(forms.Form):
@@ -29,7 +29,7 @@ class BaseSignupForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        site_settings = getSiteSettings_from_default_site()
+        site_settings = get_site_settings_from_default_site()
         self.footer_html = site_settings.signup_footer_text
 
         # construct user meta fields from site settings configuration
@@ -43,7 +43,7 @@ class BaseSignupForm(forms.Form):
 
     def signup(self, request, user):
         # process meta data
-        user_metas = process_user_meta(request)
+        user_metas = process_user_meta(request.POST)
 
         # save user data
         user.first_name = self.cleaned_data['first_name']
@@ -62,4 +62,4 @@ class BaseSignupForm(forms.Form):
         request.session['first_time_registration'] = True
 
         # set DEFAULT_FROM_EMAIL for allauth
-        setDefaultFromEmail(request)
+        set_default_from_email()

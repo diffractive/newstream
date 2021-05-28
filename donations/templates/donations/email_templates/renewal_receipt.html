@@ -10,7 +10,7 @@
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.user.fullname }},</p>
 {% url 'donations:my-renewals' donation.subscription.id as donations_url %}
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with donations_full_url=request|fullurl:donations_url%}Thank you for your generosity! Your support means a lot to us. Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to view your renewal donation on the website.{% endblocktrans %}
+    {% blocktrans with donations_full_url=donations_url|site_rel_url%}Thank you for your generosity! Your support means a lot to us. Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to view your renewal donation on the website.{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">{% trans "Here are the details of your donation:" %}</p>
 <table cellpadding="8" style="margin-bottom: 30px;">
@@ -43,5 +43,5 @@
 </table>
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 
-<p style="{{ 'parag'|email_css }}">{{ request|site_name }}</p>
+<p style="{{ 'parag'|email_css }}">{% site_name %}</p>
 {% endblock %}

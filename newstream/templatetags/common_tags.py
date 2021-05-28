@@ -4,33 +4,9 @@ from django import template
 from django.utils.safestring import mark_safe
 
 from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
-from newstream.functions import getSiteName, printvars, getSiteSettings, getSiteSettings_from_default_site, getDefaultSite
+from newstream.functions import get_site_name, get_site_url, printvars, get_site_settings_from_default_site
 
 register = template.Library()
-
-
-@register.filter(name='sociallogin_enabled')
-def sociallogin_enabled(req):
-    settings = getSiteSettings(req)
-    return settings.social_login_enabled
-
-
-@register.filter(name='googlelogin_enabled')
-def googlelogin_enabled(req):
-    settings = getSiteSettings(req)
-    return settings.google_login_enabled
-
-
-@register.filter(name='facebooklogin_enabled')
-def facebooklogin_enabled(req):
-    settings = getSiteSettings(req)
-    return settings.facebook_login_enabled
-
-
-@register.filter(name='twitterlogin_enabled')
-def twitterlogin_enabled(req):
-    settings = getSiteSettings(req)
-    return settings.twitter_login_enabled
 
 
 @register.filter(name='has_socialaccount')
@@ -59,34 +35,50 @@ def get_attr(object, key):
     return getattr(object, key, '')
 
 
-@register.filter(name='domain')
-def domain(req):
-    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + req.get_host()
+@register.simple_tag
+def site_url():
+    """
+    can be used as a tag in django templates like this: {% site_url %}
+    returns a full site url e.g. https://newstream.example.com
+    """
+    return get_site_url()
 
 
-@register.filter(name='fullurl')
-def fullurl(req, relurl):
-    # getting defaultSite's hostname instead of req.get_host() since this method might be used by allauth email templates which do not have access to request object
-    defaultSite = getDefaultSite()
-    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + re.sub(r'^(https://|http//)', '', defaultSite.hostname) + relurl
+@register.filter(name='site_rel_url')
+def site_rel_url(relurl):
+    """
+    can be used as a filter in django templates like this: {{ donations_url|site_url }}
+    rel_url is expected to start with a forward slash
+    """
+    return get_site_url() + relurl
 
 
-@register.filter(name='brand_logo')
-def getBrandLogo(req):
-    # using getSiteSettings_from_default_site instead since this functionn might be used by allauth email templates which do not have access to request object
-    settings = getSiteSettings_from_default_site()
-    return settings.brand_logo
+@register.simple_tag
+def site_name():
+    return get_site_name()
 
 
-@register.filter(name='site_icon')
-def getSiteIcon(req):
-    settings = getSiteSettings(req)
-    return settings.site_icon
+@register.filter(name='site_name_filter')
+def site_name_filter(var):
+    """
+    This is a workaround
+
+    I cannot find a way to simply assign a simple_tag value to a variable used in blocktrans(e.g. in unsubscription.html)
+    So I resort to using a filter but ignoring the passed variable
+    """
+    return get_site_name()
 
 
-@register.filter(name='site_name')
-def returnSiteName(req):
-    return getSiteName(req)
+@register.filter(name='site_settings')
+def site_settings(attribute):
+    """
+    The standard way of fetching custom site settings is too clumsy: 
+    (see: https://docs.wagtail.io/en/v2.12/reference/contrib/settings.html#using-in-django-templates)
+    so I write my own filter instead
+    """
+
+    settings = get_site_settings_from_default_site()
+    return getattr(settings, attribute, None)
 
 
 @register.filter(name='email_css')
@@ -114,17 +106,17 @@ def getAlertClass(tags):
 
 
 @register.filter(name='next_path_filter')
-def next_path_filter(request):
+def next_path_filter(rel_path):
     exceptions = ['/reset/key/done/']
     for exception in exceptions:
-        if exception in request.path:
+        if exception in rel_path:
             return ''
-    return '?next=' + request.path
+    return '?next=' + rel_path
 
 
 @register.filter(name='is_active_page')
-def returnIsActivePage(request, urlname):
-    if urlname in request.path:
+def is_active_page(rel_path, urlname):
+    if urlname in rel_path:
         return 'active-page'
     return ''
 

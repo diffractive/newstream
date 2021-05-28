@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from wagtailstreamforms.hooks import register
 
-from newstream.functions import getSiteSettings_from_default_site
+from newstream.functions import get_site_settings_from_default_site
 
 @register('process_form_submission')
 def email_submission_to_admins(instance, form):
@@ -14,7 +14,7 @@ def email_submission_to_admins(instance, form):
     # set default language for admins' emails
     translation.activate(settings.LANGUAGE_CODE)
 
-    siteSettings = getSiteSettings_from_default_site()
+    siteSettings = get_site_settings_from_default_site()
 
     admin_list = [admin_email.email for admin_email in siteSettings.admin_emails.all()]
 

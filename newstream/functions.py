@@ -1,4 +1,5 @@
 import re
+import site_settings
 import sys
 import os
 import uuid
@@ -85,38 +86,45 @@ def round_half_up(value, precision=0):
     exponent = '1.' + '0' * precision if precision > 0 else '1'
     return Decimal(value).quantize(Decimal(exponent), rounding=ROUND_HALF_UP)
 
-def getFullReverseUrl(request, urlname, kwargs=None):
-    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + request.get_host() + reverse(urlname, kwargs=kwargs)
+
+def get_default_site():
+    return Site.objects.get(is_default_site=True)
+
+
+def get_site_url():
+    """
+    Returns the site's hostname with the correct protocol prefixed
+    """
+    default_site = get_default_site()
+    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + re.sub(r'^(https://|http//)', '', default_site.hostname)
+
+
+def reverse_with_site_url(urlname, kwargs=None):
+    """
+    Returns the site url concatenated with the relative url fetched from reverse(urlname, kwargs=kwargs)
+    """
+    site_url = get_site_url()
+    return site_url + reverse(urlname, kwargs=kwargs)
 
 
 def uuid4_str():
     return str(uuid.uuid4())
 
 
-def getSiteName(request):
-    return request.site.site_name if request.site.site_name else '[SiteName]'
+def get_site_name():
+    default_site = get_default_site()
+    return default_site.site_name if default_site.site_name else '[SiteName]'
 
 
-def getSiteSettings(request):
-    return SiteSettings.for_site(request.site)
+def get_site_settings_from_default_site():
+    """
+    The prerequisites for this method are:
+    1. the default site object should be created at the start of wagtail core migrations.
+    2. There should be one site which is also the default site, ideally no other sites are allowed exist.
+    """
 
-
-def getSiteSettings_from_default_site():
-    '''
-    The usual way of getting the site object is from the request object.
-    But since newstream is very unlikely to support multi-site functionality,
-    I would provide a method to get the default site object from db directly,
-    so that places where code has no access to request can still have access to SiteSettings.
-
-    The prerequisites for this method is the default site object being created at the start of wagtail core migrations.
-    '''
-
-    site = Site.objects.get(is_default_site=True)
+    site = get_default_site()
     return SiteSettings.for_site(site)
-
-
-def getDefaultSite():
-    return Site.objects.get(is_default_site=True)
 
 
 def trans_next_url(next_url, lang_code):
@@ -130,16 +138,16 @@ def trans_next_url(next_url, lang_code):
     return trans_url
 
 
-def process_user_meta(request):
+def process_user_meta(post_dict):
     user_metas = []
-    for key, val in request.POST.items():
+    for key, val in post_dict.items():
         usermeta_key = re.match("^usermeta_([a-z_-]+)$", key)
         usermetalist_key = re.match("^usermetalist_([a-z_-]+)$", key)
         if usermeta_key:
             user_metas.append(UserMeta(
                 field_key=usermeta_key.group(1), field_value=val))
         elif usermetalist_key:
-            listval = request.POST.getlist(key)
+            listval = post_dict.getlist(key)
             if len(listval) > 0:
                 # using comma-linebreak as the separator
                 user_metas.append(UserMeta(
@@ -183,13 +191,9 @@ def getSuperUserEmail():
     return su.email
 
 
-def setDefaultFromEmail(request):
-    conf.settings.DEFAULT_FROM_EMAIL = getDefaultFromEmail(request)
-
-
-def getDefaultFromEmail(request):
-    siteSettings = getSiteSettings(request)
-    return siteSettings.default_from_email if siteSettings.default_from_email else getSuperUserEmail()
+def set_default_from_email():
+    site_settings = get_site_settings_from_default_site()
+    conf.settings.DEFAULT_FROM_EMAIL = site_settings.default_from_email
 
 
 def send_mass_html_mail(datatuple, fail_silently=False, user=None, password=None,

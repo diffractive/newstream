@@ -37,7 +37,7 @@
     </div>
     {% else %}
     <div class="menu-item-wrapper btm-grey-border">
-        <a href="{% url 'account_login' %}{{ request|next_path_filter }}" class="menu-item">{% trans 'Sign in' %}</a>
+        <a href="{% url 'account_login' %}{{ request.path|next_path_filter }}" class="menu-item">{% trans 'Sign in' %}</a>
     </div>
     {% endif %}
     <div class="px-6 py-8 flex">

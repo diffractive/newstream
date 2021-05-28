@@ -35,7 +35,7 @@ def set_donation_status(request):
             # add to the donation actions log
             addUpdateDonationActionLog(donation, DONATION_ACTION_MANUAL, action_notes='%s -> %s' % (old_status, new_status), user=request.user)
             # notify donor of action
-            sendDonationStatusChangeToDonor(request, donation)
+            sendDonationStatusChangeToDonor(donation)
 
             messages.add_message(request, messages.SUCCESS, str(_('Donation %(id)d status set to %(status)s.') % {'id': id, 'status': donation.payment_status}))
             return redirect(reverse('donations_donation_modeladmin_inspect', kwargs={'instance_pk': id}))
@@ -60,7 +60,7 @@ def set_subscription_status(request):
             # add to the update actions log
             addUpdateSubsActionLog(subscription, SUBS_ACTION_MANUAL, action_notes='%s -> %s' % (old_status, new_status), user=request.user)
             # notify donor of action
-            sendSubscriptionStatusChangeToDonor(request, subscription)
+            sendSubscriptionStatusChangeToDonor(subscription)
 
             messages.add_message(request, messages.SUCCESS, str(_('Subscription %(id)d status set to %(status)s.') % {'id': id, 'status': subscription.recurring_status}))
             return redirect(reverse('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': id}))

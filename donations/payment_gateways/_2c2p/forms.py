@@ -10,11 +10,9 @@ class RecurringPaymentForm_2C2P(forms.Form):
     currency = forms.CharField(label=('Donation Currency(fixed)'), required=False)
     billing_cycle_now = forms.BooleanField(label=_('Change Billing Cycle to Now'), required=False)
 
-    def __init__(self, *args, request=None, subscription=None, **kwargs):
+    def __init__(self, *args, subscription=None, **kwargs):
         super().__init__(*args, **kwargs)
         currency_set = getCurrencyDictAt(subscription.currency)
-        if not request:
-            raise ValueError(_('Please provide a request object'))
         if not subscription:
             raise ValueError(_('Please provide a subscription object'))
         self.fields["subscription_id"].initial = subscription.profile_id

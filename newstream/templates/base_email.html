@@ -1,5 +1,5 @@
 {% load static common_tags wagtailimages_tags %}
-{% image request|brand_logo max-120x120 as brand_logo %}
+{% image 'brand_logo'|site_settings max-120x120 as brand_logo %}
 <!DOCTYPE html>
 <html class="no-js" lang="en">
 
@@ -29,7 +29,7 @@
                                     </tr>
                                     <tr>
                                         <td>
-                                            <img src="{{ request|fullurl:brand_logo.url }}" alt="{{ brand_logo.alt }}" width="{{ brand_logo.width }}" height="{{ brand_logo.height }}">
+                                            <img src="{{ brand_logo.url|site_rel_url }}" alt="{{ brand_logo.alt }}" width="{{ brand_logo.width }}" height="{{ brand_logo.height }}">
                                         </td>
                                     </tr>
                                     <tr height="15px">

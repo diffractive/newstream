@@ -16,7 +16,7 @@
 <p style="{{ 'parag'|email_css }}">
     {% trans 'Listed below are the updated details of your donation. ' %}
     {% if donation.user %}
-    {% blocktrans with donations_full_url=request|fullurl:donations_url%}Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to see more.{% endblocktrans %}
+    {% blocktrans with donations_full_url=donations_url|site_rel_url%}Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to see more.{% endblocktrans %}
     {% endif %}
 </p>
 <table cellpadding="8" style="margin-bottom: 30px;">
@@ -43,5 +43,5 @@
 </table>
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 
-<p style="{{ 'parag'|email_css }}">{{ request|site_name }}</p>
+<p style="{{ 'parag'|email_css }}">{% site_name %}</p>
 {% endblock %}

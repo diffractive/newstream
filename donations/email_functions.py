@@ -1,6 +1,5 @@
 import html
 from pprint import pprint
-import site_settings
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
@@ -37,18 +36,18 @@ def sendEmailNotificationsToDonor(user_email, subject, textStr, htmlStr):
               user_email+"': "+str(e), flush=True)
 
 
-def sendEmailNotificationsToAdmins(siteSettings, subject, textStr, htmlStr):
+def sendEmailNotificationsToAdmins(site_settings, subject, textStr, htmlStr):
     # set default language for admins' emails
     translation.activate(settings.LANGUAGE_CODE)
 
     admin_list = [
-        admin_email.email for admin_email in siteSettings.admin_emails.all()]
+        admin_email.email for admin_email in site_settings.admin_emails.all()]
     try:
         send_mail(
             subject,
             textStr,
             site_settings.default_from_email,
-            admin_list,  # requires admin list to be set in siteSettings
+            admin_list,  # requires admin list to be set in site_settings
             html_message=htmlStr
         )
     except Exception as e:

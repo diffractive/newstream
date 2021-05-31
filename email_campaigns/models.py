@@ -4,6 +4,7 @@ from django.forms.widgets import CheckboxSelectMultiple
 from django.utils.translation import gettext_lazy as _
 
 from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, RichTextField
+from i18nfield.fields import I18nCharField, I18nTextField
 from wagtail.contrib.forms.models import AbstractFormField
 
 from wagtailautocomplete.edit_handlers import AutocompletePanel
@@ -16,9 +17,9 @@ class CustomCheckboxMultiple(CheckboxSelectMultiple):
 
 
 class EmailTemplate(models.Model):
-    title = models.CharField(max_length=255)
-    subject = models.CharField(max_length=255)
-    plain_text = models.TextField()
+    title = I18nCharField(max_length=255)
+    subject = I18nCharField(max_length=255)
+    plain_text = I18nTextField()
     html_body = RichTextField(blank=True)
 
     panels = [
@@ -29,7 +30,7 @@ class EmailTemplate(models.Model):
     ]
 
     def __str__(self):
-        return self.title
+        return str(self.title)
 
     class Meta:
         verbose_name = _('Email Template')
@@ -49,7 +50,7 @@ class TargetGroup(ClusterableModel):
     ]
 
     def __str__(self):
-        return self.title
+        return str(self.title)
 
     class Meta:
         verbose_name = _('Target Group')
@@ -73,7 +74,7 @@ class Campaign(ClusterableModel):
     ]
 
     def __str__(self):
-        return self.title
+        return str(self.title)
 
     class Meta:
         ordering = ['-id']

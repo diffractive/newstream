@@ -62,11 +62,6 @@ INSTALLED_APPS = [
     # custom_user
     'newstream_user.apps.NewstreamUserConfig',
 
-    # make sure them before all apps that you want to translate
-    'wagtail_modeltranslation',
-    'wagtail_modeltranslation.makemigrations',
-    'wagtail_modeltranslation.migrate',
-
     'wagtail.contrib.forms',
     'wagtail.contrib.redirects',
     'wagtail.contrib.settings',
@@ -238,10 +233,10 @@ LANGUAGE_CODE = 'en'
 
 LANGUAGES = [
     ('en', _('English')),
-    # ('zh-hant', _('Traditional Chinese')),
-    # ('ms', _('Malay')),
-    # ('id-id', _('Indonesian')),
-    # ('tl', _('Tagalog')),
+    ('zh-hant', _('Traditional Chinese')),
+    ('ms', _('Malay')),
+    ('id-id', _('Indonesian')),
+    ('tl', _('Tagalog')),
 ]
 
 EXTRA_LANG_INFO = {

@@ -76,9 +76,10 @@ INSTALLED_APPS = [
     'wagtail.admin',
     'wagtail.core',
     'wagtail.contrib.styleguide',
+    'wagtail.contrib.simple_translation',
+    'wagtail.locales',
 
     'captcha',
-    'wagtailstreamforms',
     'modelcluster',
     'taggit',
     'wagtailautocomplete',
@@ -220,52 +221,15 @@ LOGGING = {
     },
 }
 
-# Wagtail ModelTranslation Settings
-# This setting is essential for the displaying of translated fields in site_settings,
-# if not specified, the translated fields in panels under SubObjectList will not be displayed
-WAGTAILMODELTRANSLATION_CUSTOM_COMPOSED_PANELS = [
-    'site_settings.models.SubObjectList']
-
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
 LANGUAGE_CODE = 'en'
 
-LANGUAGES = [
+WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
     ('en', _('English')),
     ('zh-hant', _('Traditional Chinese')),
-    ('ms', _('Malay')),
-    ('id-id', _('Indonesian')),
-    ('tl', _('Tagalog')),
 ]
-
-EXTRA_LANG_INFO = {
-    'ms': {
-        'bidi': True,  # bi-directional
-        'code': 'ms',
-        'name': 'Bahasa Melayu',
-        'name_local': u'Bahasa Melayu',  # unicode codepoints here
-    },
-    'tl': {
-        'bidi': False,
-        'code': 'tl',
-        'name': 'Tagalog',
-        'name_local': u'Tagalog',  # unicode codepoints here
-    },
-    'id-id': {
-        'bidi': False,
-        'code': 'id-id',
-        'name': 'Indonesian',
-        'name_local': u'Bahasa Indonesia',
-    },
-}
-
-# Add custom languages not provided by Django
-LANG_INFO = dict(django.conf.locale.LANG_INFO, **EXTRA_LANG_INFO)
-django.conf.locale.LANG_INFO = LANG_INFO
-
-# Languages using BiDi (right-to-left) layout
-LANGUAGES_BIDI = global_settings.LANGUAGES_BIDI + ["ms"]
 
 TIME_ZONE = 'UTC'
 
@@ -275,11 +239,7 @@ USE_L10N = True
 
 USE_TZ = True
 
-# wagtailstreamforms
-WAGTAILSTREAMFORMS_FORM_TEMPLATES = (
-    ('streamforms/form_block.html', 'Default Form Template'),  # default
-    ('pages/streamforms/custom_template.html', 'Newstream Form Template'),
-)
+WAGTAIL_I18N_ENABLED = True
 
 # django-recaptcha
 # enable no captcha

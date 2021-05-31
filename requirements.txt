@@ -54,15 +54,13 @@ soupsieve==2.2.1
 sqlparse==0.4.1
 stripe==2.57.0
 tablib==3.0.0
+telepath==0.1.1
 typing-extensions==3.10.0.0
-Unidecode==1.2.0
 urllib3==1.26.4
-wagtail==2.12.4
+wagtail==2.13
 wagtail-2fa==1.4.2
 wagtail-autocomplete==0.6.2
 wagtail-modelchooser==2.3.3
-wagtail-modeltranslation==0.10.17
-wagtailstreamforms==3.14
 webencodings==0.5.1
 Willow==1.4
 xlrd==2.0.1

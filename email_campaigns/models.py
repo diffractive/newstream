@@ -11,6 +11,8 @@ from wagtailautocomplete.edit_handlers import AutocompletePanel
 from modelcluster.fields import ParentalKey, ParentalManyToManyField
 from modelcluster.models import ClusterableModel
 
+from newstream.fields import I18nRichTextField
+
 
 class CustomCheckboxMultiple(CheckboxSelectMultiple):
     template_name = 'django/forms/widgets/custom_checkbox_select.html'
@@ -20,7 +22,7 @@ class EmailTemplate(models.Model):
     title = I18nCharField(max_length=255)
     subject = I18nCharField(max_length=255)
     plain_text = I18nTextField()
-    html_body = RichTextField(blank=True)
+    html_body = I18nRichTextField(blank=True)
 
     panels = [
         FieldPanel('title', heading=_('Title')),
@@ -38,7 +40,7 @@ class EmailTemplate(models.Model):
 
 
 class TargetGroup(ClusterableModel):
-    title = models.CharField(max_length=255)
+    title = I18nCharField(max_length=255)
     users = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name='target_groups', limit_choices_to={'opt_in_mailing_list': True})
 
@@ -58,7 +60,7 @@ class TargetGroup(ClusterableModel):
 
 
 class Campaign(ClusterableModel):
-    title = models.CharField(max_length=255)
+    title = I18nCharField(max_length=255)
     from_address = models.EmailField()
     recipients = models.ManyToManyField(TargetGroup)
     template = models.ForeignKey(

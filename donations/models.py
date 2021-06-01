@@ -12,6 +12,8 @@ from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
 from wagtailmodelchooser import register_model_chooser
+from i18nfield.fields import I18nCharField, I18nTextField
+from newstream.fields import I18nRichTextField
 
 from newstream.edit_handlers import ReadOnlyPanel
 
@@ -33,7 +35,16 @@ STATUS_PENDING = 'pending'
 STATUS_PROCESSED = 'processed'
 
 
-class DonationMetaField(AbstractFormField):
+class I18nAbstractFormField(AbstractFormField):
+    label = I18nCharField(
+        verbose_name=_('label'),
+        max_length=255,
+        help_text=_('The label of the form field')
+    )
+    help_text = I18nCharField(verbose_name=_('help text'), max_length=255, blank=True)
+
+
+class DonationMetaField(I18nAbstractFormField):
     form = ParentalKey('DonationForm', on_delete=models.CASCADE,
                        related_name='donation_meta_fields')
 
@@ -66,8 +77,8 @@ class DonationForm(ClusterableModel):
         ('onetime', _('One-time')),
         ('monthly', _('Monthly')),
     ]
-    title = models.CharField(max_length=191, unique=True)
-    description = models.TextField(blank=True)
+    title = I18nCharField(max_length=191, unique=True)
+    description = I18nTextField(blank=True)
     default_frequency = models.CharField(
         max_length=20, choices=DEFAULT_FREQ_CHOICES, blank=False, default='onetime')
     amount_type = models.CharField(
@@ -75,7 +86,7 @@ class DonationForm(ClusterableModel):
     fixed_amount = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=2,
                                        help_text=_('Define fixed donation amount if you chose "Fixed Amount" for your Amount Type.'))
     allowed_gateways = models.ManyToManyField('site_settings.PaymentGateway')
-    donation_footer_text = RichTextField(blank=True)
+    donation_footer_text = I18nRichTextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     deleted = models.BooleanField(default=False)
@@ -103,7 +114,7 @@ class DonationForm(ClusterableModel):
         verbose_name_plural = _('Donation Forms')
 
     def __str__(self):
-        return self.title
+        return str(self.title)
 
     def isDefaultMonthly(self):
         return self.default_frequency == 'monthly'

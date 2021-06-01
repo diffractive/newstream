@@ -15,7 +15,7 @@ from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
 from donations.models import DonationPaymentMeta, Subscription, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
 from donations.forms import DONATION_DETAILS_FIELDS, DonationDetailsForm
-from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, process_temp_donation_meta, displayGateway
+from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, process_temp_donation_meta, displayGateway, temp_donation_meta_to_donation_meta
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml, isGatewayHosted
 from donations.payment_gateways.setting_classes import getOfflineSettings
 User = get_user_model()
@@ -137,7 +137,7 @@ def confirm_donation(request):
                     currency=tmpd.currency,
                     guest_email=tmpd.guest_email if not request.user.is_authenticated else '',
                     payment_status=STATUS_PROCESSING,
-                    metas=tmpd.temp_metas.all(),
+                    metas=temp_donation_meta_to_donation_meta(tmpd.temp_metas.all()),
                     donation_date=datetime.now(timezone.utc),
                 )
                 # create a processing subscription if is_recurring
@@ -172,6 +172,7 @@ def confirm_donation(request):
                     request.session.pop('first_time_registration')
 
                 # redirect to payment_gateway
+                print('Just b4 redirect')
                 gatewayManager = InitPaymentGateway(
                     request, donation=donation)
                 return gatewayManager.redirect_to_gateway_url()

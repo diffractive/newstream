@@ -85,7 +85,16 @@ class AdminEmails(models.Model):
         return self.title+" "+'({})'.format(self.email)
 
 
-class UserMetaField(AbstractFormField):
+class I18nAbstractFormField(AbstractFormField):
+    label = I18nCharField(
+        verbose_name=_('label'),
+        max_length=255,
+        help_text=_('The label of the form field')
+    )
+    help_text = I18nCharField(verbose_name=_('help text'), max_length=255, blank=True)
+
+
+class UserMetaField(I18nAbstractFormField):
     parent = ParentalKey('SiteSettings', on_delete=models.CASCADE,
                          related_name='user_meta_fields')
 

@@ -227,8 +227,8 @@ LOGGING = {
 LANGUAGE_CODE = 'en'
 
 WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
-    ('en', _('English')),
     ('zh-hant', _('Traditional Chinese')),
+    ('en', _('English')),
 ]
 
 TIME_ZONE = 'UTC'

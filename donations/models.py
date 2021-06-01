@@ -6,8 +6,7 @@ from django.contrib.auth import get_user_model
 from django.forms.widgets import RadioSelect
 from django.utils.translation import gettext_lazy as _
 
-from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, RichTextField
-from wagtail.contrib.forms.models import AbstractFormField
+from wagtail.admin.edit_handlers import FieldPanel, InlinePanel
 from modelcluster.fields import ParentalKey
 from modelcluster.models import ClusterableModel
 from wagtailautocomplete.edit_handlers import AutocompletePanel
@@ -15,6 +14,7 @@ from wagtailmodelchooser import register_model_chooser
 from i18nfield.fields import I18nCharField, I18nTextField
 from newstream.fields import I18nRichTextField
 
+from site_settings.models import I18nAbstractFormField
 from newstream.edit_handlers import ReadOnlyPanel
 
 User = get_user_model()
@@ -33,15 +33,6 @@ STATUS_PROCESSING = 'processing'
 # Temp Donation Statuses
 STATUS_PENDING = 'pending'
 STATUS_PROCESSED = 'processed'
-
-
-class I18nAbstractFormField(AbstractFormField):
-    label = I18nCharField(
-        verbose_name=_('label'),
-        max_length=255,
-        help_text=_('The label of the form field')
-    )
-    help_text = I18nCharField(verbose_name=_('help text'), max_length=255, blank=True)
 
 
 class DonationMetaField(I18nAbstractFormField):

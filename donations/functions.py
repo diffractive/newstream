@@ -120,7 +120,14 @@ def getRecurringDateNextMonth(date_format):
     return nextmonthdate.strftime(date_format)
 
 
-def process_temp_donation_meta(post_dict):
+def extract_temp_donation_meta(post_dict):
+    """
+    This function returns a list of TempDonationMeta objects initialized with the key/value pairs extracted from request.POST
+    
+    There are two types of donationmeta keys we're expecting: donationmeta_key_name and donationmetalist_key_name
+    donationmeta_key_name has a single value such as from a text input or radio input,
+    donationmetalist_key_name has a list of values such as from a checkbox/dropdown allowing more than one selections
+    """
     donation_metas = []
     for key, val in post_dict.items():
         donationmeta_key = re.match("^donationmeta_([a-z_-]+)$", key)

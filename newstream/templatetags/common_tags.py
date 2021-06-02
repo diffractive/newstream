@@ -74,7 +74,8 @@ def site_settings(attribute):
     """
     The standard way of fetching custom site settings is too clumsy: 
     (see: https://docs.wagtail.io/en/v2.12/reference/contrib/settings.html#using-in-django-templates)
-    so I write my own filter instead
+    
+    This filter should allow templates to be more succinct
     """
 
     settings = get_site_settings_from_default_site()

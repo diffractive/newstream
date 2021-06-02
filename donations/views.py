@@ -205,14 +205,9 @@ def thank_you(request):
                   backend='django.contrib.auth.backends.ModelBackend')
         # display extra html if donation is offline
         if donation.gateway.is_offline():
-<<<<<<< HEAD
-            offlineSettings = getOfflineSettings(request)
+            offlineSettings = getOfflineSettings()
             # manually casting offline_thankyou_text from LazyI18nString to str to avoid the "richtext expects a string" error in the template
             reminders_html = str(offlineSettings.offline_thankyou_text)
-=======
-            offlineSettings = getOfflineSettings()
-            reminders_html = offlineSettings.offline_thankyou_text
->>>>>>> master
         # display extra text for certain scenarios
         if donation.gateway.is_paypal() and donation.payment_status == STATUS_PROCESSING:
             extra_text = _('Your donation should be complete in 1-2 minutes. ')

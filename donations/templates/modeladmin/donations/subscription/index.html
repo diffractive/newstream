@@ -1,0 +1,11 @@
+{% extends "modeladmin/index.html" %}
+{% load static common_tags i18n %}
+
+{% block header_extra %}
+    <div class="right">
+        <div class="addbutton" style="margin-left: 2em;">
+            <a href={% url 'donations:export-subscriptions'%} class="button bicolor icon icon-download">{% trans 'Subscriptions' %} CSV</a>
+        </div>
+    </div>
+    {{ block.super }}
+{% endblock %}

@@ -1,4 +1,5 @@
 import json
+import csv
 from datetime import datetime, timezone
 from pprint import pprint
 from django.urls import reverse
@@ -9,6 +10,7 @@ from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
+from django.core.exceptions import PermissionDenied
 
 from newstream.functions import _exception, uuid4_str, get_site_settings_from_default_site
 from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
@@ -419,3 +421,72 @@ def my_renewals(request, id):
         _exception(str(e))
         messages.add_message(request, messages.ERROR, str(e))
         return redirect('donations:my-recurring-donations')
+
+@login_required
+def export_donations(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    filename = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S") + 'donations.csv'
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=' + filename
+
+    headings1 = ['id', 'transaction_id','donation_amount','is_recurring', 'currency', 'payment_status', 'created_at', 'updated_at']
+    headings2 = ['linked_donor_deleted', 'donation_form', 'donor_name', 'donor_email']
+    headings3 = ['gateway', 'subscription_id', 'is_test', 'donation_date', 'created_by', 'guest_email']
+    donations = Donation.objects.all()
+    headings =  headings1 + headings2 + headings3
+
+    writer = csv.writer(response)
+    writer.writerow(headings)
+    for donation in donations:
+        data_row = []
+        data_row = [getattr(donation, field) for field in headings1]
+        data_row += [getattr(donation, 'linked_user_deleted'), getattr(donation, 'form')]
+        data_row += [getattr(donation.user, 'first_name') + getattr(donation.user, 'last_name'), getattr(donation.user, 'email')]
+        data_row += [getattr(donation, field) for field in headings3]
+        writer.writerow(data_row)
+
+    return response
+
+@login_required
+def export_subscriptions(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    filename = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S") + 'subscriptions.csv'
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=' + filename
+
+    headings1 = ['id', 'profile_id','recurring_amount', 'currency', 'recurring_status', 'created_at', 'updated_at']
+    headings2 = ['linked_donor_deleted', 'gateway', 'donor_name', 'donor_email']
+    headings3 = ['is_test', 'subscribe_date', 'created_by']
+    subscriptions = Subscription.objects.all()
+    headings =  headings1 + headings2 + headings3
+
+    writer = csv.writer(response)
+    writer.writerow(headings)
+    for subscription in subscriptions:
+        data_row = []
+        data_row = [getattr(subscription, field) for field in headings1]
+        data_row += [getattr(subscription, 'linked_user_deleted'), getattr(subscription, 'gateway')]
+        data_row += [getattr(subscription.user, 'first_name') + getattr(subscription.user, 'last_name'), getattr(subscription.user, 'email')]
+        data_row += [getattr(subscription, field) for field in headings3]
+        writer.writerow(data_row)
+
+    return response
+
+@login_required
+def export_donors(request):
+    if not request.user.is_staff:
+        raise PermissionDenied
+    filename = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S") + 'donors.csv'
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename=' + filename
+    
+    donors = User.objects.all()
+    headings = ['id', 'first_name', 'last_name', 'email', 'is_active', 'date_joined', 'opt_in_mailing_list']
+
+    writer = csv.writer(response)
+    writer.writerow(headings)
+    for donor in donors:
+        writer.writerow([getattr(donor, field) for field in headings])
+    return response

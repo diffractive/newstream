@@ -137,6 +137,15 @@ def process_temp_donation_meta(post_dict):
     return donation_metas
 
 
+def temp_donation_meta_to_donation_meta(tmpd_metas):
+    donation_metas = []
+    for tmpd_meta in tmpd_metas:
+        donation_metas.append(DonationMeta(
+            field_key=tmpd_meta.field_key, field_value=tmpd_meta.field_value
+        ))
+    return donation_metas
+
+
 def displayGateway(instance):
     ''' instance can be either TempDonation, Donation or Subscription'''
     siteSettings = get_site_settings_from_default_site()

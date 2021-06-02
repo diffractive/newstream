@@ -38,3 +38,4 @@ fixture-converted.json
 newstream/settings/dev.py
 newstream/settings/production.py
 /static/
+newstream.db

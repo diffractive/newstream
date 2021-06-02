@@ -15,7 +15,7 @@ from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
 from donations.models import DonationPaymentMeta, Subscription, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
 from donations.forms import DONATION_DETAILS_FIELDS, DonationDetailsForm
-from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, process_temp_donation_meta, displayGateway
+from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, process_temp_donation_meta, displayGateway, temp_donation_meta_to_donation_meta
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml, isGatewayHosted
 from donations.payment_gateways.setting_classes import getOfflineSettings
 User = get_user_model()
@@ -102,7 +102,8 @@ def donate(request):
     offline_gateway = PaymentGateway.objects.get(title=GATEWAY_OFFLINE)
     offline_gateway_id = offline_gateway.id
     offlineSettings = getOfflineSettings()
-    offline_instructions_html = offlineSettings.offline_instructions_text
+    # manually casting offline_instructions_text from LazyI18nString to str to avoid the "richtext expects a string" error in the template
+    offline_instructions_html = str(offlineSettings.offline_instructions_text)
     
     return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS, 'offline_gateway_id': offline_gateway_id, 'offline_instructions_html': offline_instructions_html})
 
@@ -137,7 +138,7 @@ def confirm_donation(request):
                     currency=tmpd.currency,
                     guest_email=tmpd.guest_email if not request.user.is_authenticated else '',
                     payment_status=STATUS_PROCESSING,
-                    metas=tmpd.temp_metas.all(),
+                    metas=temp_donation_meta_to_donation_meta(tmpd.temp_metas.all()),
                     donation_date=datetime.now(timezone.utc),
                 )
                 # create a processing subscription if is_recurring
@@ -204,8 +205,14 @@ def thank_you(request):
                   backend='django.contrib.auth.backends.ModelBackend')
         # display extra html if donation is offline
         if donation.gateway.is_offline():
+<<<<<<< HEAD
+            offlineSettings = getOfflineSettings(request)
+            # manually casting offline_thankyou_text from LazyI18nString to str to avoid the "richtext expects a string" error in the template
+            reminders_html = str(offlineSettings.offline_thankyou_text)
+=======
             offlineSettings = getOfflineSettings()
             reminders_html = offlineSettings.offline_thankyou_text
+>>>>>>> master
         # display extra text for certain scenarios
         if donation.gateway.is_paypal() and donation.payment_status == STATUS_PROCESSING:
             extra_text = _('Your donation should be complete in 1-2 minutes. ')

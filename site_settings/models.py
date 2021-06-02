@@ -2,6 +2,7 @@ import html
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from i18nfield.fields import I18nCharField
 from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList, RichTextField
 from wagtail.images.edit_handlers import ImageChooserPanel
 from wagtailmodelchooser.edit_handlers import ModelChooserPanel
@@ -10,6 +11,7 @@ from wagtail.contrib.forms.models import AbstractFormField
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
 
+from newstream.fields import I18nRichTextField
 from donations.includes.currency_dictionary import currency_dict
 
 GATEWAY_2C2P = '2C2P'
@@ -32,8 +34,6 @@ class SubTabbedInterface(TabbedInterface):
     template = "wagtailadmin/edit_handlers/sub_tabbed_interface.html"
 
 
-# had to use classname attribute for the section id in sub_tabbed_interface.html
-# since source code in wagtail-modeltranslation only transfers heading and classname as extra attributes to the localized panels
 class SubObjectList(ObjectList):
     pass
 
@@ -85,7 +85,16 @@ class AdminEmails(models.Model):
         return self.title+" "+'({})'.format(self.email)
 
 
-class UserMetaField(AbstractFormField):
+class I18nAbstractFormField(AbstractFormField):
+    label = I18nCharField(
+        verbose_name=_('label'),
+        max_length=255,
+        help_text=_('The label of the form field')
+    )
+    help_text = I18nCharField(verbose_name=_('help text'), max_length=255, blank=True)
+
+
+class UserMetaField(I18nAbstractFormField):
     parent = ParentalKey('SiteSettings', on_delete=models.CASCADE,
                          related_name='user_meta_fields')
 
@@ -131,7 +140,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
 
     social_login_enabled = models.BooleanField(default=True)
     social_skip_signup = models.BooleanField(default=False)
-    signup_footer_text = RichTextField(blank=True)
+    signup_footer_text = I18nRichTextField(blank=True)
     signup_general_panels = [
         FieldPanel('social_login_enabled',
                    heading=_('Enable Social Login for this site ?')),
@@ -178,7 +187,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
         FieldPanel('donations_soft_delete_mode', heading=_("Soft Delete Mode(for Donations and Subscriptions only)")),
     ]
 
-    _2c2p_frontend_label = models.CharField(
+    _2c2p_frontend_label = I18nCharField(
         max_length=255, default=_("2C2P(Credit Card)"), help_text=_("The Gateway name to be shown on the frontend website."))
     _2c2p_merchant_id = models.CharField(
         max_length=255, blank=True, null=True, help_text=_("Merchant ID"))
@@ -204,7 +213,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
         ], heading=_("2C2P API Live Settings"))
     ]
 
-    paypal_frontend_label = models.CharField(
+    paypal_frontend_label = I18nCharField(
         max_length=255, default=_("PayPal"), help_text=_("The Gateway name to be shown on public-facing website."))
     paypal_sandbox_api_product_id = models.CharField(
         max_length=255, blank=True, help_text=_("The Sandbox API Product ID"))
@@ -248,14 +257,14 @@ class SiteSettings(BaseSetting, ClusterableModel):
         ], heading=_("PayPal API Live Settings")),
     ]
 
-    paypal_legacy_frontend_label = models.CharField(
+    paypal_legacy_frontend_label = I18nCharField(
         max_length=255, default=_("PayPal - Legacy"), help_text=_("The Gateway name to be shown on public-facing website for old Paypal transactions."))
     donations_paypal_legacy_panels = [
         FieldPanel("paypal_legacy_frontend_label", heading=_(
             "PayPal-Old Gateway public-facing label")),
     ]
 
-    stripe_frontend_label = models.CharField(
+    stripe_frontend_label = I18nCharField(
         max_length=255, default=_("Stripe"), help_text=_("The Gateway name to be shown on the frontend website."))
     stripe_testing_webhook_secret = models.CharField(
         max_length=255, blank=True, help_text=_("The Secret for the Testing Webhook used by the server for payment verification"))
@@ -297,12 +306,12 @@ class SiteSettings(BaseSetting, ClusterableModel):
         ], heading=_("Stripe API Live Settings")),
     ]
 
-    manual_frontend_label = models.CharField(
+    manual_frontend_label = I18nCharField(
         max_length=255, default=_("Manual"), help_text=_("The Gateway name to be shown on the frontend website for admin-added donations."))
-    offline_frontend_label = models.CharField(
+    offline_frontend_label = I18nCharField(
         max_length=255, default=_("Offline"), help_text=_("The Gateway name to be shown on the frontend website for offline donations."))
-    offline_instructions_text = RichTextField(blank=True)
-    offline_thankyou_text = RichTextField(blank=True)
+    offline_instructions_text = I18nRichTextField(blank=True)
+    offline_thankyou_text = I18nRichTextField(blank=True)
 
     donations_others_panels = [
         FieldPanel("manual_frontend_label", heading=_(

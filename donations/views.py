@@ -173,7 +173,6 @@ def confirm_donation(request):
                     request.session.pop('first_time_registration')
 
                 # redirect to payment_gateway
-                print('Just b4 redirect')
                 gatewayManager = InitPaymentGateway(
                     request, donation=donation)
                 return gatewayManager.redirect_to_gateway_url()

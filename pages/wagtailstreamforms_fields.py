@@ -4,7 +4,7 @@ from captcha.widgets import ReCaptchaV3
 from wagtail.core import blocks
 from wagtailstreamforms.fields import BaseField, register
 
-from newstream.functions import getSiteSettings_from_default_site
+from newstream.functions import get_site_settings_from_default_site
 
 @register('recaptcha')
 class ReCaptchaField(BaseField):
@@ -13,7 +13,7 @@ class ReCaptchaField(BaseField):
     label = 'ReCAPTCHA field'
 
     def get_options(self, block_value):
-        siteSettings = getSiteSettings_from_default_site()
+        siteSettings = get_site_settings_from_default_site()
         options = super().get_options(block_value)
         options.update({
             'required': True,

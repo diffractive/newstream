@@ -24,8 +24,8 @@ class Factory_Stripe(PaymentGatewayFactory):
         but I cannot find the 'charge' attribute in my Newstream 'customer.subscription.deleted' event,
         thus I will not apply the same checking here but run the same stripe_signature header check instead.
         '''
-        initStripeApiKey(request)
-        stripeSettings = getStripeSettings(request)
+        initStripeApiKey()
+        stripeSettings = getStripeSettings()
 
         payload = request.body
         sig_header = request.META['HTTP_STRIPE_SIGNATURE']
@@ -205,7 +205,7 @@ class Factory_Stripe(PaymentGatewayFactory):
 
     @staticmethod
     def initGatewayByReturn(request):
-        initStripeApiKey(request)
+        initStripeApiKey()
 
         donation_id = None
         session_id = request.GET.get("stripe_session_id", None)

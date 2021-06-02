@@ -4,10 +4,10 @@
     <div class="profile-sidebar flex flex-col rounded border border-gray-200 w-full">
         <div class="p-4 w-full whitespace-no-wrap bg-gray-200">{% trans 'Profile Settings' %}</div>
         <a href="{% url 'personal-info' %}"
-            class="block p-4 w-full whitespace-no-wrap {{ request|is_active_page:'personal-info' }} {{ request|is_active_page:'accounts/email' }}">{% trans 'Personal Info' %}</a>
+            class="block p-4 w-full whitespace-no-wrap {{ request.path|is_active_page:'personal-info' }} {{ request.path|is_active_page:'accounts/email' }}">{% trans 'Personal Info' %}</a>
         <a href="{% url 'security' %}"
-            class="block p-4 w-full whitespace-no-wrap {{ request|is_active_page:'security' }} {{ request|is_active_page:'accounts/password' }}">{% trans 'Security' %}</a>
+            class="block p-4 w-full whitespace-no-wrap {{ request.path|is_active_page:'security' }} {{ request.path|is_active_page:'accounts/password' }}">{% trans 'Security' %}</a>
         <a href="{% url 'advanced-settings' %}"
-            class="block p-4 w-full whitespace-no-wrap {{ request|is_active_page:'advanced-settings' }}">{% trans 'Advanced Settings' %}</a>
+            class="block p-4 w-full whitespace-no-wrap {{ request.path|is_active_page:'advanced-settings' }}">{% trans 'Advanced Settings' %}</a>
     </div>
 </div>

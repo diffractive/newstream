@@ -1,6 +1,6 @@
 from paypalcheckoutsdk.core import SandboxEnvironment, LiveEnvironment
 
-from newstream.functions import getSiteSettings
+from newstream.functions import get_site_settings_from_default_site
 
 
 class Settings2C2P:
@@ -43,15 +43,15 @@ class SettingsOffline:
         self.offline_thankyou_text = offline_thankyou_text
 
 
-def get2C2PSettings(request):
-    siteSettings = getSiteSettings(request)
+def get2C2PSettings():
+    siteSettings = get_site_settings_from_default_site()
     if (siteSettings.sandbox_mode):
         return Settings2C2P(siteSettings.sandbox_mode, siteSettings._2c2p_testing_merchant_id, siteSettings._2c2p_testing_secret_key)
     return Settings2C2P(siteSettings.sandbox_mode, siteSettings._2c2p_merchant_id, siteSettings._2c2p_secret_key)
 
 
-def getPayPalSettings(request):
-    siteSettings = getSiteSettings(request)
+def getPayPalSettings():
+    siteSettings = get_site_settings_from_default_site()
     if (siteSettings.sandbox_mode):
         environment = SandboxEnvironment(client_id=siteSettings.paypal_sandbox_api_client_id, client_secret=siteSettings.paypal_sandbox_api_secret_key)
         api_url = 'https://api-m.sandbox.paypal.com'
@@ -61,8 +61,8 @@ def getPayPalSettings(request):
     return SettingsPayPal(siteSettings.sandbox_mode, siteSettings.paypal_api_product_id, siteSettings.paypal_api_client_id, siteSettings.paypal_api_secret_key, siteSettings.paypal_api_webhook_id, environment, api_url)
 
 
-def getPayPalLegacySettings(request):
-    siteSettings = getSiteSettings(request)
+def getPayPalLegacySettings():
+    siteSettings = get_site_settings_from_default_site()
     if (siteSettings.sandbox_mode):
         ipn_url = 'https://ipnpb.sandbox.paypal.com/cgi-bin/webscr'
         return SettingsPayPalLegacy(siteSettings.sandbox_mode, ipn_url)
@@ -70,14 +70,14 @@ def getPayPalLegacySettings(request):
     return SettingsPayPalLegacy(siteSettings.sandbox_mode, ipn_url)
 
 
-def getStripeSettings(request):
-    siteSettings = getSiteSettings(request)
+def getStripeSettings():
+    siteSettings = get_site_settings_from_default_site()
     if (siteSettings.sandbox_mode):
         return SettingsStripe(siteSettings.sandbox_mode, siteSettings.stripe_testing_webhook_secret, siteSettings.stripe_testing_product_id, siteSettings.stripe_testing_api_publishable_key, siteSettings.stripe_testing_api_secret_key)
     return SettingsStripe(siteSettings.sandbox_mode, siteSettings.stripe_webhook_secret, siteSettings.stripe_product_id, siteSettings.stripe_api_publishable_key, siteSettings.stripe_api_secret_key)
 
 
-def getOfflineSettings(request):
+def getOfflineSettings():
     ''' Seems there's no need to have separate sets of sandbox/live settings here '''
-    siteSettings = getSiteSettings(request)
+    siteSettings = get_site_settings_from_default_site()
     return SettingsOffline(siteSettings.sandbox_mode, siteSettings.offline_instructions_text, siteSettings.offline_thankyou_text)

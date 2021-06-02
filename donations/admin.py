@@ -6,7 +6,7 @@ from wagtail.contrib.modeladmin.options import (
 from wagtail.contrib.modeladmin.views import InspectView, DeleteView, CreateView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper
 
-from newstream.functions import getSiteSettings_from_default_site
+from newstream.functions import get_site_settings_from_default_site
 from site_settings.models import GATEWAY_OFFLINE, GATEWAY_PAYPAL_LEGACY
 from donations.models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING, STATUS_INACTIVE
 from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
@@ -145,7 +145,7 @@ class SubscriptionInspectView(InspectView):
 
 class DonationDeleteView(DeleteView):
     def __init__(self, *args, **kwargs):
-        self.siteSettings = getSiteSettings_from_default_site()
+        self.siteSettings = get_site_settings_from_default_site()
         super().__init__(*args, **kwargs)
 
     def delete_instance(self):
@@ -168,7 +168,7 @@ class DonationDeleteView(DeleteView):
 
 class SubscriptionDeleteView(DeleteView):
     def __init__(self, *args, **kwargs):
-        self.siteSettings = getSiteSettings_from_default_site()
+        self.siteSettings = get_site_settings_from_default_site()
         super().__init__(*args, **kwargs)
     
     def delete_instance(self):

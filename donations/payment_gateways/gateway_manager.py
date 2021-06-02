@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from newstream.functions import raiseObjectNone, getSiteSettings
+from newstream.functions import raiseObjectNone, get_site_settings_from_default_site
 
 
 class PaymentGatewayManager(ABC):
@@ -14,10 +14,9 @@ class PaymentGatewayManager(ABC):
                 'Either one of donation or subscription has to be defined while initializing BasePaymentGateway class')
         self.donation = donation
         self.subscription = subscription
-        # set global settings object
-        self.global_settings = getSiteSettings(request)
         # stores whether current app is in test mode or not
-        self.testing_mode = self.global_settings.sandbox_mode
+        site_settings = get_site_settings_from_default_site()
+        self.testing_mode = site_settings.sandbox_mode
 
     @abstractmethod
     def redirect_to_gateway_url(self):

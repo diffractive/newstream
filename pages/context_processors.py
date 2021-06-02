@@ -2,12 +2,12 @@ from django.core.exceptions import MultipleObjectsReturned
 
 from wagtail.core.models import Page
 
-from newstream.functions import getSiteSettings
+from newstream.functions import get_site_settings_from_default_site
 
 
 def homepage(request):
     try:
-        siteSettings = getSiteSettings(request)
+        siteSettings = get_site_settings_from_default_site()
         homepage = request.site.root_page
         # candidates = TranslatablePage.objects.live().specific().child_of(
         #     root_page).filter(content_type__model='homepage')

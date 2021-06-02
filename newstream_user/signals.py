@@ -24,4 +24,4 @@ def newstream_user_logged_in(sender, request, response, user, **kwargs):
 @receiver(user_signed_up)
 def newstream_user_signed_up(sender, request, user, **kwargs):
     # email notifications
-    sendAccountCreatedNotifToAdmins(request, user)
+    sendAccountCreatedNotifToAdmins(user)

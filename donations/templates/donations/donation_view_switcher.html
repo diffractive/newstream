@@ -1,7 +1,7 @@
 {% load common_tags i18n %}
 <div class="switcher-wrapper">
     <a href="{% url 'donations:my-onetime-donations' %}"
-        class="onetime-donations-link switcher-link {{ request|is_active_page:'my-onetime-donations' }}">{% trans 'One-time Donations' %}</a>
+        class="onetime-donations-link switcher-link {{ request.path|is_active_page:'my-onetime-donations' }}">{% trans 'One-time Donations' %}</a>
     <a href="{% url 'donations:my-recurring-donations' %}"
-        class="recurring-donations-link switcher-link {{ request|is_active_page:'my-recurring-donations' }}">{% trans 'Recurring Donations' %}</a>
+        class="recurring-donations-link switcher-link {{ request.path|is_active_page:'my-recurring-donations' }}">{% trans 'Recurring Donations' %}</a>
 </div>

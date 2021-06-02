@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 
 from newstream.classes import WebhookNotProcessedError
-from newstream.functions import getSiteSettings, uuid4_str, getFullReverseUrl, _exception, _debug, object_to_json
+from newstream.functions import uuid4_str, reverse_with_site_url, _exception, _debug, object_to_json
 from donations.models import Donation, DonationPaymentMeta
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.stripe.functions import initStripeApiKey, formatDonationAmount
@@ -31,9 +31,8 @@ def create_checkout_session(request):
         "description": ""
     }
     try:
-        initStripeApiKey(request)
-        stripeSettings = getStripeSettings(request)
-        siteSettings = getSiteSettings(request)
+        initStripeApiKey()
+        stripeSettings = getStripeSettings()
 
         donation_id = request.session.pop('donation_id', None)
         if not donation_id:
@@ -48,10 +47,8 @@ def create_checkout_session(request):
             'metadata': {
                 'donation_id': donation.id
             },
-            'success_url': getFullReverseUrl(
-                    request, 'donations:return-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url': getFullReverseUrl(
-                    request, 'donations:cancel-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
+            'success_url': reverse_with_site_url('donations:return-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url': reverse_with_site_url('donations:cancel-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
             'idempotency_key': uuid4_str()
         }
 

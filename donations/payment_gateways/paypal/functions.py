@@ -11,10 +11,10 @@ from paypalhttp import HttpError
 from donations.models import STATUS_FAILED
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.email_functions import sendDonationErrorNotifToAdmins
-from newstream.functions import getSiteName, getFullReverseUrl, uuid4_str, _debug, printvars
+from newstream.functions import get_site_name, reverse_with_site_url, uuid4_str, _debug, printvars
 
-def common_headers(request):
-    return ['Content-Type: application/json', 'Authorization: Bearer %s' % (request.session['paypal_token']), 'PayPal-Request-Id: %s' % (uuid4_str())]
+def common_headers(paypal_token):
+    return ['Content-Type: application/json', 'Authorization: Bearer %s' % (paypal_token), 'PayPal-Request-Id: %s' % (uuid4_str())]
 
 def curlPaypal(url, headers, userpwd='', post_data='', verb='GET'):
     _debug('curlPaypal url: {}'.format(url))
@@ -51,42 +51,42 @@ def curlPaypal(url, headers, userpwd='', post_data='', verb='GET'):
     return json.loads(body.decode('utf-8'))
 
 
-def saveNewAccessToken(request, token_url, client_id, secret_key):
+def saveNewAccessToken(session, token_url, client_id, secret_key):
     json_data = curlPaypal(token_url, ['Accept: application/json', 'Accept-Language: en_US'], userpwd='%s:%s' % (client_id, secret_key), post_data='grant_type=client_credentials')
     if 'access_token' in json_data:
-        request.session['paypal_token'] = json_data['access_token']
+        session['paypal_token'] = json_data['access_token']
     else:
         raise RuntimeError(str(_("Cannot get 'access_token' attribute from paypal response.")))
     if 'expires_in' in json_data:
         # deduct 10 seconds from the expiry as buffer
         current_time = round(time.time()) - 10
-        request.session['paypal_token_expiry'] = current_time + int(json_data['expires_in'])
+        session['paypal_token_expiry'] = current_time + int(json_data['expires_in'])
     else:
         raise RuntimeError(str(_("Cannot get access_token's 'expires_in' attribute from paypal response.")))
 
 
-def checkAccessTokenExpiry(request):
-    paypalSettings = getPayPalSettings(request)
+def checkAccessTokenExpiry(session):
+    paypalSettings = getPayPalSettings()
     token_uri = '/v1/oauth2/token'
     # check if the paypal_token_expiry stored in session has passed or not
     current_time = round(time.time())
-    if 'paypal_token_expiry' not in request.session or current_time > request.session['paypal_token_expiry']:
-        saveNewAccessToken(request, paypalSettings.api_url+token_uri, paypalSettings.client_id, paypalSettings.secret_key)
-    _debug("Paypal Auth Token: "+request.session['paypal_token'])
+    if 'paypal_token_expiry' not in session or current_time > session['paypal_token_expiry']:
+        saveNewAccessToken(session, paypalSettings.api_url+token_uri, paypalSettings.client_id, paypalSettings.secret_key)
+    _debug("Paypal Auth Token: "+session['paypal_token'])
 
 
-def listProducts(request):
-    checkAccessTokenExpiry(request)
-    paypalSettings = getPayPalSettings(request)
+def listProducts(session):
+    checkAccessTokenExpiry(session)
+    paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/catalogs/products?page_size=20'
-    if paypalSettings.sandbox_mode and request.session.get('negtest_listProducts', None):
-        api_url += '&total_required=' + request.session.get('negtest_listProducts')
-    return curlPaypal(api_url, common_headers(request))
+    if paypalSettings.sandbox_mode and session.get('negtest_listProducts', None):
+        api_url += '&total_required=' + session.get('negtest_listProducts')
+    return curlPaypal(api_url, common_headers(session['paypal_token']))
 
 
-def createProduct(request, product_dict={}):
-    checkAccessTokenExpiry(request)
-    paypalSettings = getPayPalSettings(request)
+def createProduct(session, product_dict={}):
+    checkAccessTokenExpiry(session)
+    paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/catalogs/products'
     if not product_dict:
         product_dict = {
@@ -95,14 +95,14 @@ def createProduct(request, product_dict={}):
             "type": "SERVICE",
             "category": "BOOKS_PERIODICALS_AND_NEWSPAPERS"
         }
-    if paypalSettings.sandbox_mode and request.session.get('negtest_createProduct', None):
-        product_dict['name'] = request.session.get('negtest_createProduct')
-    return curlPaypal(api_url, common_headers(request), post_data=json.dumps(product_dict))
+    if paypalSettings.sandbox_mode and session.get('negtest_createProduct', None):
+        product_dict['name'] = session.get('negtest_createProduct')
+    return curlPaypal(api_url, common_headers(session['paypal_token']), post_data=json.dumps(product_dict))
 
 
-def createPlan(request, product_id, donation):
-    checkAccessTokenExpiry(request)
-    paypalSettings = getPayPalSettings(request)
+def createPlan(session, product_id, donation):
+    checkAccessTokenExpiry(session)
+    paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/plans'
     plan_dict = {
         "product_id": product_id,
@@ -131,9 +131,9 @@ def createPlan(request, product_id, donation):
             "payment_failure_threshold": 3
         }
     }
-    if paypalSettings.sandbox_mode and request.session.get('negtest_createPlan', None):
-        plan_dict['name'] = request.session.get('negtest_createPlan')
-    return curlPaypal(api_url, common_headers(request), post_data=json.dumps(plan_dict))
+    if paypalSettings.sandbox_mode and session.get('negtest_createPlan', None):
+        plan_dict['name'] = session.get('negtest_createPlan')
+    return curlPaypal(api_url, common_headers(session['paypal_token']), post_data=json.dumps(plan_dict))
 
 
 def getUserGivenName(user):
@@ -143,9 +143,9 @@ def getUserGivenName(user):
         return user.email.split('@')[0]
 
 
-def createSubscription(request, plan_id, donation, is_test=False):
-    checkAccessTokenExpiry(request)
-    paypalSettings = getPayPalSettings(request)
+def createSubscription(session, plan_id, donation, is_test=False):
+    checkAccessTokenExpiry(session)
+    paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/subscriptions'
     subscription_dict = {
         "plan_id": plan_id,
@@ -158,7 +158,7 @@ def createSubscription(request, plan_id, donation, is_test=False):
             "email_address": donation.user.email
         },
         "application_context": {
-            "brand_name": getSiteName(request),
+            "brand_name": get_site_name(),
             "locale": "en-US",
             "shipping_preference": "NO_SHIPPING",
             "user_action": "SUBSCRIBE_NOW",
@@ -166,56 +166,56 @@ def createSubscription(request, plan_id, donation, is_test=False):
                 "payer_selected": "PAYPAL",
                 "payee_preferred": "IMMEDIATE_PAYMENT_REQUIRED"
             },
-            "return_url": getFullReverseUrl(request, 'donations:return-from-paypal') if not is_test else 'http://example.com/return/',
-            "cancel_url": getFullReverseUrl(request, 'donations:cancel-from-paypal') if not is_test else 'http://example.com/cancel/'
+            "return_url": reverse_with_site_url('donations:return-from-paypal') if not is_test else 'http://example.com/return/',
+            "cancel_url": reverse_with_site_url('donations:cancel-from-paypal') if not is_test else 'http://example.com/cancel/'
         },
         "custom_id": str(donation.id)
     }
-    if paypalSettings.sandbox_mode and request.session.get('negtest_createSubscription', None):
-        subscription_dict['plan_id'] = request.session.get('negtest_createSubscription')
-    return curlPaypal(api_url, common_headers(request), post_data=json.dumps(subscription_dict))
+    if paypalSettings.sandbox_mode and session.get('negtest_createSubscription', None):
+        subscription_dict['plan_id'] = session.get('negtest_createSubscription')
+    return curlPaypal(api_url, common_headers(session['paypal_token']), post_data=json.dumps(subscription_dict))
 
 
-def getSubscriptionDetails(request, subscription_id):
-    checkAccessTokenExpiry(request)
-    paypalSettings = getPayPalSettings(request)
+def getSubscriptionDetails(session, subscription_id):
+    checkAccessTokenExpiry(session)
+    paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}'.format(subscription_id)
-    if paypalSettings.sandbox_mode and request.session.get('negtest_getSubscriptionDetails', None):
-       api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}'.format(request.session.get('negtest_getSubscriptionDetails')) 
-    return curlPaypal(api_url, common_headers(request))
+    if paypalSettings.sandbox_mode and session.get('negtest_getSubscriptionDetails', None):
+       api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}'.format(session.get('negtest_getSubscriptionDetails')) 
+    return curlPaypal(api_url, common_headers(session['paypal_token']))
 
 
-def cancelSubscription(request, subscription_id):
+def cancelSubscription(session, subscription_id):
     '''paypal returns 404 if the subscription has not passed the approval stage'''
-    checkAccessTokenExpiry(request)
-    paypalSettings = getPayPalSettings(request)
+    checkAccessTokenExpiry(session)
+    paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}/cancel'.format(subscription_id)
-    if paypalSettings.sandbox_mode and request.session.get('negtest_cancelSubscription', None):
-       api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}/cancel'.format(request.session.get('negtest_cancelSubscription'))
-    return curlPaypal(api_url, common_headers(request), verb='POST')
+    if paypalSettings.sandbox_mode and session.get('negtest_cancelSubscription', None):
+       api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}/cancel'.format(session.get('negtest_cancelSubscription'))
+    return curlPaypal(api_url, common_headers(session['paypal_token']), verb='POST')
 
 
-def activateSubscription(request, subscription_id):
-    checkAccessTokenExpiry(request)
-    paypalSettings = getPayPalSettings(request)
+def activateSubscription(session, subscription_id):
+    checkAccessTokenExpiry(session)
+    paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}/activate'.format(subscription_id)
-    if paypalSettings.sandbox_mode and request.session.get('negtest_activateSubscription', None):
-       api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}/activate'.format(request.session.get('negtest_activateSubscription'))
-    return curlPaypal(api_url, common_headers(request), verb='POST')
+    if paypalSettings.sandbox_mode and session.get('negtest_activateSubscription', None):
+       api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}/activate'.format(session.get('negtest_activateSubscription'))
+    return curlPaypal(api_url, common_headers(session['paypal_token']), verb='POST')
 
 
-def suspendSubscription(request, subscription_id):
-    checkAccessTokenExpiry(request)
-    paypalSettings = getPayPalSettings(request)
+def suspendSubscription(session, subscription_id):
+    checkAccessTokenExpiry(session)
+    paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}/suspend'.format(subscription_id)
-    if paypalSettings.sandbox_mode and request.session.get('negtest_suspendSubscription', None):
-       api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}/suspend'.format(request.session.get('negtest_suspendSubscription'))
-    return curlPaypal(api_url, common_headers(request), verb='POST')
+    if paypalSettings.sandbox_mode and session.get('negtest_suspendSubscription', None):
+       api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}/suspend'.format(session.get('negtest_suspendSubscription'))
+    return curlPaypal(api_url, common_headers(session['paypal_token']), verb='POST')
 
 
-def updateSubscription(request, subscription_id, new_amount, currency):
-    checkAccessTokenExpiry(request)
-    paypalSettings = getPayPalSettings(request)
+def updateSubscription(session, subscription_id, new_amount, currency):
+    checkAccessTokenExpiry(session)
+    paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}'.format(subscription_id)
     patch_body = [
         {
@@ -227,12 +227,12 @@ def updateSubscription(request, subscription_id, new_amount, currency):
             }
         }
     ]
-    if paypalSettings.sandbox_mode and request.session.get('negtest_updateSubscription', None):
-        api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}'.format(request.session.get('negtest_updateSubscription'))
-    return curlPaypal(api_url, common_headers(request), post_data=json.dumps(patch_body), verb='PATCH')
+    if paypalSettings.sandbox_mode and session.get('negtest_updateSubscription', None):
+        api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}'.format(session.get('negtest_updateSubscription'))
+    return curlPaypal(api_url, common_headers(session['paypal_token']), post_data=json.dumps(patch_body), verb='PATCH')
 
 
-def process_capture_failure(request, donation, issue, description):
+def process_capture_failure(donation, issue, description):
     """grouping according to each error description written on https://developer.paypal.com/docs/api/orders/v2/#errors"""
     group_customer_support = [
         'COMPLIANCE_VIOLATION',
@@ -246,16 +246,16 @@ def process_capture_failure(request, donation, issue, description):
         'TRANSACTION_RECEIVING_LIMIT_EXCEEDED'
     ]
     # send notification to admin
-    sendDonationErrorNotifToAdmins(request, donation, issue, description)
+    sendDonationErrorNotifToAdmins(donation, issue, description)
     # filter error message for display
     if issue in group_customer_support:
         description += str(_(' Please call PayPal Customer Support for more details.'))
     return "{}: {}".format(issue, description)
 
 
-def capture_paypal_order(request, donation, order_id):
+def capture_paypal_order(donation, order_id):
     """Method to capture order using order_id"""
-    paypalSettings = getPayPalSettings(request)
+    paypalSettings = getPayPalSettings()
     client = PayPalHttpClient(paypalSettings.environment)
 
     req = OrdersCaptureRequest(order_id)
@@ -268,7 +268,7 @@ def capture_paypal_order(request, donation, order_id):
             # Something went wrong server-side
             httpError = json.loads(ioe.message)
             if 'details' in httpError and len(httpError['details']) > 0:
-                fail_reason = process_capture_failure(request, donation, httpError['details'][0]['issue'], httpError['details'][0]['description'])
+                fail_reason = process_capture_failure(donation, httpError['details'][0]['issue'], httpError['details'][0]['description'])
         # update donation status to failed
         donation.payment_status = STATUS_FAILED
         donation.save()
@@ -276,23 +276,23 @@ def capture_paypal_order(request, donation, order_id):
     return response.result
 
 
-def build_onetime_request_body(request, donation):
+def build_onetime_request_body(donation):
     """Method to create body with CAPTURE intent"""
     # returl_url or cancel_url params in application_context tested to be only useful if order not initiated by Javascript APK
     return \
     {
         "intent": "CAPTURE",
         "application_context": {
-            "brand_name": getSiteName(request),
+            "brand_name": get_site_name(),
             "landing_page": "NO_PREFERENCE",
             "shipping_preference": "NO_SHIPPING",
             "user_action": "PAY_NOW",
-            "return_url": getFullReverseUrl(request, 'donations:return-from-paypal'),
-            "cancel_url": getFullReverseUrl(request, 'donations:cancel-from-paypal')
+            "return_url": reverse_with_site_url('donations:return-from-paypal'),
+            "cancel_url": reverse_with_site_url('donations:cancel-from-paypal')
         },
         "purchase_units": [
             {
-                "description": getSiteName(request) + str(_(" Onetime Donation")),
+                "description": get_site_name() + str(_(" Onetime Donation")),
                 "custom_id": donation.id,
                 "amount": {
                     "currency_code": donation.currency,
@@ -303,15 +303,15 @@ def build_onetime_request_body(request, donation):
     }
 
 
-def create_paypal_order(request, donation):
-    paypalSettings = getPayPalSettings(request)
+def create_paypal_order(session, donation):
+    paypalSettings = getPayPalSettings()
     client = PayPalHttpClient(paypalSettings.environment)
 
     req = OrdersCreateRequest()
     # set dictionary object in session['extra_test_headers'] in TestCases
-    if request.session.get('extra_test_headers', None) and donation.is_test:
-        for key, value in request.session.get('extra_test_headers').items():
+    if session.get('extra_test_headers', None) and donation.is_test:
+        for key, value in session.get('extra_test_headers').items():
             req.headers[key] = value
     req.prefer('return=representation')
-    req.request_body(build_onetime_request_body(request, donation))
+    req.request_body(build_onetime_request_body(donation))
     return client.execute(req)

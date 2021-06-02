@@ -35,7 +35,7 @@ def create_paypal_transaction(request):
     }
     result = {}
     try:
-        paypalSettings = getPayPalSettings(request)
+        paypalSettings = getPayPalSettings()
 
         donation_id = request.session.pop('donation_id', None)
         if not donation_id:
@@ -46,10 +46,10 @@ def create_paypal_transaction(request):
             # Product should have been created by admin manually at the dashboard/setup wizard
             # if no product exists, create one here(double safety net)
             # todo: make sure the product_id in site_settings has been set by some kind of configuration enforcement before site is launched
-            product_list = listProducts(request)
+            product_list = listProducts(request.session)
             product = None
             if len(product_list['products']) == 0:
-                product = createProduct(request)
+                product = createProduct(request.session)
             else:
                 # get the product, should aim at the product with the specific product id
                 for prod in product_list['products']:
@@ -58,9 +58,9 @@ def create_paypal_transaction(request):
             if product == None:
                 raise ValueError(_('Cannot initialize/get the paypal product object'))
             # Create plan and subscription
-            plan = createPlan(request, product['id'], donation)
+            plan = createPlan(request.session, product['id'], donation)
             if plan['status'] == 'ACTIVE':
-                subscription = createSubscription(request, plan['id'], donation)
+                subscription = createSubscription(request.session, plan['id'], donation)
                 result['subscription_id'] = subscription['id']
                 for link in subscription['links']:
                     if link['rel'] == 'approve':
@@ -69,7 +69,7 @@ def create_paypal_transaction(request):
                 raise ValueError(_("Newly created PayPal plan is not active, status: %(status)s") % {'status': plan['status']})
         # else: one-time donation
         else:
-            response = create_paypal_order(request, donation)
+            response = create_paypal_order(request.session, donation)
             ppresult = response.result
             _debug('PayPal: Order Created Status: '+ppresult.status)
             # set approval_link attribute
@@ -163,7 +163,7 @@ def return_from_paypal(request):
             # further capture payment if detected order approved, if not just set payment as processing and leave it to webhook processing
             if gatewayManager.order_status == 'APPROVED':
                 # might raise IOError/HttpError
-                capture_response = capture_paypal_order(request, gatewayManager.donation, gatewayManager.order_id)
+                capture_response = capture_paypal_order(gatewayManager.donation, gatewayManager.order_id)
                 if capture_response.status == 'COMPLETED':
                     _debug('PayPal: Order Captured. Payment Completed.')
                     gatewayManager.donation.payment_status = STATUS_COMPLETE

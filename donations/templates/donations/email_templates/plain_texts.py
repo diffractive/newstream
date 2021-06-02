@@ -1,10 +1,10 @@
 from django.utils.translation import gettext as _
 
-from newstream.functions import getSiteName, getFullReverseUrl
+from newstream.functions import get_site_name, get_site_url, reverse_with_site_url
 from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency, displayGateway
 
 
-def get_new_donation_text(request, donation):
+def get_new_donation_text(donation):
     return _("""
         New Donation\n
         \n
@@ -23,7 +23,7 @@ def get_new_donation_text(request, donation):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': getFullReverseUrl(request, 'donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
+        'url': reverse_with_site_url('donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
         'name': donation.donor_name(),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
@@ -31,12 +31,12 @@ def get_new_donation_text(request, donation):
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
         'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring and donation.subscription else '',
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_donation_receipt_text(request, donation):
-    donation_url = getFullReverseUrl(request, 'donations:my-recurring-donations') if donation.is_recurring else getFullReverseUrl(request, 'donations:my-onetime-donations')
+def get_donation_receipt_text(donation):
+    donation_url = reverse_with_site_url('donations:my-recurring-donations') if donation.is_recurring else reverse_with_site_url('donations:my-onetime-donations')
     if donation.user:
         url_text = str(_('Go to %(url)s to view your donation on the website.') % {'url': donation_url})
     else:
@@ -66,12 +66,12 @@ def get_donation_receipt_text(request, donation):
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
         'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring and donation.subscription else '',
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_donation_status_change_text(request, donation):
-    donation_url = getFullReverseUrl(request, 'donations:my-renewals', kwargs={'id': donation.subscription.id}) if donation.is_recurring else getFullReverseUrl(request, 'donations:my-onetime-donations')
+def get_donation_status_change_text(donation):
+    donation_url = reverse_with_site_url('donations:my-renewals', kwargs={'id': donation.subscription.id}) if donation.is_recurring else reverse_with_site_url('donations:my-onetime-donations')
     if donation.user:
         url_text = str(_('Go to %(url)s to see more.') % {'url': donation_url})
     else:
@@ -98,11 +98,11 @@ def get_donation_status_change_text(request, donation):
         'gateway': displayGateway(donation),
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_subscription_status_change_text(request, subscription):
+def get_subscription_status_change_text(subscription):
     return _("""
         Your Recurring Donation Status has been updated\n
         \n
@@ -118,16 +118,16 @@ def get_subscription_status_change_text(request, subscription):
         %(sitename)s
     """) % {
         'name': subscription.user.fullname,
-        'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
+        'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
         'amount': displayRecurringAmountWithCurrency(subscription),
         'status': subscription.recurring_status,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_new_renewal_text(request, donation):
+def get_new_renewal_text(donation):
     return _("""
         New Renewal Donation\n
         \n
@@ -146,7 +146,7 @@ def get_new_renewal_text(request, donation):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': getFullReverseUrl(request, 'donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
+        'url': reverse_with_site_url('donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
         'name': donation.user.fullname,
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
@@ -154,11 +154,11 @@ def get_new_renewal_text(request, donation):
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
         'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring else '',
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_renewal_receipt_text(request, donation):
+def get_renewal_receipt_text(donation):
     return _("""
         Renewal Donation Receipt\n
         \n
@@ -177,18 +177,18 @@ def get_renewal_receipt_text(request, donation):
         %(sitename)s
     """) % {
         'name': donation.user.fullname,
-        'url': getFullReverseUrl(request, 'donations:my-renewals', kwargs={'id': donation.subscription.id}),
+        'url': reverse_with_site_url('donations:my-renewals', kwargs={'id': donation.subscription.id}),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
         'gateway': displayGateway(donation),
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
         'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring else '',
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_recurring_updated_admin_text(request, subscription, message):
+def get_recurring_updated_admin_text(subscription, message):
     return _("""
         A Recurring Donation is updated\n
         \n
@@ -206,17 +206,17 @@ def get_recurring_updated_admin_text(request, subscription, message):
         %(sitename)s
     """) % {
         'message': message,
-        'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_recurring_updated_donor_text(request, subscription, message):
+def get_recurring_updated_donor_text(subscription, message):
     return _("""
         Your Recurring Donation is updated\n
         \n
@@ -235,16 +235,16 @@ def get_recurring_updated_donor_text(request, subscription, message):
     """) % {
         'name': subscription.user.fullname,
         'message': message,
-        'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
+        'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_recurring_paused_admin_text(request, subscription):
+def get_recurring_paused_admin_text(subscription):
     return _("""
         A Recurring Donation is paused\n
         \n
@@ -261,17 +261,17 @@ def get_recurring_paused_admin_text(request, subscription):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_recurring_paused_donor_text(request, subscription):
+def get_recurring_paused_donor_text(subscription):
     return _("""
         Your Recurring Donation is paused\n
         \n
@@ -289,16 +289,16 @@ def get_recurring_paused_donor_text(request, subscription):
         %(sitename)s
     """) % {
         'name': subscription.user.fullname,
-        'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
+        'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_recurring_resumed_admin_text(request, subscription):
+def get_recurring_resumed_admin_text(subscription):
     return _("""
         A Recurring Donation is resumed\n
         \n
@@ -315,17 +315,17 @@ def get_recurring_resumed_admin_text(request, subscription):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_recurring_resumed_donor_text(request, subscription):
+def get_recurring_resumed_donor_text(subscription):
     return _("""
         Your Recurring Donation is resumed\n
         \n
@@ -343,16 +343,16 @@ def get_recurring_resumed_donor_text(request, subscription):
         %(sitename)s
     """) % {
         'name': subscription.user.fullname,
-        'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
+        'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_recurring_cancelled_admin_text(request, subscription):
+def get_recurring_cancelled_admin_text(subscription):
     return _("""
         A Recurring Donation is cancelled\n
         \n
@@ -369,17 +369,17 @@ def get_recurring_cancelled_admin_text(request, subscription):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_recurring_cancel_request_admin_text(request, subscription):
+def get_recurring_cancel_request_admin_text(subscription):
     return _("""
         Cancellation to a Recurring Donation is requested\n
         \n
@@ -396,17 +396,17 @@ def get_recurring_cancel_request_admin_text(request, subscription):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': getFullReverseUrl(request, 'donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.fullname,
         'profile_id': subscription.profile_id,
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_recurring_cancelled_donor_text(request, subscription):
+def get_recurring_cancelled_donor_text(subscription):
     return _("""
         Your Recurring Donation is cancelled\n
         \n
@@ -424,16 +424,16 @@ def get_recurring_cancelled_donor_text(request, subscription):
         %(sitename)s
     """) % {
         'name': subscription.user.fullname,
-        'url': getFullReverseUrl(request, 'donations:my-recurring-donations'),
+        'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_account_deleted_admin_text(request, user):
+def get_account_deleted_admin_text(user):
     return _("""
         A Donor Account is deleted\n
         \n
@@ -446,13 +446,13 @@ def get_account_deleted_admin_text(request, user):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': request.build_absolute_uri('/')+'admin/users/',
+        'url': get_site_url()+'/admin/users/',
         'name': user.fullname,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_account_deleted_donor_text(request, user):
+def get_account_deleted_donor_text(user):
     return _("""
         Your Account is deleted\n
         \n
@@ -463,11 +463,11 @@ def get_account_deleted_donor_text(request, user):
         %(sitename)s
     """) % {
         'name': user.fullname,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_account_created_admin_text(request, user):
+def get_account_created_admin_text(user):
     return _("""
         A Donor Account is created\n
         \n
@@ -480,13 +480,13 @@ def get_account_created_admin_text(request, user):
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': request.build_absolute_uri('/')+'admin/users/%d/' % user.id,
+        'url': get_site_url()+'/admin/users/%d/' % user.id,
         'name': user.fullname,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }
 
 
-def get_donation_error_admin_text(request, donation, error_title, error_description):
+def get_donation_error_admin_text(donation, error_title, error_description):
     return _("""
         A Donation Error has occurred.\n
         \n
@@ -502,10 +502,10 @@ def get_donation_error_admin_text(request, donation, error_title, error_descript
         Thank you,\n
         %(sitename)s
     """) % {
-        'url': getFullReverseUrl(request, 'donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
+        'url': reverse_with_site_url('donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
         'order': donation.transaction_id,
         'name': donation.donor_name(),
         'error_title': error_title,
         'error_description': error_description,
-        'sitename': getSiteName(request)
+        'sitename': get_site_name()
     }

@@ -21,7 +21,7 @@ class Factory_Paypal(PaymentGatewayFactory):
 
     @staticmethod
     def initGatewayByVerification(request):
-        paypalSettings = getPayPalSettings(request)
+        paypalSettings = getPayPalSettings()
 
         # The payload body sent in the webhook event
         event_body = request.body.decode()
@@ -79,7 +79,7 @@ class Factory_Paypal(PaymentGatewayFactory):
             # subscription payment sale completed
             if json_data['event_type'] == EVENT_PAYMENT_SALE_COMPLETED:
                 subscription_id = json_data['resource']['billing_agreement_id']
-                subscription_obj = getSubscriptionDetails(request, subscription_id)
+                subscription_obj = getSubscriptionDetails(request.session, subscription_id)
                 if 'custom_id' in subscription_obj:
                     donation_id = subscription_obj['custom_id']
                 else:
@@ -111,7 +111,7 @@ class Factory_Paypal(PaymentGatewayFactory):
     @staticmethod
     def initGatewayByReturn(request):
         # a get param named 'token' contains the order_id
-        paypalSettings = getPayPalSettings(request)
+        paypalSettings = getPayPalSettings()
         client = PayPalHttpClient(paypalSettings.environment)
         donation_id = None
         subscription_obj = {}
@@ -119,7 +119,7 @@ class Factory_Paypal(PaymentGatewayFactory):
 
         if request.GET.get('subscription_id', None):
             # recurring payment
-            subscription_obj = getSubscriptionDetails(request, request.GET.get('subscription_id'))
+            subscription_obj = getSubscriptionDetails(request.session, request.GET.get('subscription_id'))
             kwargs['subscription_obj'] = subscription_obj
             if 'custom_id' in subscription_obj:
                 donation_id = subscription_obj['custom_id']

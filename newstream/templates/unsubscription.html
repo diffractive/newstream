@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load common_tags widget_tweaks i18n %}
 
-{% block title %}{% blocktrans with sitename=request|site_name %}Unsubscribe from
+{% block title %}{% blocktrans with sitename=''|site_name_filter %}Unsubscribe from
 {{ sitename }}{% endblocktrans %}{% endblock %}
 
 {% block content %}

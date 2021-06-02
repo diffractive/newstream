@@ -19,7 +19,7 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
     def __init__(self, request, donation=None, subscription=None, **kwargs):
         super().__init__(request, donation, subscription)
         # set paypal legacy settings object
-        self.settings = getPayPalLegacySettings(request)
+        self.settings = getPayPalLegacySettings()
         # saves all remaining kwargs into the manager
         self.__dict__.update(kwargs)
 
@@ -84,12 +84,6 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
                 # continue code execution
                 pass
 
-            # commented here as there is no logical need for this
-            # verify if mc_currency match with the system defined currency_code
-            # if self.request.POST.get('mc_currency', '').lower() != self.global_settings.currency.lower():
-                # the currency code is invalid
-                # raise Exception(str(_('Invalid currency in IPN response. IPN data: %(data)s') % {'data': json.dumps(self.request.POST.dict())}))
-
             # add renewal payment to subscription
             # transaction_id uses the txn_id from paypal directly, just for convenience, value is the same as _give_payment_transaction_id in donationPaymentMeta
             renewal = Donation(
@@ -109,8 +103,8 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
             renewal.save()
 
             # email notifications
-            sendRenewalReceiptToDonor(self.request, renewal)
-            sendRenewalNotifToAdmins(self.request, renewal)
+            sendRenewalReceiptToDonor(renewal)
+            sendRenewalNotifToAdmins(renewal)
 
             # also save required DonationPaymentMetas, purchase key is skipped here as it should be saved at the parent payment/subscription
             transaction_id_dpm = DonationPaymentMeta(donation=renewal, field_key='_give_payment_transaction_id', field_value=self.request.POST.get('txn_id', ''))
@@ -123,9 +117,9 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
             self.donation.subscription.save()
 
             # email notifications
-            # sendRecurringCancelledNotifToDonor(self.request, self.donation.subscription)
-            sendRecurringUpdatedNotifToDonor(self.request, self.donation.subscription, str(_("Your recurring donation has been cancelled.")))
-            sendRecurringCancelledNotifToAdmins(self.request, self.donation.subscription)
+            # sendRecurringCancelledNotifToDonor(self.donation.subscription)
+            sendRecurringUpdatedNotifToDonor(self.donation.subscription, str(_("Your recurring donation has been cancelled.")))
+            sendRecurringCancelledNotifToAdmins(self.donation.subscription)
 
             return HttpResponse(status=200)
         else:
@@ -147,8 +141,7 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
         addUpdateSubsActionLog(self.subscription, SUBS_ACTION_CANCEL, action_notes='Cancellation Request')
 
         # email notifications
-        sendRecurringCancelRequestNotifToAdmins(
-            self.request, self.subscription)
+        sendRecurringCancelRequestNotifToAdmins(self.subscription)
 
         # raise error so that main code goes to failure path
         raise Exception(_('Direct cancellation of subscription is not supported for this gateway. Email has been sent to site admin to take further action. Site admin will manually cancel this subscription.'))

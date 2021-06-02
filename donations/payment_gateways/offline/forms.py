@@ -9,11 +9,9 @@ class RecurringPaymentForm_Offline(forms.Form):
     subscription_id = forms.CharField(label=_('Recurring donation identifier(fixed)'), required=False)
     currency = forms.CharField(label=('Donation Currency(fixed)'), required=False)
 
-    def __init__(self, *args, request=None, subscription=None, **kwargs):
+    def __init__(self, *args, subscription=None, **kwargs):
         super().__init__(*args, **kwargs)
         currency_set = getCurrencyDictAt(subscription.currency)
-        if not request:
-            raise ValueError(_('Please provide a request object'))
         if not subscription:
             raise ValueError(_('Please provide a subscription object'))
         self.fields["subscription_id"].initial = subscription.profile_id

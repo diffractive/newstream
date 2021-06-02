@@ -10,7 +10,7 @@
 <p>{% trans "Dear" %} {{ subscription.user.fullname }},</p>
 {% url 'donations:my-recurring-donations' as donations_url %}
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with donations_full_url=request|fullurl:donations_url%}You have just cancelled your recurring donation. Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to view your recurring donations on the website.{% endblocktrans %}
+    {% blocktrans with donations_full_url=donations_url|site_rel_url%}You have just cancelled your recurring donation. Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to view your recurring donations on the website.{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
     {% trans "Here are the details of your recurring donation:" %}
@@ -39,5 +39,5 @@
 </table>
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 
-<p style="{{ 'parag'|email_css }}">{{ request|site_name }}</p>
+<p style="{{ 'parag'|email_css }}">{% site_name %}</p>
 {% endblock %}

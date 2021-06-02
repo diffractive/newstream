@@ -1,7 +1,7 @@
 {% load common_tags i18n %}
 {% extends "base.html" %}
 
-{% block title %}{% blocktrans with sitename=request|site_name %}Logged out from
+{% block title %}{% blocktrans with sitename=''|site_name_filter %}Logged out from
 {{ sitename }}{% endblocktrans %}{% endblock %}
 
 {% block content %}

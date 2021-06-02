@@ -13,6 +13,7 @@ services:
   app:
     environment:
       NEWSTREAM_RUN_MIGRATIONS: 1
+      NEWSTREAM_DEBUG: 1
       DATABASE_NAME: newstream
       DATABASE_USER: newstream
       DATABASE_HOST: database
@@ -27,6 +28,10 @@ services:
       - database:database
     ports:
       - "8000:8000"
+    volumes:
+      - type: bind
+        source: .
+        target: /app
   mailhog:
     image: mailhog/mailhog
     logging:

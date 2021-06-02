@@ -37,10 +37,10 @@ def unsubscribe(request, email, hash):
 @login_required
 def personal_info(request):
     if request.method == 'POST':
-        form = PersonalInfoForm(request.POST, request=request)
+        form = PersonalInfoForm(request.POST, user=request.user)
         if form.is_valid():
             # process meta data
-            user_metas = process_user_meta(request)
+            user_metas = process_user_meta(request.POST)
 
             # process the data in form.cleaned_data as required
             user = request.user
@@ -60,7 +60,7 @@ def personal_info(request):
                 settings.LANGUAGE_COOKIE_NAME, user.language_preference)
             return response
     else:
-        form = PersonalInfoForm(request=request)
+        form = PersonalInfoForm(user=request.user)
     return render(request, 'profile_settings/personal_info.html', {'form': form})
 
 
@@ -88,8 +88,8 @@ def delete_account(request):
         if form.is_valid():
             user = request.user
             # email notifications
-            sendAccountDeletedNotifToAdmins(request, user)
-            sendAccountDeletedNotifToDonor(request, user)
+            sendAccountDeletedNotifToAdmins(user)
+            sendAccountDeletedNotifToDonor(user)
 
             # proceed to logout user
             # lastly, deletes the account

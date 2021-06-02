@@ -17,7 +17,7 @@ class Factory_Paypal_Legacy(PaymentGatewayFactory):
         # Regular PayPal IPN
         # give-listener=IPN param check is done in the nginx config file
         if request.method == 'POST':
-            paypalLegacySettings = getPayPalLegacySettings(request)
+            paypalLegacySettings = getPayPalLegacySettings()
 
             raw_post_data = request.body.decode('utf-8')
             req_data = 'cmd=_notify-validate'

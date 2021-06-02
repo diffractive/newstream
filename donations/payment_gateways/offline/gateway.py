@@ -14,7 +14,7 @@ class Gateway_Offline(PaymentGatewayManager):
     def __init__(self, request, donation=None, subscription=None, **kwargs):
         super().__init__(request, donation, subscription)
         # set offline settings object
-        self.settings = getOfflineSettings(request)
+        self.settings = getOfflineSettings()
         # saves all remaining kwargs into the manager
         self.__dict__.update(kwargs)
 
@@ -25,8 +25,8 @@ class Gateway_Offline(PaymentGatewayManager):
         self.request.session['return-donation-id'] = self.donation.id
 
         # send email notifs
-        sendDonationReceiptToDonor(self.request, self.donation)
-        sendDonationNotifToAdmins(self.request, self.donation)
+        sendDonationReceiptToDonor(self.donation)
+        sendDonationNotifToAdmins(self.donation)
 
         return redirect('donations:thank-you')
 
@@ -43,9 +43,9 @@ class Gateway_Offline(PaymentGatewayManager):
             self.subscription.save()
 
             # email notifications
-            sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, str(
+            sendRecurringUpdatedNotifToAdmins(self.subscription, str(
                 _("A Recurring Donation's amount has been updated on your website:")))
-            sendRecurringUpdatedNotifToDonor(self.request, self.subscription, str(
+            sendRecurringUpdatedNotifToDonor(self.subscription, str(
                 _("You have just updated your recurring donation amount.")))
 
             messages.add_message(self.request, messages.SUCCESS, _(
@@ -62,8 +62,7 @@ class Gateway_Offline(PaymentGatewayManager):
         addUpdateSubsActionLog(self.subscription, SUBS_ACTION_CANCEL, action_notes='Cancellation Request')
 
         # email notifications
-        sendRecurringCancelRequestNotifToAdmins(
-            self.request, self.subscription)
+        sendRecurringCancelRequestNotifToAdmins(self.subscription)
 
         # raise error so that main code goes to failure path
         raise Exception(_('Direct cancellation of subscription is not supported for this gateway. Email has been sent to site admin to take further action. Site admin will manually cancel this subscription.'))
@@ -74,10 +73,8 @@ class Gateway_Offline(PaymentGatewayManager):
             self.subscription.recurring_status = STATUS_ACTIVE
             self.subscription.save()
             # email notifications
-            sendRecurringResumedNotifToAdmins(
-                self.request, self.subscription)
-            sendRecurringResumedNotifToDonor(
-                self.request, self.subscription)
+            sendRecurringResumedNotifToAdmins(self.subscription)
+            sendRecurringResumedNotifToDonor(self.subscription)
             return {
                 'button-text': str(_('Pause Recurring Donation')),
                 'recurring-status': STATUS_ACTIVE,
@@ -88,10 +85,8 @@ class Gateway_Offline(PaymentGatewayManager):
             self.subscription.recurring_status = STATUS_PAUSED
             self.subscription.save()
             # email notifications
-            sendRecurringPausedNotifToAdmins(
-                self.request, self.subscription)
-            sendRecurringPausedNotifToDonor(
-                self.request, self.subscription)
+            sendRecurringPausedNotifToAdmins(self.subscription)
+            sendRecurringPausedNotifToDonor(self.subscription)
             return {
                 'button-text': str(_('Resume Recurring Donation')),
                 'recurring-status': STATUS_PAUSED,

@@ -16,7 +16,7 @@ from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.stripe.constants import *
 from donations.functions import gen_transaction_id
 from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
-from newstream.functions import uuid4_str, getSiteName, getSiteSettings, getFullReverseUrl, printvars, raiseObjectNone, _debug
+from newstream.functions import uuid4_str, get_site_name, reverse_with_site_url, printvars, raiseObjectNone, _debug
 from donations.payment_gateways.stripe.functions import initStripeApiKey, formatDonationAmount, formatDonationAmountFromGateway
 
 
@@ -33,7 +33,7 @@ class Gateway_Stripe(PaymentGatewayManager):
         '''
         super().__init__(request, donation, subscription)
         # set stripe settings object
-        self.settings = getStripeSettings(request)
+        self.settings = getStripeSettings()
         # saves all remaining kwargs into the manager, e.g. session, event, invoice
         self.__dict__.update(kwargs)
 
@@ -46,7 +46,7 @@ class Gateway_Stripe(PaymentGatewayManager):
         return render(self.request, 'donations/redirection_stripe.html', {'publishable_key': self.settings.publishable_key})
 
     def process_webhook_response(self):
-        initStripeApiKey(self.request)
+        initStripeApiKey()
         # Decide what actions to perform on Newstream's side according to the results/events from the Stripe notifications
         # Event: checkout.session.completed
         if self.event['type'] == EVENT_CHECKOUT_SESSION_COMPLETED:
@@ -58,8 +58,8 @@ class Gateway_Stripe(PaymentGatewayManager):
 
             # Since for recurring payment, subscription.updated event might lag behind checkout.session.completed
             if not self.donation.is_recurring:
-                sendDonationReceiptToDonor(self.request, self.donation)
-                sendDonationNotifToAdmins(self.request, self.donation)
+                sendDonationReceiptToDonor(self.donation)
+                sendDonationNotifToAdmins(self.donation)
 
             return HttpResponse(status=200)
 
@@ -102,8 +102,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                     dpmeta.save()
 
                     # donation email notifications sent here instead of at EVENT_BILLING_SUBSCRIPTION_ACTIVATED
-                    sendDonationReceiptToDonor(self.request, self.donation)
-                    sendDonationNotifToAdmins(self.request, self.donation)
+                    sendDonationReceiptToDonor(self.donation)
+                    sendDonationNotifToAdmins(self.donation)
                 elif len(invoices['data']) > 1:
                     _debug("[stripe recurring] About to add renewal donation")
                     # create a new donation record + then send donation receipt to user
@@ -128,8 +128,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                     dpmeta.save()
 
                     # email notifications
-                    sendRenewalReceiptToDonor(self.request, donation)
-                    sendRenewalNotifToAdmins(self.request, donation)
+                    sendRenewalReceiptToDonor(donation)
+                    sendRenewalNotifToAdmins(donation)
 
                 # log down the current subscription period span
                 spmeta = SubscriptionPaymentMeta(
@@ -157,8 +157,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                     # send the subscription updatecd notifs to admins and donor as subscription is just active
                     admin_email_wordings = str(_("A new recurring donation has become active on your website:"))
                     donor_email_wordings = str(_("Your new recurring donation has become active."))
-                    sendRecurringUpdatedNotifToAdmins(self.request, self.donation.subscription, admin_email_wordings)
-                    sendRecurringUpdatedNotifToDonor(self.request, self.donation.subscription, donor_email_wordings)
+                    sendRecurringUpdatedNotifToAdmins(self.donation.subscription, admin_email_wordings)
+                    sendRecurringUpdatedNotifToDonor(self.donation.subscription, donor_email_wordings)
                 else:
                     # check if pause_collection is marked_uncollectible
                     if self.subscription_obj['pause_collection'] and self.subscription_obj['pause_collection']['behavior'] == 'mark_uncollectible':
@@ -180,10 +180,8 @@ class Gateway_Stripe(PaymentGatewayManager):
             self.donation.subscription.save()
 
             # email notifications here because cancellation might occur manually at the stripe dashboard
-            sendRecurringCancelledNotifToAdmins(
-                self.request, self.donation.subscription)
-            sendRecurringCancelledNotifToDonor(
-                self.request, self.donation.subscription)
+            sendRecurringCancelledNotifToAdmins(self.donation.subscription)
+            sendRecurringCancelledNotifToDonor(self.donation.subscription)
 
             return HttpResponse(status=200)
         
@@ -193,7 +191,7 @@ class Gateway_Stripe(PaymentGatewayManager):
     def update_recurring_payment(self, form_data):
         if not self.subscription:
             raise ValueError(_('Subscription object is None. Cannot update recurring payment.'))
-        initStripeApiKey(self.request)
+        initStripeApiKey()
         # update donation amount if it is different from database
         if form_data['recurring_amount'] != self.subscription.recurring_amount:
             # ad-hoc price is used
@@ -233,9 +231,9 @@ class Gateway_Stripe(PaymentGatewayManager):
                     self.subscription.save()
 
                     # email notifications
-                    sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, str(
+                    sendRecurringUpdatedNotifToAdmins(self.subscription, str(
                         _("A Recurring Donation's amount has been updated on your website:")))
-                    sendRecurringUpdatedNotifToDonor(self.request, self.subscription, str(
+                    sendRecurringUpdatedNotifToDonor(self.subscription, str(
                         _("You have just updated your recurring donation amount.")))
 
                     messages.add_message(self.request, messages.SUCCESS, _(
@@ -257,9 +255,9 @@ class Gateway_Stripe(PaymentGatewayManager):
                 raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
             if updateRes:
                 # email notifications
-                sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, str(
+                sendRecurringUpdatedNotifToAdmins(self.subscription, str(
                     _("A Recurring Donation's billing cycle has been reset to today's date on your website:")))
-                sendRecurringUpdatedNotifToDonor(self.request, self.subscription, str(
+                sendRecurringUpdatedNotifToDonor(self.subscription, str(
                     _("You have just reset your recurring donation's billing cycle to today's date.")))
 
                 messages.add_message(self.request, messages.SUCCESS, _(
@@ -270,7 +268,7 @@ class Gateway_Stripe(PaymentGatewayManager):
     def cancel_recurring_payment(self):
         if not self.subscription:
             raise ValueError(_('Subscription object is None. Cannot cancel recurring payment.'))
-        initStripeApiKey(self.request)
+        initStripeApiKey()
         # cancel subscription via stripe API
         try:
             cancelled_subscription = stripe.Subscription.delete(
@@ -285,7 +283,7 @@ class Gateway_Stripe(PaymentGatewayManager):
             raise RuntimeError(_('Subscription object returned from stripe having status %(status)s instead of canceled') % {'status': cancelled_subscription.status})
 
     def toggle_recurring_payment(self):
-        initStripeApiKey(self.request)
+        initStripeApiKey()
         # pause or resume subscription via stripe API
         toggle_obj = None
         if self.subscription.recurring_status == STATUS_PAUSED:
@@ -305,10 +303,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                 self.subscription.recurring_status = STATUS_PAUSED
                 self.subscription.save()
                 # email notifications
-                sendRecurringPausedNotifToAdmins(
-                    self.request, self.subscription)
-                sendRecurringPausedNotifToDonor(
-                    self.request, self.subscription)
+                sendRecurringPausedNotifToAdmins(self.subscription)
+                sendRecurringPausedNotifToDonor(self.subscription)
                 return {
                     'button-text': str(_('Resume Recurring Donation')),
                     'recurring-status': STATUS_PAUSED,
@@ -319,10 +315,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                 self.subscription.recurring_status = STATUS_ACTIVE
                 self.subscription.save()
                 # email notifications
-                sendRecurringResumedNotifToAdmins(
-                    self.request, self.subscription)
-                sendRecurringResumedNotifToDonor(
-                    self.request, self.subscription)
+                sendRecurringResumedNotifToAdmins(self.subscription)
+                sendRecurringResumedNotifToDonor(self.subscription)
                 return {
                     'button-text': str(_('Pause Recurring Donation')),
                     'recurring-status': STATUS_ACTIVE,

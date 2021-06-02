@@ -13,7 +13,7 @@
 <p style="{{ 'parag'|email_css }}">{% trans 'This email is to inform you that a donor account has been created on your website:' %}</p>
                 
 <p style="{{ 'parag'|email_css }}">
-    <a href="{{ request|domain }}/admin/users/{{ user.id }}/" target="_blank" rel="noopener noreferrer">{{ request|domain }}/admin/users/{{ user.id }}/</a>
+    <a href="{% site_url %}/admin/users/{{ user.id }}/" target="_blank" rel="noopener noreferrer">{% site_url %}/admin/users/{{ user.id }}/</a>
 </p>
 
 <table cellpadding="8" style="margin-bottom: 30px;">
@@ -25,5 +25,5 @@
 
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 
-<p style="{{ 'parag'|email_css }}">{{ request|site_name }}</p>
+<p style="{{ 'parag'|email_css }}">{% site_name %}</p>
 {% endblock %}

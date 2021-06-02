@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 
-from newstream.functions import getSiteSettings
+from newstream.functions import get_site_settings_from_default_site
 
 
 class DisableSocialLoginMiddleware:
@@ -20,7 +20,7 @@ class DisableSocialLoginMiddleware:
     def __call__(self, request):
         # Code to be executed for each request before
         # the view (and later middleware) are called.
-        siteSettings = getSiteSettings(request)
+        siteSettings = get_site_settings_from_default_site()
         if not siteSettings.social_login_enabled:
             # return 404 for social login urls
             if request.path_info in self.sociallogin_urls:

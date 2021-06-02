@@ -9,7 +9,7 @@ from django.contrib import messages
 from django.shortcuts import render
 from django.utils.translation import gettext_lazy as _
 
-from newstream.functions import getFullReverseUrl, getSiteName, _debug
+from newstream.functions import reverse_with_site_url, get_site_name, _debug
 from donations.functions import getNextDateFromRecurringInterval, gen_order_prefix_2c2p, getCurrencyDictAt, currencyCodeToKey
 from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor, sendRenewalNotifToAdmins, sendRenewalReceiptToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringCancelledNotifToAdmins, sendRecurringCancelledNotifToDonor
 from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_CANCELLED
@@ -33,7 +33,7 @@ class Gateway_2C2P(PaymentGatewayManager):
         '''
         super().__init__(request, donation, subscription)
         # set 2c2p settings object
-        self.settings = get2C2PSettings(request)
+        self.settings = get2C2PSettings()
         # saves all remaining kwargs into the manager
         self.__dict__.update(kwargs)
 
@@ -75,15 +75,13 @@ class Gateway_2C2P(PaymentGatewayManager):
             self.donation.donation_amount, self.donation.currency)
         # Apr 20 Tested result_url_1/2 working (such that merchant portal no need manual setting) after follow up with 2C2P Sum (an internal 2C2P settings needs to be turned on by them)
         # todo: Apr 21 2C2P server is not firing back the request from the new recurring payments (need follow up with Sum again)
-        data['result_url_1'] = getFullReverseUrl(
-            self.request, 'donations:return-from-2c2p')
-        data['result_url_2'] = getFullReverseUrl(
-            self.request, 'donations:verify-2c2p-response')
+        data['result_url_1'] = reverse_with_site_url('donations:return-from-2c2p')
+        data['result_url_2'] = reverse_with_site_url('donations:verify-2c2p-response')
         data['user_defined_1'] = str(self.donation.id)
 
         if self.donation.is_recurring:
             data['payment_description'] = _('Recurring Donation for %(site)s') % {
-                'site': getSiteName(self.request)}
+                'site': get_site_name()}
             data['request_3ds'] = 'Y'
             data['recurring'] = 'Y'
             data['order_prefix'] = gen_order_prefix_2c2p()
@@ -106,7 +104,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             # dpmeta.save()
         else:
             data['payment_description'] = _('Onetime Donation for %(site)s') % {
-                'site': getSiteName(self.request)}
+                'site': get_site_name()}
 
         params = ''
         for key in getRequestParamOrder():
@@ -129,8 +127,8 @@ class Gateway_2C2P(PaymentGatewayManager):
             self.donation.save()
 
             # email notifications
-            sendDonationReceiptToDonor(self.request, self.donation)
-            sendDonationNotifToAdmins(self.request, self.donation)
+            sendDonationReceiptToDonor(self.donation)
+            sendDonationNotifToAdmins(self.donation)
 
             return HttpResponse(status=200)
         # case two: donation is passed + first_time_subscription: true
@@ -157,8 +155,8 @@ class Gateway_2C2P(PaymentGatewayManager):
                 self.donation.save()
 
                 # send the donation receipt to donor and notification to admins if subscription is just created
-                sendDonationReceiptToDonor(self.request, self.donation)
-                sendDonationNotifToAdmins(self.request, self.donation)
+                sendDonationReceiptToDonor(self.donation)
+                sendDonationNotifToAdmins(self.donation)
 
                 return HttpResponse(200)
             else:
@@ -185,8 +183,8 @@ class Gateway_2C2P(PaymentGatewayManager):
             donation.save()
             
             # email notifications
-            sendRenewalReceiptToDonor(self.request, donation)
-            sendRenewalNotifToAdmins(self.request, donation)
+            sendRenewalReceiptToDonor(donation)
+            sendRenewalNotifToAdmins(donation)
 
             return HttpResponse(200)
         else:
@@ -250,8 +248,8 @@ class Gateway_2C2P(PaymentGatewayManager):
                         self.subscription.recurring_amount = extract_payment_amount(xmlResp.find('amount').text, xmlResp.find('currency').text)
                         self.subscription.save()
                     # email notifications
-                    sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, admin_email_wordings)
-                    sendRecurringUpdatedNotifToDonor(self.request, self.subscription, donor_email_wordings)
+                    sendRecurringUpdatedNotifToAdmins(self.subscription, admin_email_wordings)
+                    sendRecurringUpdatedNotifToDonor(self.subscription, donor_email_wordings)
                     # add message
                     messages.add_message(self.request, messages.SUCCESS, message_wordings)
                 else:
@@ -286,9 +284,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             self.subscription.recurring_status = STATUS_CANCELLED
             self.subscription.save()
             # email notifications
-            sendRecurringCancelledNotifToAdmins(
-                self.request, self.subscription)
-            sendRecurringCancelledNotifToDonor(
-                self.request, self.subscription)
+            sendRecurringCancelledNotifToAdmins(self.subscription)
+            sendRecurringCancelledNotifToDonor(self.subscription)
         else:
             raise RuntimeError(_('Cannot cancel 2C2P subscription, ')+("respCode is :"+xmlResp.find('respCode').text if xmlResp.find('respCode') else "output is: "+output.decode('utf-8')))

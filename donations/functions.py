@@ -7,7 +7,7 @@ from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from .includes.currency_dictionary import currency_dict
-from newstream.functions import getSiteSettings, getSuperUserTimezone, _debug, getSiteSettings_from_default_site
+from newstream.functions import getSuperUserTimezone, _debug, get_site_settings_from_default_site
 from donations.models import DonationMeta, TempDonationMeta
 from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
 
@@ -36,11 +36,6 @@ def currencyCodeToKey(code):
     return None
 
 
-def isTestMode(request):
-    siteSettings = getSiteSettings(request)
-    return siteSettings.sandbox_mode
-
-
 def getDonationEmail(donation):
     if donation.user:
         return donation.user.email
@@ -49,7 +44,8 @@ def getDonationEmail(donation):
 
 
 def isUpdateSubsFrequencyLimitationPassed(gatewayManager):
-    if gatewayManager.global_settings.limit_fiveactions_per_fivemins:
+    site_settings = get_site_settings_from_default_site()
+    if site_settings.limit_fiveactions_per_fivemins:
         # get count of the actions carried out by the same donor in the last 5 minutes
         nowdt = datetime.now(dt_timezone.utc)
         fiveminsbf = nowdt - timedelta(minutes=5)
@@ -124,16 +120,16 @@ def getRecurringDateNextMonth(date_format):
     return nextmonthdate.strftime(date_format)
 
 
-def process_temp_donation_meta(request):
+def process_temp_donation_meta(post_dict):
     donation_metas = []
-    for key, val in request.POST.items():
+    for key, val in post_dict.items():
         donationmeta_key = re.match("^donationmeta_([a-z_-]+)$", key)
         donationmetalist_key = re.match("^donationmetalist_([a-z_-]+)$", key)
         if donationmeta_key:
             donation_metas.append(TempDonationMeta(
                 field_key=donationmeta_key.group(1), field_value=val))
         elif donationmetalist_key:
-            listval = request.POST.getlist(key)
+            listval = post_dict.getlist(key)
             if len(listval) > 0:
                 # using comma-linebreak as the separator
                 donation_metas.append(TempDonationMeta(
@@ -152,7 +148,7 @@ def temp_donation_meta_to_donation_meta(tmpd_metas):
 
 def displayGateway(instance):
     ''' instance can be either TempDonation, Donation or Subscription'''
-    siteSettings = getSiteSettings_from_default_site()
+    siteSettings = get_site_settings_from_default_site()
     return getattr(siteSettings, instance.gateway.frontend_label_attr_name, instance.gateway.title)
 
 

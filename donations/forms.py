@@ -6,7 +6,7 @@ from django.utils.translation import gettext_lazy as _
 
 from wagtail.contrib.forms.forms import FormBuilder
 
-from newstream.functions import getSiteSettings
+from newstream.functions import get_site_settings_from_default_site
 from donations.functions import getCurrencyDictAt, displayAmountWithCurrency
 from donations.models import TempDonation
 User = get_user_model()
@@ -41,8 +41,8 @@ class DonationDetailsForm(forms.Form):
         self.request = request
         # manually casting donation_footer_text from LazyI18nString to str to avoid the "richtext expects a string" error in the template
         self.footer_html = str(form.donation_footer_text)
-        self.global_settings = getSiteSettings(request)
-        self.fields["currency"].initial = self.global_settings.currency
+        self.site_settings = get_site_settings_from_default_site()
+        self.fields["currency"].initial = self.site_settings.currency
 
         # set default donation frequency
         if form.isDefaultMonthly():
@@ -53,10 +53,10 @@ class DonationDetailsForm(forms.Form):
         # construct payment gateway field
         gateways = form.allowed_gateways.all()
         self.fields["payment_gateway"] = forms.ChoiceField(
-            choices=[(x.id, getattr(self.global_settings, x.frontend_label_attr_name)) for x in gateways], label=_("Payment method"))
+            choices=[(x.id, getattr(self.site_settings, x.frontend_label_attr_name)) for x in gateways], label=_("Payment method"))
 
         # construct donation amount field
-        currency_set = getCurrencyDictAt(self.global_settings.currency)
+        currency_set = getCurrencyDictAt(self.site_settings.currency)
         amount_label = _('Donation amount in ') + html.unescape(currency_set['admin_label'])
         custom_amount_label = _('Custom Donation amount in ') + html.unescape(currency_set['admin_label'])
         if form.isAmountFixed():
@@ -66,13 +66,13 @@ class DonationDetailsForm(forms.Form):
         elif form.isAmountStepped():
             amountSteps = form.amount_steps.all()
             self.fields["donation_amount"] = forms.ChoiceField(
-                choices=[(x.step, displayAmountWithCurrency(self.global_settings.currency, x.step, True)) for x in amountSteps], label=amount_label)
+                choices=[(x.step, displayAmountWithCurrency(self.site_settings.currency, x.step, True)) for x in amountSteps], label=amount_label)
         elif form.isAmountCustom():
             self.fields["donation_amount"] = forms.DecimalField(
                 label=custom_amount_label, decimal_places=currency_set['setting']['number_decimals'])
         elif form.isAmountSteppedCustom():
             amountSteps = form.amount_steps.all()
-            select_choices = [('custom', _('Custom Amount')), *[(x.step, displayAmountWithCurrency(self.global_settings.currency, x.step, True)) for x in amountSteps]]
+            select_choices = [('custom', _('Custom Amount')), *[(x.step, displayAmountWithCurrency(self.site_settings.currency, x.step, True)) for x in amountSteps]]
             if len(amountSteps) > 10:
                 select_choices.append(('custom', _('Custom Amount')))
             self.fields["donation_amount"] = forms.ChoiceField(

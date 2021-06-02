@@ -18,7 +18,7 @@ class Factory_2C2P(PaymentGatewayFactory):
 
     @staticmethod
     def initGatewayByVerification(request):
-        settings = get2C2PSettings(request)
+        settings = get2C2PSettings()
         data = {}
         # debugging POST params from 2C2P
         for key, value in request.POST.items():

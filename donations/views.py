@@ -10,7 +10,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 
-from newstream.functions import getSiteSettings, _exception, uuid4_str
+from newstream.functions import _exception, uuid4_str, get_site_settings_from_default_site
 from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
 from donations.models import DonationPaymentMeta, Subscription, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
@@ -23,7 +23,7 @@ User = get_user_model()
 
 def donate(request):
     try:
-        siteSettings = getSiteSettings(request)
+        siteSettings = get_site_settings_from_default_site()
         form_template = 'donations/donation_details_form.html'
         form_blueprint = siteSettings.donation_form
         if not form_blueprint:
@@ -33,7 +33,7 @@ def donate(request):
                 request.POST, request=request, blueprint=form_blueprint, label_suffix='')
             if form.is_valid():
                 # process temp meta data
-                temp_donation_metas = process_temp_donation_meta(request)
+                temp_donation_metas = process_temp_donation_meta(request.POST)
 
                 # process donation amount
                 if form.cleaned_data.get('donation_amount_custom', None) and form.cleaned_data['donation_amount_custom'] > 0:
@@ -101,7 +101,7 @@ def donate(request):
     # get offline gateway id and instructions text
     offline_gateway = PaymentGateway.objects.get(title=GATEWAY_OFFLINE)
     offline_gateway_id = offline_gateway.id
-    offlineSettings = getOfflineSettings(request)
+    offlineSettings = getOfflineSettings()
     # manually casting offline_instructions_text from LazyI18nString to str to avoid the "richtext expects a string" error in the template
     offline_instructions_html = str(offlineSettings.offline_instructions_text)
     
@@ -114,7 +114,7 @@ def register_signin(request):
 
 def confirm_donation(request):
     try:
-        siteSettings = getSiteSettings(request)
+        siteSettings = get_site_settings_from_default_site()
         tmpd = TempDonation.objects.get(pk=request.session.get('temp_donation_id', None))
         paymentMethod = displayGateway(tmpd)
         isGatewayHostedBool = isGatewayHosted(tmpd.gateway)
@@ -205,9 +205,14 @@ def thank_you(request):
                   backend='django.contrib.auth.backends.ModelBackend')
         # display extra html if donation is offline
         if donation.gateway.is_offline():
+<<<<<<< HEAD
             offlineSettings = getOfflineSettings(request)
             # manually casting offline_thankyou_text from LazyI18nString to str to avoid the "richtext expects a string" error in the template
             reminders_html = str(offlineSettings.offline_thankyou_text)
+=======
+            offlineSettings = getOfflineSettings()
+            reminders_html = offlineSettings.offline_thankyou_text
+>>>>>>> master
         # display extra text for certain scenarios
         if donation.gateway.is_paypal() and donation.payment_status == STATUS_PROCESSING:
             extra_text = _('Your donation should be complete in 1-2 minutes. ')
@@ -357,7 +362,7 @@ def edit_recurring(request, id):
         subscription = get_object_or_404(Subscription, id=id)
         if subscription.user == request.user:
             # Form object is initialized according to the specific gateway and if request.method=='POST'
-            form = InitEditRecurringPaymentForm(request, subscription)
+            form = InitEditRecurringPaymentForm(request.POST, request.method, subscription)
             if request.method == 'POST':
                 if form.is_valid():
                     # use gatewayManager to process the data in form.cleaned_data as required
@@ -390,7 +395,7 @@ def my_onetime_donations(request):
     # previously deleted records should still be hidden even soft-delete mode is turned off afterwards
     donations = Donation.objects.filter(
         user=request.user, is_recurring=False, deleted=False).order_by('-donation_date')
-    siteSettings = getSiteSettings(request)
+    siteSettings = get_site_settings_from_default_site()
     return render(request, 'donations/my_onetime_donations.html', {'donations': donations, 'siteSettings': siteSettings})
 
 
@@ -399,7 +404,7 @@ def my_recurring_donations(request):
     # deleted=False should be valid whether soft-delete mode is on or off
     subscriptions = Subscription.objects.filter(
         user=request.user, deleted=False).order_by('-created_at')
-    siteSettings = getSiteSettings(request)
+    siteSettings = get_site_settings_from_default_site()
     return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'siteSettings': siteSettings})
 
 
@@ -411,7 +416,7 @@ def my_renewals(request, id):
         if subscription.user == request.user:
             renewals = Donation.objects.filter(
                 subscription=subscription, deleted=False).order_by('-donation_date')
-            siteSettings = getSiteSettings(request)
+            siteSettings = get_site_settings_from_default_site()
             return render(request, 'donations/my_renewals.html', {'subscription': subscription, 'renewals': renewals, 'siteSettings': siteSettings})
         else:
             raise PermissionError(_('You are not authorized to view renewals of subscription %(id)d.') % {'id': id})

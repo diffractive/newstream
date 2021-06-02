@@ -18,7 +18,7 @@
             <div class="personal-info-section w-full">
                 <h2 class="mb-4">{% trans 'Personal info' %}</h2>
                 <p class="my-6 font-bold">
-                    {% with provider_name=account.get_provider.name %}{% blocktrans with sitename=request|site_name %}You
+                    {% with provider_name=account.get_provider.name %}{% blocktrans with sitename=''|site_name_filter %}You
                     are
                     about to use your
                     {{provider_name}}

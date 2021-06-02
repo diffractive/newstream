@@ -1,5 +1,5 @@
 {% load common_tags wagtailcore_tags wagtailimages_tags i18n %}
-{% image request|brand_logo max-80x80 as brand_logo %}
+{% image 'brand_logo'|site_settings max-80x80 as brand_logo %}
 
 <div class='newstream-footer md:items-center'>
     <a href="{% pageurl homepage %}" class="brand-logo-link">

@@ -1,5 +1,5 @@
 {% load static wagtailuserbar common_tags wagtailimages_tags %}
-{% image request|site_icon max-32x32 as site_icon %}
+{% image 'site_icon'|site_settings max-32x32 as site_icon %}
 
 <!DOCTYPE html>
 <html class="no-js" lang="{{ request.LANGUAGE_CODE }}">

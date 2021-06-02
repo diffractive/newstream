@@ -20,7 +20,7 @@ class Gateway_Paypal(PaymentGatewayManager):
     def __init__(self, request, donation=None, subscription=None, **kwargs):
         super().__init__(request, donation, subscription)
         # set paypal settings object
-        self.settings = getPayPalSettings(request)
+        self.settings = getPayPalSettings()
         # init paypal http client
         self.client = PayPalHttpClient(self.settings.environment)
         # saves all remaining kwargs into the manager, e.g. order_id, order_status
@@ -48,8 +48,8 @@ class Gateway_Paypal(PaymentGatewayManager):
                 self.donation.save()
             
             # send email notifs
-            sendDonationReceiptToDonor(self.request, self.donation)
-            sendDonationNotifToAdmins(self.request, self.donation)
+            sendDonationReceiptToDonor(self.donation)
+            sendDonationNotifToAdmins(self.donation)
 
             return HttpResponse(status=200)
 
@@ -67,8 +67,8 @@ class Gateway_Paypal(PaymentGatewayManager):
                     # send the subscription updatecd notifs to admins and donor as subscription is just active
                     admin_email_wordings = str(_("A new recurring donation has become active on your website:"))
                     donor_email_wordings = str(_("Your new recurring donation has become active."))
-                    sendRecurringUpdatedNotifToAdmins(self.request, self.donation.subscription, admin_email_wordings)
-                    sendRecurringUpdatedNotifToDonor(self.request, self.donation.subscription, donor_email_wordings)
+                    sendRecurringUpdatedNotifToAdmins(self.donation.subscription, admin_email_wordings)
+                    sendRecurringUpdatedNotifToDonor(self.donation.subscription, donor_email_wordings)
 
                 return HttpResponse(status=200)
             else:
@@ -117,8 +117,8 @@ class Gateway_Paypal(PaymentGatewayManager):
                     donation.save()
 
                     # email notifications
-                    sendRenewalReceiptToDonor(self.request, donation)
-                    sendRenewalNotifToAdmins(self.request, donation)
+                    sendRenewalReceiptToDonor(donation)
+                    sendRenewalNotifToAdmins(donation)
                 else:
                     # this is a first time subscription payment
                     self.donation.payment_status = STATUS_COMPLETE
@@ -130,8 +130,8 @@ class Gateway_Paypal(PaymentGatewayManager):
                     dpmeta.save()
 
                     # donation email notifications sent here instead of at EVENT_BILLING_SUBSCRIPTION_ACTIVATED
-                    sendDonationReceiptToDonor(self.request, self.donation)
-                    sendDonationNotifToAdmins(self.request, self.donation)
+                    sendDonationReceiptToDonor(self.donation)
+                    sendDonationNotifToAdmins(self.donation)
 
                 return HttpResponse(status=200)
             else:
@@ -144,10 +144,8 @@ class Gateway_Paypal(PaymentGatewayManager):
                 self.donation.subscription.save()
 
                 # email notifications
-                sendRecurringCancelledNotifToAdmins(
-                    self.request, self.donation.subscription)
-                sendRecurringCancelledNotifToDonor(
-                    self.request, self.donation.subscription)
+                sendRecurringCancelledNotifToAdmins(self.donation.subscription)
+                sendRecurringCancelledNotifToDonor(self.donation.subscription)
 
                 return HttpResponse(status=200)
             else:
@@ -161,15 +159,15 @@ class Gateway_Paypal(PaymentGatewayManager):
             raise ValueError(_('Subscription object is None. Cannot update recurring payment.'))
         # update donation amount if it is different from database
         if form_data['recurring_amount'] != self.subscription.recurring_amount:
-            updateSubscription(self.request, self.subscription.profile_id, str(form_data['recurring_amount']), self.subscription.currency)
+            updateSubscription(self.request.session, self.subscription.profile_id, str(form_data['recurring_amount']), self.subscription.currency)
 
             self.subscription.recurring_amount = form_data['recurring_amount']
             self.subscription.save()
 
             # email notifications
-            sendRecurringUpdatedNotifToAdmins(self.request, self.subscription, str(
+            sendRecurringUpdatedNotifToAdmins(self.subscription, str(
                 _("A Recurring Donation's amount has been updated on your website:")))
-            sendRecurringUpdatedNotifToDonor(self.request, self.subscription, str(
+            sendRecurringUpdatedNotifToDonor(self.subscription, str(
                 _("You have just updated your recurring donation amount.")))
 
             messages.add_message(self.request, messages.SUCCESS, _(
@@ -179,7 +177,7 @@ class Gateway_Paypal(PaymentGatewayManager):
     def cancel_recurring_payment(self):
         if not self.subscription:
             raise ValueError(_('Subscription object is None. Cannot cancel recurring payment.'))
-        cancelSubscription(self.request, self.subscription.profile_id)
+        cancelSubscription(self.request.session, self.subscription.profile_id)
         # update newstream model
         self.subscription.recurring_status = STATUS_CANCELLED
         self.subscription.save()
@@ -188,19 +186,17 @@ class Gateway_Paypal(PaymentGatewayManager):
     def toggle_recurring_payment(self):
         # no need to handle webhook events for activate/suspend actions(as they are too slow, donor might have already toggled twice before the first webhook arrives)
         # get realtime subscription's status from paypal
-        req_subscription = getSubscriptionDetails(self.request, self.subscription.profile_id)
+        req_subscription = getSubscriptionDetails(self.request.session, self.subscription.profile_id)
         # if self.subscription.recurring_status == STATUS_PAUSED:
         if req_subscription['status'] == "SUSPENDED":
             # activate subscription(returns 204 if success)
-            activateSubscription(self.request, self.subscription.profile_id)
+            activateSubscription(self.request.session, self.subscription.profile_id)
             # update newstream model
             self.subscription.recurring_status = STATUS_ACTIVE
             self.subscription.save()
             # email notifications
-            sendRecurringResumedNotifToAdmins(
-                self.request, self.subscription)
-            sendRecurringResumedNotifToDonor(
-                self.request, self.subscription)
+            sendRecurringResumedNotifToAdmins(self.subscription)
+            sendRecurringResumedNotifToDonor(self.subscription)
             return {
                 'button-text': str(_('Pause Recurring Donation')),
                 'recurring-status': STATUS_ACTIVE,
@@ -209,15 +205,13 @@ class Gateway_Paypal(PaymentGatewayManager):
         # elif self.subscription.recurring_status == STATUS_ACTIVE:
         elif req_subscription['status'] == "ACTIVE":
             # suspend subscription(returns 204 if success)
-            suspendSubscription(self.request, self.subscription.profile_id)
+            suspendSubscription(self.request.session, self.subscription.profile_id)
             # update newstream model
             self.subscription.recurring_status = STATUS_PAUSED
             self.subscription.save()
             # email notifications
-            sendRecurringPausedNotifToAdmins(
-                self.request, self.subscription)
-            sendRecurringPausedNotifToDonor(
-                self.request, self.subscription)
+            sendRecurringPausedNotifToAdmins(self.subscription)
+            sendRecurringPausedNotifToDonor(self.subscription)
             return {
                 'button-text': str(_('Resume Recurring Donation')),
                 'recurring-status': STATUS_PAUSED,

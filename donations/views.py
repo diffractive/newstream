@@ -102,7 +102,8 @@ def donate(request):
     offline_gateway = PaymentGateway.objects.get(title=GATEWAY_OFFLINE)
     offline_gateway_id = offline_gateway.id
     offlineSettings = getOfflineSettings(request)
-    offline_instructions_html = offlineSettings.offline_instructions_text
+    # manually casting offline_instructions_text from LazyI18nString to str to avoid the "richtext expects a string" error in the template
+    offline_instructions_html = str(offlineSettings.offline_instructions_text)
     
     return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS, 'offline_gateway_id': offline_gateway_id, 'offline_instructions_html': offline_instructions_html})
 
@@ -206,7 +207,8 @@ def thank_you(request):
         # display extra html if donation is offline
         if donation.gateway.is_offline():
             offlineSettings = getOfflineSettings(request)
-            reminders_html = offlineSettings.offline_thankyou_text
+            # manually casting offline_thankyou_text from LazyI18nString to str to avoid the "richtext expects a string" error in the template
+            reminders_html = str(offlineSettings.offline_thankyou_text)
         # display extra text for certain scenarios
         if donation.gateway.is_paypal() and donation.payment_status == STATUS_PROCESSING:
             extra_text = _('Your donation should be complete in 1-2 minutes. ')

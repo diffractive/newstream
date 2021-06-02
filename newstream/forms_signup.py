@@ -30,7 +30,8 @@ class BaseSignupForm(forms.Form):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         site_settings = getSiteSettings_from_default_site()
-        self.footer_html = site_settings.signup_footer_text
+        # manually casting signup_footer_text from LazyI18nString to str to avoid the "richtext expects a string" error in the template
+        self.footer_html = str(site_settings.signup_footer_text)
 
         # construct user meta fields from site settings configuration
         usermetafields = site_settings.user_meta_fields.all()

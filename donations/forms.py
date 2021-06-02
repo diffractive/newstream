@@ -39,7 +39,8 @@ class DonationDetailsForm(forms.Form):
             raise ValueError(_('Please provide a DonationForm blueprint'))
         form = blueprint
         self.request = request
-        self.footer_html = form.donation_footer_text
+        # manually casting donation_footer_text from LazyI18nString to str to avoid the "richtext expects a string" error in the template
+        self.footer_html = str(form.donation_footer_text)
         self.global_settings = getSiteSettings(request)
         self.fields["currency"].initial = self.global_settings.currency
 

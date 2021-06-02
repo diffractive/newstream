@@ -25,7 +25,7 @@
     <p class="mb-5 text-center">{% trans 'We are so grateful for your support.' %}</p>
     {% if reminders_html %}
     <div class="w-full mb-5 p-4 md:p-4 lg:py-8 lg:px-24 border-2 rounded border-gray-200">
-        {{ reminders_html|stringformat:"s"|richtext }}
+        {{ reminders_html|richtext }}
     </div>
     {% endif %}
     <div class="{% if reminders_html %}w-full lg:px-24{% else %}donation-info-box{% endif %} info-spacing-css p-4 lg:p-8 border-2 rounded border-gray-200">

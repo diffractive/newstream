@@ -94,9 +94,10 @@ def get_default_site():
 def get_site_url():
     """
     Returns the site's hostname with the correct protocol prefixed
+    the HTTPS environment variable is being set to 'on' in wsgi.py
     """
     default_site = get_default_site()
-    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + re.sub(r'^(https://|http//)', '', default_site.hostname)
+    return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + re.sub(r'^(https://|http://)', '', default_site.hostname)
 
 
 def reverse_with_site_url(urlname, kwargs=None):

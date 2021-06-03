@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-14 13:50+0000\n"
+"POT-Creation-Date: 2021-06-04 07:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -21,34 +21,70 @@ msgstr ""
 msgid "Opt in Mailing List"
 msgstr ""
 
-#: newstream_user/models.py:26
+#: newstream_user/models.py:30
+msgid "The Email must be set"
+msgstr ""
+
+#: newstream_user/models.py:46
+msgid "Superuser must have is_staff=True."
+msgstr ""
+
+#: newstream_user/models.py:48
+msgid "Superuser must have is_superuser=True."
+msgstr ""
+
+#: newstream_user/models.py:66
 msgid "User Meta"
 msgstr ""
 
-#: newstream_user/models.py:27
+#: newstream_user/models.py:67
 msgid "User Metas"
 msgstr ""
 
-#: newstream_user/models.py:41
+#: newstream_user/models.py:100
+msgid "User Subscription Updates Log"
+msgstr ""
+
+#: newstream_user/models.py:101
+msgid "User Subscription Updates Logs"
+msgstr ""
+
+#: newstream_user/models.py:127
+msgid "User Donation Updates Log"
+msgstr ""
+
+#: newstream_user/models.py:128
+msgid "User Donation Updates Logs"
+msgstr ""
+
+#: newstream_user/models.py:134
+msgid "first name"
+msgstr ""
+
+#: newstream_user/models.py:135
+msgid "email address"
+msgstr ""
+
+#: newstream_user/models.py:151
 msgid "(Verified)"
 msgstr ""
 
-#: newstream_user/models.py:42
+#: newstream_user/models.py:152
 msgid "(Unverified)"
 msgstr ""
 
-#: newstream_user/models.py:51
+#: newstream_user/models.py:161
 msgid "Yes"
 msgstr ""
 
-#: newstream_user/models.py:51
+#: newstream_user/models.py:161
 msgid "No"
 msgstr ""
 
-#: newstream_user/models.py:70
+#: newstream_user/models.py:183
 msgid "User"
 msgstr ""
 
-#: newstream_user/models.py:71
+#: newstream_user/models.py:184
 msgid "Users"
 msgstr ""

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-14 13:50+0000\n"
+"POT-Creation-Date: 2021-06-04 07:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,23 +18,23 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: email_campaigns/admin.py:13 email_campaigns/models.py:37
+#: email_campaigns/admin.py:12 email_campaigns/models.py:39
 msgid "Email Templates"
 msgstr ""
 
-#: email_campaigns/admin.py:24 email_campaigns/models.py:57
+#: email_campaigns/admin.py:23 email_campaigns/models.py:59
 msgid "Target Groups"
 msgstr ""
 
-#: email_campaigns/admin.py:35 email_campaigns/models.py:82
+#: email_campaigns/admin.py:34 email_campaigns/models.py:84
 msgid "Campaigns"
 msgstr ""
 
-#: email_campaigns/admin.py:45
+#: email_campaigns/admin.py:44
 msgid "Email Campaigns"
 msgstr ""
 
-#: email_campaigns/custom_classes.py:27
+#: email_campaigns/custom_classes.py:28
 msgid "Send Emails"
 msgstr ""
 
@@ -46,48 +46,48 @@ msgstr ""
 msgid "Unsubscribe"
 msgstr ""
 
-#: email_campaigns/models.py:26 email_campaigns/models.py:46
-#: email_campaigns/models.py:70
+#: email_campaigns/models.py:28 email_campaigns/models.py:48
+#: email_campaigns/models.py:72
 msgid "Title"
 msgstr ""
 
-#: email_campaigns/models.py:27
+#: email_campaigns/models.py:29
 msgid "Subject"
 msgstr ""
 
-#: email_campaigns/models.py:28
+#: email_campaigns/models.py:30
 msgid "Plain Text Body"
 msgstr ""
 
-#: email_campaigns/models.py:29
+#: email_campaigns/models.py:31
 msgid "HTML Body"
 msgstr ""
 
-#: email_campaigns/models.py:36
+#: email_campaigns/models.py:38
 msgid "Email Template"
 msgstr ""
 
-#: email_campaigns/models.py:48
+#: email_campaigns/models.py:50
 msgid "Users (Only opted-in and verified users are listed here)"
 msgstr ""
 
-#: email_campaigns/models.py:56
+#: email_campaigns/models.py:58
 msgid "Target Group"
 msgstr ""
 
-#: email_campaigns/models.py:71
+#: email_campaigns/models.py:73
 msgid "From Address"
 msgstr ""
 
-#: email_campaigns/models.py:72
+#: email_campaigns/models.py:74
 msgid "Template"
 msgstr ""
 
-#: email_campaigns/models.py:73
+#: email_campaigns/models.py:75
 msgid "Recipients"
 msgstr ""
 
-#: email_campaigns/models.py:81
+#: email_campaigns/models.py:83
 msgid "Campaign"
 msgstr ""
 

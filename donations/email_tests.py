@@ -2,8 +2,6 @@ from django.test import TestCase
 from django.http import HttpRequest
 from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
-from requests.api import get
-from wagtail.core.models import Site
 
 from newstream.functions import get_default_site
 from donations.models import Donation, Subscription

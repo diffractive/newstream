@@ -17,7 +17,7 @@ from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
 from donations.models import DonationPaymentMeta, Subscription, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
 from donations.forms import DONATION_DETAILS_FIELDS, DonationDetailsForm
-from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, process_temp_donation_meta, displayGateway, temp_donation_meta_to_donation_meta
+from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, extract_temp_donation_meta, displayGateway, temp_donation_meta_to_donation_meta
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml, isGatewayHosted
 from donations.payment_gateways.setting_classes import getOfflineSettings
 User = get_user_model()
@@ -34,8 +34,8 @@ def donate(request):
             form = DonationDetailsForm(
                 request.POST, request=request, blueprint=form_blueprint, label_suffix='')
             if form.is_valid():
-                # process temp meta data
-                temp_donation_metas = process_temp_donation_meta(request.POST)
+                # extract temp meta data
+                temp_donation_metas = extract_temp_donation_meta(request.POST)
 
                 # process donation amount
                 if form.cleaned_data.get('donation_amount_custom', None) and form.cleaned_data['donation_amount_custom'] > 0:

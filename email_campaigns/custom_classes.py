@@ -94,10 +94,10 @@ class SendCampaignView(InstanceSpecificView):
             self.mails_sent = 0
             self.refused_list = []
             for recipient, lang_pref in unique_list:
-                if lang_pref:
-                    translation.activate(lang_pref)
-                else:
-                    translation.activate(settings.LANGUAGE_CODE)
+                # if lang_pref:
+                #     translation.activate(lang_pref)
+                # else:
+                #     translation.activate(settings.LANGUAGE_CODE)
                 num = send_mail(template.subject, self.textAppendUnsubscribeLink(recipient, template.plain_text), model.from_address, [
                                 recipient], html_message=self.htmlAppendUnsubscribeLink(recipient, richtext(template.html_body)))
                 if num == 0:
@@ -105,10 +105,10 @@ class SendCampaignView(InstanceSpecificView):
                 self.mails_sent += num
 
             # reactivate original lang
-            if original_lang:
-                translation.activate(original_lang)
-            else:
-                translation.activate(settings.LANGUAGE_CODE)
+            # if original_lang:
+            #     translation.activate(original_lang)
+            # else:
+            #     translation.activate(settings.LANGUAGE_CODE)
 
             if self.mails_sent > 0:
                 model.sent = True

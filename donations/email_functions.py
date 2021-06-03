@@ -38,7 +38,7 @@ def sendEmailNotificationsToDonor(user_email, subject, textStr, htmlStr):
 
 def sendEmailNotificationsToAdmins(site_settings, subject, textStr, htmlStr):
     # set default language for admins' emails
-    translation.activate(settings.LANGUAGE_CODE)
+    # translation.activate(settings.LANGUAGE_CODE)
 
     admin_list = [
         admin_email.email for admin_email in site_settings.admin_emails.all()]

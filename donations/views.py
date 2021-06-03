@@ -449,7 +449,7 @@ def export_donations(request):
         if donation.user is None:
             data_row += ['', getattr(donation, 'guest_email')]
         else:
-            data_row += [getattr(donation.user, 'first_name') + getattr(donation.user, 'last_name'), getattr(donation.user, 'email')]
+            data_row += [getattr(donation.user, 'first_name') + ' ' + getattr(donation.user, 'last_name'), getattr(donation.user, 'email')]
 
         data_row += [getattr(donation, field) for field in headings3]
         donation_date = getattr(donation, 'donation_date').strftime("%Y-%m-%d")
@@ -482,7 +482,7 @@ def export_subscriptions(request):
         data_row += [created_at, updated_at]
 
         data_row += [getattr(subscription, 'linked_user_deleted'), getattr(subscription, 'gateway')]
-        data_row += [getattr(subscription.user, 'first_name') + getattr(subscription.user, 'last_name'), getattr(subscription.user, 'email')]
+        data_row += [getattr(subscription.user, 'first_name') + ' ' + getattr(subscription.user, 'last_name'), getattr(subscription.user, 'email')]
         subscribe_date = getattr(subscription, 'subscribe_date').strftime("%Y-%m-%d")
         data_row += [getattr(subscription, 'is_test'), subscribe_date, getattr(subscription, 'created_by')]
         writer.writerow(data_row)

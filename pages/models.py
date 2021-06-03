@@ -5,6 +5,7 @@ from wagtail.core import blocks
 from wagtail.core.fields import RichTextField, StreamField
 from wagtail.images.blocks import ImageChooserBlock
 from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel
+from wagtailmetadata.models import MetadataPageMixin
 
 from pages.blocks import FullWidthImageSectionBlock, FullWidthSectionBlock
 
@@ -26,7 +27,7 @@ class StaticPage(Page):
         verbose_name_plural = _('Static Pages')
 
 
-class HomePage(Page):
+class HomePage(MetadataPageMixin, Page):
     body = StreamField([
         ('full_width_image', FullWidthImageSectionBlock()),
         ('full_width_section', FullWidthSectionBlock()),

@@ -1,4 +1,4 @@
-{% load static wagtailuserbar common_tags wagtailimages_tags %}
+{% load static wagtailuserbar common_tags wagtailimages_tags wagtailmetadata_tags %}
 {% image 'site_icon'|site_settings max-32x32 as site_icon %}
 
 <!DOCTYPE html>
@@ -24,6 +24,11 @@
 
     {# Global stylesheets #}
     <link rel="stylesheet" type="text/css" href="{% static 'css/main_1_18.css' %}">
+
+    {# wagtail-metadata: only wagtail pages in the page tree have the self object to be pulled from, this is not for other pages defined in the urls.py #}
+    {% if self != None %}
+    {% meta_tags %}
+    {% endif %}
 
     {% block extra_head %}
     {# Override this in templates to add extra stuff in the head #}

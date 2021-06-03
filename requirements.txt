@@ -60,6 +60,7 @@ urllib3==1.26.4
 wagtail==2.13
 wagtail-2fa==1.4.2
 wagtail-autocomplete==0.6.2
+wagtail-metadata==3.4.0
 wagtail-modelchooser==2.3.3
 webencodings==0.5.1
 Willow==1.4

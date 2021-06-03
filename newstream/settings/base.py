@@ -85,6 +85,7 @@ INSTALLED_APPS = [
     'wagtailautocomplete',
     'wagtailmodelchooser',
     'widget_tweaks',
+    'wagtailmetadata',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',

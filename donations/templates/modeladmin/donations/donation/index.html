@@ -1,0 +1,16 @@
+{% extends "modeladmin/index.html" %}
+{% load static common_tags i18n %}
+
+{% block header_extra %}
+    <div class="right">
+        <div class="addbutton" style="margin-left: 2em;">
+            <a href={% url 'donations:export-donors'%} class="button bicolor icon icon-download">{% trans 'Donors' %} CSV</a>
+        </div>
+    </div>
+    <div class="right">
+        <div class="addbutton" style="margin-left: 2em;">
+            <a href={% url 'donations:export-donations'%} class="button bicolor icon icon-download">{% trans 'Donations' %} CSV</a>
+        </div>
+    </div>
+    {{ block.super }}
+{% endblock %}

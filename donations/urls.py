@@ -32,4 +32,7 @@ urlpatterns = [
     path('my-onetime-donations/', views.my_onetime_donations, name='my-onetime-donations'),
     path('my-recurring-donations/', views.my_recurring_donations, name='my-recurring-donations'),
     path('my-renewals/<int:id>/', views.my_renewals, name='my-renewals'),
+    path('export-donations/', views.export_donations, name='export-donations'),
+    path('export-subscriptions', views.export_subscriptions, name='export-subscriptions'),
+    path('export-donors/', views.export_donors, name='export-donors')
 ]

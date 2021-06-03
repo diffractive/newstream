@@ -48,8 +48,8 @@ def personal_info(request):
             user.last_name = form.cleaned_data['last_name']
             user.opt_in_mailing_list = form.cleaned_data['opt_in_mailing_list']
             user.language_preference = form.cleaned_data['language_preference']
-            translation.activate(user.language_preference)
-            request.LANGUAGE_CODE = translation.get_language()
+            # translation.activate(user.language_preference)
+            # request.LANGUAGE_CODE = translation.get_language()
             user.metas = user_metas
             user.save()
             messages.add_message(request, messages.SUCCESS,

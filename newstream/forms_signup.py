@@ -56,8 +56,8 @@ class BaseSignupForm(forms.Form):
 
         # set language for email_confirmation_subject/message.txt
         # todo: translation: tested but email message does not seem to translate
-        if user.language_preference:
-            translation.activate(user.language_preference)
+        # if user.language_preference:
+        #     translation.activate(user.language_preference)
 
         # save to session to remember user's registration
         request.session['first_time_registration'] = True

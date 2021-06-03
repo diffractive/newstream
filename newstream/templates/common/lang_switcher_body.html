@@ -1,26 +1,23 @@
 {% load i18n common_tags wagtailcore_tags %}
 
+{% get_current_language as LANGUAGE_CODE %}
 <!-- this html must be wrapped by .dropdown-div-wrapper in parent file for the dropdown popup to work  -->
 <input type="checkbox" name="{{prefix}}_multilang-dropdown-toggle-checkbox"
     id="{{prefix}}_multilang-dropdown-toggle-checkbox" class="dropdown-toggle-checkbox">
 <label for="{{prefix}}_multilang-dropdown-toggle-checkbox" class="dropdown-toggle-label"></label>
-<span class="language-code">{{ request.LANGUAGE_CODE }}</span>
+<span class="language-code">{{ LANGUAGE_CODE }}</span>
 <span class="multilang-icon"></span>
 <div class="multilang-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
     <form action="{% url 'set_language' %}" method="post" id="{{prefix}}-switch-lang-form">
         {% csrf_token %}
-        <input name="next" type="hidden" value="{{ redirect_to }}">
-        <select name="language" class="language-switcher-select"
-                                onchange="document.getElementById('{{prefix}}-switch-lang-form').submit();">
-            {% get_current_language as LANGUAGE_CODE %}
-            {% get_available_languages as LANGUAGES %}
-            {% get_language_info_list for LANGUAGES as languages %}
-            {% for language in languages %}
-            <option value="{{ language.code }}" {% if language.code == LANGUAGE_CODE %} selected{% endif %}>
-                {{ language.name_local }} ({{ language.code }})
-            </option>
-            {% endfor %}
-        </select>
-        <input type="submit" value="Go" class="hidden">
+        <input name="next" type="hidden" value="{{ request.path|strip_lang:LANGUAGE_CODE }}">
+        {% get_available_languages as LANGUAGES %}
+        {% get_language_info_list for LANGUAGES as languages %}
+        {% for language in languages %}
+            {% if language.code != LANGUAGE_CODE %}
+            <button type="submit" name="language" value="{{ language.code }}">{{ language.name_local }}</button>
+            {% endif %}
+        {% endfor %}
+        <!-- <input type="submit" value="Go" class="hidden"> -->
     </form>
 </div>

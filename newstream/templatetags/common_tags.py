@@ -35,6 +35,11 @@ def get_attr(object, key):
     return getattr(object, key, '')
 
 
+@register.filter(name='strip_lang')
+def get_attr(current_url, current_lang):
+    return re.sub("^/%s/" % current_lang, "/", current_url)
+
+
 @register.simple_tag
 def site_url():
     """

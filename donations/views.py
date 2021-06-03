@@ -482,7 +482,10 @@ def export_subscriptions(request):
         data_row += [created_at, updated_at]
 
         data_row += [getattr(subscription, 'linked_user_deleted'), getattr(subscription, 'gateway')]
-        data_row += [getattr(subscription.user, 'first_name') + ' ' + getattr(subscription.user, 'last_name'), getattr(subscription.user, 'email')]
+        if subscription.user is None:
+            data_row += ['', '']
+        else:
+            data_row += [getattr(subscription.user, 'first_name') + ' ' + getattr(subscription.user, 'last_name'), getattr(subscription.user, 'email')]
         subscribe_date = getattr(subscription, 'subscribe_date').strftime("%Y-%m-%d")
         data_row += [getattr(subscription, 'is_test'), subscribe_date, getattr(subscription, 'created_by')]
         writer.writerow(data_row)

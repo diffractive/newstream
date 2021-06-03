@@ -1,3 +1,5 @@
+import re
+import os
 from django.utils.translation import gettext_lazy as _
 
 from wagtail.core.models import Page
@@ -27,7 +29,15 @@ class StaticPage(Page):
         verbose_name_plural = _('Static Pages')
 
 
-class HomePage(MetadataPageMixin, Page):
+class _MetadataPageMixin(MetadataPageMixin):
+    def get_meta_url(self):
+        return ('https' if os.environ.get('HTTPS') == 'on' else 'http') + '://' + re.sub(r'^(https://|http://)', '', self.full_url)
+
+    class Meta:
+        abstract = True
+
+
+class HomePage(_MetadataPageMixin, Page):
     body = StreamField([
         ('full_width_image', FullWidthImageSectionBlock()),
         ('full_width_section', FullWidthSectionBlock()),

@@ -430,20 +430,30 @@ def export_donations(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=' + filename
 
-    headings1 = ['id', 'transaction_id','donation_amount','is_recurring', 'currency', 'payment_status', 'created_at', 'updated_at']
-    headings2 = ['linked_donor_deleted', 'donation_form', 'donor_name', 'donor_email']
-    headings3 = ['gateway', 'subscription_id', 'is_test', 'donation_date', 'created_by', 'guest_email']
+    headings1 = ['id', 'transaction_id','donation_amount','is_recurring', 'currency', 'payment_status']
+    headings2 = ['created_at', 'updated_at', 'linked_donor_deleted', 'donation_form', 'donor_name', 'donor_email']
+    headings3 = ['gateway', 'subscription_id', 'is_test']
+    headings4 = ['donation_date', 'created_by', 'guest_email']
     donations = Donation.objects.all()
-    headings =  headings1 + headings2 + headings3
+    headings =  headings1 + headings2 + headings3 + headings4
 
     writer = csv.writer(response)
     writer.writerow(headings)
     for donation in donations:
-        data_row = []
         data_row = [getattr(donation, field) for field in headings1]
+
+        created_at = getattr(donation, 'created_at').strftime("%Y-%m-%d %H:%M:%S")
+        updated_at = getattr(donation, 'updated_at').strftime("%Y-%m-%d %H:%M:%S")
+        data_row += [created_at, updated_at]
         data_row += [getattr(donation, 'linked_user_deleted'), getattr(donation, 'form')]
-        data_row += [getattr(donation.user, 'first_name') + getattr(donation.user, 'last_name'), getattr(donation.user, 'email')]
+        if donation.user is None:
+            data_row += ['', getattr(donation, 'guest_email')]
+        else:
+            data_row += [getattr(donation.user, 'first_name') + getattr(donation.user, 'last_name'), getattr(donation.user, 'email')]
+
         data_row += [getattr(donation, field) for field in headings3]
+        donation_date = getattr(donation, 'donation_date').strftime("%Y-%m-%d")
+        data_row += [donation_date, getattr(donation, 'created_by'), getattr(donation, 'guest_email')]
         writer.writerow(data_row)
 
     return response
@@ -456,8 +466,8 @@ def export_subscriptions(request):
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=' + filename
 
-    headings1 = ['id', 'profile_id','recurring_amount', 'currency', 'recurring_status', 'created_at', 'updated_at']
-    headings2 = ['linked_donor_deleted', 'gateway', 'donor_name', 'donor_email']
+    headings1 = ['id', 'profile_id','recurring_amount', 'currency', 'recurring_status']
+    headings2 = ['created_at', 'updated_at', 'linked_donor_deleted', 'gateway', 'donor_name', 'donor_email']
     headings3 = ['is_test', 'subscribe_date', 'created_by']
     subscriptions = Subscription.objects.all()
     headings =  headings1 + headings2 + headings3
@@ -465,11 +475,16 @@ def export_subscriptions(request):
     writer = csv.writer(response)
     writer.writerow(headings)
     for subscription in subscriptions:
-        data_row = []
         data_row = [getattr(subscription, field) for field in headings1]
+
+        created_at = getattr(subscription, 'created_at').strftime("%Y-%m-%d %H:%M:%S")
+        updated_at = getattr(subscription, 'updated_at').strftime("%Y-%m-%d %H:%M:%S")
+        data_row += [created_at, updated_at]
+
         data_row += [getattr(subscription, 'linked_user_deleted'), getattr(subscription, 'gateway')]
         data_row += [getattr(subscription.user, 'first_name') + getattr(subscription.user, 'last_name'), getattr(subscription.user, 'email')]
-        data_row += [getattr(subscription, field) for field in headings3]
+        subscribe_date = getattr(subscription, 'subscribe_date').strftime("%Y-%m-%d")
+        data_row += [getattr(subscription, 'is_test'), subscribe_date, getattr(subscription, 'created_by')]
         writer.writerow(data_row)
 
     return response
@@ -483,10 +498,19 @@ def export_donors(request):
     response['Content-Disposition'] = 'attachment; filename=' + filename
     
     donors = User.objects.all()
-    headings = ['id', 'first_name', 'last_name', 'email', 'is_active', 'date_joined', 'opt_in_mailing_list']
+    headings1 = ['id', 'first_name', 'last_name', 'email', 'is_active']
+    headings2 = ['date_joined', 'opt_in_mailing_list']
+    headings = headings1 + headings2
 
     writer = csv.writer(response)
     writer.writerow(headings)
     for donor in donors:
-        writer.writerow([getattr(donor, field) for field in headings])
+        data_row = ([getattr(donor, field) for field in headings1])
+        date_joined = getattr(donor, 'date_joined').strftime("%Y-%m-%d %H:%M:%S")
+        data_row += [date_joined, getattr(donor, 'opt_in_mailing_list')]
+        writer.writerow(data_row)
+    guests = Donation.objects.order_by().values_list('guest_email', flat=True).distinct()
+    for guest in guests:
+        if guest:
+            writer.writerow(['','','', guest,'','',''])
     return response

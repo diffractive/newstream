@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-14 13:50+0000\n"
+"POT-Creation-Date: 2021-06-04 07:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,212 +17,1076 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: donations/admin.py:18
-msgid "No reference to Donation instance in overridden DonationInspectView"
+#: donations/admin.py:161 donations/admin.py:184
+#, python-format
+msgid ""
+"Are you sure you want to soft-delete this %s? If other things in your site "
+"are related to it, they may also be affected. (Record will still persist in "
+"the database)"
 msgstr ""
 
-#: donations/admin.py:39 donations/admin.py:83 donations/models.py:198
+#: donations/admin.py:225 donations/admin.py:301 donations/models.py:363
+#: donations/templates/modeladmin/donations/donation/index.html:12
 msgid "Donations"
 msgstr "Donasi"
 
-#: donations/admin.py:57
-msgid "User Email"
+#: donations/admin.py:252 donations/admin.py:285
+msgid "Donor Email"
 msgstr ""
 
-#: donations/admin.py:62 donations/models.py:46
-msgid "Payment Gateways"
+#: donations/admin.py:258 donations/models.py:284
+#: donations/templates/modeladmin/donations/subscription/index.html:7
+msgid "Subscriptions"
 msgstr ""
 
-#: donations/admin.py:73 donations/models.py:122
+#: donations/admin.py:290 donations/models.py:105
 msgid "Donation Forms"
 msgstr ""
 
-#: donations/forms.py:39
+#: donations/email_functions.py:61
+#, fuzzy
+#| msgid "Donations"
+msgid "Donation Error"
+msgstr "Donasi"
+
+#: donations/email_functions.py:67
+#: donations/templates/donations/email_templates/new_donation.html:5
+#: donations/templates/donations/email_templates/new_donation.html:9
+msgid "New Donation"
+msgstr ""
+
+#: donations/email_functions.py:69 donations/email_functions.py:78
+msgid "(Revoked)"
+msgstr ""
+
+#: donations/email_functions.py:76
+msgid "Thank You! This is your Donation Receipt."
+msgstr ""
+
+#: donations/email_functions.py:83
+msgid "Your Donation Payment Status has been updated."
+msgstr ""
+
+#: donations/email_functions.py:88
+msgid "Your Recurring Donation Status has been updated."
+msgstr ""
+
+#: donations/email_functions.py:95
+#: donations/templates/donations/email_templates/new_renewal.html:5
+#: donations/templates/donations/email_templates/new_renewal.html:9
+msgid "New Renewal Donation"
+msgstr ""
+
+#: donations/email_functions.py:100
+msgid "Thank You! This is your Renewal Donation Receipt."
+msgstr ""
+
+#: donations/email_functions.py:117
+#: donations/templates/donations/email_templates/recurring_paused_admin.html:5
+#: donations/templates/donations/email_templates/recurring_paused_admin.html:9
+msgid "A Recurring Donation is paused"
+msgstr ""
+
+#: donations/email_functions.py:122
+#: donations/templates/donations/email_templates/recurring_paused_donor.html:5
+#: donations/templates/donations/email_templates/recurring_paused_donor.html:9
+msgid "Your Recurring Donation is paused"
+msgstr ""
+
+#: donations/email_functions.py:128
+#: donations/templates/donations/email_templates/recurring_resumed_admin.html:5
+#: donations/templates/donations/email_templates/recurring_resumed_admin.html:9
+msgid "A Recurring Donation is resumed"
+msgstr ""
+
+#: donations/email_functions.py:133
+#: donations/templates/donations/email_templates/recurring_resumed_donor.html:5
+#: donations/templates/donations/email_templates/recurring_resumed_donor.html:9
+msgid "Your Recurring Donation is resumed"
+msgstr ""
+
+#: donations/email_functions.py:139
+#: donations/templates/donations/email_templates/recurring_cancelled_admin.html:5
+#: donations/templates/donations/email_templates/recurring_cancelled_admin.html:9
+msgid "A Recurring Donation is cancelled"
+msgstr ""
+
+#: donations/email_functions.py:145
+#: donations/templates/donations/email_templates/recurring_cancel_request_admin.html:5
+#: donations/templates/donations/email_templates/recurring_cancel_request_admin.html:9
+msgid "Cancellation to a Recurring Donation is requested"
+msgstr ""
+
+#: donations/email_functions.py:150
+#: donations/templates/donations/email_templates/recurring_cancelled_donor.html:5
+#: donations/templates/donations/email_templates/recurring_cancelled_donor.html:9
+msgid "Your Recurring Donation is cancelled"
+msgstr ""
+
+#: donations/email_functions.py:156
+#: donations/templates/donations/email_templates/account_created_admin.html:5
+#: donations/templates/donations/email_templates/account_created_admin.html:9
+msgid "A Donor Account is created"
+msgstr ""
+
+#: donations/email_functions.py:163
+#: donations/templates/donations/email_templates/account_deleted_admin.html:5
+#: donations/templates/donations/email_templates/account_deleted_admin.html:9
+msgid "A Donor Account is deleted"
+msgstr ""
+
+#: donations/email_functions.py:168
+#: donations/templates/donations/email_templates/account_deleted_donor.html:5
+#: donations/templates/donations/email_templates/account_deleted_donor.html:9
+msgid "Your Account is deleted"
+msgstr ""
+
+#: donations/forms.py:28 donations/models.py:69
+#: donations/templates/donations/my_recurring_donations.html:63
+#: donations/templates/donations/my_recurring_donations.html:93
+#: donations/templates/donations/my_renewals.html:19
 msgid "Monthly"
 msgstr ""
 
-#: donations/forms.py:40
+#: donations/forms.py:29 donations/models.py:68
 msgid "One-time"
 msgstr ""
 
-#: donations/forms.py:59
+#: donations/forms.py:37
+msgid "Please provide request object"
+msgstr ""
+
+#: donations/forms.py:39
+msgid "Please provide a DonationForm blueprint"
+msgstr ""
+
+#: donations/forms.py:56 donations/templates/donations/cancelled.html:30
+#: donations/templates/donations/confirm_donation.html:38
+#: donations/templates/donations/email_templates/donation_receipt.html:33
+#: donations/templates/donations/email_templates/donation_status_change.html:32
+#: donations/templates/donations/email_templates/new_donation.html:29
+#: donations/templates/donations/email_templates/new_renewal.html:29
+#: donations/templates/donations/email_templates/recurring_cancel_request_admin.html:27
+#: donations/templates/donations/email_templates/recurring_cancelled_admin.html:27
+#: donations/templates/donations/email_templates/recurring_cancelled_donor.html:28
+#: donations/templates/donations/email_templates/recurring_paused_admin.html:27
+#: donations/templates/donations/email_templates/recurring_paused_donor.html:28
+#: donations/templates/donations/email_templates/recurring_resumed_admin.html:27
+#: donations/templates/donations/email_templates/recurring_resumed_donor.html:28
+#: donations/templates/donations/email_templates/recurring_updated_admin.html:27
+#: donations/templates/donations/email_templates/recurring_updated_donor.html:28
+#: donations/templates/donations/email_templates/renewal_receipt.html:26
+#: donations/templates/donations/email_templates/subscription_status_change.html:22
+#: donations/templates/donations/revoked.html:28
+#: donations/templates/donations/thankyou.html:38
 msgid "Payment method"
 msgstr ""
 
-#: donations/forms.py:65 donations/forms.py:70 donations/forms.py:73
-#: donations/models.py:184
-#: donations/templates/donations/email_templates/donation_receipt.html:37
-#: donations/templates/donations/email_templates/new_donation.html:42
-#: donations/templates/donations/my_donations.html:62
-msgid "Donation amount"
+#: donations/forms.py:60
+msgid "Donation amount in "
 msgstr ""
 
-#: donations/models.py:38 donations/models.py:103
-msgid "Title"
+#: donations/forms.py:61
+msgid "Custom Donation amount in "
 msgstr ""
 
-#: donations/models.py:39
-msgid "Frontend Label"
-msgstr ""
-
-#: donations/models.py:40
-msgid "List Order"
-msgstr ""
-
-#: donations/models.py:45
-msgid "Payment Gateway"
-msgstr ""
-
-#: donations/models.py:72
-msgid "Step"
-msgstr ""
-
-#: donations/models.py:81
-msgid "Fixed Amount"
-msgstr ""
-
-#: donations/models.py:82
-msgid "Fixed Steps"
-msgstr ""
-
-#: donations/models.py:83
+#: donations/forms.py:75 donations/forms.py:77 donations/models.py:64
 msgid "Custom Amount"
 msgstr ""
 
-#: donations/models.py:93
-msgid ""
-"Define fixed donation amount if you chose \"Fixed Amount\" for your Amount "
-"Type"
+#: donations/forms.py:117
+msgid "You are required to fill in your email address."
 msgstr ""
 
-#: donations/models.py:104
+#: donations/functions.py:83
+msgid "Please provide a payment gateway object"
+msgstr ""
+
+#: donations/models.py:51
+msgid "Step"
+msgstr ""
+
+#: donations/models.py:52
+msgid "Is Default?"
+msgstr ""
+
+#: donations/models.py:62
+msgid "Fixed Amount"
+msgstr ""
+
+#: donations/models.py:63
+msgid "Fixed Steps"
+msgstr ""
+
+#: donations/models.py:65
+msgid "Fixed Steps with Custom Amount Option"
+msgstr ""
+
+#: donations/models.py:78
+msgid ""
+"Define fixed donation amount if you chose \"Fixed Amount\" for your Amount "
+"Type."
+msgstr ""
+
+#: donations/models.py:86
+msgid "Title"
+msgstr ""
+
+#: donations/models.py:87
 msgid "Description"
 msgstr ""
 
-#: donations/models.py:105
-msgid "Is Active"
+#: donations/models.py:88
+msgid "Default Donation Frequency"
 msgstr ""
 
-#: donations/models.py:106
+#: donations/models.py:89
 msgid "Donation amount Type"
 msgstr ""
 
-#: donations/models.py:108
+#: donations/models.py:91
 msgid "Define Fixed Donation amount"
 msgstr ""
 
-#: donations/models.py:108
-msgid ""
-"Define your fixed donation amount if you chose \"Fixed Amount\" for your "
-"Amount Type."
-msgstr ""
-
-#: donations/models.py:109
+#: donations/models.py:92
 msgid "Fixed Amount Steps"
 msgstr ""
 
-#: donations/models.py:109
+#: donations/models.py:92
 msgid "Define Fixed Donation amount Steps"
 msgstr ""
 
-#: donations/models.py:110
+#: donations/models.py:93
 msgid ""
 "Define fixed donation amount steps if you chose \"Fixed Steps\" for your "
 "Amount Type."
 msgstr ""
 
-#: donations/models.py:112
+#: donations/models.py:95
 msgid "Allowed Payment Gateways"
 msgstr ""
 
-#: donations/models.py:114
+#: donations/models.py:97
 msgid "Donation Meta Fields"
 msgstr ""
 
-#: donations/models.py:115
+#: donations/models.py:98
 msgid "Footer Text(Under Donation Details Form)"
 msgstr ""
 
-#: donations/models.py:116
+#: donations/models.py:99
 msgid ""
 "Footer text to be displayed under the \"Donation Details\" Form (Step 2 of "
 "payment)"
 msgstr ""
 
-#: donations/models.py:121
+#: donations/models.py:104 donations/models.py:343
 msgid "Donation Form"
 msgstr ""
 
-#: donations/models.py:183
-#: donations/templates/donations/email_templates/donation_receipt.html:25
-#: donations/templates/donations/email_templates/new_donation.html:30
-#: donations/templates/donations/my_donations.html:64
-msgid "Order Number"
-msgstr ""
-
-#: donations/models.py:185
-msgid "Is Recurring"
-msgstr ""
-
-#: donations/models.py:186
-#: donations/templates/donations/email_templates/donation_receipt.html:33
-#: donations/templates/donations/email_templates/new_donation.html:38
-#: donations/templates/donations/thankyou.html:36
-msgid "Currency"
-msgstr ""
-
-#: donations/models.py:187
-#: donations/templates/donations/email_templates/donation_receipt.html:45
-#: donations/templates/donations/email_templates/new_donation.html:50
-msgid "Payment status"
-msgstr ""
-
-#: donations/models.py:188
-msgid "Recurring Status"
-msgstr ""
-
-#: donations/models.py:189 donations/models.py:232
+#: donations/models.py:143 donations/models.py:354
 msgid "Donation Meta"
 msgstr ""
 
-#: donations/models.py:189
-msgid "Donation Meta Data"
-msgstr ""
-
-#: donations/models.py:190
-msgid "Meta data about this donation is recorded here"
-msgstr ""
-
-#: donations/models.py:192
-msgid "Linked User Account Deleted?"
-msgstr ""
-
-#: donations/models.py:197
-msgid "Donation"
-msgstr ""
-
-#: donations/models.py:233
+#: donations/models.py:144
 msgid "Donation Metas"
 msgstr ""
 
-#: donations/models.py:253
+#: donations/models.py:167
+#, fuzzy
+#| msgid "My Donations"
+msgid "Temp Donation Meta"
+msgstr "Donasi Saya"
+
+#: donations/models.py:168
+#, fuzzy
+#| msgid "My Donations"
+msgid "Temp Donation Metas"
+msgstr "Donasi Saya"
+
+#: donations/models.py:191
 msgid "Donation Payment Meta"
 msgstr ""
 
-#: donations/models.py:254
+#: donations/models.py:192
 msgid "Donation Payment Metas"
 msgstr ""
 
-#: donations/templates/donations/donation_details_form.html:4
-#: donations/templates/donations/donation_details_form.html:12
-#: donations/templates/donations/donation_details_form.html:27
-msgid "Donation Details"
+#: donations/models.py:215
+msgid "Subscription Payment Meta"
 msgstr ""
 
-#: donations/templates/donations/donation_details_form.html:11
-msgid "Step 2 of 3"
+#: donations/models.py:216
+msgid "Subscription Payment Metas"
 msgstr ""
 
+#: donations/models.py:261 donations/models.py:342
+#: donations/templates/modeladmin/donations/donation/inspect.html:208
+#: donations/templates/modeladmin/donations/subscription/inspect.html:240
+msgid "User"
+msgstr ""
+
+#: donations/models.py:262 donations/models.py:344
+msgid "Payment Gateway"
+msgstr ""
+
+#: donations/models.py:263
+msgid "Is Test Subscription?"
+msgstr ""
+
+#: donations/models.py:264
+#: donations/templates/donations/email_templates/subscription_status_change.html:18
+msgid "Profile ID"
+msgstr ""
+
+#: donations/models.py:265
+#: donations/templates/donations/email_templates/subscription_status_change.html:26
+msgid "Recurring Amount"
+msgstr ""
+
+#: donations/models.py:266 donations/models.py:351
+#: donations/templates/modeladmin/donations/subscription/inspect.html:151
+msgid "Currency"
+msgstr ""
+
+#: donations/models.py:267
+msgid "Recurring Status"
+msgstr ""
+
+#: donations/models.py:268
+msgid "Subscribe Date"
+msgstr ""
+
+#: donations/models.py:269 donations/models.py:357
+msgid "Donor User Deleted?"
+msgstr ""
+
+#: donations/models.py:283 donations/models.py:345
+#: donations/templates/modeladmin/donations/donation/inspect.html:100
+msgid "Subscription"
+msgstr ""
+
+#: donations/models.py:346
+#, fuzzy
+#| msgid "My Donations"
+msgid "Is Test Donation?"
+msgstr "Donasi Saya"
+
+#: donations/models.py:347 donations/templates/donations/cancelled.html:26
+#: donations/templates/donations/email_templates/donation_receipt.html:25
+#: donations/templates/donations/email_templates/donation_status_change.html:24
+#: donations/templates/donations/email_templates/new_donation.html:21
+#: donations/templates/donations/email_templates/new_renewal.html:21
+#: donations/templates/donations/email_templates/renewal_receipt.html:18
+#: donations/templates/donations/my_onetime_donations.html:48
+#: donations/templates/donations/my_renewals.html:57
+#: donations/templates/donations/revoked.html:24
+#: donations/templates/donations/thankyou.html:34
+#: donations/templates/modeladmin/donations/subscription/inspect.html:149
+msgid "Transaction ID"
+msgstr ""
+
+#: donations/models.py:348 donations/templates/donations/cancelled.html:32
+#: donations/templates/donations/confirm_donation.html:34
+#: donations/templates/donations/email_templates/donation_receipt.html:37
+#: donations/templates/donations/email_templates/donation_status_change.html:36
+#: donations/templates/donations/email_templates/new_donation.html:33
+#: donations/templates/donations/email_templates/new_renewal.html:33
+#: donations/templates/donations/email_templates/renewal_receipt.html:30
+#: donations/templates/donations/my_onetime_donations.html:46
+#: donations/templates/donations/my_renewals.html:55
+#: donations/templates/donations/revoked.html:30
+#: donations/templates/donations/thankyou.html:40
+#: donations/templates/modeladmin/donations/subscription/inspect.html:150
+msgid "Donation amount"
+msgstr ""
+
+#: donations/models.py:349
+msgid "Guest Email - for non-registered donors"
+msgstr ""
+
+#: donations/models.py:350
+msgid "Is Recurring Donation?"
+msgstr ""
+
+#: donations/models.py:352 donations/templates/donations/cancelled.html:34
+#: donations/templates/donations/email_templates/donation_receipt.html:41
+#: donations/templates/donations/email_templates/donation_status_change.html:40
+#: donations/templates/donations/email_templates/new_donation.html:37
+#: donations/templates/donations/email_templates/new_renewal.html:37
+#: donations/templates/donations/email_templates/renewal_receipt.html:34
+#: donations/templates/donations/revoked.html:32
+#: donations/templates/donations/thankyou.html:42
+#: donations/templates/modeladmin/donations/subscription/inspect.html:152
+msgid "Payment status"
+msgstr ""
+
+#: donations/models.py:353
+#, fuzzy
+#| msgid "Donations"
+msgid "Donation Date"
+msgstr "Donasi"
+
+#: donations/models.py:354
+msgid "Donation Meta Data"
+msgstr ""
+
+#: donations/models.py:355
+msgid "Meta data about this donation is recorded here"
+msgstr ""
+
+#: donations/models.py:362
+msgid "Donation"
+msgstr ""
+
+#: donations/models.py:436
+#, fuzzy
+#| msgid "Donations"
+msgid "Temp Donation"
+msgstr "Donasi"
+
+#: donations/models.py:437
+#, fuzzy
+#| msgid "Donations"
+msgid "Temp Donations"
+msgstr "Donasi"
+
+#: donations/payment_gateways/_2c2p/factory.py:46
+#: donations/payment_gateways/_2c2p/factory.py:60
+#: donations/payment_gateways/_2c2p/factory.py:78
+#, python-format
+msgid "Cannot identify donation record from 2C2P request, id: %(id)s"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/factory.py:65
+msgid ""
+"hash_value does not match with checkHash, cannot verify request from 2C2P."
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/factory.py:67
+msgid "No hash_value in request.POST, cannot verify request from 2C2P."
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/factory.py:80
+msgid ""
+"No user_defined_1 in request.POST, cannot initialize gateway from 2C2P "
+"request."
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/forms.py:9
+#: donations/payment_gateways/offline/forms.py:9
+#: donations/payment_gateways/paypal/forms.py:9
+#: donations/payment_gateways/stripe/forms.py:9
+msgid "Recurring donation identifier(fixed)"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/forms.py:11
+#: donations/payment_gateways/stripe/forms.py:11
+msgid "Change Billing Cycle to Now"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/forms.py:17
+#: donations/payment_gateways/offline/forms.py:16
+#: donations/payment_gateways/paypal/forms.py:16
+#: donations/payment_gateways/stripe/forms.py:17
+msgid "Please provide a subscription object"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/forms.py:22
+#: donations/payment_gateways/offline/forms.py:21
+#: donations/payment_gateways/paypal/forms.py:21
+#: donations/payment_gateways/stripe/forms.py:22
+#: donations/templates/donations/email_templates/recurring_cancel_request_admin.html:31
+#: donations/templates/donations/email_templates/recurring_cancelled_admin.html:31
+#: donations/templates/donations/email_templates/recurring_cancelled_donor.html:32
+#: donations/templates/donations/email_templates/recurring_paused_admin.html:31
+#: donations/templates/donations/email_templates/recurring_paused_donor.html:32
+#: donations/templates/donations/email_templates/recurring_resumed_admin.html:31
+#: donations/templates/donations/email_templates/recurring_resumed_donor.html:32
+#: donations/templates/donations/email_templates/recurring_updated_admin.html:31
+#: donations/templates/donations/email_templates/recurring_updated_donor.html:32
+#: donations/templates/donations/my_recurring_donations.html:79
+msgid "Recurring donation amount"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:83
+#, python-format
+msgid "Recurring Donation for %(site)s"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:106
+#, python-format
+msgid "Onetime Donation for %(site)s"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:163
+#, python-format
+msgid ""
+"Cannot create subscription object due to donation payment_status: %(status)s"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:191
+msgid "Unable to process_webhook_response after verifying 2C2P request"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:195
+#: donations/payment_gateways/offline/gateway.py:38
+#: donations/payment_gateways/paypal/gateway.py:159
+#: donations/payment_gateways/stripe/gateway.py:193
+msgid "Subscription object is None. Cannot update recurring payment."
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:223
+#, python-format
+msgid "Cannot update 2C2P subscription: %(error)s"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:230
+#, python-format
+msgid "Cannot inquire 2C2P subscription: %(error)s"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:235
+msgid ""
+"A Recurring Donation's billing cycle has been reset to today's date, and has "
+"its recurring donation amount updated on your website:"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:236
+msgid ""
+"You have just reset your recurring donation's billing cycle to today's date, "
+"and updated the recurring donation amount."
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:237
+msgid ""
+"You have successfully reset your recurring donation's billing cycle to "
+"today's date, and updated the recurring donation amount at 2C2P."
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:239
+#: donations/payment_gateways/offline/gateway.py:47
+#: donations/payment_gateways/paypal/gateway.py:169
+#: donations/payment_gateways/stripe/gateway.py:235
+msgid "A Recurring Donation's amount has been updated on your website:"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:240
+#: donations/payment_gateways/offline/gateway.py:49
+#: donations/payment_gateways/paypal/gateway.py:171
+#: donations/payment_gateways/stripe/gateway.py:237
+msgid "You have just updated your recurring donation amount."
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:241
+msgid "Your recurring donation amount at 2C2P is updated successfully."
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:243
+#: donations/payment_gateways/stripe/gateway.py:259
+msgid ""
+"A Recurring Donation's billing cycle has been reset to today's date on your "
+"website:"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:244
+#: donations/payment_gateways/stripe/gateway.py:261
+msgid ""
+"You have just reset your recurring donation's billing cycle to today's date."
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:245
+msgid ""
+"Your recurring donation at Stripe is set to bill on today's date every month."
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:256
+msgid "Cannot successfully inquire 2C2P subscription, "
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:258
+msgid "Cannot successfully update 2C2P subscription, "
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:260
+msgid "Nothing is updated."
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:265
+#: donations/payment_gateways/offline/gateway.py:56
+#: donations/payment_gateways/paypal/gateway.py:179
+#: donations/payment_gateways/paypal_legacy/gateway.py:135
+#: donations/payment_gateways/stripe/gateway.py:270
+msgid "Subscription object is None. Cannot cancel recurring payment."
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:280
+#, python-format
+msgid "Cannot cancel 2C2P subscription: %(reason)s"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/gateway.py:290
+msgid "Cannot cancel 2C2P subscription, "
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/views.py:41
+#: donations/payment_gateways/_2c2p/views.py:50
+#: donations/payment_gateways/stripe/views.py:243 donations/views.py:220
+#: donations/views.py:242 donations/views.py:262
+msgid "Unknown Error"
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/views.py:43
+msgid "Could not determine how to treat payment status: "
+msgstr ""
+
+#: donations/payment_gateways/_2c2p/views.py:46
+#: donations/payment_gateways/paypal/views.py:184
+#: donations/payment_gateways/paypal/views.py:216
+#: donations/payment_gateways/stripe/views.py:199
+#: donations/payment_gateways/stripe/views.py:235
+msgid "ValueError"
+msgstr ""
+
+#: donations/payment_gateways/__init__.py:23
+msgid ""
+"Either one of donation or subscription has to be defined while initializing "
+"BasePaymentGateway class"
+msgstr ""
+
+#: donations/payment_gateways/__init__.py:36
+#: donations/payment_gateways/__init__.py:57
+#: donations/payment_gateways/__init__.py:72
+msgid "The Provided gateway has not been implemented yet"
+msgstr ""
+
+#: donations/payment_gateways/__init__.py:41
+#: donations/payment_gateways/__init__.py:62
+msgid "Needs subscription to init the edit form for the recurring payment"
+msgstr ""
+
+#: donations/payment_gateways/offline/gateway.py:52
+msgid ""
+"Your offline recurring donation amount is updated successfully. Please wait "
+"for the administrator to complete the checking."
+msgstr ""
+
+#: donations/payment_gateways/offline/gateway.py:68
+#: donations/payment_gateways/paypal_legacy/gateway.py:147
+msgid ""
+"Direct cancellation of subscription is not supported for this gateway. Email "
+"has been sent to site admin to take further action. Site admin will manually "
+"cancel this subscription."
+msgstr ""
+
+#: donations/payment_gateways/offline/gateway.py:79
+#: donations/payment_gateways/paypal/gateway.py:201
+#: donations/payment_gateways/stripe/gateway.py:321
+#: donations/templatetags/donation_tags.py:19
+msgid "Pause Recurring Donation"
+msgstr ""
+
+#: donations/payment_gateways/offline/gateway.py:81
+msgid "Your recurring donation is resumed."
+msgstr ""
+
+#: donations/payment_gateways/offline/gateway.py:91
+#: donations/payment_gateways/paypal/gateway.py:216
+#: donations/payment_gateways/stripe/gateway.py:309
+#: donations/templatetags/donation_tags.py:21
+msgid "Resume Recurring Donation"
+msgstr ""
+
+#: donations/payment_gateways/offline/gateway.py:93
+msgid "Your recurring donation is paused."
+msgstr ""
+
+#: donations/payment_gateways/offline/gateway.py:96
+#: donations/payment_gateways/paypal/gateway.py:221
+#: donations/payment_gateways/stripe/gateway.py:294
+msgid "Subscription object is neither Active or Paused"
+msgstr ""
+
+#: donations/payment_gateways/paypal/factory.py:61
+#: donations/payment_gateways/paypal/factory.py:69
+#: donations/payment_gateways/paypal/factory.py:77
+#: donations/payment_gateways/paypal/factory.py:94
+msgid "Missing custom_id(donation_id) in json_data.resource"
+msgstr ""
+
+#: donations/payment_gateways/paypal/factory.py:86
+msgid "Missing custom_id(donation_id) in curlPaypal-returned subscription_obj"
+msgstr ""
+
+#: donations/payment_gateways/paypal/factory.py:97
+msgid "Missing donation_id after processing events from paypal"
+msgstr ""
+
+#: donations/payment_gateways/paypal/factory.py:99
+msgid "PayPal Event not expected for processing at the moment"
+msgstr ""
+
+#: donations/payment_gateways/paypal/factory.py:107
+#: donations/payment_gateways/paypal/factory.py:164
+#: donations/payment_gateways/paypal_legacy/factory.py:45
+msgid "Donation object not found by id: "
+msgstr ""
+
+#: donations/payment_gateways/paypal/factory.py:109
+msgid "PayPal Webhook verification failed."
+msgstr ""
+
+#: donations/payment_gateways/paypal/factory.py:127
+msgid "Missing custom_id(donation_id) in curlPaypal-returned subscription"
+msgstr ""
+
+#: donations/payment_gateways/paypal/factory.py:139
+msgid "Missing donation_id in purchase_units custom_id attribute"
+msgstr ""
+
+#: donations/payment_gateways/paypal/factory.py:141
+msgid "Missing token from PayPal request"
+msgstr ""
+
+#: donations/payment_gateways/paypal/factory.py:150
+msgid ""
+"PayPal subscription id found. Return request from PayPal is already invalid."
+msgstr ""
+
+#: donations/payment_gateways/paypal/factory.py:158
+msgid "PayPal token found. Return request from PayPal is already invalid."
+msgstr ""
+
+#: donations/payment_gateways/paypal/functions.py:59
+msgid "Cannot get 'access_token' attribute from paypal response."
+msgstr ""
+
+#: donations/payment_gateways/paypal/functions.py:65
+msgid "Cannot get access_token's 'expires_in' attribute from paypal response."
+msgstr ""
+
+#: donations/payment_gateways/paypal/functions.py:252
+msgid " Please call PayPal Customer Support for more details."
+msgstr ""
+
+#: donations/payment_gateways/paypal/functions.py:295
+#, fuzzy
+#| msgid "My Donations"
+msgid " Onetime Donation"
+msgstr "Donasi Saya"
+
+#: donations/payment_gateways/paypal/gateway.py:68
+#: donations/payment_gateways/stripe/gateway.py:158
+msgid "A new recurring donation has become active on your website:"
+msgstr ""
+
+#: donations/payment_gateways/paypal/gateway.py:69
+#: donations/payment_gateways/stripe/gateway.py:159
+msgid "Your new recurring donation has become active."
+msgstr ""
+
+#: donations/payment_gateways/paypal/gateway.py:75
+#, python-format
+msgid ""
+"EVENT_BILLING_SUBSCRIPTION_ACTIVATED but subscription status is %(status)s"
+msgstr ""
+
+#: donations/payment_gateways/paypal/gateway.py:82
+#, python-format
+msgid "Cannot find subscription object in database with profile_id %(id)s"
+msgstr ""
+
+#: donations/payment_gateways/paypal/gateway.py:88
+#, python-format
+msgid ""
+"EVENT_BILLING_SUBSCRIPTION_UPDATED but subscription status is %(status)s"
+msgstr ""
+
+#: donations/payment_gateways/paypal/gateway.py:102
+#, python-format
+msgid "Missing subscription linkage/object for donation %(id)s"
+msgstr ""
+
+#: donations/payment_gateways/paypal/gateway.py:138
+#, python-format
+msgid "EVENT_PAYMENT_SALE_COMPLETED but payment state is %(state)s"
+msgstr ""
+
+#: donations/payment_gateways/paypal/gateway.py:152
+#, python-format
+msgid ""
+"EVENT_BILLING_SUBSCRIPTION_CANCELLED but subscription status is %(status)s"
+msgstr ""
+
+#: donations/payment_gateways/paypal/gateway.py:174
+msgid "Your recurring donation amount via PayPal is updated successfully."
+msgstr ""
+
+#: donations/payment_gateways/paypal/gateway.py:203
+msgid "Your recurring donation via PayPal  is resumed."
+msgstr ""
+
+#: donations/payment_gateways/paypal/gateway.py:218
+msgid "Your recurring donation via PayPal  is paused."
+msgstr ""
+
+#: donations/payment_gateways/paypal/views.py:42
+msgid "Missing donation_id in session"
+msgstr ""
+
+#: donations/payment_gateways/paypal/views.py:59
+msgid "Cannot initialize/get the paypal product object"
+msgstr ""
+
+#: donations/payment_gateways/paypal/views.py:69
+#, python-format
+msgid "Newly created PayPal plan is not active, status: %(status)s"
+msgstr ""
+
+#: donations/payment_gateways/paypal/views.py:88
+#: donations/payment_gateways/stripe/views.py:122
+#, python-format
+msgid "Donation object not found by id: %(id)s"
+msgstr ""
+
+#: donations/payment_gateways/paypal/views.py:132
+msgid "gatewayManager for paypal not initialized."
+msgstr ""
+
+#: donations/payment_gateways/paypal/views.py:180
+#: donations/payment_gateways/paypal/views.py:212
+msgid "IOError"
+msgstr ""
+
+#: donations/payment_gateways/paypal/views.py:188
+#: donations/payment_gateways/paypal/views.py:220
+msgid "Exception"
+msgstr ""
+
+#: donations/payment_gateways/paypal_legacy/factory.py:38
+msgid "Missing custom(donation_id) in PayPal's incoming renewal IPN"
+msgstr ""
+
+#: donations/payment_gateways/paypal_legacy/factory.py:47
+msgid "IPN is not verified by PayPal"
+msgstr ""
+
+#: donations/payment_gateways/paypal_legacy/factory.py:49
+msgid "Not POST request from PayPal IPN"
+msgstr ""
+
+#: donations/payment_gateways/paypal_legacy/gateway.py:63
+msgid "Payment failed due to invalid amount in PayPal Recurring IPN."
+msgstr ""
+
+#: donations/payment_gateways/paypal_legacy/gateway.py:66
+#, python-format
+msgid ""
+"Invalid payment amount in IPN subscr_payment response. IPN data: %(data)s"
+msgstr ""
+
+#: donations/payment_gateways/paypal_legacy/gateway.py:121
+msgid "Your recurring donation has been cancelled."
+msgstr ""
+
+#: donations/payment_gateways/paypal_legacy/views.py:17
+msgid "gatewayManager for paypal-legacy not initialized."
+msgstr ""
+
+#: donations/payment_gateways/stripe/factory.py:51
+msgid "Stripe Event not expected for processing at the moment"
+msgstr ""
+
+#: donations/payment_gateways/stripe/factory.py:65
+msgid "Missing donation_id in payment_intent.metadata"
+msgstr ""
+
+#: donations/payment_gateways/stripe/factory.py:72
+msgid "Missing donation_id in subscription_obj.metadata"
+msgstr ""
+
+#: donations/payment_gateways/stripe/factory.py:85
+msgid "Payment Intent Id not found in DonationPaymentMeta:"
+msgstr ""
+
+#: donations/payment_gateways/stripe/factory.py:107
+#: donations/payment_gateways/stripe/factory.py:135
+#: donations/payment_gateways/stripe/factory.py:162
+#: donations/payment_gateways/stripe/factory.py:185
+msgid "Missing parent donation queried via Subscription, subscription_id: "
+msgstr ""
+
+#: donations/payment_gateways/stripe/factory.py:109
+#: donations/payment_gateways/stripe/factory.py:137
+#: donations/payment_gateways/stripe/factory.py:164
+#: donations/payment_gateways/stripe/factory.py:187
+msgid "No matching Subscription found, profile_id: "
+msgstr ""
+
+#: donations/payment_gateways/stripe/factory.py:111
+#: donations/payment_gateways/stripe/factory.py:139
+msgid "Missing subscription_id"
+msgstr ""
+
+#: donations/payment_gateways/stripe/factory.py:191
+#, fuzzy
+#| msgid "My donations"
+msgid "Missing donation_id"
+msgstr "Donasi Saya"
+
+#: donations/payment_gateways/stripe/factory.py:204
+#: donations/payment_gateways/stripe/factory.py:235
+msgid "No matching Donation found, donation_id: "
+msgstr ""
+
+#: donations/payment_gateways/stripe/factory.py:213
+msgid "Missing session_id in request.GET"
+msgstr ""
+
+#: donations/payment_gateways/stripe/factory.py:220
+msgid "Missing donation_id in session.metadata"
+msgstr ""
+
+#: donations/payment_gateways/stripe/factory.py:229
+msgid "Stripe session id found. Return request from Stripe is already invalid."
+msgstr ""
+
+#: donations/payment_gateways/stripe/gateway.py:240
+msgid "Your recurring donation amount at Stripe is updated successfully."
+msgstr ""
+
+#: donations/payment_gateways/stripe/gateway.py:242
+#: donations/payment_gateways/stripe/gateway.py:266
+msgid "Cannot update stripe subscription. Stripe API returned none."
+msgstr ""
+
+#: donations/payment_gateways/stripe/gateway.py:244
+msgid ""
+"Cannot update stripe subscription. SubscriptionItem more or less than 1."
+msgstr ""
+
+#: donations/payment_gateways/stripe/gateway.py:264
+msgid ""
+"Your recurring donation via Stripe is set to bill on today's date every "
+"month."
+msgstr ""
+
+#: donations/payment_gateways/stripe/gateway.py:283
+#, python-format
+msgid ""
+"Subscription object returned from stripe having status %(status)s instead of "
+"canceled"
+msgstr ""
+
+#: donations/payment_gateways/stripe/gateway.py:311
+msgid "Your recurring donation via Stripe is paused."
+msgstr ""
+
+#: donations/payment_gateways/stripe/gateway.py:323
+msgid "Your recurring donation via Stripe is resumed."
+msgstr ""
+
+#: donations/payment_gateways/stripe/gateway.py:326
+msgid ""
+"Subscription object returned from stripe does not have valid "
+"pause_collection value"
+msgstr ""
+
+#: donations/payment_gateways/stripe/views.py:39
+msgid "No donation_id in session"
+msgstr ""
+
+#: donations/payment_gateways/stripe/views.py:207
+msgid "Unknown Exception"
+msgstr ""
+
+#: donations/payment_gateways/stripe/views.py:209
+#: donations/payment_gateways/stripe/views.py:245
+msgid "Results returned from gateway is invalid."
+msgstr ""
+
+#: donations/templates/donations/cancelled.html:4
+msgid "Donation cancelled"
+msgstr ""
+
+#: donations/templates/donations/cancelled.html:11
+msgid "Donation Cancelled"
+msgstr ""
+
+#: donations/templates/donations/cancelled.html:12
+msgid "Your payment is cancelled."
+msgstr ""
+
+#: donations/templates/donations/cancelled.html:17
+#: donations/templates/donations/revoked.html:16
+#: donations/templates/donations/thankyou.html:20
+msgid ""
+"You will be receiving a verification email shortly, click on the link in the "
+"email to verify your email."
+msgstr ""
+
+#: donations/templates/donations/cancelled.html:22
+#: donations/templates/donations/revoked.html:20
+msgid "Please consider donating to us again. Your support means a lot to us."
+msgstr ""
+
+#: donations/templates/donations/cancelled.html:24
+#: donations/templates/donations/confirm_donation.html:32
+#: donations/templates/donations/email_templates/account_created_admin.html:21
+#: donations/templates/donations/email_templates/account_deleted_admin.html:21
+#: donations/templates/donations/email_templates/donation_error_admin.html:21
+#: donations/templates/donations/email_templates/new_donation.html:17
+#: donations/templates/donations/email_templates/new_renewal.html:17
+#: donations/templates/donations/email_templates/recurring_cancel_request_admin.html:19
+#: donations/templates/donations/email_templates/recurring_cancelled_admin.html:19
+#: donations/templates/donations/email_templates/recurring_cancelled_donor.html:20
+#: donations/templates/donations/email_templates/recurring_paused_admin.html:19
+#: donations/templates/donations/email_templates/recurring_paused_donor.html:20
+#: donations/templates/donations/email_templates/recurring_resumed_admin.html:19
+#: donations/templates/donations/email_templates/recurring_resumed_donor.html:20
+#: donations/templates/donations/email_templates/recurring_updated_admin.html:19
+#: donations/templates/donations/email_templates/recurring_updated_donor.html:20
+#: donations/templates/donations/revoked.html:22
+#: donations/templates/donations/thankyou.html:32
+msgid "Donor"
+msgstr ""
+
+#: donations/templates/donations/cancelled.html:28
+#: donations/templates/donations/confirm_donation.html:36
+#: donations/templates/donations/email_templates/donation_receipt.html:29
+#: donations/templates/donations/email_templates/donation_status_change.html:28
+#: donations/templates/donations/email_templates/new_donation.html:25
+#: donations/templates/donations/email_templates/new_renewal.html:25
+#: donations/templates/donations/email_templates/renewal_receipt.html:22
+#: donations/templates/donations/my_onetime_donations.html:47
+#: donations/templates/donations/my_renewals.html:56
+#: donations/templates/donations/revoked.html:26
+#: donations/templates/donations/thankyou.html:36
+msgid "Donation frequency"
+msgstr ""
+
+#: donations/templates/donations/confirm_donation.html:4
+#: donations/templates/donations/confirm_donation.html:12
+#: donations/templates/donations/redirection_2c2p_form.html:12
+#: donations/templates/donations/redirection_paypal.html:16
+#: donations/templates/donations/redirection_stripe.html:16
+msgid "Donation Confirmation"
+msgstr ""
+
+#: donations/templates/donations/confirm_donation.html:11
+#: donations/templates/donations/redirection_2c2p_form.html:11
+#: donations/templates/donations/redirection_paypal.html:15
+#: donations/templates/donations/redirection_stripe.html:15
+msgid "Step 3 of 3"
+msgstr ""
+
+#: donations/templates/donations/confirm_donation.html:22
+#, fuzzy
+#| msgid "My donations"
+msgid "Confirm your donation"
+msgstr "Donasi Saya"
+
+#: donations/templates/donations/confirm_donation.html:25
 #: donations/templates/donations/donation_details_form.html:30
 #, python-format
 msgid ""
@@ -230,68 +1094,291 @@ msgid ""
 "                        %(username)s."
 msgstr ""
 
+#: donations/templates/donations/confirm_donation.html:27
 #: donations/templates/donations/donation_details_form.html:32
 msgid "Logout"
 msgstr ""
 
-#: donations/templates/donations/donation_details_form.html:64
+#: donations/templates/donations/confirm_donation.html:45
+msgid "Change Donation Details"
+msgstr ""
+
+#: donations/templates/donations/confirm_donation.html:49
+#, fuzzy
+#| msgid "My Donations"
+msgid "Confirm Donation"
+msgstr "Donasi Saya"
+
+#: donations/templates/donations/confirm_donation.html:51
+#, python-format
+msgid "You will be redirected to the %(gateway)s-hosted payment page."
+msgstr ""
+
+#: donations/templates/donations/donation_details_form.html:4
+#: donations/templates/donations/donation_details_form.html:12
+#: donations/templates/donations/donation_details_form.html:27
+#: donations/templates/donations/edit_2c2p_recurring_payment_form.html:4
+#: donations/templates/donations/edit_offline_recurring_payment_form.html:4
+#: donations/templates/donations/edit_paypal_recurring_payment_form.html:4
+#: donations/templates/donations/edit_stripe_recurring_payment_form.html:4
+msgid "Donation Details"
+msgstr ""
+
+#: donations/templates/donations/donation_details_form.html:11
+msgid "Step 1 of 3"
+msgstr ""
+
+#: donations/templates/donations/donation_details_form.html:87
 msgid "Continue"
 msgstr ""
 
-#: donations/templates/donations/email_templates/donation_receipt.html:5
-#: donations/templates/donations/email_templates/new_donation.html:5
-#: donations/templates/donations/email_templates/new_donation.html:13
-msgid "New Donation"
+#: donations/templates/donations/donation_details_form.html:92
+msgid "Continue as guest"
 msgstr ""
 
-#: donations/templates/donations/email_templates/donation_receipt.html:13
+#: donations/templates/donations/donation_details_form.html:93
+msgid "Donate without account creation."
+msgstr ""
+
+#: donations/templates/donations/donation_details_form.html:97
+#: donations/templates/donations/signin_method.html:12
+msgid "Register or Login"
+msgstr ""
+
+#: donations/templates/donations/donation_details_form.html:98
+msgid "You need to register to become a monthly donor."
+msgstr ""
+
+#: donations/templates/donations/donation_details_form.html:99
+msgid "Manage donations with an account."
+msgstr ""
+
+#: donations/templates/donations/donation_view_switcher.html:4
+#, fuzzy
+#| msgid "My Donations"
+msgid "One-time Donations"
+msgstr "Donasi Saya"
+
+#: donations/templates/donations/donation_view_switcher.html:6
+#, fuzzy
+#| msgid "My Donations"
+msgid "Recurring Donations"
+msgstr "Donasi Saya"
+
+#: donations/templates/donations/edit_2c2p_recurring_payment_form.html:13
+#: donations/templates/donations/edit_offline_recurring_payment_form.html:13
+#: donations/templates/donations/edit_paypal_recurring_payment_form.html:13
+#: donations/templates/donations/edit_stripe_recurring_payment_form.html:13
+#: donations/templates/donations/my_renewals.html:12
+#, fuzzy
+#| msgid "My Donations"
+msgid "Back to My Donations"
+msgstr "Donasi Saya"
+
+#: donations/templates/donations/edit_2c2p_recurring_payment_form.html:16
+#: donations/templates/donations/edit_offline_recurring_payment_form.html:16
+#: donations/templates/donations/edit_paypal_recurring_payment_form.html:16
+#: donations/templates/donations/edit_stripe_recurring_payment_form.html:16
+msgid "Edit Recurring Donation"
+msgstr ""
+
+#: donations/templates/donations/edit_2c2p_recurring_payment_form.html:17
+#: donations/templates/donations/edit_offline_recurring_payment_form.html:17
+#: donations/templates/donations/edit_paypal_recurring_payment_form.html:17
+#: donations/templates/donations/edit_stripe_recurring_payment_form.html:17
+msgid "Recurring donation identifier: "
+msgstr ""
+
+#: donations/templates/donations/edit_2c2p_recurring_payment_form.html:18
+#: donations/templates/donations/edit_offline_recurring_payment_form.html:18
+#: donations/templates/donations/edit_paypal_recurring_payment_form.html:18
+#: donations/templates/donations/edit_stripe_recurring_payment_form.html:18
+#: donations/templates/donations/my_renewals.html:20
+msgid "Recurring Donation status:"
+msgstr ""
+
+#: donations/templates/donations/edit_2c2p_recurring_payment_form.html:22
+#: donations/templates/donations/edit_offline_recurring_payment_form.html:22
+#: donations/templates/donations/edit_paypal_recurring_payment_form.html:22
+#: donations/templates/donations/edit_stripe_recurring_payment_form.html:22
+msgid "Edit your recurring donation by submitting this form."
+msgstr ""
+
+#: donations/templates/donations/edit_2c2p_recurring_payment_form.html:38
+#: donations/templates/donations/edit_offline_recurring_payment_form.html:38
+#: donations/templates/donations/edit_paypal_recurring_payment_form.html:38
+#: donations/templates/donations/edit_stripe_recurring_payment_form.html:38
+msgid "Recurring Donation Details"
+msgstr ""
+
+#: donations/templates/donations/edit_2c2p_recurring_payment_form.html:41
+#: donations/templates/donations/edit_offline_recurring_payment_form.html:41
+#: donations/templates/donations/edit_paypal_recurring_payment_form.html:41
+#: donations/templates/donations/edit_stripe_recurring_payment_form.html:41
+msgid "Update Recurring Donation"
+msgstr ""
+
+#: donations/templates/donations/edit_paypal_recurring_payment_form.html:42
+msgid ""
+"Any price update will not impact billing cycles within next 10 days "
+"(Applicable only for subscriptions funded by PayPal account)."
+msgstr ""
+
+#: donations/templates/donations/email_templates/account_created_admin.html:11
+#: donations/templates/donations/email_templates/account_deleted_admin.html:11
+#: donations/templates/donations/email_templates/donation_error_admin.html:10
+#: donations/templates/donations/email_templates/new_donation.html:10
+#: donations/templates/donations/email_templates/new_renewal.html:10
+#: donations/templates/donations/email_templates/recurring_cancel_request_admin.html:10
+#: donations/templates/donations/email_templates/recurring_cancelled_admin.html:10
+#: donations/templates/donations/email_templates/recurring_paused_admin.html:10
+#: donations/templates/donations/email_templates/recurring_resumed_admin.html:10
+#: donations/templates/donations/email_templates/recurring_updated_admin.html:10
+msgid "Hi Admins,"
+msgstr ""
+
+#: donations/templates/donations/email_templates/account_created_admin.html:13
+msgid ""
+"This email is to inform you that a donor account has been created on your "
+"website:"
+msgstr ""
+
+#: donations/templates/donations/email_templates/account_created_admin.html:26
+#: donations/templates/donations/email_templates/account_deleted_admin.html:26
+#: donations/templates/donations/email_templates/account_deleted_donor.html:17
+#: donations/templates/donations/email_templates/donation_error_admin.html:33
+#: donations/templates/donations/email_templates/donation_receipt.html:51
+#: donations/templates/donations/email_templates/donation_status_change.html:44
+#: donations/templates/donations/email_templates/new_donation.html:47
+#: donations/templates/donations/email_templates/new_renewal.html:47
+#: donations/templates/donations/email_templates/recurring_cancel_request_admin.html:39
+#: donations/templates/donations/email_templates/recurring_cancelled_admin.html:39
+#: donations/templates/donations/email_templates/recurring_cancelled_donor.html:40
+#: donations/templates/donations/email_templates/recurring_paused_admin.html:39
+#: donations/templates/donations/email_templates/recurring_paused_donor.html:40
+#: donations/templates/donations/email_templates/recurring_resumed_admin.html:39
+#: donations/templates/donations/email_templates/recurring_resumed_donor.html:40
+#: donations/templates/donations/email_templates/recurring_updated_admin.html:39
+#: donations/templates/donations/email_templates/recurring_updated_donor.html:40
+#: donations/templates/donations/email_templates/renewal_receipt.html:44
+#: donations/templates/donations/email_templates/subscription_status_change.html:34
+msgid "Thank you,"
+msgstr ""
+
+#: donations/templates/donations/email_templates/account_deleted_admin.html:13
+msgid ""
+"This email is to inform you that a donor account has been deleted on your "
+"website:"
+msgstr ""
+
+#: donations/templates/donations/email_templates/account_deleted_donor.html:11
+#: donations/templates/donations/email_templates/donation_receipt.html:10
+#: donations/templates/donations/email_templates/donation_status_change.html:10
+#: donations/templates/donations/email_templates/recurring_cancelled_donor.html:10
+#: donations/templates/donations/email_templates/recurring_paused_donor.html:10
+#: donations/templates/donations/email_templates/recurring_resumed_donor.html:10
+#: donations/templates/donations/email_templates/recurring_updated_donor.html:10
+#: donations/templates/donations/email_templates/renewal_receipt.html:10
+#: donations/templates/donations/email_templates/subscription_status_change.html:10
+msgid "Dear"
+msgstr ""
+
+#: donations/templates/donations/email_templates/account_deleted_donor.html:14
+msgid ""
+"You have just deleted your account. Thank you for your support all the way!"
+msgstr ""
+
+#: donations/templates/donations/email_templates/donation_error_admin.html:5
+#: donations/templates/donations/email_templates/donation_error_admin.html:9
+msgid "A Donation Error has occurred"
+msgstr ""
+
+#: donations/templates/donations/email_templates/donation_error_admin.html:11
+msgid ""
+"This email is to inform you that a donation error has occurred on your "
+"website:"
+msgstr ""
+
+#: donations/templates/donations/email_templates/donation_error_admin.html:17
+msgid "Donation transaction ID"
+msgstr ""
+
+#: donations/templates/donations/email_templates/donation_error_admin.html:25
+msgid "Error title"
+msgstr ""
+
+#: donations/templates/donations/email_templates/donation_error_admin.html:29
+msgid "Error description"
+msgstr ""
+
+#: donations/templates/donations/email_templates/donation_receipt.html:5
+#: donations/templates/donations/email_templates/donation_receipt.html:9
 msgid "Donation Receipt"
+msgstr ""
+
+#: donations/templates/donations/email_templates/donation_receipt.html:17
+msgid "Thank you for your generosity! Your support means a lot to us. "
 msgstr ""
 
 #: donations/templates/donations/email_templates/donation_receipt.html:19
 #, python-format
-msgid "Dear %(donation.user.fullname)s,"
-msgstr ""
-
-#: donations/templates/donations/email_templates/donation_receipt.html:21
 msgid ""
-"Thank you for your generosity! Your support means a lot to us. Here are the "
-"details of your donation:"
+"Click <a href=\"%(donations_full_url)s\" target=\"_blank\" rel=\"noopener "
+"noreferrer\">here</a> to view your donation on the website."
 msgstr ""
 
-#: donations/templates/donations/email_templates/donation_receipt.html:29
-#: donations/templates/donations/email_templates/new_donation.html:34
-#: donations/templates/donations/my_donations.html:63
-msgid "Donation frequency"
+#: donations/templates/donations/email_templates/donation_receipt.html:22
+#: donations/templates/donations/email_templates/renewal_receipt.html:15
+msgid "Here are the details of your donation:"
 msgstr ""
 
-#: donations/templates/donations/email_templates/donation_receipt.html:41
-#: donations/templates/donations/email_templates/new_donation.html:46
-#: donations/templates/donations/thankyou.html:44
-msgid "Opt in Mailing List?"
+#: donations/templates/donations/email_templates/donation_receipt.html:46
+#: donations/templates/donations/email_templates/new_donation.html:42
+#: donations/templates/donations/email_templates/new_renewal.html:42
+#: donations/templates/donations/email_templates/recurring_cancel_request_admin.html:35
+#: donations/templates/donations/email_templates/recurring_cancelled_admin.html:35
+#: donations/templates/donations/email_templates/recurring_cancelled_donor.html:36
+#: donations/templates/donations/email_templates/recurring_paused_admin.html:35
+#: donations/templates/donations/email_templates/recurring_paused_donor.html:36
+#: donations/templates/donations/email_templates/recurring_resumed_admin.html:35
+#: donations/templates/donations/email_templates/recurring_resumed_donor.html:36
+#: donations/templates/donations/email_templates/recurring_updated_admin.html:35
+#: donations/templates/donations/email_templates/recurring_updated_donor.html:36
+#: donations/templates/donations/email_templates/renewal_receipt.html:39
+#: donations/templates/donations/thankyou.html:45
+msgid "Recurring donation status"
 msgstr ""
 
-#: donations/templates/donations/email_templates/donation_receipt.html:49
-#: donations/templates/donations/email_templates/new_donation.html:54
-msgid "Thank you,"
+#: donations/templates/donations/email_templates/donation_status_change.html:5
+#: donations/templates/donations/email_templates/donation_status_change.html:9
+msgid "Your Donation Payment Status has been updated"
 msgstr ""
 
-#: donations/templates/donations/email_templates/new_donation.html:19
-msgid "Hi Admins,"
+#: donations/templates/donations/email_templates/donation_status_change.html:17
+msgid "Listed below are the updated details of your donation. "
 msgstr ""
 
-#: donations/templates/donations/email_templates/new_donation.html:21
+#: donations/templates/donations/email_templates/donation_status_change.html:19
+#: donations/templates/donations/email_templates/subscription_status_change.html:14
+#, python-format
+msgid ""
+"Click <a href=\"%(donations_full_url)s\" target=\"_blank\" rel=\"noopener "
+"noreferrer\">here</a> to see more."
+msgstr ""
+
+#: donations/templates/donations/email_templates/new_donation.html:11
 msgid ""
 "This email is to inform you that a new donation has been made on your "
 "website:"
 msgstr ""
 
-#: donations/templates/donations/email_templates/new_donation.html:26
-#: donations/templates/donations/thankyou.html:24
-msgid "Donor"
+#: donations/templates/donations/email_templates/new_renewal.html:11
+msgid ""
+"This email is to inform you that a new renewal donation has been made on "
+"your website:"
 msgstr ""
 
-#: donations/templates/donations/email_templates/plain_texts.py:7
+#: donations/templates/donations/email_templates/plain_texts.py:8
 #, python-format
 msgid ""
 "\n"
@@ -310,18 +1397,17 @@ msgid ""
 "\n"
 "        Donor: %(name)s\n"
 "\n"
-"        Order Number: %(order_number)s\n"
+"        Transaction ID: %(transaction_id)s\n"
 "\n"
 "        Donation frequency: %(frequency)s\n"
 "\n"
-"        Currency: %(currency)s\n"
+"        Payment method: %(gateway)s\n"
 "\n"
 "        Donation amount: %(amount)s\n"
 "\n"
-"        Opt in Mailing List? %(opt_in)s\n"
-"\n"
 "        Payment status: %(status)s\n"
 "\n"
+"        %(recurring_status)s\n"
 "        \n"
 "\n"
 "        Thank you,\n"
@@ -330,7 +1416,12 @@ msgid ""
 "    "
 msgstr ""
 
-#: donations/templates/donations/email_templates/plain_texts.py:38
+#: donations/templates/donations/email_templates/plain_texts.py:41
+#, python-format
+msgid "Go to %(url)s to view your donation on the website."
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:44
 #, python-format
 msgid ""
 "\n"
@@ -340,20 +1431,59 @@ msgid ""
 "\n"
 "        Dear %(name)s,\n"
 "\n"
-"        Thank you for your generosity! Your support means a lot to us. Here "
-"are the details of your donation:\n"
+"        Thank you for your generosity! Your support means a lot to us. "
+"%(url_text)s\n"
+"\n"
+"        Here are the details of your donation:\n"
 "\n"
 "        \n"
 "\n"
-"        Order Number: %(order_number)s\n"
+"        Transaction ID: %(transaction_id)s\n"
 "\n"
 "        Donation frequency: %(frequency)s\n"
 "\n"
-"        Currency: %(currency)s\n"
+"        Payment method: %(gateway)s\n"
 "\n"
 "        Donation amount: %(amount)s\n"
 "\n"
-"        Opt in Mailing List? %(opt_in)s\n"
+"        Payment status: %(status)s\n"
+"\n"
+"        %(recurring_status)s\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:76
+#, python-format
+msgid "Go to %(url)s to see more."
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:79
+#, python-format
+msgid ""
+"\n"
+"        Your Donation Payment Status has been updated\n"
+"\n"
+"        \n"
+"\n"
+"        Dear %(name)s,\n"
+"\n"
+"        Listed below are the updated details of your donation. "
+"%(url_text)s:\n"
+"\n"
+"        \n"
+"\n"
+"        Transaction ID: %(transaction_id)s\n"
+"\n"
+"        Donation frequency: %(frequency)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Donation amount: %(amount)s\n"
 "\n"
 "        Payment status: %(status)s\n"
 "\n"
@@ -365,92 +1495,826 @@ msgid ""
 "    "
 msgstr ""
 
-#: donations/templates/donations/my_donations.html:4
-msgid "My Donations"
-msgstr "Donasi Saya"
-
-#: donations/templates/donations/my_donations.html:10
-msgid "My donations"
-msgstr "Donasi Saya"
-
-#: donations/templates/donations/my_donations.html:12
+#: donations/templates/donations/email_templates/plain_texts.py:106
+#, python-format
 msgid ""
-"View and manage your donations here. We thank you so much for your support. "
-"Every contribution, however big or small, is valuable for our future and our "
-"ability to deliver quality journalism that’s independent, not-for-profit, "
-"and free of charge."
+"\n"
+"        Your Recurring Donation Status has been updated\n"
+"\n"
+"        \n"
+"\n"
+"        Dear %(name)s,\n"
+"\n"
+"        Listed below are the updated details of your recurring donation. Go "
+"to %(url)s to see more.\n"
+"\n"
+"        \n"
+"\n"
+"        Profile ID: %(profile_id)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Recurring Amount: %(amount)s\n"
+"\n"
+"        Status: %(status)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
 msgstr ""
 
-#: donations/templates/donations/my_donations.html:34
-#: donations/templates/donations/my_donations.html:89
-msgid "View all renewals"
+#: donations/templates/donations/email_templates/plain_texts.py:131
+#, python-format
+msgid ""
+"\n"
+"        New Renewal Donation\n"
+"\n"
+"        \n"
+"\n"
+"        Hi Admins,\n"
+"\n"
+"        This email is to inform you that a new renewal donation has been "
+"made on your website:\n"
+"\n"
+"        %(url)s\n"
+"\n"
+"        \n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        Transaction ID: %(transaction_id)s\n"
+"\n"
+"        Donation frequency: %(frequency)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Donation amount: %(amount)s\n"
+"\n"
+"        Payment status: %(status)s\n"
+"\n"
+"        %(recurring_status)s\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
 msgstr ""
 
-#: donations/templates/donations/my_donations.html:35
-#: donations/templates/donations/my_donations.html:90
-msgid "Edit donation"
+#: donations/templates/donations/email_templates/plain_texts.py:162
+#, python-format
+msgid ""
+"\n"
+"        Renewal Donation Receipt\n"
+"\n"
+"        \n"
+"\n"
+"        Dear %(name)s,\n"
+"\n"
+"        Thank you for your generosity! Your support means a lot to us. Go to "
+"%(url)s to view your renewal donation on the website.\n"
+"\n"
+"        Here are the details of your renewal donation:\n"
+"\n"
+"        \n"
+"\n"
+"        Transaction ID: %(transaction_id)s\n"
+"\n"
+"        Donation frequency: %(frequency)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Donation amount: %(amount)s\n"
+"\n"
+"        Payment status: %(status)s\n"
+"\n"
+"        %(recurring_status)s\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
 msgstr ""
 
-#: donations/templates/donations/my_donations.html:36
-#: donations/templates/donations/my_donations.html:91
-msgid "Cancel donation"
+#: donations/templates/donations/email_templates/plain_texts.py:192
+#, python-format
+msgid ""
+"\n"
+"        A Recurring Donation is updated\n"
+"\n"
+"        \n"
+"\n"
+"        Hi Admins,\n"
+"\n"
+"        %(message)s\n"
+"\n"
+"        %(url)s\n"
+"\n"
+"        \n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        Recurring donation identifier: %(profile_id)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Recurring donation amount: %(amount)s\n"
+"\n"
+"        Recurring Status: %(recurring_status)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
 msgstr ""
 
-#: donations/templates/donations/my_donations.html:38
-#: donations/templates/donations/my_donations.html:93
-msgid "Actions locked (Email unverified)"
+#: donations/templates/donations/email_templates/plain_texts.py:220
+#, python-format
+msgid ""
+"\n"
+"        Your Recurring Donation is updated\n"
+"\n"
+"        \n"
+"\n"
+"        Dear %(name)s,\n"
+"\n"
+"        %(message)s Go to %(url)s to view your recurring donations on the "
+"website.\n"
+"\n"
+"        Here are the details of your recurring donation:\n"
+"\n"
+"        \n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        Recurring donation identifier: %(profile_id)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Recurring donation amount: %(amount)s\n"
+"\n"
+"        Recurring Status: %(recurring_status)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
 msgstr ""
 
-#: donations/templates/donations/my_donations.html:65
+#: donations/templates/donations/email_templates/plain_texts.py:248
+#, python-format
+msgid ""
+"\n"
+"        A Recurring Donation is paused\n"
+"\n"
+"        \n"
+"\n"
+"        Hi Admins,\n"
+"\n"
+"        This email is to inform you that a recurring donation has been "
+"paused on your website:\n"
+"\n"
+"        %(url)s\n"
+"\n"
+"        \n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        Recurring donation identifier: %(profile_id)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Recurring donation amount: %(amount)s\n"
+"\n"
+"        Recurring Status: %(recurring_status)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:275
+#, python-format
+msgid ""
+"\n"
+"        Your Recurring Donation is paused\n"
+"\n"
+"        \n"
+"\n"
+"        Dear %(name)s,\n"
+"\n"
+"        You have just paused your recurring donation. You can resume it "
+"anytime in your account. Go to %(url)s to view your recurring donations on "
+"the website.\n"
+"\n"
+"        Here are the details of your recurring donation:\n"
+"\n"
+"        \n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        Recurring donation identifier: %(profile_id)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Recurring donation amount: %(amount)s\n"
+"\n"
+"        Recurring Status: %(recurring_status)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:302
+#, python-format
+msgid ""
+"\n"
+"        A Recurring Donation is resumed\n"
+"\n"
+"        \n"
+"\n"
+"        Hi Admins,\n"
+"\n"
+"        This email is to inform you that a recurring donation has been "
+"resumed on your website:\n"
+"\n"
+"        %(url)s\n"
+"\n"
+"        \n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        Recurring donation identifier: %(profile_id)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Recurring donation amount: %(amount)s\n"
+"\n"
+"        Recurring Status: %(recurring_status)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:329
+#, python-format
+msgid ""
+"\n"
+"        Your Recurring Donation is resumed\n"
+"\n"
+"        \n"
+"\n"
+"        Dear %(name)s,\n"
+"\n"
+"        You have just resumed your recurring donation. Go to %(url)s to view "
+"your recurring donations on the website.\n"
+"\n"
+"        Here are the details of your recurring donation:\n"
+"\n"
+"        \n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        Recurring donation identifier: %(profile_id)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Recurring donation amount: %(amount)s\n"
+"\n"
+"        Recurring Status: %(recurring_status)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:356
+#, python-format
+msgid ""
+"\n"
+"        A Recurring Donation is cancelled\n"
+"\n"
+"        \n"
+"\n"
+"        Hi Admins,\n"
+"\n"
+"        This email is to inform you that a recurring donation has been "
+"cancelled on your website:\n"
+"\n"
+"        %(url)s\n"
+"\n"
+"        \n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        Recurring donation identifier: %(profile_id)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Recurring donation amount: %(amount)s\n"
+"\n"
+"        Recurring Status: %(recurring_status)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:383
+#, python-format
+msgid ""
+"\n"
+"        Cancellation to a Recurring Donation is requested\n"
+"\n"
+"        \n"
+"\n"
+"        Hi Admins,\n"
+"\n"
+"        This email is to inform you that a cancellation to a recurring "
+"donation has been requested on your website. Please complete the request and "
+"manually change the subscription status to Cancelled at the link below:\n"
+"\n"
+"        %(url)s\n"
+"\n"
+"        \n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        Recurring donation identifier: %(profile_id)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Recurring donation amount: %(amount)s\n"
+"\n"
+"        Recurring Status: %(recurring_status)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:410
+#, python-format
+msgid ""
+"\n"
+"        Your Recurring Donation is cancelled\n"
+"\n"
+"        \n"
+"\n"
+"        Dear %(name)s,\n"
+"\n"
+"        You have just cancelled your recurring donation. Go to %(url)s to "
+"view your recurring donations on the website.\n"
+"\n"
+"        Here are the details of your recurring donation:\n"
+"\n"
+"        \n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        Recurring donation identifier: %(profile_id)s\n"
+"\n"
+"        Payment method: %(gateway)s\n"
+"\n"
+"        Recurring donation amount: %(amount)s\n"
+"\n"
+"        Recurring Status: %(recurring_status)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:437
+#, python-format
+msgid ""
+"\n"
+"        A Donor Account is deleted\n"
+"\n"
+"        \n"
+"\n"
+"        Hi Admins,\n"
+"\n"
+"        This email is to inform you that a donor account has been deleted on "
+"your website:\n"
+"\n"
+"        %(url)s\n"
+"\n"
+"        \n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:456
+#, python-format
+msgid ""
+"\n"
+"        Your Account is deleted\n"
+"\n"
+"        \n"
+"\n"
+"        Dear %(name)s,\n"
+"\n"
+"        You have just deleted your account. Thank you for your support all "
+"the way!\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:471
+#, python-format
+msgid ""
+"\n"
+"        A Donor Account is created\n"
+"\n"
+"        \n"
+"\n"
+"        Hi Admins,\n"
+"\n"
+"        This email is to inform you that a donor account has been created on "
+"your website:\n"
+"\n"
+"        %(url)s\n"
+"\n"
+"        \n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
+msgstr ""
+
+#: donations/templates/donations/email_templates/plain_texts.py:490
+#, python-format
+msgid ""
+"\n"
+"        A Donation Error has occurred.\n"
+"\n"
+"        \n"
+"\n"
+"        Hi Admins,\n"
+"\n"
+"        This email is to inform you that a donation error has occurred on "
+"your website:\n"
+"\n"
+"        %(url)s\n"
+"\n"
+"        \n"
+"\n"
+"        Donation transaction ID: %(order)s\n"
+"\n"
+"        Donor: %(name)s\n"
+"\n"
+"        Error title: %(error_title)s\n"
+"\n"
+"        Error description: %(error_description)s\n"
+"\n"
+"        \n"
+"\n"
+"        Thank you,\n"
+"\n"
+"        %(sitename)s\n"
+"    "
+msgstr ""
+
+#: donations/templates/donations/email_templates/recurring_cancel_request_admin.html:12
+msgid ""
+"This email is to inform you that a cancellation to a recurring donation has "
+"been requested on your website. Please complete the request and manually "
+"change the subscription status to Cancelled at the link below:"
+msgstr ""
+
+#: donations/templates/donations/email_templates/recurring_cancel_request_admin.html:23
+#: donations/templates/donations/email_templates/recurring_cancelled_admin.html:23
+#: donations/templates/donations/email_templates/recurring_cancelled_donor.html:24
+#: donations/templates/donations/email_templates/recurring_paused_admin.html:23
+#: donations/templates/donations/email_templates/recurring_paused_donor.html:24
+#: donations/templates/donations/email_templates/recurring_resumed_admin.html:23
+#: donations/templates/donations/email_templates/recurring_resumed_donor.html:24
+#: donations/templates/donations/email_templates/recurring_updated_admin.html:23
+#: donations/templates/donations/email_templates/recurring_updated_donor.html:24
+msgid "Recurring donation identifier"
+msgstr ""
+
+#: donations/templates/donations/email_templates/recurring_cancelled_admin.html:12
+msgid ""
+"This email is to inform you that a recurring donation has been cancelled on "
+"your website:"
+msgstr ""
+
+#: donations/templates/donations/email_templates/recurring_cancelled_donor.html:13
+#, python-format
+msgid ""
+"You have just cancelled your recurring donation. Click <a href="
+"\"%(donations_full_url)s\" target=\"_blank\" rel=\"noopener noreferrer"
+"\">here</a> to view your recurring donations on the website."
+msgstr ""
+
+#: donations/templates/donations/email_templates/recurring_cancelled_donor.html:16
+#: donations/templates/donations/email_templates/recurring_paused_donor.html:16
+#: donations/templates/donations/email_templates/recurring_resumed_donor.html:16
+#: donations/templates/donations/email_templates/recurring_updated_donor.html:16
+msgid "Here are the details of your recurring donation:"
+msgstr ""
+
+#: donations/templates/donations/email_templates/recurring_paused_admin.html:12
+msgid ""
+"This email is to inform you that a recurring donation has been paused on "
+"your website:"
+msgstr ""
+
+#: donations/templates/donations/email_templates/recurring_paused_donor.html:13
+#, python-format
+msgid ""
+"You have just paused your recurring donation. You can resume it anytime in "
+"your account. Click <a href=\"%(donations_full_url)s\" target=\"_blank\" rel="
+"\"noopener noreferrer\">here</a> to view your recurring donations on the "
+"website."
+msgstr ""
+
+#: donations/templates/donations/email_templates/recurring_resumed_admin.html:12
+msgid ""
+"This email is to inform you that a recurring donation has been resumed on "
+"your website:"
+msgstr ""
+
+#: donations/templates/donations/email_templates/recurring_resumed_donor.html:13
+#, python-format
+msgid ""
+"You have just resumed your recurring donation. Click <a href="
+"\"%(donations_full_url)s\" target=\"_blank\" rel=\"noopener noreferrer"
+"\">here</a> to view your recurring donations on the website."
+msgstr ""
+
+#: donations/templates/donations/email_templates/recurring_updated_admin.html:5
+#: donations/templates/donations/email_templates/recurring_updated_admin.html:9
+msgid "A Recurring Donation is updated"
+msgstr ""
+
+#: donations/templates/donations/email_templates/recurring_updated_donor.html:5
+#: donations/templates/donations/email_templates/recurring_updated_donor.html:9
+msgid "Your Recurring Donation is updated"
+msgstr ""
+
+#: donations/templates/donations/email_templates/recurring_updated_donor.html:13
+#, python-format
+msgid ""
+" Click <a href=\"%(donations_full_url)s\" target=\"_blank\" rel=\"noopener "
+"noreferrer\">here</a> to view your recurring donations on the website."
+msgstr ""
+
+#: donations/templates/donations/email_templates/renewal_receipt.html:5
+#: donations/templates/donations/email_templates/renewal_receipt.html:9
+msgid "Renewal Donation Receipt"
+msgstr ""
+
+#: donations/templates/donations/email_templates/renewal_receipt.html:13
+#, python-format
+msgid ""
+"Thank you for your generosity! Your support means a lot to us. Click <a href="
+"\"%(donations_full_url)s\" target=\"_blank\" rel=\"noopener noreferrer"
+"\">here</a> to view your renewal donation on the website."
+msgstr ""
+
+#: donations/templates/donations/email_templates/subscription_status_change.html:5
+#: donations/templates/donations/email_templates/subscription_status_change.html:9
+msgid "Your Recurring Donation Status has been updated"
+msgstr ""
+
+#: donations/templates/donations/email_templates/subscription_status_change.html:13
+msgid "Listed below are the updated details of your recurring donation. "
+msgstr ""
+
+#: donations/templates/donations/email_templates/subscription_status_change.html:30
+#: donations/templates/donations/my_onetime_donations.html:51
+#: donations/templates/donations/my_recurring_donations.html:84
+#: donations/templates/donations/my_renewals.html:60
+msgid "Status"
+msgstr ""
+
+#: donations/templates/donations/my_onetime_donations.html:4
+#, fuzzy
+#| msgid "My Donations"
+msgid "My One-time Donations"
+msgstr "Donasi Saya"
+
+#: donations/templates/donations/my_onetime_donations.html:10
+#, fuzzy
+#| msgid "My donations"
+msgid "My one-time donations"
+msgstr "Donasi Saya"
+
+#: donations/templates/donations/my_onetime_donations.html:12
+msgid ""
+"View and manage your one-time donations here. We thank you so much for your "
+"support. Every contribution, however big or small, is valuable for our "
+"future and our ability to deliver quality journalism that’s independent, not-"
+"for-profit, and free of charge."
+msgstr ""
+
+#: donations/templates/donations/my_onetime_donations.html:49
+#: donations/templates/donations/my_recurring_donations.html:82
+#: donations/templates/donations/my_renewals.html:58
 msgid "Date"
 msgstr ""
 
-#: donations/templates/donations/my_donations.html:66
+#: donations/templates/donations/my_onetime_donations.html:50
+#: donations/templates/donations/my_recurring_donations.html:83
+#: donations/templates/donations/my_renewals.html:59
 msgid "Payment Method"
 msgstr ""
 
-#: donations/templates/donations/my_donations.html:103
+#: donations/templates/donations/my_onetime_donations.html:68
 msgid "No Donation History."
+msgstr ""
+
+#: donations/templates/donations/my_recurring_donations.html:4
+#, fuzzy
+#| msgid "My Donations"
+msgid "My Recurring Donations"
+msgstr "Donasi Saya"
+
+#: donations/templates/donations/my_recurring_donations.html:10
+#, fuzzy
+#| msgid "My donations"
+msgid "My recurring donations"
+msgstr "Donasi Saya"
+
+#: donations/templates/donations/my_recurring_donations.html:12
+msgid ""
+"View and manage your recurring donations here. We thank you so much for your "
+"support. Every contribution, however big or small, is valuable for our "
+"future and our ability to deliver quality journalism that’s independent, not-"
+"for-profit, and free of charge."
+msgstr ""
+
+#: donations/templates/donations/my_recurring_donations.html:39
+#: donations/templates/donations/my_recurring_donations.html:112
+#: donations/views.py:293
+msgid "View all renewals"
+msgstr ""
+
+#: donations/templates/donations/my_recurring_donations.html:41
+#: donations/templates/donations/my_recurring_donations.html:114
+msgid "Edit Recurring donation"
+msgstr ""
+
+#: donations/templates/donations/my_recurring_donations.html:47
+#: donations/templates/donations/my_recurring_donations.html:120
+msgid "Cancel recurring donation"
+msgstr ""
+
+#: donations/templates/donations/my_recurring_donations.html:52
+#: donations/templates/donations/my_recurring_donations.html:125
+msgid "Actions locked (Email unverified)"
+msgstr ""
+
+#: donations/templates/donations/my_recurring_donations.html:80
+msgid "Recurring Frequency"
+msgstr ""
+
+#: donations/templates/donations/my_recurring_donations.html:81
+msgid "Identifier"
+msgstr ""
+
+#: donations/templates/donations/my_recurring_donations.html:134
+msgid "No Recurring Donation History."
+msgstr ""
+
+#: donations/templates/donations/my_renewals.html:4
+msgid "My Renewals"
+msgstr ""
+
+#: donations/templates/donations/my_renewals.html:15
+msgid "My renewals"
+msgstr ""
+
+#: donations/templates/donations/my_renewals.html:16
+msgid "Recurring Donation identifier:"
+msgstr ""
+
+#: donations/templates/donations/my_renewals.html:17
+msgid "Recurring Donation start date:"
+msgstr ""
+
+#: donations/templates/donations/my_renewals.html:19
+msgid "Recurring Donation interval:"
+msgstr ""
+
+#: donations/templates/donations/my_renewals.html:24
+msgid "View all your renewals here. "
+msgstr ""
+
+#: donations/templates/donations/my_renewals.html:77
+msgid "No Renewal History."
 msgstr ""
 
 #: donations/templates/donations/redirection_2c2p_form.html:4
 msgid "Redirecting to 2C2P"
 msgstr ""
 
-#: donations/templates/donations/redirection_2c2p_form.html:11
-msgid "Step 3 of 3"
-msgstr ""
-
-#: donations/templates/donations/redirection_2c2p_form.html:12
-msgid "Secure Payment"
-msgstr ""
-
 #: donations/templates/donations/redirection_2c2p_form.html:17
+#: donations/templates/donations/redirection_paypal.html:22
+#: donations/templates/donations/redirection_stripe.html:22
 msgid "Redirecting to Payment Gateway Page..."
 msgstr ""
 
+#: donations/templates/donations/redirection_paypal.html:4
+msgid "Redirecting to PayPal"
+msgstr ""
+
+#: donations/templates/donations/redirection_paypal.html:28
+#: donations/templates/donations/redirection_stripe.html:27
+msgid "Something went wrong..."
+msgstr ""
+
+#: donations/templates/donations/redirection_stripe.html:4
+msgid "Redirecting to Stripe"
+msgstr ""
+
+#: donations/templates/donations/revoked.html:4
+#: donations/templates/donations/revoked.html:11
+#, fuzzy
+#| msgid "Donations"
+msgid "Donation Revoked"
+msgstr "Donasi"
+
+#: donations/templates/donations/revoked.html:12
+msgid "Your payment is revoked."
+msgstr ""
+
 #: donations/templates/donations/signin_method.html:4
-#: donations/templates/donations/signin_method.html:10
 msgid "Sign in to donate"
 msgstr ""
 
-#: donations/templates/donations/signin_method.html:18
+#: donations/templates/donations/signin_method.html:11
+msgid "Step 2 of 3"
+msgstr ""
+
+#: donations/templates/donations/signin_method.html:21
 msgid "Sign in with Google"
 msgstr ""
 
-#: donations/templates/donations/signin_method.html:24
+#: donations/templates/donations/signin_method.html:25
 msgid "Sign in with Facebook"
 msgstr ""
 
-#: donations/templates/donations/signin_method.html:31
+#: donations/templates/donations/signin_method.html:30
 msgid "Sign in with Twitter"
 msgstr ""
 
-#: donations/templates/donations/signin_method.html:45
+#: donations/templates/donations/signin_method.html:42
 msgid "Sign in with Email"
 msgstr ""
 
-#: donations/templates/donations/signin_method.html:47
+#: donations/templates/donations/signin_method.html:44
 msgid "Continue with Email Sign up"
 msgstr ""
 
@@ -463,50 +2327,246 @@ msgid "Thank you!"
 msgstr ""
 
 #: donations/templates/donations/thankyou.html:12
-msgid "Your payment is successful."
+#, python-format
+msgid "Your payment is %(status)s. "
 msgstr ""
 
-#: donations/templates/donations/thankyou.html:16
-msgid ""
-"You will be receiving a verification email shortly, click on the link in the "
-"email to verify your email."
-msgstr ""
-
-#: donations/templates/donations/thankyou.html:20
+#: donations/templates/donations/thankyou.html:25
 msgid "We are so grateful for your support."
 msgstr ""
 
-#: donations/templates/donations/thankyou.html:28
-msgid "Order number"
+#: donations/templates/donations/thankyou.html:34
+msgid "Temporary Transaction ID"
 msgstr ""
 
-#: donations/templates/donations/thankyou.html:32
-msgid "Donation frequency"
+#: donations/templates/donations/thankyou.html:46
+msgid "Processing"
 msgstr ""
 
-#: donations/templates/donations/thankyou.html:40
-msgid "Donation amount"
+#: donations/templates/modeladmin/donations/donation/index.html:7
+msgid "Donors"
 msgstr ""
 
-#: donations/templates/donations/thankyou.html:48
-msgid "Payment status"
-msgstr ""
-
-#: donations/templates/modeladmin/donations/donation/inspect.html:29
+#: donations/templates/modeladmin/donations/donation/inspect.html:38
+#: donations/templates/modeladmin/donations/subscription/inspect.html:38
 #, python-format
+msgid "Back to %(model_name)s list"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:45
+#, fuzzy
+#| msgid "Donations"
+msgid "Donation Info"
+msgstr "Donasi"
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:48
+#: donations/templates/modeladmin/donations/subscription/inspect.html:48
+msgid "Meta Data"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:51
+#: donations/templates/modeladmin/donations/subscription/inspect.html:54
+#, fuzzy
+#| msgid "Donations"
+msgid "Actions"
+msgstr "Donasi"
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:54
+#: donations/templates/modeladmin/donations/subscription/inspect.html:57
+msgid "Action Logs"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:151
+msgid "Donor Meta Data"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:159
+msgid "No donor meta data entered/registered."
+msgstr ""
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:163
+#: donations/templates/modeladmin/donations/subscription/inspect.html:130
+msgid "System Generated Meta Data"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:171
+#: donations/templates/modeladmin/donations/subscription/inspect.html:138
+msgid "No system meta data registered."
+msgstr ""
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:178
+#, fuzzy
+#| msgid "My donations"
+msgid "Manually set donation status"
+msgstr "Donasi Saya"
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:179
+msgid "Current donation status is:"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:209
+#: donations/templates/modeladmin/donations/subscription/inspect.html:241
+msgid "Action type"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:210
+#: donations/templates/modeladmin/donations/subscription/inspect.html:242
+msgid "Action notes"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:211
+#: donations/templates/modeladmin/donations/subscription/inspect.html:243
+msgid "Created at"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/donation/inspect.html:226
+#: donations/templates/modeladmin/donations/subscription/inspect.html:258
+msgid "No update-actions are logged."
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:45
+msgid "Subscription Info"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:51
+msgid "Renewals"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:148
+msgid "ID"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:153
+#, fuzzy
+#| msgid "Donations"
+msgid "Donation date"
+msgstr "Donasi"
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:170
+msgid "No renewals are found."
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:176
+msgid "Current subscription status is:"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:178
+msgid "Manually set subscription status"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:199
+msgid "Toggle subscription status"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:204
+msgid "Pause Subscription"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:204
+msgid "Resume Subscription"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:209
+msgid "Subscription is not in a valid state for resuming/pausing."
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:213
+msgid "Toggle Subscription is not supported for this gateway."
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:217
+msgid "Cancel subscription status"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:222
+msgid "Cancel Subscription"
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:227
+msgid "Subscription is already cancelled."
+msgstr ""
+
+#: donations/templates/modeladmin/donations/subscription/inspect.html:230
+msgid "Cancel Subscription is not supported for this gateway."
+msgstr ""
+
+#: donations/views.py:32
+msgid "Donation Form not yet set."
+msgstr ""
+
+#: donations/views.py:85 donations/views.py:182
+msgid "No valid submit-choice is being submitted."
+msgstr ""
+
+#: donations/views.py:184
+msgid "Session data has expired. Please enter the donation details again."
+msgstr ""
+
+#: donations/views.py:215
+msgid "Your donation should be complete in 1-2 minutes. "
+msgstr ""
+
+#: donations/views.py:218
 msgid ""
-"Back to\n"
-"                %(model_name)s list"
+"Please complete your donation by following either one of the payment methods "
+"stated below. "
 msgstr ""
 
-#: donations/views.py:57
-msgid "Results returned from gateway is invalid."
-msgstr ""
-
-#: donations/views.py:60
-msgid "Could not determine payment gateway from request"
-msgstr ""
-
-#: donations/views.py:75
+#: donations/views.py:220 donations/views.py:242 donations/views.py:262
 msgid "No Payment Data is received."
+msgstr ""
+
+#: donations/views.py:295
+#, python-format
+msgid "You are not authorized to cancel subscription %(id)d."
+msgstr ""
+
+#: donations/views.py:330 donations/views.py:370
+msgid ""
+"You have already carried out 5 subscription update action in the last 5 "
+"minutes, our current limit is 5 subscription update actions(edit/pause/"
+"resume) every 5 minutes."
+msgstr ""
+
+#: donations/views.py:336
+#, python-format
+msgid "You are not authorized to pause/resume subscription %(id)d."
+msgstr ""
+
+#: donations/views.py:378
+#, python-format
+msgid "You are not authorized to edit subscription %(id)d."
+msgstr ""
+
+#: donations/views.py:419
+#, python-format
+msgid "You are not authorized to view renewals of subscription %(id)d."
+msgstr ""
+
+#: donations/wagtail_hooks.py:31
+msgid "Empty value submitted for donation status update"
+msgstr ""
+
+#: donations/wagtail_hooks.py:40
+#, python-format
+msgid "Donation %(id)d status set to %(status)s."
+msgstr ""
+
+#: donations/wagtail_hooks.py:56
+msgid "Empty value submitted for subscription status update"
+msgstr ""
+
+#: donations/wagtail_hooks.py:65
+#, python-format
+msgid "Subscription %(id)d status set to %(status)s."
+msgstr ""
+
+#: donations/wagtail_hooks.py:84
+#, python-format
+msgid "Subscription %(id)d status is toggled to %(status)s."
+msgstr ""
+
+#: donations/wagtail_hooks.py:104
+#, python-format
+msgid "Subscription %(id)d status is cancelled."
 msgstr ""

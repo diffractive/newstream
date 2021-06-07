@@ -2,16 +2,22 @@
 {% load common_tags i18n %}
 
 {% block title %}
-{% trans 'Your Account is deleted' %}
+{% trans 'ACCOUNT DELETED' %}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "Your Account is deleted" %}</h2>
+<h2 style="{{ 'heading'|email_css }}">{% trans "ACCOUNT DELETED" %}</h2>
          
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ user.fullname }},</p>
 
 <p style="{{ 'last-parag'|email_css }}">
-    {% trans "You have just deleted your account. Thank you for your support all the way!" %}
+    {% trans "Thanks very much for your recent support." %}
+</p>
+<p style="{{ 'last-parag'|email_css }}">
+    {% blocktrans with sitename=''|site_name_filter %}Your account at {{ site_name }} has been deleted at your request.{% endblocktrans %}
+</p>
+<p style="{{ 'last-parag'|email_css }}">
+    {% trans "From all of us, thank you for backing our team and helping us keep independent media alive in Hong Kong!" %}
 </p>
 
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>

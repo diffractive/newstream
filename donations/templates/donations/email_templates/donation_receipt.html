@@ -2,11 +2,11 @@
 {% load common_tags donation_tags i18n %}
 
 {% block title %}
-{% trans 'Donation Receipt' %}
+{% trans 'NEW ONE-OFF DONATION' %}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "Donation Receipt" %}</h2>
+<h2 style="{{ 'heading'|email_css }}">{% trans "NEW ONE-OFF DONATION" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.donor_name }},</p>
 {% if donation.is_recurring %}
 {% url 'donations:my-recurring-donations' as donations_url %}
@@ -14,12 +14,20 @@
 {% url 'donations:my-onetime-donations' as donations_url %}
 {% endif %}
 <p style="{{ 'parag'|email_css }}">
-    {% trans 'Thank you for your generosity! Your support means a lot to us. ' %}
+    {% blocktrans with donation_amount=donation|amount_with_currency %}A big "thank you" for your kind {{ donation_amount }} donation - it is very much appreciated and it will go a long way in supporting our operations.{% endblocktrans %}
+</p>
+<p style="{{ 'parag'|email_css }}">
+    {% blocktrans %}Your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's <a href="https://hongkongfp.com/hong-kong-free-press-annual-report-2020/" target="_blank" rel="noopener noreferrer">latest Annual Report</a> - it includes our yearly, <a href="https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/" target="_blank" rel="noopener noreferrer">audited Transparency Report</a>, so you can see how carefully we spend our income.{% endblocktrans %}
+</p>
+<p style="{{ 'parag'|email_css }}">
     {% if donation.user %}
-    {% blocktrans with donations_full_url=donations_url|site_rel_url%}Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to view your donation on the website.{% endblocktrans %}
+    {% blocktrans with donations_full_url=donations_url|site_rel_url %}Sign into our support page (click "forgot password?" if you have trouble logging in) to <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">view your donation</a>. Please email <a href="mailto:donations@hongkongfp.com">donations@hongkongfp.com</a> if you have any further enquiries.{% endblocktrans %}
     {% endif %}
 </p>
-<p style="{{ 'parag'|email_css }}">{% trans "Here are the details of your donation:" %}</p>
+<p style="{{ 'parag'|email_css }}">
+    {% blocktrans %}From all of us, <strong>thank you</strong> for helping us keep independent media alive in Hong Kong!{% endblocktrans %}
+</p>
+<p style="{{ 'parag'|email_css }}">{% trans "Details of your donation:" %}</p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
         <td style="font-weight: bold;">{% trans "Transaction ID" %}</td>

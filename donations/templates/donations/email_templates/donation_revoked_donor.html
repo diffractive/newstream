@@ -2,11 +2,11 @@
 {% load common_tags donation_tags i18n %}
 
 {% block title %}
-{% trans 'Your Donation is revoked.' %}
+{% trans 'DONATION REVOKED' %}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "Donation Revoked" %}</h2>
+<h2 style="{{ 'heading'|email_css }}">{% trans "DONATION REVOKED" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.donor_name }},</p>
 {% if donation.is_recurring %}
 {% url 'donations:my-recurring-donations' as donations_url %}

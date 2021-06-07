@@ -5,7 +5,7 @@ from donations.functions import displayDonationAmountWithCurrency, displayRecurr
 
 
 def get_new_donation_text(donation):
-    return _("""New Donation\n
+    return _("""New One-off Donation\n
 \n
 Hi Admins,\n
 This email is to inform you that a new donation has been made on your website:\n
@@ -36,14 +36,17 @@ Thank you,\n
 def get_donation_receipt_text(donation):
     donation_url = reverse_with_site_url('donations:my-recurring-donations') if donation.is_recurring else reverse_with_site_url('donations:my-onetime-donations')
     if donation.user:
-        url_text = str(_('Go to %(url)s to view your donation on the website.') % {'url': donation_url})
+        url_text = str(_('Sign into our support page (click "forgot password?" if you have trouble logging in) to view your donation(%(url)s). Please email donations@hongkongfp.com if you have any further enquiries.') % {'url': donation_url})
     else:
         url_text = ''
-    return _("""Donation Receipt\n
+    return _("""NEW ONE-OFF DONATION\n
 \n
 Dear %(name)s,\n
-Thank you for your generosity! Your support means a lot to us. %(url_text)s\n
-Here are the details of your donation:\n
+A big "thank you" for your kind %(amount)s donation - it is very much appreciated and it will go a long way in supporting our operations.\n
+Your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2020/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/), so you can see how carefully we spend our income.\n
+%(url_text)s\n
+From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
+Details of your donation:\n
 \n
 Transaction ID: %(transaction_id)s\n
 Donation frequency: %(frequency)s\n
@@ -101,7 +104,7 @@ def get_donation_revoked_donor_text(donation):
         url_text = str(_('Go to %(url)s to view your donation on the website.') % {'url': donation_url})
     else:
         url_text = ''
-    return _("""Donation Revoked\n
+    return _("""DONATION REVOKED\n
 \n
 Dear %(name)s,\n
 Your donation is unfortunately revoked by the payment gateway. %(url_text)s\n
@@ -134,7 +137,7 @@ def get_donation_status_change_text(donation):
         url_text = str(_('Go to %(url)s to see more.') % {'url': donation_url})
     else:
         url_text = ''
-    return _("""Your Donation Payment Status has been updated\n
+    return _("""ONE-OFF DONATION STATUS UPDATED\n
 \n
 Dear %(name)s,\n
 Listed below are the updated details of your donation. %(url_text)s:\n
@@ -159,7 +162,7 @@ Thank you,\n
 
 
 def get_subscription_status_change_text(subscription):
-    return _("""Your Recurring Donation Status has been updated\n
+    return _("""RECURRING DONATION STATUS UPDATED\n
 \n
 Dear %(name)s,\n
 Listed below are the updated details of your recurring donation. Go to %(url)s to see more.\n
@@ -214,8 +217,11 @@ def get_renewal_receipt_text(donation):
     return _("""Renewal Donation Receipt\n
 \n
 Dear %(name)s,\n
-Thank you for your generosity! Your support means a lot to us. Go to %(url)s to view your renewal donation on the website.\n
-Here are the details of your renewal donation:\n
+A big "thank you" for your kind %(amount)s recurring donation - it is very much appreciated and it will go a long way in supporting our operations.\n
+Your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2020/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/), so you can see how carefully we spend our income.\n
+Sign into our support page (click "forgot password?" if you have trouble logging in) to view your recurring donation(%(url)s). Please email donations@hongkongfp.com if you have any further enquiries.\n
+From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
+Details of your renewal donation:\n
 \n
 Transaction ID: %(transaction_id)s\n
 Donation frequency: %(frequency)s\n
@@ -264,11 +270,14 @@ Thank you,\n
 
 
 def get_recurring_adjusted_donor_text(subscription):
-    return _("""Your Recurring Donation Amount is Adjusted\n
+    return _("""DONATION AMOUNT ADJUSTED\n
 \n
 Dear %(name)s,\n
-You have just adjusted your recurring donation amount. Go to %(url)s to view your recurring donations on the website.\n
-Here are the details of your recurring donation:\n
+A big "thank you" for your kind contribution - it is very much appreciated and it will go a long way in supporting our operations. Your monthly donation has been adjusted to %(amount)s per month. Regular support is vital to our sustainability.\n
+Your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2020/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/), so you can see how carefully we spend our income.\n
+Sign into our support page (click "forgot password?" if you have trouble logging in) to adjust or suspend your donation(%(url)s). Please email donations@hongkongfp.com if you have any further enquiries.\n
+From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
+Details of your recurring donation:\n
 \n
 Donor: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
@@ -314,11 +323,14 @@ Thank you,\n
 
 
 def get_new_recurring_donor_text(subscription):
-    return _("""Your New Recurring Donation is Activated\n
+    return _("""NEW RECURRING DONATION\n
 \n
 Dear %(name)s,\n
-Your new recurring donation has just been activated. Go to %(url)s to view your recurring donations on the website.\n
-Here are the details of your recurring donation:\n
+A big "thank you" for your kind %(amount)s contribution - it is very much appreciated and it will go a long way in supporting our operations. Recurring donations, in particular, are vital to our sustainability.
+As an HKFP Patron, your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2020/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/), so you can see how carefully we spend our income.\n
+Sign into our support page (click "forgot password?" if you have trouble logging in) to adjust or suspend your donation(%(url)s). Please email donations@hongkongfp.com if you have any further enquiries.\n
+From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
+Details of your recurring donation:\n
 \n
 Donor: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
@@ -364,11 +376,14 @@ Thank you,\n
 
 
 def get_recurring_rescheduled_donor_text(subscription):
-    return _("""Your Recurring Donation is Rescheduled\n
+    return _("""RECURRING DONATION RESCHEDULED\n
 \n
 Dear %(name)s,\n
-You have just rescheduled your recurring donation's billing date to today. Go to %(url)s to view your recurring donations on the website.\n
-Here are the details of your recurring donation:\n
+A big "thank you" for your kind contribution - it is very much appreciated and it will go a long way in supporting our operations. Your monthly donation's billing date has been rescheduled to today.\n
+Your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2020/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/), so you can see how carefully we spend our income.\n
+Sign into our support page (click "forgot password?" if you have trouble logging in) to adjust or suspend your donation(%(url)s). Please email donations@hongkongfp.com if you have any further enquiries.\n
+From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
+Details of your recurring donation:\n
 \n
 Donor: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
@@ -414,11 +429,14 @@ Thank you,\n
 
 
 def get_recurring_paused_donor_text(subscription):
-    return _("""Your Recurring Donation is paused\n
+    return _("""DONATION PAUSED\n
 \n
 Dear %(name)s,\n
-You have just paused your recurring donation. You can resume it anytime in your account. Go to %(url)s to view your recurring donations on the website.\n
-Here are the details of your recurring donation:\n
+Thanks very much for your recent support.\n
+Your recurring donation to HKFP has been paused at your request - no further payments will be processed, unless you reactivate your contribution.\n
+Sign into our support page (click "forgot password?" if you have trouble logging in) if you wish to support us again in the future(%(url)s). Please email donations@hongkongfp.com if you have any further enquiries.\n
+From all of us, thank you for backing our team and helping us keep independent media alive in Hong Kong!\n
+Details of your recurring donation:\n
 \n
 Donor: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
@@ -464,11 +482,14 @@ Thank you,\n
 
 
 def get_recurring_resumed_donor_text(subscription):
-    return _("""Your Recurring Donation is resumed\n
+    return _("""DONATION RESUMED\n
 \n
 Dear %(name)s,\n
-You have just resumed your recurring donation. Go to %(url)s to view your recurring donations on the website.\n
-Here are the details of your recurring donation:\n
+A big "thank you" for resuming your %(amount)s contribution - it is very much appreciated and it will go a long way in supporting our operations. Recurring donations, in particular, are vital to our sustainability.
+As an HKFP Patron, your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2020/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/), so you can see how carefully we spend our income.\n
+Sign into our support page (click "forgot password?" if you have trouble logging in) to adjust or suspend your donation(%(url)s). Please email donations@hongkongfp.com if you have any further enquiries.\n
+From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
+Details of your recurring donation:\n
 \n
 Donor: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
@@ -539,11 +560,14 @@ Thank you,\n
 
 
 def get_recurring_cancelled_donor_text(subscription):
-    return _("""Your Recurring Donation is cancelled\n
+    return _("""DONATION CANCELLED\n
 \n
 Dear %(name)s,\n
-Your recurring donation has been cancelled. Go to %(url)s to view your recurring donations on the website.\n
-Here are the details of your recurring donation:\n
+Thanks very much for your recent support.\n
+Your recurring donation to HKFP has been suspended at your request - no further payments will be processed.\n
+Sign into our support page(%(siteurl)s) (click "forgot password?" if you have trouble logging in) if you wish to support us again in the future. Please email donations@hongkongfp.com if you have any further enquiries.\n
+From all of us, thank you for backing our team and helping us keep independent media alive in Hong Kong!\n
+Details of your recurring donation:\n
 \n
 Donor: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
@@ -554,6 +578,7 @@ Recurring Status: %(recurring_status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'name': subscription.user.fullname,
+        'siteurl': get_site_url(),
         'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
@@ -581,10 +606,12 @@ Thank you,\n
 
 
 def get_account_deleted_donor_text(user):
-    return _("""Your Account is deleted\n
+    return _("""ACCOUNT DELETED\n
 \n
 Dear %(name)s,\n
-You have just deleted your account. Thank you for your support all the way!\n
+Thanks very much for your recent support.\n
+Your account at %(sitename)s has been deleted at your request.\n
+From all of us, thank you for backing our team and helping us keep independent media alive in Hong Kong!\n
 \n
 Thank you,\n
 %(sitename)s""") % {

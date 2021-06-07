@@ -2,11 +2,11 @@
 {% load common_tags donation_tags i18n %}
 
 {% block title %}
-{% trans 'Your Donation Payment Status has been updated' %}
+{% trans 'ONE-OFF DONATION STATUS UPDATED' %}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "Your Donation Payment Status has been updated" %}</h2>
+<h2 style="{{ 'heading'|email_css }}">{% trans "ONE-OFF DONATION STATUS UPDATED" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.donor_name }},</p>
 {% if donation.is_recurring %}
 {% url 'donations:my-renewals' donation.subscription.id as donations_url %}

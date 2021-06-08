@@ -7,10 +7,10 @@
 
 {% block content %}
 <h2 style="{{ 'heading'|email_css }}">{% trans "DONATION CANCELLED" %}</h2>
-<p>{% trans "Dear" %} {{ subscription.user.fullname }},</p>
+<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ subscription.user.fullname }},</p>
 {% url 'donations:my-recurring-donations' as donations_url %}
 <p style="{{ 'parag'|email_css }}">
-    {% trans "Thanks very much for your recent support."" %}
+    {% trans "Thanks very much for your recent support." %}
 </p>
 <p style="{{ 'parag'|email_css }}">
     {% trans "Your recurring donation to HKFP has been suspended at your request - no further payments will be processed." %}

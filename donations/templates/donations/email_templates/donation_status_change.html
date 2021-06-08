@@ -13,12 +13,12 @@
 {% else %}
 {% url 'donations:my-onetime-donations' as donations_url %}
 {% endif %}
+{% if donation.user %}
 <p style="{{ 'parag'|email_css }}">
-    {% trans 'Listed below are the updated details of your donation. ' %}
-    {% if donation.user %}
-    {% blocktrans with donations_full_url=donations_url|site_rel_url%}Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to see more.{% endblocktrans %}
-    {% endif %}
+    {% blocktrans with donations_full_url=donations_url|site_rel_url %}Sign into our support page (click "forgot password?" if you have trouble logging in) to <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">view your updated donation</a>.{% endblocktrans %}
 </p>
+{% endif %}
+<p style="{{ 'parag'|email_css }}">{% trans "Details of your donation:" %}</p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
         <td style="font-weight: bold;">{% trans "Transaction ID" %}</td>

@@ -134,13 +134,14 @@ Thank you,\n
 def get_donation_status_change_text(donation):
     donation_url = reverse_with_site_url('donations:my-renewals', kwargs={'id': donation.subscription.id}) if donation.is_recurring else reverse_with_site_url('donations:my-onetime-donations')
     if donation.user:
-        url_text = str(_('Go to %(url)s to see more.') % {'url': donation_url})
+        url_text = str(_('Sign into our support page (click "forgot password?" if you have trouble logging in) to view your updated donation(%(url)s).') % {'url': donation_url}) + "\n"
     else:
         url_text = ''
     return _("""ONE-OFF DONATION STATUS UPDATED\n
 \n
 Dear %(name)s,\n
-Listed below are the updated details of your donation. %(url_text)s:\n
+%(url_text)s
+Details of your donation:\n
 \n
 Transaction ID: %(transaction_id)s\n
 Donation frequency: %(frequency)s\n
@@ -165,7 +166,8 @@ def get_subscription_status_change_text(subscription):
     return _("""RECURRING DONATION STATUS UPDATED\n
 \n
 Dear %(name)s,\n
-Listed below are the updated details of your recurring donation. Go to %(url)s to see more.\n
+Sign into our support page (click "forgot password?" if you have trouble logging in) to view your updated recurring donation(%(url)s).\n
+Details of your recurring donation:\n
 \n
 Profile ID: %(profile_id)s\n
 Payment method: %(gateway)s\n

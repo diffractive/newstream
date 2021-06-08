@@ -104,8 +104,12 @@ class UserMetaField(I18nAbstractFormField):
 @register_setting
 class SiteSettings(BaseSetting, ClusterableModel):
     default_from_email = models.EmailField()
+    default_from_name = I18nCharField(
+        max_length=255, 
+        blank=True)
     email_general_panels = [
         FieldPanel('default_from_email', heading=_('Default From Email')),
+        FieldPanel('default_from_name', heading=_('Default Name for From Email')),
         InlinePanel('admin_emails', label=_("Admin Email"), heading=_("List of Admins' Emails"),
                     help_text=_('Email notifications such as new donations will be sent to this list.'))
     ]

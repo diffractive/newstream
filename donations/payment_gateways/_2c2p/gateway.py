@@ -11,8 +11,8 @@ from django.utils.translation import gettext_lazy as _
 
 from newstream.functions import reverse_with_site_url, get_site_name, _debug
 from donations.functions import getNextDateFromRecurringInterval, gen_order_prefix_2c2p, getCurrencyDictAt, currencyCodeToKey
-from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor, sendRenewalNotifToAdmins, sendRenewalReceiptToDonor, sendRecurringUpdatedNotifToAdmins, sendRecurringUpdatedNotifToDonor, sendRecurringCancelledNotifToAdmins, sendRecurringCancelledNotifToDonor
-from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_CANCELLED
+from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor, sendDonationRevokedToAdmins, sendDonationRevokedToDonor, sendRecurringAdjustedNotifToAdmins, sendRecurringAdjustedNotifToDonor, sendRecurringRescheduledNotifToAdmins, sendRecurringRescheduledNotifToDonor, sendRenewalNotifToAdmins, sendRenewalReceiptToDonor, sendRecurringCancelledNotifToAdmins, sendRecurringCancelledNotifToDonor
+from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_CANCELLED, STATUS_REVOKED
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import get2C2PSettings
 from donations.payment_gateways._2c2p.functions import format_payment_amount, extract_payment_amount, map2C2PPaymentStatus, getRequestParamOrder
@@ -127,8 +127,12 @@ class Gateway_2C2P(PaymentGatewayManager):
             self.donation.save()
 
             # email notifications
-            sendDonationReceiptToDonor(self.donation)
-            sendDonationNotifToAdmins(self.donation)
+            if self.donation.payment_status == STATUS_REVOKED:
+                sendDonationRevokedToDonor(self.donation)
+                sendDonationRevokedToAdmins(self.donation)
+            else:
+                sendDonationReceiptToDonor(self.donation)
+                sendDonationNotifToAdmins(self.donation)
 
             return HttpResponse(status=200)
         # case two: donation is passed + first_time_subscription: true
@@ -183,8 +187,12 @@ class Gateway_2C2P(PaymentGatewayManager):
             donation.save()
             
             # email notifications
-            sendRenewalReceiptToDonor(donation)
-            sendRenewalNotifToAdmins(donation)
+            if donation.payment_status == STATUS_REVOKED:
+                sendDonationRevokedToDonor(donation)
+                sendDonationRevokedToAdmins(donation)
+            else:
+                sendRenewalReceiptToDonor(donation)
+                sendRenewalNotifToAdmins(donation)
 
             return HttpResponse(200)
         else:
@@ -232,24 +240,23 @@ class Gateway_2C2P(PaymentGatewayManager):
                 if xmlResp.find('respCode') != None and xmlResp.find('respCode').text == '00':
                     # construct email wordings and messages
                     if form_data['recurring_amount'] != self.subscription.recurring_amount and form_data['billing_cycle_now']:
-                        admin_email_wordings = str(_("A Recurring Donation's billing cycle has been reset to today's date, and has its recurring donation amount updated on your website:"))
-                        donor_email_wordings = str(_("You have just reset your recurring donation's billing cycle to today's date, and updated the recurring donation amount."))
+                        sendRecurringAdjustedNotifToAdmins(self.subscription)
+                        sendRecurringAdjustedNotifToDonor(self.subscription)
+                        sendRecurringRescheduledNotifToAdmins(self.subscription)
+                        sendRecurringRescheduledNotifToDonor(self.subscription)
                         message_wordings = _("You have successfully reset your recurring donation's billing cycle to today's date, and updated the recurring donation amount at 2C2P.")
                     elif form_data['recurring_amount'] != self.subscription.recurring_amount:
-                        admin_email_wordings = str(_("A Recurring Donation's amount has been updated on your website:"))
-                        donor_email_wordings = str(_("You have just updated your recurring donation amount."))
+                        sendRecurringAdjustedNotifToAdmins(self.subscription)
+                        sendRecurringAdjustedNotifToDonor(self.subscription)
                         message_wordings = _("Your recurring donation amount at 2C2P is updated successfully.")
                     elif form_data['billing_cycle_now']:
-                        admin_email_wordings = str(_("A Recurring Donation's billing cycle has been reset to today's date on your website:"))
-                        donor_email_wordings = str(_("You have just reset your recurring donation's billing cycle to today's date."))
+                        sendRecurringRescheduledNotifToAdmins(self.subscription)
+                        sendRecurringRescheduledNotifToDonor(self.subscription)
                         message_wordings = _("Your recurring donation at Stripe is set to bill on today's date every month.")
                     # update newstream record in database
                     if form_data['recurring_amount'] != self.subscription.recurring_amount:
                         self.subscription.recurring_amount = extract_payment_amount(xmlResp.find('amount').text, xmlResp.find('currency').text)
                         self.subscription.save()
-                    # email notifications
-                    sendRecurringUpdatedNotifToAdmins(self.subscription, admin_email_wordings)
-                    sendRecurringUpdatedNotifToDonor(self.subscription, donor_email_wordings)
                     # add message
                     messages.add_message(self.request, messages.SUCCESS, message_wordings)
                 else:

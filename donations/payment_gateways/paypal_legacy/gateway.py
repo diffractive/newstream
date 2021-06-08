@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 from newstream.functions import _debug, round_half_up
 from newstream_user.models import SUBS_ACTION_CANCEL
 from donations.models import STATUS_PROCESSING, STATUS_COMPLETE, STATUS_CANCELLED, Donation, DonationPaymentMeta
-from donations.email_functions import sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringCancelRequestNotifToAdmins, sendRecurringCancelledNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringUpdatedNotifToDonor
+from donations.email_functions import sendRecurringCancelledNotifToDonor, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringCancelRequestNotifToAdmins, sendRecurringCancelledNotifToAdmins
 from donations.functions import gen_transaction_id, addUpdateSubsActionLog
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getPayPalLegacySettings
@@ -117,8 +117,7 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
             self.donation.subscription.save()
 
             # email notifications
-            # sendRecurringCancelledNotifToDonor(self.donation.subscription)
-            sendRecurringUpdatedNotifToDonor(self.donation.subscription, str(_("Your recurring donation has been cancelled.")))
+            sendRecurringCancelledNotifToDonor(self.donation.subscription)
             sendRecurringCancelledNotifToAdmins(self.donation.subscription)
 
             return HttpResponse(status=200)

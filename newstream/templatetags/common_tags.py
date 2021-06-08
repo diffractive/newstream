@@ -47,7 +47,7 @@ def site_url():
 @register.filter(name='site_rel_url')
 def site_rel_url(relurl):
     """
-    can be used as a filter in django templates like this: {{ donations_url|site_url }}
+    can be used as a filter in django templates like this: {{ donations_url|site_rel_url }}
     rel_url is expected to start with a forward slash
     """
     return get_site_url() + relurl

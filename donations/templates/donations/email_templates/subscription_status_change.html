@@ -2,17 +2,17 @@
 {% load common_tags donation_tags i18n %}
 
 {% block title %}
-{% trans 'Your Recurring Donation Status has been updated' %}
+{% trans 'RECURRING DONATION STATUS UPDATED' %}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "Your Recurring Donation Status has been updated" %}</h2>
+<h2 style="{{ 'heading'|email_css }}">{% trans "RECURRING DONATION STATUS UPDATED" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ subscription.user.fullname }},</p>
 {% url 'donations:my-recurring-donations' as donations_url %}
 <p style="{{ 'parag'|email_css }}">
-    {% trans 'Listed below are the updated details of your recurring donation. ' %}
-    {% blocktrans with donations_full_url=donations_url|site_rel_url%}Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to see more.{% endblocktrans %}
+    {% blocktrans with donations_full_url=donations_url|site_rel_url %}Sign into our support page (click "forgot password?" if you have trouble logging in) to <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">view your updated recurring donation</a>.{% endblocktrans %}
 </p>
+<p style="{{ 'parag'|email_css }}">{% trans "Details of your recurring donation:" %}</p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
         <td style="font-weight: bold;">{% trans "Profile ID" %}</td>

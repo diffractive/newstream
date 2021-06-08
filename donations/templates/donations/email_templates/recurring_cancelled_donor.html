@@ -2,19 +2,26 @@
 {% load common_tags donation_tags i18n %}
 
 {% block title %}
-{% trans 'Your Recurring Donation is cancelled' %}
+{% trans 'DONATION CANCELLED' %}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "Your Recurring Donation is cancelled" %}</h2>
-<p>{% trans "Dear" %} {{ subscription.user.fullname }},</p>
+<h2 style="{{ 'heading'|email_css }}">{% trans "DONATION CANCELLED" %}</h2>
+<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ subscription.user.fullname }},</p>
 {% url 'donations:my-recurring-donations' as donations_url %}
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with donations_full_url=donations_url|site_rel_url%}You have just cancelled your recurring donation. Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to view your recurring donations on the website.{% endblocktrans %}
+    {% trans "Thanks very much for your recent support." %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    {% trans "Here are the details of your recurring donation:" %}
+    {% trans "Your recurring donation to HKFP has been suspended at your request - no further payments will be processed." %}
 </p>
+<p style="{{ 'parag'|email_css }}">
+    {% blocktrans with site_url=''|site_rel_url %}<a href="{{ site_url }}" target="_blank" rel="noopener noreferrer">Sign into our support page</a> (click "forgot password?" if you have trouble logging in) if you wish to support us again in the future. Please email <a href="mailto:donations@hongkongfp.com">donations@hongkongfp.com</a> if you have any further enquiries.{% endblocktrans %}
+</p>
+<p style="{{ 'parag'|email_css }}">
+    {% blocktrans %}From all of us, <strong>thank you</strong> for helping us keep independent media alive in Hong Kong!{% endblocktrans %}
+</p>
+<p style="{{ 'parag'|email_css }}">{% trans "Details of your recurring donation:" %}</p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
         <td style="font-weight: bold;">{% trans 'Donor' %}</td>

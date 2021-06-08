@@ -2,23 +2,24 @@
 {% load common_tags donation_tags i18n %}
 
 {% block title %}
-{% trans 'ONE-OFF DONATION STATUS UPDATED' %}
+{% trans 'DONATION REVOKED' %}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "ONE-OFF DONATION STATUS UPDATED" %}</h2>
+<h2 style="{{ 'heading'|email_css }}">{% trans "DONATION REVOKED" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.donor_name }},</p>
 {% if donation.is_recurring %}
-{% url 'donations:my-renewals' donation.subscription.id as donations_url %}
+{% url 'donations:my-recurring-donations' as donations_url %}
 {% else %}
 {% url 'donations:my-onetime-donations' as donations_url %}
 {% endif %}
-{% if donation.user %}
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with donations_full_url=donations_url|site_rel_url %}Sign into our support page (click "forgot password?" if you have trouble logging in) to <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">view your updated donation</a>.{% endblocktrans %}
+    {% trans 'Your donation is unfortunately revoked by the payment gateway. ' %}
+    {% if donation.user %}
+    {% blocktrans with donations_full_url=donations_url|site_rel_url%}Click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">here</a> to view your donation on the website.{% endblocktrans %}
+    {% endif %}
 </p>
-{% endif %}
-<p style="{{ 'parag'|email_css }}">{% trans "Details of your donation:" %}</p>
+<p style="{{ 'parag'|email_css }}">{% trans "Here are the details of your donation:" %}</p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
         <td style="font-weight: bold;">{% trans "Transaction ID" %}</td>
@@ -40,6 +41,12 @@
         <td style="font-weight: bold;">{% trans "Payment status" %}</td>
         <td>{{ donation.payment_status|title }}</td>
     </tr>
+    {% if donation.is_recurring and donation.subscription %}
+    <tr>
+        <td style="font-weight: bold;">{% trans 'Recurring donation status' %}</td>
+        <td>{{ donation.subscription.recurring_status|title }}</td>
+    </tr>
+    {% endif %}
 </table>
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 

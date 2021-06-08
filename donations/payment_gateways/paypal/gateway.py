@@ -127,10 +127,6 @@ class Gateway_Paypal(PaymentGatewayManager):
                     dpmeta = DonationPaymentMeta(donation=self.donation, field_key='paypal_first_cycle', field_value='completed')
                     dpmeta.save()
 
-                    # donation email notifications sent here instead of at EVENT_BILLING_SUBSCRIPTION_ACTIVATED
-                    sendDonationReceiptToDonor(self.donation)
-                    sendDonationNotifToAdmins(self.donation)
-
                 return HttpResponse(status=200)
             else:
                raise ValueError(_("EVENT_PAYMENT_SALE_COMPLETED but payment state is %(state)s") % {'state': self.payload['state']})

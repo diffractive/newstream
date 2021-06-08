@@ -99,10 +99,6 @@ class Gateway_Stripe(PaymentGatewayManager):
                     dpmeta = DonationPaymentMeta(
                         donation=self.donation, field_key='stripe_invoice_number', field_value=self.invoice.number)
                     dpmeta.save()
-
-                    # donation email notifications sent here instead of at EVENT_BILLING_SUBSCRIPTION_ACTIVATED
-                    sendDonationReceiptToDonor(self.donation)
-                    sendDonationNotifToAdmins(self.donation)
                 elif len(invoices['data']) > 1:
                     _debug("[stripe recurring] About to add renewal donation")
                     # create a new donation record + then send donation receipt to user

@@ -7,7 +7,7 @@ from newstream_user.models import SUBS_ACTION_CANCEL
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getOfflineSettings
 from donations.functions import addUpdateSubsActionLog
-from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRecurringAdjustedNotifToAdmins, sendRecurringAdjustedNotifToDonor, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelRequestNotifToAdmins
+from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendRecurringAdjustedNotifToAdmins, sendRecurringAdjustedNotifToDonor, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelRequestNotifToAdmins, sendNewRecurringNotifToAdmins, sendNewRecurringNotifToDonor
 
 
 class Gateway_Offline(PaymentGatewayManager):
@@ -25,8 +25,12 @@ class Gateway_Offline(PaymentGatewayManager):
         self.request.session['return-donation-id'] = self.donation.id
 
         # send email notifs
-        sendDonationReceiptToDonor(self.donation)
-        sendDonationNotifToAdmins(self.donation)
+        if self.donation.is_recurring:
+            sendNewRecurringNotifToDonor(self.donation.subscription)
+            sendNewRecurringNotifToAdmins(self.donation.subscription)
+        else:
+            sendDonationReceiptToDonor(self.donation)
+            sendDonationNotifToAdmins(self.donation)
 
         return redirect('donations:thank-you')
 

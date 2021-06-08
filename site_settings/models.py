@@ -1,4 +1,6 @@
 import html
+import json
+from django.conf import settings
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
@@ -100,6 +102,21 @@ class UserMetaField(I18nAbstractFormField):
                          related_name='user_meta_fields')
 
 
+# i18n strings
+# We use this so we can set default values based on i18n strings, and dynamically
+# set the default at runtime when the models are created / migrated
+def resolve_i18n_string(i18n_str):
+    value = LazyI18nString.from_gettext(_(i18n_str)).data
+    return json.dumps({lng: value[lng] for lng, lngname in settings.LANGUAGES if value[lng]}, sort_keys=True)
+
+def get_i18n_label_2c2p(): return resolve_i18n_string("2C2P(Credit Card)")
+def get_i18n_label_paypal(): return resolve_i18n_string("PayPal")
+def get_i18n_label_paypal_legacy(): return resolve_i18n_string("PayPal - Legacy")
+def get_i18n_label_stripe(): return resolve_i18n_string("Stripe")
+def get_i18n_label_manual(): return resolve_i18n_string("Manual")
+def get_i18n_label_offline(): return resolve_i18n_string("Offline")
+
+
 @register_setting
 class SiteSettings(BaseSetting, ClusterableModel):
     default_from_email = models.EmailField()
@@ -189,7 +206,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     ]
 
     _2c2p_frontend_label = I18nCharField(
-        max_length=255, default=LazyI18nString.from_gettext(_("2C2P(Credit Card)")),
+        max_length=255, default=get_i18n_label_2c2p,
         help_text=_("The Gateway name to be shown on the frontend website."))
     _2c2p_merchant_id = models.CharField(
         max_length=255, blank=True, null=True, help_text=_("Merchant ID"))
@@ -216,7 +233,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     ]
 
     paypal_frontend_label = I18nCharField(
-        max_length=255, default=LazyI18nString.from_gettext(_("PayPal")),
+        max_length=255, default=get_i18n_label_paypal,
         help_text=_("The Gateway name to be shown on public-facing website."))
     paypal_sandbox_api_product_id = models.CharField(
         max_length=255, blank=True, help_text=_("The Sandbox API Product ID"))
@@ -261,7 +278,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     ]
 
     paypal_legacy_frontend_label = I18nCharField(
-        max_length=255, default=LazyI18nString.from_gettext(_("PayPal - Legacy")),
+        max_length=255, default=get_i18n_label_paypal_legacy,
         help_text=_("The Gateway name to be shown on public-facing website for old Paypal transactions."))
     donations_paypal_legacy_panels = [
         FieldPanel("paypal_legacy_frontend_label", heading=_(
@@ -269,7 +286,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     ]
 
     stripe_frontend_label = I18nCharField(
-        max_length=255, default=LazyI18nString.from_gettext(_("Stripe")),
+        max_length=255, default=get_i18n_label_stripe,
         help_text=_("The Gateway name to be shown on the frontend website."))
     stripe_testing_webhook_secret = models.CharField(
         max_length=255, blank=True, help_text=_("The Secret for the Testing Webhook used by the server for payment verification"))
@@ -312,10 +329,10 @@ class SiteSettings(BaseSetting, ClusterableModel):
     ]
 
     manual_frontend_label = I18nCharField(
-        max_length=255, default=LazyI18nString.from_gettext(_("Manual")),
+        max_length=255, default=get_i18n_label_manual,
         help_text=_("The Gateway name to be shown on the frontend website for admin-added donations."))
     offline_frontend_label = I18nCharField(
-        max_length=255, default=LazyI18nString.from_gettext(_("Offline")),
+        max_length=255, default=get_i18n_label_offline,
         help_text=_("The Gateway name to be shown on the frontend website for offline donations."))
     offline_instructions_text = I18nRichTextField(blank=True)
     offline_thankyou_text = I18nRichTextField(blank=True)

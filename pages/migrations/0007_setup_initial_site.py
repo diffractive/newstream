@@ -58,83 +58,25 @@ def initial_data(apps, schema_editor):
         )
     )
 
+    # Link the default site to the new homepage
     default_site = Site.objects.get(
         hostname='localhost',
     )
     default_site.root_page_id = home_page.id
     default_site.save()
     
+    # Remove the previous wagtail demo homepage
+    # We can only do this now that the default site has been updated, otherwise the 
+    # default site would have been removed
     Page.objects.filter(
         url_path='/home/',
     ).delete()
 
+    # Update our homepage to be at /home/
+    # We couldn't do this before, as the wagtail homepage was in the way
     home_page.url_path = '/home/'
     home_page.save()
     
-
-
-#    root = Page.objects.create(
-#        title="Root",
-#        slug='root',
-#        content_type=page_content_type,
-#        path='0001',
-#        depth=1,
-#        numchild=1,
-#        url_path='/',
-#    )
-#
-#    # Create homepage
-#    homepage = Page.objects.create(
-#        title="Welcome to your new Wagtail site!",
-#        slug='home',
-#        content_type=page_content_type,
-#        path='00010001',
-#        depth=2,
-#        numchild=0,
-#        url_path='/home/',
-#    )
-#
-#    # Create default site
-#
-
-#
-# From production
-# 
-
-# id                         | 3
-# path                       | 00010002
-# depth                      | 2
-# numchild                   | 1
-# title                      | Support Hong Kong Free Press
-# slug                       | home
-# live                       | t
-# has_unpublished_changes    | f
-# url_path                   | /home/
-# seo_title                  | 
-# show_in_menus              | f
-# search_description         | 
-# go_live_at                 | 
-# expire_at                  | 
-# expired                    | f
-# content_type_id            | 40
-# owner_id                   | 1
-# locked                     | f
-# latest_revision_created_at | 2021-05-26 07:17:37.922391+00
-# first_published_at         | 2020-08-14 14:20:50.071+00
-# live_revision_id           | 43
-# last_published_at          | 2021-05-26 07:17:37.945029+00
-# draft_title                | Support Hong Kong Free Press
-# locked_at                  | 
-# locked_by_id               | 
-# search_description_en      | 
-# title_en                   | Support Hong Kong Free Press
-# slug_en                    | home
-# url_path_en                | /home/
-# seo_title_en               | 
-# translation_key            | b4f2da13-d85b-490f-98fa-31890560725f
-# locale_id                  | 1
-# alias_of_id                | 
-
 
 def remove_initial_data(apps, schema_editor):
     pass

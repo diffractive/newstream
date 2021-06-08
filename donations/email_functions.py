@@ -21,12 +21,17 @@ def setDonorLanguagePreference(user):
 def sendEmailNotificationsToDonor(user_email, subject, textStr, htmlStr):
     # setDonorLanguagePreference(user)
     site_settings = get_site_settings_from_default_site()
+    # default_from_name is an I18nCharField
+    if str(site_settings.default_from_name):
+        from_email = '%s <%s>' % (str(site_settings.default_from_name), site_settings.default_from_email)
+    else:
+        from_email = site_settings.default_from_email
 
     try:
         send_mail(
             str(subject),
             textStr,
-            site_settings.default_from_email,
+            from_email,
             [user_email],
             html_message=htmlStr
         )
@@ -41,11 +46,16 @@ def sendEmailNotificationsToAdmins(site_settings, subject, textStr, htmlStr):
 
     admin_list = [
         admin_email.email for admin_email in site_settings.admin_emails.all()]
+    # default_from_name is an I18nCharField
+    if str(site_settings.default_from_name):
+        from_email = '%s <%s>' % (str(site_settings.default_from_name), site_settings.default_from_email)
+    else:
+        from_email = site_settings.default_from_email
     try:
         send_mail(
             str(subject),
             textStr,
-            site_settings.default_from_email,
+            from_email,
             admin_list,  # requires admin list to be set in site_settings
             html_message=htmlStr
         )

@@ -10,10 +10,10 @@
          
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ user.fullname }},</p>
 
-<p style="{{ 'last-parag'|email_css }}">
+<p style="{{ 'parag'|email_css }}">
     {% trans "Thanks very much for your recent support." %}
 </p>
-<p style="{{ 'last-parag'|email_css }}">
+<p style="{{ 'parag'|email_css }}">
     {% blocktrans with sitename=''|site_name_filter %}Your account at {{ site_name }} has been deleted at your request.{% endblocktrans %}
 </p>
 <p style="{{ 'last-parag'|email_css }}">

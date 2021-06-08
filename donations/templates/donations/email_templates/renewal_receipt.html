@@ -2,11 +2,11 @@
 {% load common_tags donation_tags i18n %}
 
 {% block title %}
-{% trans 'Renewal Donation Receipt' %}
+{% trans 'NEW RENEWAL DONATION' %}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "Renewal Donation Receipt" %}</h2>
+<h2 style="{{ 'heading'|email_css }}">{% trans "NEW RENEWAL DONATION" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.user.fullname }},</p>
 {% url 'donations:my-renewals' donation.subscription.id as donations_url %}
 <p style="{{ 'parag'|email_css }}">

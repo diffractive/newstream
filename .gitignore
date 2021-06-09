@@ -28,6 +28,9 @@ client/node_modules
 ### vscode
 .vscode
 .pylintrc
+
+### DJANGO
+*.mo
  
 ### NEWSTREAM
 *.log

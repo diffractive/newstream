@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-14 13:50+0000\n"
+"POT-Creation-Date: 2021-06-09 05:40+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,180 +18,204 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: pages/blocks.py:11
+#: blocks.py:11
 msgid "New Tab"
 msgstr ""
 
-#: pages/blocks.py:12
+#: blocks.py:12
 msgid "Same Tab"
 msgstr ""
 
-#: pages/blocks.py:17
+#: blocks.py:17
 msgid "Link Button"
 msgstr ""
 
-#: pages/blocks.py:35
-msgid "Heading"
-msgstr ""
-
-#: pages/blocks.py:51
-msgid "Accordion"
-msgstr ""
-
-#: pages/blocks.py:65
-msgid "Page Breaker"
-msgstr ""
-
-#: pages/blocks.py:70
-msgid "Currently only youtube/vimeo embeds can be responsive"
-msgstr ""
-
-#: pages/blocks.py:75
-msgid "Responsive Video iFrame"
-msgstr ""
-
-#: pages/blocks.py:81
-msgid "Text"
-msgstr ""
-
-#: pages/blocks.py:83
-msgid "Action Buttons"
-msgstr ""
-
-#: pages/blocks.py:92
-msgid "Column Content"
-msgstr ""
-
-#: pages/blocks.py:97
+#: blocks.py:31 blocks.py:87 blocks.py:120
 msgid "center"
 msgstr ""
 
-#: pages/blocks.py:98
+#: blocks.py:32 blocks.py:88 blocks.py:121
 msgid "left"
 msgstr ""
 
-#: pages/blocks.py:99
+#: blocks.py:33 blocks.py:89 blocks.py:122
 msgid "right"
 msgstr ""
 
-#: pages/blocks.py:100
+#: blocks.py:34
+msgid "Horizontal Alignment of Heading"
+msgstr ""
+
+#: blocks.py:36
+msgid "ID for Anchor Links"
+msgstr ""
+
+#: blocks.py:41
+msgid "Heading"
+msgstr ""
+
+#: blocks.py:57
+msgid "Accordion"
+msgstr ""
+
+#: blocks.py:71
+msgid "Page Breaker"
+msgstr ""
+
+#: blocks.py:76
+msgid "Currently only youtube/vimeo embeds can be responsive"
+msgstr ""
+
+#: blocks.py:81
+msgid "Responsive Video iFrame"
+msgstr ""
+
+#: blocks.py:90
+msgid "Horizontal Alignment of Image"
+msgstr ""
+
+#: blocks.py:91
+msgid "Css Value for Width attribute"
+msgstr ""
+
+#: blocks.py:92
+msgid "Alt Text"
+msgstr ""
+
+#: blocks.py:96
+msgid "Image Block"
+msgstr ""
+
+#: blocks.py:103
+msgid "Text"
+msgstr ""
+
+#: blocks.py:105
+msgid "Action Buttons"
+msgstr ""
+
+#: blocks.py:115
+msgid "Column Content"
+msgstr ""
+
+#: blocks.py:123
 msgid "Horizontal Alignment of Column Content"
 msgstr ""
 
-#: pages/blocks.py:110
+#: blocks.py:133
 msgid "Single-Column Block"
 msgstr ""
 
-#: pages/blocks.py:115 pages/blocks.py:124
+#: blocks.py:138 blocks.py:147
 msgid "Column 1 Content"
 msgstr ""
 
-#: pages/blocks.py:116 pages/blocks.py:125
+#: blocks.py:139 blocks.py:148
 msgid "Column 2 Content"
 msgstr ""
 
-#: pages/blocks.py:119
+#: blocks.py:142
 msgid "Two-Column Block"
 msgstr ""
 
-#: pages/blocks.py:126
+#: blocks.py:149
 msgid "Column 3 Content"
 msgstr ""
 
-#: pages/blocks.py:129
+#: blocks.py:152
 msgid "Three-Column Block"
 msgstr ""
 
-#: pages/blocks.py:140
+#: blocks.py:163
 msgid "Section Content"
 msgstr ""
 
-#: pages/blocks.py:145 pages/blocks.py:168
+#: blocks.py:168 blocks.py:191
 msgid "tight"
 msgstr ""
 
-#: pages/blocks.py:146 pages/blocks.py:169
+#: blocks.py:169 blocks.py:192
 msgid "standard"
 msgstr ""
 
-#: pages/blocks.py:147 pages/blocks.py:170
+#: blocks.py:170 blocks.py:193
 msgid "wide"
 msgstr ""
 
-#: pages/blocks.py:148 pages/blocks.py:171
+#: blocks.py:171 blocks.py:194
 msgid "Width of Inner Container"
 msgstr ""
 
-#: pages/blocks.py:150
+#: blocks.py:173
 msgid "Minimum height of this section(pixels)"
 msgstr ""
 
-#: pages/blocks.py:151
+#: blocks.py:174
 msgid "Background Image"
 msgstr ""
 
-#: pages/blocks.py:153
+#: blocks.py:176
 msgid "White"
 msgstr ""
 
-#: pages/blocks.py:154
+#: blocks.py:177
 msgid "Black"
 msgstr ""
 
-#: pages/blocks.py:155
+#: blocks.py:178
 msgid "Text Color of Inner Container"
 msgstr ""
 
-#: pages/blocks.py:160
+#: blocks.py:183
 msgid "Full-width Image Block"
 msgstr ""
 
-#: pages/blocks.py:161
+#: blocks.py:184
 #, python-format
 msgid "%(label)s: image that extends to fit the screen width"
 msgstr ""
 
-#: pages/blocks.py:173
+#: blocks.py:196
 msgid "Primary Colour"
 msgstr ""
 
-#: pages/blocks.py:174
+#: blocks.py:197
 msgid "Primary Light Colour"
 msgstr ""
 
-#: pages/blocks.py:175
+#: blocks.py:198
 msgid "Primary Dark Colour"
 msgstr ""
 
-#: pages/blocks.py:176
+#: blocks.py:199
 msgid "Section Background Colour"
 msgstr ""
 
-#: pages/blocks.py:181
+#: blocks.py:204
 msgid "Full-width Section"
 msgstr ""
 
-#: pages/blocks.py:183
+#: blocks.py:206
 #, python-format
 msgid "%(label)s: full-width section that can contains many more child blocks"
 msgstr ""
 
-#: pages/models.py:21 pages/models.py:37
+#: models.py:24 models.py:48
 msgid "Page Body"
 msgstr ""
 
-#: pages/models.py:25
+#: models.py:28
 msgid "Static Page"
 msgstr ""
 
-#: pages/models.py:26
+#: models.py:29
 msgid "Static Pages"
 msgstr ""
 
-#: pages/models.py:41
+#: models.py:52
 msgid "Home Page"
 msgstr ""
 
-#: pages/models.py:42
+#: models.py:53
 msgid "Home Pages"
 msgstr ""

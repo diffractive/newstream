@@ -21,6 +21,7 @@ def initial_data(apps, schema_editor):
     site_settings = SiteSettings.objects.create(
         donation_form = main_form,
         site = default_site,
+        social_login_enabled = False,
     )
 
 

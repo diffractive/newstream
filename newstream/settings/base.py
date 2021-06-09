@@ -43,7 +43,7 @@ ACCOUNT_SIGNUP_FORM_CLASS = 'newstream.forms_signup.BaseSignupForm'
 ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_ADAPTER = 'newstream.forms.NewstreamSAAdapter'
 
-DEFAULT_FROM_EMAIL = 'franky@arkon.digital'
+DEFAULT_FROM_EMAIL = 'donations@domain.example'
 
 # Custom User Model
 AUTH_USER_MODEL = 'newstream_user.User'

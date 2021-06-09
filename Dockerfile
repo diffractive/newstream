@@ -11,6 +11,7 @@ ENV PYTHONUNBUFFERED 1
 # The mariadb-client is needed for givewp migration support
 # libcurl4-gnutls-dev is needed for pycurl for gateway support
 # gcc is required for building pycurl. We should split that as buildDepends (see puckel/docker airflow)
+# mime-support is required for uwsgi to serve static files correctly
 RUN set -ex \
     && apt-get update -yqq \
     && apt-get upgrade -yqq \
@@ -19,6 +20,8 @@ RUN set -ex \
         libmariadbclient-dev \
         libcurl4-gnutls-dev \
         gcc \ 
+        mime-support \
+        gettext \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \
     && rm -rf \
@@ -56,8 +59,20 @@ RUN groupadd -r ${APP_USER} && useradd --no-log-init -r -g ${APP_USER} ${APP_USE
 RUN mkdir /app/static
 RUN chown newstream:newstream /app/static
 
+# We also need to be able to write to the locales folder for compilemessages
+# TODO: This needs updated, as it does introduce more security risks
+RUN chown -R newstream:newstream /app
+
 # Change to a non-root user
 USER ${APP_USER}:${APP_USER}
+
+# Call collectstatic (customize the following line with the minimal environment variables needed for manage.py to run):
+RUN DATABASE_URL='' python manage.py collectstatic --noinput
+
+# Run compilemessages to build the mo files
+RUN DATABASE_URL='' python manage.py compilemessages
+
+COPY uwsgi.ini /app
 
 # Entrypoint script
 COPY docker-entrypoint.sh /

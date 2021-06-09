@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-14 13:50+0000\n"
+"POT-Creation-Date: 2021-06-09 05:38+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,102 +18,101 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: email_campaigns/admin.py:13 email_campaigns/models.py:37
+#: admin.py:12 models.py:39
 msgid "Email Templates"
 msgstr ""
 
-#: email_campaigns/admin.py:24 email_campaigns/models.py:57
+#: admin.py:23 models.py:59
 msgid "Target Groups"
 msgstr ""
 
-#: email_campaigns/admin.py:35 email_campaigns/models.py:82
+#: admin.py:34 models.py:84
 msgid "Campaigns"
 msgstr ""
 
-#: email_campaigns/admin.py:45
+#: admin.py:44
 msgid "Email Campaigns"
 msgstr ""
 
-#: email_campaigns/custom_classes.py:27
+#: custom_classes.py:28
 msgid "Send Emails"
 msgstr ""
 
-#: email_campaigns/custom_classes.py:71
+#: custom_classes.py:71
 msgid "Link to unsubscribe: "
 msgstr ""
 
-#: email_campaigns/custom_classes.py:77
+#: custom_classes.py:77
 msgid "Unsubscribe"
 msgstr ""
 
-#: email_campaigns/models.py:26 email_campaigns/models.py:46
-#: email_campaigns/models.py:70
+#: models.py:28 models.py:48 models.py:72
 msgid "Title"
 msgstr ""
 
-#: email_campaigns/models.py:27
+#: models.py:29
 msgid "Subject"
 msgstr ""
 
-#: email_campaigns/models.py:28
+#: models.py:30
 msgid "Plain Text Body"
 msgstr ""
 
-#: email_campaigns/models.py:29
+#: models.py:31
 msgid "HTML Body"
 msgstr ""
 
-#: email_campaigns/models.py:36
+#: models.py:38
 msgid "Email Template"
 msgstr ""
 
-#: email_campaigns/models.py:48
+#: models.py:50
 msgid "Users (Only opted-in and verified users are listed here)"
 msgstr ""
 
-#: email_campaigns/models.py:56
+#: models.py:58
 msgid "Target Group"
 msgstr ""
 
-#: email_campaigns/models.py:71
+#: models.py:73
 msgid "From Address"
 msgstr ""
 
-#: email_campaigns/models.py:72
+#: models.py:74
 msgid "Template"
 msgstr ""
 
-#: email_campaigns/models.py:73
+#: models.py:75
 msgid "Recipients"
 msgstr ""
 
-#: email_campaigns/models.py:81
+#: models.py:83
 msgid "Campaign"
 msgstr ""
 
-#: email_campaigns/templates/django/forms/widgets/custom_checkbox_select.html:6
+#: templates/django/forms/widgets/custom_checkbox_select.html:6
 msgid "Check All"
 msgstr ""
 
-#: email_campaigns/templates/django/forms/widgets/custom_checkbox_select.html:8
+#: templates/django/forms/widgets/custom_checkbox_select.html:8
 msgid "Uncheck All"
 msgstr ""
 
-#: email_campaigns/templates/modeladmin/email_campaigns/campaign/send_emails.html:29
+#: templates/modeladmin/email_campaigns/campaign/send_emails.html:29
 #, python-format
 msgid ""
 "Back to\n"
 "                %(model_name)s list"
 msgstr ""
 
-#: email_campaigns/templates/modeladmin/email_campaigns/campaign/send_emails.html:33
+#: templates/modeladmin/email_campaigns/campaign/send_emails.html:33
 msgid "Emails are sent."
 msgstr ""
 
-#: email_campaigns/templates/modeladmin/email_campaigns/campaign/send_emails.html:35
+#: templates/modeladmin/email_campaigns/campaign/send_emails.html:35
 msgid "The following recipients are rejected:"
 msgstr ""
 
-#: email_campaigns/templates/modeladmin/email_campaigns/campaign/send_emails.html:43
+#: templates/modeladmin/email_campaigns/campaign/send_emails.html:43
 msgid "All Emails sent successfully."
 msgstr ""

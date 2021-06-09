@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-08-14 13:50+0000\n"
+"POT-Creation-Date: 2021-06-09 05:39+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,196 +18,202 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: newstream/forms.py:22
+#: forms.py:19
 msgid "Primary Email Address"
 msgstr ""
 
-#: newstream/forms.py:24 newstream/forms_signup.py:14
+#: forms.py:21 forms_signup.py:12
 msgid "First Name"
 msgstr ""
 
-#: newstream/forms.py:25 newstream/forms_signup.py:15
+#: forms.py:22 forms_signup.py:13
 msgid "Last Name"
 msgstr ""
 
-#: newstream/forms.py:27 newstream/forms_signup.py:17
+#: forms.py:24 forms_signup.py:15
 msgid "Opt in Mailing List?"
 msgstr ""
 
-#: newstream/forms.py:29 newstream/forms_signup.py:18
+#: forms.py:26 forms_signup.py:16
 msgid "Language Preference"
 msgstr ""
 
-#: newstream/forms.py:41
-msgid "Please provide request object"
+#: forms.py:38
+msgid "Please provide user object"
 msgstr ""
 
-#: newstream/forms.py:114
+#: forms.py:111
 msgid "Enter Confirmation Text"
 msgstr ""
 
-#: newstream/forms.py:119
+#: forms.py:116
 #, python-format
 msgid "Your confirmation text is incorrect, please enter exactly %(target)s"
 msgstr ""
 
-#: newstream/functions.py:98 newstream/functions.py:106
+#: functions.py:170 functions.py:191
 msgid "Superuser not found"
 msgstr ""
 
-#: newstream/settings/base.py:175
-msgid "English"
-msgstr ""
-
-#: newstream/settings/base.py:176
+#: settings/base.py:231
 msgid "Traditional Chinese"
 msgstr ""
 
-#: newstream/settings/base.py:177
-msgid "Malay"
+#: settings/base.py:232
+msgid "English"
 msgstr ""
 
-#: newstream/settings/base.py:178
-msgid "Indonesian"
-msgstr ""
-
-#: newstream/settings/base.py:179
-msgid "Tagalog"
-msgstr ""
-
-#: newstream/templates/404.html:6
+#: templates/404.html:6
 msgid "Page Not Found"
 msgstr ""
 
-#: newstream/templates/404.html:10
+#: templates/404.html:10
 msgid "Page not found"
 msgstr ""
 
-#: newstream/templates/404.html:11
+#: templates/404.html:11
 msgid "Sorry, this page could not be found."
 msgstr ""
 
-#: newstream/templates/500.html:8 newstream/templates/500.html:13
+#: templates/500.html:8 templates/500.html:13
 msgid "Internal server error"
 msgstr ""
 
-#: newstream/templates/500.html:15
+#: templates/500.html:15
 msgid "Sorry, there seems to be an error. Please try again soon."
 msgstr ""
 
-#: newstream/templates/account/email.html:5
+#: templates/account/account_inactive.html:4
+#: templates/account/account_inactive.html:8
+msgid "Account Inactive"
+msgstr ""
+
+#: templates/account/account_inactive.html:10
+msgid "This account is inactive."
+msgstr ""
+
+#: templates/account/email.html:5
 msgid "Personal Email Settings"
 msgstr ""
 
-#: newstream/templates/account/email.html:13
+#: templates/account/email.html:13
 msgid "Email Addresses"
 msgstr ""
 
-#: newstream/templates/account/email.html:15
+#: templates/account/email.html:15
 msgid "The following e-mail addresses are associated with your account:"
 msgstr ""
 
-#: newstream/templates/account/email.html:37
+#: templates/account/email.html:37
 msgid "Verified"
 msgstr ""
 
-#: newstream/templates/account/email.html:40
+#: templates/account/email.html:40
 msgid "Unverified"
 msgstr ""
 
-#: newstream/templates/account/email.html:43
+#: templates/account/email.html:43
 msgid "Primary"
 msgstr ""
 
-#: newstream/templates/account/email.html:55
+#: templates/account/email.html:55
 msgid "Make Primary"
 msgstr ""
 
-#: newstream/templates/account/email.html:57
+#: templates/account/email.html:57
 msgid "Re-send Verification"
 msgstr ""
 
-#: newstream/templates/account/email.html:58
+#: templates/account/email.html:58
 msgid "Remove"
 msgstr ""
 
-#: newstream/templates/account/email.html:64
+#: templates/account/email.html:64
 msgid "Warning:"
 msgstr ""
 
-#: newstream/templates/account/email.html:65
+#: templates/account/email.html:65
 msgid ""
 "You currently do not have any e-mail address set up. You should really add "
 "an e-mail address so you can receive notifications, reset your password, etc."
 msgstr ""
 
-#: newstream/templates/account/email.html:71
+#: templates/account/email.html:71
 msgid "Add E-mail Address"
 msgstr ""
 
-#: newstream/templates/account/email.html:76
+#: templates/account/email.html:76
 msgid "Add E-mail"
 msgstr ""
 
-#: newstream/templates/account/email.html:85
+#: templates/account/email.html:86
 msgid "Do you really want to remove the selected e-mail address?"
 msgstr ""
 
-#: newstream/templates/account/email/email_confirmation_message.txt:1
-#, python-format
-msgid ""
-"Hello from %(site_name)s!\n"
-"\n"
-"You're receiving this e-mail because user %(user_display)s has given yours "
-"as an e-mail address to connect their account.\n"
-"\n"
-"To confirm this is correct, go to %(activate_url)s\n"
-msgstr ""
-
-#: newstream/templates/account/email/email_confirmation_message.txt:7
-#, python-format
-msgid ""
-"Thank you from %(site_name)s!\n"
-"%(site_domain)s"
-msgstr ""
-
-#: newstream/templates/account/email/email_confirmation_subject.txt:3
+#: templates/account/email/email_confirmation_message.html:6
+#: templates/account/email/email_confirmation_message.html:11
+#: templates/account/email/email_confirmation_signup_message.html:6
+#: templates/account/email/email_confirmation_signup_message.html:11
+#: templates/account/email/email_confirmation_subject.txt:3
 msgid "Please Confirm Your E-mail Address"
 msgstr ""
 
-#: newstream/templates/account/email/password_reset_key_message.txt:1
+#: templates/account/email/email_confirmation_message.html:13
+#: templates/account/email/email_confirmation_signup_message.html:13
+#: templates/account/email/password_reset_key_message.html:13
+#, python-format
+msgid "Hello from %(site_name)s!"
+msgstr ""
+
+#: templates/account/email/email_confirmation_message.html:15
+#: templates/account/email/email_confirmation_signup_message.html:15
 #, python-format
 msgid ""
-"Hello from %(site_name)s!\n"
-"\n"
+"You're receiving this e-mail because user %(user_display)s has given yours "
+"as an e-mail address to connect their account."
+msgstr ""
+
+#: templates/account/email/email_confirmation_message.html:17
+#: templates/account/email/email_confirmation_signup_message.html:17
+#, python-format
+msgid "To confirm this is correct, go to %(activate_url)s."
+msgstr ""
+
+#: templates/account/email/email_confirmation_message.html:19
+#: templates/account/email/email_confirmation_signup_message.html:19
+#: templates/account/email/password_reset_key_message.html:21
+msgid "Thank you,"
+msgstr ""
+
+#: templates/account/email/password_reset_key_message.html:6
+#: templates/account/email/password_reset_key_message.html:11
+#: templates/account/email/password_reset_key_subject.txt:3
+msgid "Password Reset E-mail"
+msgstr ""
+
+#: templates/account/email/password_reset_key_message.html:15
+msgid ""
 "You're receiving this e-mail because you or someone else has requested a "
-"password for your user account.\n"
+"password for your user account."
+msgstr ""
+
+#: templates/account/email/password_reset_key_message.html:17
+msgid ""
 "It can be safely ignored if you did not request a password reset. Click the "
 "link below to reset your password."
 msgstr ""
 
-#: newstream/templates/account/email/password_reset_key_message.txt:8
+#: templates/account/email/password_reset_key_message.html:19
 #, python-format
-msgid "In case you forgot, your username is %(username)s."
+msgid "%(password_reset_url)s"
 msgstr ""
 
-#: newstream/templates/account/email/password_reset_key_message.txt:10
-#, python-format
-msgid ""
-"Thank you for using %(site_name)s!\n"
-"%(site_domain)s"
-msgstr ""
-
-#: newstream/templates/account/email/password_reset_key_subject.txt:3
-msgid "Password Reset E-mail"
-msgstr ""
-
-#: newstream/templates/account/email_confirm.html:5
-#: newstream/templates/account/email_confirm.html:11
+#: templates/account/email_confirm.html:5
+#: templates/account/email_confirm.html:11
 msgid "Confirm E-mail Address"
 msgstr ""
 
-#: newstream/templates/account/email_confirm.html:18
+#: templates/account/email_confirm.html:18
 #, python-format
 msgid ""
 "Please\n"
@@ -217,11 +223,11 @@ msgid ""
 "        %(user_display)s."
 msgstr ""
 
-#: newstream/templates/account/email_confirm.html:26
+#: templates/account/email_confirm.html:26
 msgid "Confirm"
 msgstr ""
 
-#: newstream/templates/account/email_confirm.html:33
+#: templates/account/email_confirm.html:33
 #, python-format
 msgid ""
 "This e-mail confirmation link expired or is invalid. Please <a\n"
@@ -229,103 +235,106 @@ msgid ""
 "            e-mail confirmation request</a>."
 msgstr ""
 
-#: newstream/templates/account/login.html:4
+#: templates/account/login.html:4
 #, python-format
 msgid ""
 "Login to\n"
 "%(sitename)s"
 msgstr ""
 
-#: newstream/templates/account/login.html:9
+#: templates/account/login.html:9
 #, python-format
 msgid "Login to %(sitename)s"
 msgstr ""
 
-#: newstream/templates/account/login.html:16
+#: templates/account/login.html:14
 msgid "Sign in with Google"
 msgstr ""
 
-#: newstream/templates/account/login.html:22
+#: templates/account/login.html:18
 msgid "Sign in with Facebook"
 msgstr ""
 
-#: newstream/templates/account/login.html:29
+#: templates/account/login.html:23
 msgid "Sign in with Twitter"
 msgstr ""
 
-#: newstream/templates/account/login.html:67
+#: templates/account/login.html:59
 msgid "Login"
 msgstr ""
 
-#: newstream/templates/account/login.html:70
+#: templates/account/login.html:62
 msgid "Forgot Password?"
 msgstr ""
 
-#: newstream/templates/account/login.html:71
+#: templates/account/login.html:63
 msgid "Not yet a member?"
 msgstr ""
 
-#: newstream/templates/account/login.html:72
+#: templates/account/login.html:64
 msgid "Donate and Join Now"
 msgstr ""
 
-#: newstream/templates/account/password_change.html:4
-#: newstream/templates/profile_settings/change_password.html:4
+#: templates/account/password_change.html:4
+#: templates/profile_settings/change_password.html:4
 msgid "Change My Password"
 msgstr ""
 
-#: newstream/templates/account/password_change.html:12
-#: newstream/templates/profile_settings/change_password.html:12
+#: templates/account/password_change.html:12
+#: templates/profile_settings/change_password.html:12
 msgid "Change my password"
 msgstr ""
 
-#: newstream/templates/account/password_change.html:17
-#: newstream/templates/account/password_reset_from_key.html:19
-#: newstream/templates/account/password_set.html:17
-#: newstream/templates/profile_settings/change_password.html:24
-#: newstream/templates/profile_settings/personal_info.html:39
+#: templates/account/password_change.html:17
+#: templates/account/password_reset_from_key.html:19
+#: templates/account/password_set.html:17
+#: templates/profile_settings/change_password.html:24
+#: templates/profile_settings/personal_info.html:39
 msgid "Submit"
 msgstr ""
 
-#: newstream/templates/account/password_reset.html:4
+#: templates/account/password_reset.html:4
 msgid "Reset Your Password?"
 msgstr ""
 
-#: newstream/templates/account/password_reset.html:8
+#: templates/account/password_reset.html:8
 msgid "Need to reset your password?"
 msgstr ""
 
-#: newstream/templates/account/password_reset.html:16
+#: templates/account/password_reset.html:16
 msgid ""
 "Once you have filled out the following form, a reset password link will be "
 "sent to your registered email address."
 msgstr ""
 
-#: newstream/templates/account/password_reset_done.html:4
+#: templates/account/password_reset_done.html:4
 msgid "Email Sent"
 msgstr ""
 
-#: newstream/templates/account/password_reset_done.html:8
+#: templates/account/password_reset_done.html:8
 msgid "Check your inbox."
 msgstr ""
 
-#: newstream/templates/account/password_reset_done.html:13
-msgid "We"
+#: templates/account/password_reset_done.html:13
+msgid ""
+"We've emailed you instructions for setting your password. You should receive "
+"the email shortly! Please contact us if you do not receive the email in a "
+"few minutes."
 msgstr ""
 
-#: newstream/templates/account/password_reset_from_key.html:4
-#: newstream/templates/account/password_reset_from_key.html:8
-#: newstream/templates/account/password_reset_from_key_done.html:4
-#: newstream/templates/account/password_reset_from_key_done.html:8
-#: newstream/templates/profile_settings/security.html:16
+#: templates/account/password_reset_from_key.html:4
+#: templates/account/password_reset_from_key.html:8
+#: templates/account/password_reset_from_key_done.html:4
+#: templates/account/password_reset_from_key_done.html:8
+#: templates/profile_settings/security.html:16
 msgid "Change Password"
 msgstr ""
 
-#: newstream/templates/account/password_reset_from_key.html:8
+#: templates/account/password_reset_from_key.html:8
 msgid "Bad Token"
 msgstr ""
 
-#: newstream/templates/account/password_reset_from_key.html:11
+#: templates/account/password_reset_from_key.html:11
 #, python-format
 msgid ""
 "The password reset link was invalid, possibly because it has already been "
@@ -334,203 +343,184 @@ msgid ""
 "reset</a>."
 msgstr ""
 
-#: newstream/templates/account/password_reset_from_key.html:23
-#: newstream/templates/account/password_reset_from_key_done.html:9
+#: templates/account/password_reset_from_key.html:23
+#: templates/account/password_reset_from_key_done.html:9
 msgid "Your password is now changed."
 msgstr ""
 
-#: newstream/templates/account/password_set.html:4
+#: templates/account/password_set.html:4
 msgid "Set My Password"
 msgstr ""
 
-#: newstream/templates/account/password_set.html:12
+#: templates/account/password_set.html:12
 msgid "Set my password"
 msgstr ""
 
-#: newstream/templates/account/signup.html:4
+#: templates/account/signup.html:4
 msgid "Personal Info Registration"
 msgstr ""
 
-#: newstream/templates/account/signup.html:11
+#: templates/account/signup.html:11
 msgid "Step 1 of 3"
 msgstr ""
 
-#: newstream/templates/account/signup.html:12
-#: newstream/templates/account/signup.html:25
-#: newstream/templates/profile_settings/personal_info.html:12
-#: newstream/templates/profile_settings/sidebar.html:7
+#: templates/account/signup.html:12 templates/account/signup.html:25
+#: templates/profile_settings/personal_info.html:12
+#: templates/profile_settings/sidebar.html:7
 msgid "Personal Info"
 msgstr ""
 
-#: newstream/templates/common/form_errors.html:9
+#: templates/common/form_errors.html:9
 msgid "Form Error"
 msgstr ""
 
-#: newstream/templates/common/form_errors.html:19
+#: templates/common/form_errors.html:19
 msgid "Form Error:"
 msgstr ""
 
-#: newstream/templates/common/mobile_main_menu.html:31
-#: newstream/templates/profile_settings/sidebar.html:5
+#: templates/common/mobile_main_menu.html:28
+#: templates/profile_settings/sidebar.html:5
 msgid "Profile Settings"
 msgstr ""
 
-#: newstream/templates/common/mobile_main_menu.html:34
+#: templates/common/mobile_main_menu.html:31
 msgid "My Donations"
 msgstr ""
 
-#: newstream/templates/common/mobile_main_menu.html:37
+#: templates/common/mobile_main_menu.html:34
 msgid "Logout"
 msgstr ""
 
-#: newstream/templates/common/mobile_main_menu.html:43
+#: templates/common/mobile_main_menu.html:40
 msgid "Sign in"
 msgstr ""
 
-#: newstream/templates/common/mobile_main_menu.html:48
+#: templates/common/mobile_main_menu.html:45
 msgid "Donate"
 msgstr ""
 
-#: newstream/templates/common/signup_form_content.html:38
+#: templates/common/signup_form_content.html:38
 msgid "Continue"
 msgstr ""
 
-#: newstream/templates/footer.html:10
+#: templates/footer.html:10
 msgid "Privacy Policy"
 msgstr ""
 
-#: newstream/templates/footer.html:12
-msgid "Terms & Conditions"
-msgstr ""
-
-#: newstream/templates/footer.html:15
+#: templates/footer.html:13
 msgid ""
-"© 2020 Hong Kong Free Press Limited.</span><span>&nbsp;Part of <a href=\"#"
-"\"\n"
+"© 2020 Hong Kong Free Press Limited.</span><span>&nbsp;Part of <a href="
+"\"https://github.com/diffractive/newstream\" target=\"_blank\"\n"
 "                class=\"pl-1\">The\n"
 "                NewStream\n"
 "                Project</a>."
 msgstr ""
 
-#: newstream/templates/profile_settings/advanced_settings.html:4
-#: newstream/templates/profile_settings/advanced_settings.html:12
-#: newstream/templates/profile_settings/sidebar.html:11
+#: templates/maintenance.html:6 templates/maintenance.html:10
+msgid "Site Under Maintenance"
+msgstr ""
+
+#: templates/maintenance.html:11
+msgid ""
+"Sorry for the inconvenience but we're performing maintenance at the moment. "
+"We'll be back online shortly!"
+msgstr ""
+
+#: templates/profile_settings/advanced_settings.html:4
+#: templates/profile_settings/advanced_settings.html:12
+#: templates/profile_settings/sidebar.html:11
 msgid "Advanced Settings"
 msgstr ""
 
-#: newstream/templates/profile_settings/advanced_settings.html:14
+#: templates/profile_settings/advanced_settings.html:14
 msgid "Account Removal"
 msgstr ""
 
-#: newstream/templates/profile_settings/advanced_settings.html:15
+#: templates/profile_settings/advanced_settings.html:16
+#: templates/profile_settings/delete_account.html:4
 msgid "Delete My Account"
 msgstr ""
 
-#: newstream/templates/profile_settings/advanced_settings.html:18
+#: templates/profile_settings/advanced_settings.html:20
 msgid ""
-"Note that by deleting your account, all recurring payments will be cancelled "
-"and your account will be removed from our database."
+"Note that by deleting your account, your account will be removed from our "
+"database but your previous donation records will be anonymously kept."
 msgstr ""
 
-#: newstream/templates/profile_settings/delete_account.html:4
-msgid "Delete My Password"
+#: templates/profile_settings/advanced_settings.html:22 views.py:75
+msgid ""
+"You need to cancel all your recurring donations before you are allowed to "
+"delete your account."
 msgstr ""
 
-#: newstream/templates/profile_settings/delete_account.html:12
+#: templates/profile_settings/delete_account.html:12
 msgid "Delete my account"
 msgstr ""
 
-#: newstream/templates/profile_settings/delete_account.html:13
+#: templates/profile_settings/delete_account.html:13
 #, python-format
 msgid ""
 "Please enter exactly '%(confirm_text)s' in the Confirmation textbox\n"
 "            below."
 msgstr ""
 
-#: newstream/templates/profile_settings/delete_account.html:26
+#: templates/profile_settings/delete_account.html:26
 msgid "Delete My Account Now"
 msgstr ""
 
-#: newstream/templates/profile_settings/personal_info.html:4
+#: templates/profile_settings/personal_info.html:4
 msgid "Personal Info Settings"
 msgstr ""
 
-#: newstream/templates/profile_settings/personal_info.html:29
+#: templates/profile_settings/personal_info.html:29
 msgid "Manage Email Addresses"
 msgstr ""
 
-#: newstream/templates/profile_settings/security.html:4
+#: templates/profile_settings/security.html:4
 msgid "Security Settings"
 msgstr ""
 
-#: newstream/templates/profile_settings/security.html:12
-#: newstream/templates/profile_settings/sidebar.html:9
+#: templates/profile_settings/security.html:12
+#: templates/profile_settings/sidebar.html:9
 msgid "Security"
 msgstr ""
 
-#: newstream/templates/profile_settings/security.html:14
+#: templates/profile_settings/security.html:14
 msgid "Password"
 msgstr ""
 
-#: newstream/templates/registration/email_templates/verify_your_email.html:5
-msgid "Verify Your Email"
-msgstr ""
-
-#: newstream/templates/registration/email_templates/verify_your_email.html:13
-msgid "Verify Your Email Now"
-msgstr ""
-
-#: newstream/templates/registration/email_templates/verify_your_email.html:19
-#, python-format
-msgid "Dear %(fullname)s,"
-msgstr ""
-
-#: newstream/templates/registration/email_templates/verify_your_email.html:20
-#, python-format
-msgid ""
-"Your account has been created. Please verify your email by clicking this\n"
-"                <a href=\"%(fullurl)s\" target=\"_blank\">link</a> in order "
-"to fully\n"
-"                manage\n"
-"                your donations and account."
-msgstr ""
-
-#: newstream/templates/registration/email_templates/verify_your_email.html:24
-msgid "Thank you,"
-msgstr ""
-
-#: newstream/templates/registration/logged_out.html:4
+#: templates/registration/logged_out.html:4
 #, python-format
 msgid ""
 "Logged out from\n"
 "%(sitename)s"
 msgstr ""
 
-#: newstream/templates/registration/logged_out.html:9
+#: templates/registration/logged_out.html:9
 msgid "Goodbye!"
 msgstr ""
 
-#: newstream/templates/registration/logged_out.html:11
+#: templates/registration/logged_out.html:11
 #, python-format
 msgid "Log back in <a href=\"%(loginurl)s\">Here</a>"
 msgstr ""
 
-#: newstream/templates/socialaccount/authentication_error.html:4
-#: newstream/templates/socialaccount/authentication_error.html:8
+#: templates/socialaccount/authentication_error.html:4
+#: templates/socialaccount/authentication_error.html:8
 msgid "Social Network Login Failure"
 msgstr ""
 
-#: newstream/templates/socialaccount/authentication_error.html:10
+#: templates/socialaccount/authentication_error.html:10
 msgid ""
 "An error occurred while attempting to login via your social network account."
 msgstr ""
 
-#: newstream/templates/socialaccount/login_cancelled.html:4
-#: newstream/templates/socialaccount/login_cancelled.html:8
+#: templates/socialaccount/login_cancelled.html:4
+#: templates/socialaccount/login_cancelled.html:8
 msgid "Login Cancelled"
 msgstr ""
 
-#: newstream/templates/socialaccount/login_cancelled.html:10
+#: templates/socialaccount/login_cancelled.html:10
 #, python-format
 msgid ""
 "You decided to cancel logging in to our site using one of your existing\n"
@@ -539,15 +529,15 @@ msgid ""
 "        to <a href=\"%(login_url)s\">sign in</a>."
 msgstr ""
 
-#: newstream/templates/socialaccount/signup.html:4
+#: templates/socialaccount/signup.html:4
 msgid "Complete Account Registration"
 msgstr ""
 
-#: newstream/templates/socialaccount/signup.html:19
+#: templates/socialaccount/signup.html:19
 msgid "Personal info"
 msgstr ""
 
-#: newstream/templates/socialaccount/signup.html:21
+#: templates/socialaccount/signup.html:21
 #, python-format
 msgid ""
 "You\n"
@@ -559,18 +549,18 @@ msgid ""
 "                    registration:"
 msgstr ""
 
-#: newstream/templates/unsubscription.html:4
+#: templates/unsubscription.html:4
 #, python-format
 msgid ""
 "Unsubscribe from\n"
 "%(sitename)s"
 msgstr ""
 
-#: newstream/templates/unsubscription.html:10
+#: templates/unsubscription.html:10
 msgid "Failed to unsubscribe"
 msgstr ""
 
-#: newstream/templates/unsubscription.html:11
+#: templates/unsubscription.html:11
 #, python-format
 msgid ""
 "We failed to unsubscribe you <span class=\"font-bold\">(%(email)s)</span>\n"
@@ -578,11 +568,11 @@ msgid ""
 "        unsubscription link is invalid."
 msgstr ""
 
-#: newstream/templates/unsubscription.html:16
+#: templates/unsubscription.html:16
 msgid "Successful"
 msgstr ""
 
-#: newstream/templates/unsubscription.html:17
+#: templates/unsubscription.html:17
 #, python-format
 msgid ""
 "You <span class=\"font-bold\">(%(email)s)</span> have unsubscribed from\n"
@@ -591,10 +581,10 @@ msgid ""
 "        by checking the opt in mailing box in your personal info settings."
 msgstr ""
 
-#: newstream/views.py:57
+#: views.py:56
 msgid "Personal Info Updated."
 msgstr ""
 
-#: newstream/views.py:89
+#: views.py:99
 msgid "Your account is deleted."
 msgstr ""

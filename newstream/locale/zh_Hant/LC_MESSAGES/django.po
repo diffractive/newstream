@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-09 05:39+0000\n"
+"POT-Creation-Date: 2021-06-09 17:08+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -378,24 +378,28 @@ msgstr ""
 msgid "Form Error:"
 msgstr ""
 
-#: templates/common/mobile_main_menu.html:28
+#: templates/common/main_menu.html:5 templates/common/mobile_main_menu.html:17
+msgid "Contact Us"
+msgstr ""
+
+#: templates/common/mobile_main_menu.html:28 templates/header.html:30
 #: templates/profile_settings/sidebar.html:5
 msgid "Profile Settings"
 msgstr ""
 
-#: templates/common/mobile_main_menu.html:31
+#: templates/common/mobile_main_menu.html:31 templates/header.html:31
 msgid "My Donations"
 msgstr ""
 
-#: templates/common/mobile_main_menu.html:34
+#: templates/common/mobile_main_menu.html:34 templates/header.html:32
 msgid "Logout"
 msgstr ""
 
-#: templates/common/mobile_main_menu.html:40
+#: templates/common/mobile_main_menu.html:40 templates/header.html:36
 msgid "Sign in"
 msgstr ""
 
-#: templates/common/mobile_main_menu.html:45
+#: templates/common/mobile_main_menu.html:45 templates/header.html:38
 msgid "Donate"
 msgstr ""
 

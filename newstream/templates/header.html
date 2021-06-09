@@ -27,15 +27,15 @@
                 <span class="user-fullname">{{ user|display_username }}</span>
                 <span class="dropdown-chevron-icon"></span>
                 <div class="user-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
-                    <a href="{% url 'personal-info' %}">Profile Settings</a>
-                    <a href="{% url 'donations:my-onetime-donations' %}">My Donations</a>
-                    <a href="{% url 'account_logout' %}">Logout</a>
+                    <a href="{% url 'personal-info' %}">{% trans 'Profile Settings' %}</a>
+                    <a href="{% url 'donations:my-onetime-donations' %}">{% trans 'My Donations' %}</a>
+                    <a href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
                 </div>
             </div>
             {% else %}
-            <a href="{% url 'account_login' %}{{ request.path|next_path_filter }}" class="mr-16 menu-item">Sign in</a>
+            <a href="{% url 'account_login' %}{{ request.path|next_path_filter }}" class="mr-16 menu-item">{% trans 'Sign in' %}</a>
             {% endif %}
-            <a href="{% url 'donations:donate'%}" class="menu-item nav-donate-btn">Donate</a>
+            <a href="{% url 'donations:donate'%}" class="menu-item nav-donate-btn">{% trans 'Donate' %}</a>
             <div class="multilang-dropdown-div ml-6 hidden lg:hidden items-center dropdown-div-wrapper">
                 {% include 'common/lang_switcher_body.html' with prefix='main' %}
             </div>

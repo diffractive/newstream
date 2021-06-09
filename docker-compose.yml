@@ -12,15 +12,17 @@ services:
       - "5432"
   app:
     environment:
-      NEWSTREAM_RUN_MIGRATIONS: 1
-      NEWSTREAM_DEBUG: 1
+      RUN_MIGRATIONS: 1
+      COLLECTSTATIC: 1
+      COMPILEMESSAGES: 1
+      DEBUG: 1
       DATABASE_NAME: newstream
       DATABASE_USER: newstream
       DATABASE_HOST: database
       DATABASE_PASSWORD: newstream
       DJANGO_SUPERUSER_EMAIL: newstream@test.local
       DJANGO_SUPERUSER_PASSWORD: newstream
-    image: newstream:latest
+    image: diffractive/newstream:latest
     build:
       context: .
       dockerfile: ./Dockerfile

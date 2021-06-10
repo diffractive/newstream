@@ -1,9 +1,8 @@
-================
 Newstream
-================
+==========
 
 Newstream is a fundraising and donation management system, designed for news organisations and NGOs. It was created
-thanks to funding from the `Google News Initiatitve (GNI) https://newsinitiative.withgoogle.com/`. It allows users
+thanks to funding from the [Google News Initiatitve (GNI)](https://newsinitiative.withgoogle.com/). It allows users
 to perform one-off donations, or set up recurring payments to your organisation. The portal allows donors to manage
 their subscrption, view past donations, and update their personal details.
 

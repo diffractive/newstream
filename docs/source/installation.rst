@@ -7,6 +7,43 @@ Installation
 Google Cloud
 ============
 
+The simplest way to deploy Newstream is via Google Cloud. Using Google Cloud Run we can deploy newstream
+as a docker container. Costs are relatively low, and will reduce in future updates as we optimise components.
+
+----
+
+.. _google-cloud-pricing:
+
+Pricing
+-------
+
+These prices are all estimates, based on the current prices for the ap-southeast1 region (singapore). We run an idle instance as part of the current configuration - future updates should remove the need for this. Note there are some additional small costs which are not covered here (network traffic, backups, google cloud build, google storage, etc). These are all assumed to be negligible.
+
+**Google Cloud Run**
+
+| Idle instance CPU 1 x 0.00000250 * (60 * 60 * 24) * 365 → $78.84 USD / pa
+| Idle instance Memory 0.5 x 0.00000250 * (60 * 60 * 24) * 365 → $39.42 USD / pa
+
+**Google Cloud SQL**
+
+| 10 GB storage HDD 10 x 0.126 x 12 → $15.12 USD / pa
+| Instance cost (db-f1-micro) 12 x 10.73 → $128.76 USD / pa
+
+**Email Service (Mailgun)**
+
+| Assuming 10000 emails per year - $0.80 / 1000 emails → $8 USD / pa
+
+| **Total annual cost: $270.14 USD / pa**
+| *(78.84 + 39.42 + 15.12 + 128.76 + 8)*
+
+
+----
+
+.. _google-cloud-installation-steps:
+
+Installation Steps
+------------------
+
 The simplest way to deploy Newstream is via Google Cloud. You will need to configure the following
 
 * :ref:`setup-google-cloud-project`
@@ -170,9 +207,6 @@ You should register `mg.yourdomain.com` as recommended. You can leave the DKIM s
 .. image:: images/mailgun-chose-api-smtp.png
   :width: 600
   :alt: Mailgun Choose API / SMTP
-
--rw-r--r--@ 1 kev  staff  32648 Jun 10 14:27 mailgun-add-domain.png
--rw-r--r--@ 1 kev  staff  34661 Jun 10 14:28 mailgun-chose-api-smtp.png
 
 Choose the SMTP option. Mailgun should show you details for your SMTP connection.
 

@@ -29,7 +29,7 @@ class DonationDetailsForm(forms.Form):
         ('onetime', _('One-time')),
     ], label=_("Donation frequency"))
     currency = forms.CharField(widget=forms.HiddenInput())
-    email = forms.EmailField(required=False, widget=forms.TextInput(attrs={'placeholder': str(_('Enter your email address'))}), label=_("Email"))
+    email = forms.EmailField(required=False, widget=forms.TextInput(attrs={'placeholder': _('Enter your email address')}), label=_("Email"))
 
     def __init__(self, *args, request=None, blueprint=None, **kwargs):
         super().__init__(*args, **kwargs)

@@ -232,6 +232,9 @@ WAGTAIL_CONTENT_LANGUAGES = LANGUAGES = [
     ('en', _('English')),
 ]
 
+# add in the additional newstream directory
+LOCALE_PATHS = [os.path.join(PROJECT_DIR, 'locale'),]
+
 TIME_ZONE = 'UTC'
 
 USE_I18N = True

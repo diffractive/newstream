@@ -40,7 +40,7 @@
                     <div class="field-div widget_{{ field|widget_type }}" style="margin-bottom: 2px;">
                         {{ field }}
                     </div>
-                    <p class="secondary-text m-0" style="color: red;">Only required for guests donating one-time.</p>
+                    <p class="secondary-text m-0" style="color: red;">{% trans 'Only required for guests donating one-time.' %}</p>
                 </div>
                 {% elif field.html_name == 'donation_amount_custom' %}
                 <div class="mb-4 hidden">

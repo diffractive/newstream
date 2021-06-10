@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-06-09 05:36+0000\n"
+"POT-Creation-Date: 2021-06-10 08:16+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -195,10 +195,33 @@ msgstr ""
 #: templates/donations/my_recurring_donations.html:93
 #: templates/donations/my_renewals.html:19
 msgid "Monthly"
-msgstr ""
+msgstr "每月"
 
 #: forms.py:29 models.py:68
 msgid "One-time"
+msgstr "一次性"
+
+#: forms.py:30 templates/donations/cancelled.html:28
+#: templates/donations/confirm_donation.html:36
+#: templates/donations/email_templates/donation_receipt.html:37
+#: templates/donations/email_templates/donation_revoked_admin.html:25
+#: templates/donations/email_templates/donation_revoked_donor.html:29
+#: templates/donations/email_templates/donation_status_change.html:28
+#: templates/donations/email_templates/new_donation.html:25
+#: templates/donations/email_templates/new_renewal.html:25
+#: templates/donations/email_templates/renewal_receipt.html:31
+#: templates/donations/my_onetime_donations.html:47
+#: templates/donations/my_renewals.html:56 templates/donations/revoked.html:26
+#: templates/donations/thankyou.html:36
+msgid "Donation frequency"
+msgstr "捐贈頻率"
+
+#: forms.py:32
+msgid "Enter your email address"
+msgstr "輸入您的電郵地址"
+
+#: forms.py:32
+msgid "Email"
 msgstr ""
 
 #: forms.py:37
@@ -234,23 +257,23 @@ msgstr ""
 #: templates/donations/email_templates/subscription_status_change.html:22
 #: templates/donations/revoked.html:28 templates/donations/thankyou.html:38
 msgid "Payment method"
-msgstr ""
+msgstr "付款方法"
 
 #: forms.py:60
 msgid "Donation amount in "
-msgstr ""
+msgstr "捐贈金額 - "
 
 #: forms.py:61
 msgid "Custom Donation amount in "
-msgstr ""
+msgstr "自訂捐贈金額 - "
 
 #: forms.py:75 forms.py:77 models.py:64
 msgid "Custom Amount"
-msgstr ""
+msgstr "自訂金額"
 
 #: forms.py:117
 msgid "You are required to fill in your email address."
-msgstr ""
+msgstr "您需要填寫您的電郵地址"
 
 #: functions.py:83
 msgid "Please provide a payment gateway object"
@@ -1021,21 +1044,6 @@ msgstr ""
 msgid "Donor"
 msgstr ""
 
-#: templates/donations/cancelled.html:28
-#: templates/donations/confirm_donation.html:36
-#: templates/donations/email_templates/donation_receipt.html:37
-#: templates/donations/email_templates/donation_revoked_admin.html:25
-#: templates/donations/email_templates/donation_revoked_donor.html:29
-#: templates/donations/email_templates/donation_status_change.html:28
-#: templates/donations/email_templates/new_donation.html:25
-#: templates/donations/email_templates/new_renewal.html:25
-#: templates/donations/email_templates/renewal_receipt.html:31
-#: templates/donations/my_onetime_donations.html:47
-#: templates/donations/my_renewals.html:56 templates/donations/revoked.html:26
-#: templates/donations/thankyou.html:36
-msgid "Donation frequency"
-msgstr ""
-
 #: templates/donations/confirm_donation.html:4
 #: templates/donations/confirm_donation.html:12
 #: templates/donations/redirection_2c2p_form.html:12
@@ -1049,7 +1057,7 @@ msgstr ""
 #: templates/donations/redirection_paypal.html:15
 #: templates/donations/redirection_stripe.html:15
 msgid "Step 3 of 3"
-msgstr ""
+msgstr "步驟3 共3步"
 
 #: templates/donations/confirm_donation.html:22
 msgid "Confirm your donation"
@@ -1062,11 +1070,13 @@ msgid ""
 "Logged in as\n"
 "                        %(username)s."
 msgstr ""
+"已登入為用戶：\n"
+"                        %(username)s。"
 
 #: templates/donations/confirm_donation.html:27
 #: templates/donations/donation_details_form.html:32
 msgid "Logout"
-msgstr ""
+msgstr "登出"
 
 #: templates/donations/confirm_donation.html:45
 msgid "Change Donation Details"
@@ -1089,11 +1099,15 @@ msgstr ""
 #: templates/donations/edit_paypal_recurring_payment_form.html:4
 #: templates/donations/edit_stripe_recurring_payment_form.html:4
 msgid "Donation Details"
-msgstr ""
+msgstr "捐款詳情"
 
 #: templates/donations/donation_details_form.html:11
 msgid "Step 1 of 3"
-msgstr ""
+msgstr "步驟1 共3步"
+
+#: templates/donations/donation_details_form.html:43
+msgid "Only required for guests donating one-time."
+msgstr "僅對一次性捐款的訪客需要輸入。"
 
 #: templates/donations/donation_details_form.html:87
 msgid "Continue"
@@ -1101,24 +1115,24 @@ msgstr ""
 
 #: templates/donations/donation_details_form.html:92
 msgid "Continue as guest"
-msgstr ""
+msgstr "以訪客身份繼續"
 
 #: templates/donations/donation_details_form.html:93
 msgid "Donate without account creation."
-msgstr ""
+msgstr "不註冊帳號下捐款。"
 
 #: templates/donations/donation_details_form.html:97
 #: templates/donations/signin_method.html:12
 msgid "Register or Login"
-msgstr ""
+msgstr "註冊或登入"
 
 #: templates/donations/donation_details_form.html:98
 msgid "You need to register to become a monthly donor."
-msgstr ""
+msgstr "您需要註冊才能成為每月捐贈者"
 
 #: templates/donations/donation_details_form.html:99
 msgid "Manage donations with an account."
-msgstr ""
+msgstr "使用帳號管理捐款"
 
 #: templates/donations/donation_view_switcher.html:4
 msgid "One-time Donations"
@@ -2555,7 +2569,7 @@ msgstr ""
 #: templates/donations/my_recurring_donations.html:83
 #: templates/donations/my_renewals.html:59
 msgid "Payment Method"
-msgstr ""
+msgstr "付款方法"
 
 #: templates/donations/my_onetime_donations.html:68
 msgid "No Donation History."
@@ -2670,7 +2684,7 @@ msgstr ""
 
 #: templates/donations/signin_method.html:11
 msgid "Step 2 of 3"
-msgstr ""
+msgstr "步驟2 共3步"
 
 #: templates/donations/signin_method.html:21
 msgid "Sign in with Google"
@@ -2936,3 +2950,43 @@ msgstr ""
 #, python-format
 msgid "Subscription %(id)d status is cancelled."
 msgstr ""
+
+#: wagtail_hooks.py:138
+msgid "Today's Statistics"
+msgstr "今日的數據"
+
+#: wagtail_hooks.py:141
+msgid "New Completed Donations"
+msgstr "新完成捐款"
+
+#: wagtail_hooks.py:143
+msgid "New Active Subscriptions"
+msgstr "新有效月捐"
+
+#: wagtail_hooks.py:145
+msgid "New Donors"
+msgstr "新捐贈者"
+
+#: wagtail_hooks.py:159
+msgid "Total Statistics"
+msgstr "所有數據"
+
+#: wagtail_hooks.py:161
+msgid "Completed Donations"
+msgstr "完成的捐款"
+
+#: wagtail_hooks.py:163
+msgid "All Donations"
+msgstr "所有捐款"
+
+#: wagtail_hooks.py:165
+msgid "All Donors"
+msgstr "所有捐贈者"
+
+#: wagtail_hooks.py:167
+msgid "Active Subscriptions"
+msgstr "有效月捐"
+
+#: wagtail_hooks.py:169
+msgid "All Subscriptions"
+msgstr "所有月捐"

@@ -32,7 +32,7 @@ msgstr ""
 
 #: admin.py:44
 msgid "Email Campaigns"
-msgstr ""
+msgstr "集寄電郵"
 
 #: custom_classes.py:28
 msgid "Send Emails"

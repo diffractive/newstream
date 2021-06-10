@@ -134,7 +134,16 @@ class TodayStatisticsPanel:
         today_donations = Donation.objects.filter(donation_date__gte=utc_dt, payment_status=STATUS_COMPLETE, deleted=False).count()
         today_subscriptions = Subscription.objects.filter(subscribe_date__gte=utc_dt, recurring_status=STATUS_ACTIVE, deleted=False).count()
         today_donors = User.objects.filter(date_joined__gte=utc_dt, is_staff=False).count()
-        return mark_safe("<section class=\"summary nice-padding today-stats-panel\"><h1><strong>Today's Statistics ({})</strong></h1><ul class=\"stats\"><li><span>{}</span>New Completed Donations</li><li><span>{}</span>New Active Subscriptions</li><li><span>{}</span>New Donors</li></ul></section>".format(today, today_donations, today_subscriptions, today_donors))
+        return mark_safe("<section class=\"summary nice-padding today-stats-panel\"><h1><strong>%(heading)s (%(date)s)</strong></h1><ul class=\"stats\"><li><span>%(completed_donations)i</span>%(completed_donations_subtext)s</li><li><span>%(active_subscriptions)i</span>%(active_subscriptions_subtext)s</li><li><span>%(donors)i</span>%(donors_subtext)s</li></ul></section>" % {
+            'heading': str(_("Today's Statistics")),
+            'date': today,
+            'completed_donations': today_donations,
+            'completed_donations_subtext': str(_("New Completed Donations")),
+            'active_subscriptions': today_subscriptions,
+            'active_subscriptions_subtext': str(_("New Active Subscriptions")),
+            'donors': today_donors,
+            'donors_subtext': str(_("New Donors"))
+        })
 
 
 class TotalStatisticsPanel:
@@ -146,7 +155,19 @@ class TotalStatisticsPanel:
         total_donors = User.objects.filter(is_staff=False).count()
         total_active_subscriptions = Subscription.objects.filter(recurring_status=STATUS_ACTIVE, deleted=False).count()
         total_subscriptions = Subscription.objects.filter(deleted=False).count()
-        return mark_safe("<section class=\"summary nice-padding total-stats-panel\"><h1><strong>Total Statistics</strong></h1><ul class=\"stats\"><li><span>{}</span>Completed Donations</li><li><span>{}</span>Total Donations</li><li><span>{}</span>All Donors</li><li><span>{}</span>Active Subscriptions</li><li><span>{}</span>All Subscriptions</li></ul></section>".format(total_completed_donations, total_donations, total_donors, total_active_subscriptions, total_subscriptions))
+        return mark_safe("<section class=\"summary nice-padding total-stats-panel\"><h1><strong>%(heading)s</strong></h1><ul class=\"stats\"><li><span>%(completed_donations)i</span>%(completed_donations_subtext)s</li><li><span>%(donations)i</span>%(donations_subtext)s</li><li><span>%(donors)i</span>%(donors_subtext)s</li><li><span>%(active_subscriptions)i</span>%(active_subscriptions_subtext)s</li><li><span>%(subscriptions)i</span>%(subscriptions_subtext)s</li></ul></section>" % {
+            'heading': str(_("Total Statistics")),
+            'completed_donations': total_completed_donations,
+            'completed_donations_subtext': str(_("Completed Donations")),
+            'donations': total_donations,
+            'donations_subtext': str(_("All Donations")),
+            'donors': total_donors,
+            'donors_subtext': str(_("All Donors")),
+            'active_subscriptions': total_active_subscriptions,
+            'active_subscriptions_subtext': str(_("Active Subscriptions")),
+            'subscriptions': total_subscriptions,
+            'subscriptions_subtext': str(_("All Subscriptions"))
+        })
 
 @hooks.register('construct_homepage_panels')
 def add_statistics_panel(request, panels):

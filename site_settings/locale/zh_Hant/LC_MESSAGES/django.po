@@ -491,7 +491,7 @@ msgstr ""
 
 #: models.py:418
 msgid "Donations"
-msgstr ""
+msgstr "捐款"
 
 #: models.py:423
 msgid "Footer"

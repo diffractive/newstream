@@ -38,7 +38,8 @@ env = environ.Env(
     EMAIL_PORT=(int, 25),
     EMAIL_HOST_USER=(str, ''),
     EMAIL_HOST_PASSWORD=(str, ''), 
-    EMAIL_USE_SSL=(bool, True),
+    EMAIL_USE_SSL=(bool, False),
+    EMAIL_USE_TLS=(bool, False),
 
     DEFAULT_FROM_EMAIL=(str, ''),
 
@@ -71,6 +72,7 @@ DATABASES = {
 # Email settings
 EMAIL_BACKEND = env('EMAIL_BACKEND')
 EMAIL_USE_SSL = env('EMAIL_USE_SSL')
+EMAIL_USE_TLS = env('EMAIL_USE_TLS')
 EMAIL_PORT = env('EMAIL_PORT')
 if env('EMAIL_HOST'): EMAIL_HOST = env('EMAIL_HOST')
 if env('EMAIL_HOST_USER'): EMAIL_HOST_USER = env('EMAIL_HOST_USER')

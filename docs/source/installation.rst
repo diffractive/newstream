@@ -13,8 +13,7 @@ The simplest way to deploy Newstream is via Google Cloud. You will need to confi
 * :ref:`setup-google-cloud-sql`
 * :ref:`setup-google-secret-manager`
 * :ref:`setup-mailgun`
-* Google Cloud Run
-* Access newstream site
+* :ref:`setup-google-cloud-run`
 
 Once the site is up and running, there is some additional configuration you can apply
 
@@ -111,7 +110,37 @@ Finally, you need to create a user account. Go to `Users > Create User` and crea
 Google Secret Manager
 ---------------------
 
-The Google Cloud SQL database will hold all of your user data, as well as the site configuration and page content. We chose the lowest cost options available.
+Secret Manager is used to securely store passwords and API keys. You will need to create the following secrets
+
+* secret_key - randomly generated secret value to secure web pages and forms - see below
+* database_password - the password you recorded when you created the Google Cloud SQL database
+* admin_password - a password of your choice for the admin site
+* email_host_password - the connection password provided by mailgun
+
+To add a secret, choose Create Secret and then enter the secret details. You only need to set the name and the secret value, all other options can be left as default 
+
+.. image:: images/google-secrets-manager-add-secret.png
+  :width: 400
+  :alt: Google Secrets Manager Add Secret
+
+Once you have added all secrets, you should see the following list
+
+.. image:: images/google-secrets-manager-secret-list.png
+  :width: 400
+  :alt: Google Secrets Manager Secret List
+
+
+**secret_key**
+
+On OSX, pasting the following into your terminal will generate a suitable secret key
+
+.. code-block:: sh
+   
+   base64 /dev/urandom | head -c50 | tr '\n' ' ' && echo " "
+
+For other operating systems, you may want to use the `Javascript Key Generator <https://asecuritysite.com/encryption/js01>`_  to generate a key via your browser. Choose “Hexadecimal” and generate a new secret
+
+----
 
 .. _setup-mailgun:
 
@@ -130,7 +159,202 @@ Mailgun is a good option for medium volume sites due to it's pay as you go prici
 emails per day, which may cause problems during fundraising campaigns if a large number of donors register at once. Note that Google Workspace isn't
 free as it requires a user account to be configured.
 
+Sign up via https://www.mailgun.com/. Once logged in, go to to Sending > Domains > Add New Domain
+
+.. image:: images/mailgun-add-domain.png
+  :width: 400
+  :alt: Mailgun Add Domain
+
+You should register `mg.yourdomain.com` as recommended. You can leave the DKIM settings (under advanced settings) as default. You will now need to configure the DNS settings for your domain. As there are a number of different DNS providers, you will need to follow Mailgun's instructions for configuring this. Once you've managed to finish configuring DNS and have verified the settings, Mailgun will ask you how you want to configure your domain.
+
+.. image:: images/mailgun-chose-api-smtp.png
+  :width: 600
+  :alt: Mailgun Choose API / SMTP
+
+-rw-r--r--@ 1 kev  staff  32648 Jun 10 14:27 mailgun-add-domain.png
+-rw-r--r--@ 1 kev  staff  34661 Jun 10 14:28 mailgun-chose-api-smtp.png
+
+Choose the SMTP option. Mailgun should show you details for your SMTP connection.
+
+* SMTP hostname: smtp.eu.mailgun.org
+* Port: 587 (recommended)
+* Username: postmaster@mg.diffractive.io
+* Default password: XXX
+
+Take a note of the username, SMTP hostname and password. You will need these later when setting up Google Secret Manager and configuring your Google Cloud Run instance.
+
+----
+
+.. _setup-google-cloud-run:
+
+Google Cloud Run
+----------------
+
+Now you are ready to deploy and run the newstream instance. Go to `Cloud Run` from the Google Cloud console and choose `Create Service`. Enter the Service Name (newstream) and choose your region
+
+.. image:: images/google-cloud-run-new-service.png
+  :width: 400
+  :alt: Google Cloud Run New Service
+
+Choose the container image. You can use `gcr.io/diffractive/newstream` which is the public container image on Google Cloud for newstream.
+
+You will also need to configure the Advanced Settings
+
+**Container**
+
+.. image:: images/google-cloud-run-container.png
+  :width: 400
+  :alt: Google Cloud Run Container Settings
+
+* Container port: 8000
+* Minimum number of instances: 1
+
+**Variables & Secrets**
+
+.. image:: images/google-cloud-run-variables-and-secrets.png
+  :width: 400
+  :alt: Google Cloud Run Variables and Secerts
+
+There are quite a few variables to set here. See the :ref:`setup-docker-env-reference` for details all of variables which can be set. For the full list which is required for now, refer to the screenshot.
+
+There are some variables which need to be exposed from Google Secret Manager. You will have configured these earlier in the :ref:`setup-google-secret-manager` section of this documentation. Use "Exposed as environmental variables" for these and set the Version to "latest".
+
+.. image:: images/google-cloud-run-secrets-env.png
+  :width: 400
+  :alt: Google Cloud Run Secrets Env
+
+**Connections**
+
+Add the connection the database instance you created earlier (newstream-db) and enable the cloud sql admin API
+
+.. image:: images/google-cloud-run-connections.png
+  :width: 400
+  :alt: Google Cloud Run Connections
+
+Finally, for the last step, enable “Allow unauthenticated invocations” as this is a public website
+
+.. image:: images/google-cloud-run-triggers.png
+  :width: 400
+  :alt: Google Cloud Run Triggers
+
+If everything has gone successfully, you should see a green tick showing the deployment completed, and the URL to log into the site.
+
+.. image:: images/google-cloud-run-success.png
+  :width: 400
+  :alt: Google Cloud Run Success
+
+Click on the URL to view your new installation. You can now access the admin page and start configuring and testing.
+
+.. image:: images/google-cloud-run-new-site-homepage.png
+  :width: 400
+  :alt: Google Cloud Run Homepage
 
 
+----
 
+.. _setup-docker-env-reference:
 
+Docker Env Reference
+====================
+
+.. flat-table:: Docker Parameters
+   :widths: 50 25 50 50
+   :header-rows: 1
+
+   * - :cspan:`3` Global Settings
+   * - Variable Name
+     - Sensitive
+     - Example Value
+     - Default
+   * - DJANGO_SETTINGS_MODULE
+     - No
+     - newstream.settings.gcloud
+     - 
+   * - SECRET_KEY
+     - Yes
+     - fhfb37dg3yv
+     -
+
+   * - :cspan:`3` **Admin Account Creation**
+   * - DJANGO_SUPERUSER_EMAIL
+     - No
+     - admin@diffractive.io
+     -
+   * - DJANGO_SUPERUSER_PASSWORD
+     - Yes
+     - groebge94bf
+     -
+
+   * - :cspan:`3` **Gcloud Project Details**
+   * - GCLOUD_PROJECT_ID
+     - No
+     - axiomatic-math-314909
+     -
+   * - GCLOUD_REGION
+     - No
+     - asia-southeast1
+     -
+
+   * - :cspan:`3` **Google Database Settings**
+   * - GCLOUD_DATABASE_INSTANCE
+     - No
+     - newstream-db
+     - newstream-db
+   * - GCLOUD_DATABASE_NAME
+     - No
+     - newstream
+     - newstream
+   * - GCLOUD_DATABASE_PASSWORD
+     - Yes
+     - DFf93fbjdgfuVFHDsd1f
+     - 
+
+   * - :cspan:`3` **Google Storage Settings**
+   * - GCLOUD_BUCKET_NAME
+     - No
+     - newstream.diffractive.io
+     - 
+
+   * - :cspan:`3` **Email Settings**
+   * - EMAIL_BACKEND
+     - No
+     - django.core.mail.backends.smtp.emailbackend
+     - 
+   * - EMAIL_USE_SSL
+     - No
+     - 1
+     - 0
+   * - EMAIL_USE_TLS
+     - No
+     - 1
+     - 0
+   * - EMAIL_PORT
+     - No
+     - 465
+     - 25
+   * - EMAIL_HOST
+     - No
+     - smtp.eu.mailgun.org
+     - 
+   * - EMAIL_HOST_USER
+     - No
+     - postmaster@mg.diffractive.io
+     - 
+   * - EMAIL_HOST_PASSWORD
+     - Yes
+     - doub23f89fbi32f
+     - 
+   * - DEFAULT_FROM_EMAIL
+     - No
+     - donations@diffractive.io
+     - 
+
+   * - :cspan:`3` **System Settings**
+   * - RUN_MIGRATIONS
+     - No
+     - 1
+     - 1
+   * - COLLECTSTATIC
+     - No
+     - 1
+     - 1

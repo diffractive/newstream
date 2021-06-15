@@ -15,7 +15,7 @@ services:
       RUN_MIGRATIONS: 1
       COLLECTSTATIC: 1
       COMPILEMESSAGES: 1
-      DEBUG: 1
+      NEWSTREAM_DEBUG: 1
       DATABASE_NAME: newstream
       DATABASE_USER: newstream
       DATABASE_HOST: database

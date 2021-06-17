@@ -60,7 +60,7 @@ tablib==3.0.0
 telepath==0.1.1
 typing-extensions==3.10.0.0
 urllib3==1.26.5
-wagtail==2.13
+wagtail==2.13.2
 wagtail-2fa==1.4.2
 wagtail-autocomplete==0.6.2
 wagtail-metadata==3.4.0

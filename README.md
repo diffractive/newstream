@@ -10,8 +10,32 @@ The system runs as a standalone web application, idependent of your main web pre
 or security issues which may be found with donation plugins. The system is self-contained, and can be installed
 by non-technical users, by following the documentation.
 
+
+Screenshots
+-----------
+
+<div style="display:inline-block; float:none">
+
+<a href="docs/source/images/site-donation.png">
+  <img style="float:left; padding:5px"  src="docs/source/images/site-donation.png" alt="Donation Page" width="100"/>
+</a>
+
+<a href="docs/source/images/site-recurring-donations.png">
+  <img style="float:left; padding:5px" src="docs/source/images/site-recurring-donations.png" alt="Recurring Donations" width="100"/>
+</a>
+
+<a href="docs/source/images/site-personal-info.png">
+  <img style="float:left; padding:5px" src="docs/source/images/site-personal-info.png" alt="Personal Info" width="100"/>
+</a>
+
+<a href="docs/source/images/site-frontpage.png">
+  <img style="float:left; padding:5px" src="docs/source/images/site-frontpage.png" alt="Personal Info" width="240"/>
+</a>
+</div>
+
+
 Features
-========
+---------
 
 - End user portal for donors (subscription settings, receipts, password management)
 - Reporting and donor management via admin site

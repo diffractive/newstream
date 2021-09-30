@@ -2,11 +2,10 @@
 {% load common_tags donation_tags i18n %}
 
 {% block title %}
-{% trans 'NEW ONE-OFF DONATION' %}
+{{ mail_title }}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "NEW ONE-OFF DONATION" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.display_donor }},</p>
 {% if donation.is_recurring %}
 {% url 'donations:my-recurring-donations' as donations_url %}

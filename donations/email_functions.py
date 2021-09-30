@@ -81,8 +81,8 @@ def sendDonationNotifToAdmins(donation):
 
 
 def sendDonationReceiptToDonor(donation):
-    mail_title = _("NEW ONE-OFF DONATION")
-    sendEmailNotificationsToDonor(getDonationEmail(donation), mail_title, get_donation_receipt_text(donation), render_to_string('donations/email_templates/donation_receipt.html', context={'donation': donation}))
+    mail_title = _("Thank you for your Donation")
+    sendEmailNotificationsToDonor(getDonationEmail(donation), mail_title, get_donation_receipt_text(donation), render_to_string('donations/email_templates/donation_receipt.html', context={'donation': donation, 'mail_title': mail_title}))
 
 
 def sendDonationRevokedToAdmins(donation):
@@ -99,13 +99,13 @@ def sendDonationRevokedToDonor(donation):
 
 
 def sendDonationStatusChangeToDonor(donation):
-    mail_title = _("ONE-OFF DONATION STATUS UPDATED")
-    sendEmailNotificationsToDonor(getDonationEmail(donation), mail_title, get_donation_status_change_text(donation), render_to_string('donations/email_templates/donation_status_change.html', context={'donation': donation}))
+    mail_title = _("Your Donation Status is Updated")
+    sendEmailNotificationsToDonor(getDonationEmail(donation), mail_title, get_donation_status_change_text(donation), render_to_string('donations/email_templates/donation_status_change.html', context={'donation': donation, 'mail_title': mail_title}))
 
 
 def sendSubscriptionStatusChangeToDonor(subscription):
-    mail_title = _("RECURRING DONATION STATUS UPDATED")
-    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_subscription_status_change_text(subscription), render_to_string('donations/email_templates/subscription_status_change.html', context={'subscription': subscription}))
+    mail_title = _("Your Recurring Donation Status is Updated")
+    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_subscription_status_change_text(subscription), render_to_string('donations/email_templates/subscription_status_change.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
 def sendRenewalNotifToAdmins(donation):
@@ -117,8 +117,8 @@ def sendRenewalNotifToAdmins(donation):
 
 
 def sendRenewalReceiptToDonor(donation):
-    mail_title = _("NEW RENEWAL DONATION")
-    sendEmailNotificationsToDonor(donation.user.email, mail_title, get_renewal_receipt_text(donation), render_to_string('donations/email_templates/renewal_receipt.html', context={'donation': donation}))
+    mail_title = _("Thank you for your Monthly Donation")
+    sendEmailNotificationsToDonor(donation.user.email, mail_title, get_renewal_receipt_text(donation), render_to_string('donations/email_templates/renewal_receipt.html', context={'donation': donation, 'mail_title': mail_title}))
 
 
 def sendRecurringAdjustedNotifToAdmins(subscription):
@@ -130,8 +130,8 @@ def sendRecurringAdjustedNotifToAdmins(subscription):
 
 
 def sendRecurringAdjustedNotifToDonor(subscription):
-    mail_title = _("DONATION AMOUNT ADJUSTED")
-    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_recurring_adjusted_donor_text(subscription), render_to_string('donations/email_templates/recurring_adjusted_donor.html', context={'subscription': subscription}))
+    mail_title = _("Your Recurring Donation Amount is Adjusted")
+    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_recurring_adjusted_donor_text(subscription), render_to_string('donations/email_templates/recurring_adjusted_donor.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
 def sendNewRecurringNotifToAdmins(subscription):
@@ -143,8 +143,8 @@ def sendNewRecurringNotifToAdmins(subscription):
 
 
 def sendNewRecurringNotifToDonor(subscription):
-    mail_title = _("NEW RECURRING DONATION")
-    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_new_recurring_donor_text(subscription), render_to_string('donations/email_templates/recurring_new_donor.html', context={'subscription': subscription}))
+    mail_title = _("Thank you for setting up a Recurring Donation")
+    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_new_recurring_donor_text(subscription), render_to_string('donations/email_templates/recurring_new_donor.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
 def sendRecurringRescheduledNotifToAdmins(subscription):
@@ -156,8 +156,8 @@ def sendRecurringRescheduledNotifToAdmins(subscription):
 
 
 def sendRecurringRescheduledNotifToDonor(subscription):
-    mail_title = _("RECURRING DONATION RESCHEDULED")
-    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_recurring_rescheduled_donor_text(subscription), render_to_string('donations/email_templates/recurring_rescheduled_donor.html', context={'subscription': subscription}))
+    mail_title = _("Your Recurring Donation is Rescheduled")
+    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_recurring_rescheduled_donor_text(subscription), render_to_string('donations/email_templates/recurring_rescheduled_donor.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
 def sendRecurringPausedNotifToAdmins(subscription):
@@ -169,8 +169,8 @@ def sendRecurringPausedNotifToAdmins(subscription):
 
 
 def sendRecurringPausedNotifToDonor(subscription):
-    mail_title = _("DONATION PAUSED")
-    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_recurring_paused_donor_text(subscription), render_to_string('donations/email_templates/recurring_paused_donor.html', context={'subscription': subscription}))
+    mail_title = _("Your Recurring Donation is Paused")
+    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_recurring_paused_donor_text(subscription), render_to_string('donations/email_templates/recurring_paused_donor.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
 def sendRecurringResumedNotifToAdmins(subscription):
@@ -182,8 +182,8 @@ def sendRecurringResumedNotifToAdmins(subscription):
 
 
 def sendRecurringResumedNotifToDonor(subscription):
-    mail_title = _("DONATION RESUMED")
-    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_recurring_resumed_donor_text(subscription), render_to_string('donations/email_templates/recurring_resumed_donor.html', context={'subscription': subscription}))
+    mail_title = _("Your Recurring Donation is Resumed")
+    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_recurring_resumed_donor_text(subscription), render_to_string('donations/email_templates/recurring_resumed_donor.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
 def sendRecurringCancelledNotifToAdmins(subscription):
@@ -202,8 +202,8 @@ def sendRecurringCancelRequestNotifToAdmins(subscription):
 
 
 def sendRecurringCancelledNotifToDonor(subscription):
-    mail_title = _("DONATION CANCELLED")
-    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_recurring_cancelled_donor_text(subscription), render_to_string('donations/email_templates/recurring_cancelled_donor.html', context={'subscription': subscription}))
+    mail_title = _("Your Recurring Donation is Cancelled")
+    sendEmailNotificationsToDonor(subscription.user.email, mail_title, get_recurring_cancelled_donor_text(subscription), render_to_string('donations/email_templates/recurring_cancelled_donor.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
 def sendAccountCreatedNotifToAdmins(user):
@@ -223,8 +223,8 @@ def sendAccountDeletedNotifToAdmins(user):
 
 
 def sendAccountDeletedNotifToDonor(user):
-    mail_title = _("ACCOUNT DELETED")
-    sendEmailNotificationsToDonor(user.email, mail_title, get_account_deleted_donor_text(user), render_to_string('donations/email_templates/account_deleted_donor.html', context={'user': user}))
+    mail_title = _("Your Account is Deleted")
+    sendEmailNotificationsToDonor(user.email, mail_title, get_account_deleted_donor_text(user), render_to_string('donations/email_templates/account_deleted_donor.html', context={'user': user, 'mail_title': mail_title}))
 
 
 def sendVerificationEmail(user):

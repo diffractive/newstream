@@ -11,7 +11,7 @@ Hi Admins,\n
 This email is to inform you that a new donation has been made on your website:\n
 %(url)s\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Transaction ID: %(transaction_id)s\n
 Donation frequency: %(frequency)s\n
 Payment method: %(gateway)s\n
@@ -22,7 +22,7 @@ Payment status: %(status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'url': reverse_with_site_url('donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
-        'name': donation.donor_name(),
+        'name': donation.display_donor_name(),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
         'gateway': donation.gateway,
@@ -57,7 +57,7 @@ Payment status: %(status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': donation.donor_name(),
+        'name': donation.display_donor(),
         'url_text': url_text,
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
@@ -76,7 +76,7 @@ Hi Admins,\n
 This email is to inform you that a donation has been revoked on your website:\n
 %(url)s\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Transaction ID: %(transaction_id)s\n
 Donation frequency: %(frequency)s\n
 Payment method: %(gateway)s\n
@@ -87,7 +87,7 @@ Payment status: %(status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'url': reverse_with_site_url('donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
-        'name': donation.donor_name(),
+        'name': donation.display_donor_name(),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
         'gateway': donation.gateway,
@@ -119,7 +119,7 @@ Payment status: %(status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': donation.donor_name(),
+        'name': donation.display_donor(),
         'url_text': url_text,
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
@@ -151,7 +151,7 @@ Payment status: %(status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': donation.donor_name(),
+        'name': donation.display_donor(),
         'url_text': url_text,
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
@@ -176,7 +176,7 @@ Status: %(status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_display_fullname()(),
         'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
@@ -193,7 +193,7 @@ Hi Admins,\n
 This email is to inform you that a new renewal donation has been made on your website:\n
 %(url)s\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Transaction ID: %(transaction_id)s\n
 Donation frequency: %(frequency)s\n
 Payment method: %(gateway)s\n
@@ -204,7 +204,7 @@ Payment status: %(status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'url': reverse_with_site_url('donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
-        'name': donation.user.fullname,
+        'name': donation.user.display_display_fullname()(),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
         'gateway': donation.gateway,
@@ -234,7 +234,7 @@ Payment status: %(status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': donation.user.fullname,
+        'name': donation.user.display_display_fullname()(),
         'url': reverse_with_site_url('donations:my-renewals', kwargs={'id': donation.subscription.id}),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
@@ -253,7 +253,7 @@ Hi Admins,\n
 A Recurring Donation's amount has been adjusted on your website:\n
 %(url)s\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -262,7 +262,7 @@ Recurring Status: %(recurring_status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'profile_id': subscription.profile_id,
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
@@ -281,7 +281,7 @@ Sign into our support page (click "forgot password?" if you have trouble logging
 From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -289,7 +289,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
@@ -306,7 +306,7 @@ Hi Admins,\n
 A new recurring donation has been activated on your website:\n
 %(url)s\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -315,7 +315,7 @@ Recurring Status: %(recurring_status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'profile_id': subscription.profile_id,
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
@@ -334,7 +334,7 @@ Sign into our support page (click "forgot password?" if you have trouble logging
 From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -342,7 +342,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
@@ -359,7 +359,7 @@ Hi Admins,\n
 A Recurring Donation's billing date has been rescheduled to today:\n
 %(url)s\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -368,7 +368,7 @@ Recurring Status: %(recurring_status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'profile_id': subscription.profile_id,
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
@@ -387,7 +387,7 @@ Sign into our support page (click "forgot password?" if you have trouble logging
 From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -395,7 +395,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
@@ -412,7 +412,7 @@ Hi Admins,\n
 This email is to inform you that a recurring donation has been paused on your website:\n
 %(url)s\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -421,7 +421,7 @@ Recurring Status: %(recurring_status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'profile_id': subscription.profile_id,
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
@@ -440,7 +440,7 @@ Sign into our support page (click "forgot password?" if you have trouble logging
 From all of us, thank you for backing our team and helping us keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -448,7 +448,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
@@ -465,7 +465,7 @@ Hi Admins,\n
 This email is to inform you that a recurring donation has been resumed on your website:\n
 %(url)s\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -474,7 +474,7 @@ Recurring Status: %(recurring_status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'profile_id': subscription.profile_id,
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
@@ -493,7 +493,7 @@ Sign into our support page (click "forgot password?" if you have trouble logging
 From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -501,7 +501,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
@@ -518,7 +518,7 @@ Hi Admins,\n
 This email is to inform you that a recurring donation has been cancelled on your website:\n
 %(url)s\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -527,7 +527,7 @@ Recurring Status: %(recurring_status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'profile_id': subscription.profile_id,
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
@@ -543,7 +543,7 @@ Hi Admins,\n
 This email is to inform you that a cancellation to a recurring donation has been requested on your website. Please complete the request and manually change the subscription status to Cancelled at the link below:\n
 %(url)s\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -552,7 +552,7 @@ Recurring Status: %(recurring_status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'profile_id': subscription.profile_id,
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
@@ -571,7 +571,7 @@ Sign into our support page(%(siteurl)s) (click "forgot password?" if you have tr
 From all of us, thank you for backing our team and helping us keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
@@ -579,7 +579,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': subscription.user.fullname,
+        'name': subscription.user.display_fullname(),
         'siteurl': get_site_url(),
         'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
@@ -597,12 +597,12 @@ Hi Admins,\n
 This email is to inform you that a donor account has been deleted on your website:\n
 %(url)s\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
         'url': get_site_url()+'/admin/users/',
-        'name': user.fullname,
+        'name': user.display_fullname(),
         'sitename': get_site_name()
     }
 
@@ -617,7 +617,7 @@ From all of us, thank you for backing our team and helping us keep independent m
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': user.fullname,
+        'name': user.display_fullname(),
         'sitename': get_site_name()
     }
 
@@ -629,12 +629,12 @@ Hi Admins,\n
 This email is to inform you that a donor account has been created on your website:\n
 %(url)s\n
 \n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
         'url': get_site_url()+'/admin/users/%d/' % user.id,
-        'name': user.fullname,
+        'name': user.display_fullname(),
         'sitename': get_site_name()
     }
 
@@ -647,7 +647,7 @@ This email is to inform you that a donation error has occurred on your website:\
 %(url)s\n
 \n
 Donation transaction ID: %(order)s\n
-Donor: %(name)s\n
+Donor name: %(name)s\n
 Error title: %(error_title)s\n
 Error description: %(error_description)s\n
 \n
@@ -655,7 +655,7 @@ Thank you,\n
 %(sitename)s""") % {
         'url': reverse_with_site_url('donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
         'order': donation.transaction_id,
-        'name': donation.donor_name(),
+        'name': donation.display_donor_name(),
         'error_title': error_title,
         'error_description': error_description,
         'sitename': get_site_name()

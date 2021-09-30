@@ -7,7 +7,7 @@
 
 {% block content %}
 <h2 style="{{ 'heading'|email_css }}">{% trans "NEW ONE-OFF DONATION" %}</h2>
-<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.donor_name }},</p>
+<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.display_donor }},</p>
 {% if donation.is_recurring %}
 {% url 'donations:my-recurring-donations' as donations_url %}
 {% else %}

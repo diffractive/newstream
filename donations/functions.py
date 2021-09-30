@@ -50,7 +50,7 @@ def isUpdateSubsFrequencyLimitationPassed(gatewayManager):
         nowdt = datetime.now(dt_timezone.utc)
         fiveminsbf = nowdt - timedelta(minutes=5)
         count = UserSubscriptionUpdatesLog.objects.filter(user=gatewayManager.subscription.user, created_at__gte=fiveminsbf).count()
-        _debug('Count of Subscription Actions done by {} within five minutes: {}'.format(gatewayManager.subscription.user.fullname, count))
+        _debug('Count of Subscription Actions done by {} within five minutes: {}'.format(gatewayManager.subscription.user.display_fullname(), count))
         if count >= 5:
             return False
     return True

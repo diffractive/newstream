@@ -22,7 +22,7 @@
     <p class="mb-5 text-center">{% trans 'Please consider donating to us again. Your support means a lot to us.' %}</p>
     <div class="donation-info-box info-spacing-css p-4 lg:p-8 border-2 rounded border-gray-200">
         <p class="field-label">{% trans 'Donor' %}</p>
-        <p class="field-value text-primary font-bold">{{ donation.donor_name }}</p>
+        <p class="field-value text-primary font-bold">{{ donation|display_donor }}</p>
         <p class="field-label">{% trans 'Transaction ID' %}</p>
         <p class="field-value text-primary font-bold" style="word-break: break-all;">{{ donation.transaction_id }}</p>
         <p class="field-label">{% trans 'Donation frequency' %}</p>

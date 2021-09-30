@@ -14,8 +14,8 @@
 </p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
-        <td style="font-weight: bold;">{% trans 'Donor' %}</td>
-        <td>{{ donation.user.fullname }}</td>
+        <td style="font-weight: bold;">{% trans 'Donor name' %}</td>
+        <td>{{ donation.user.display_fullname }}</td>
     </tr>
     <tr>
         <td style="font-weight: bold;">{% trans 'Transaction ID' %}</td>

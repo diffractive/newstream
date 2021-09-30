@@ -7,7 +7,7 @@
 
 {% block content %}
 <h2 style="{{ 'heading'|email_css }}">{% trans "NEW RENEWAL DONATION" %}</h2>
-<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.user.fullname }},</p>
+<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.user.display_fullname }},</p>
 {% url 'donations:my-renewals' donation.subscription.id as donations_url %}
 <p style="{{ 'parag'|email_css }}">
     {% blocktrans with donation_amount=donation|amount_with_currency %}A big "thank you" for your kind <strong>{{ donation_amount }}</strong> recurring donation - it is very much appreciated and it will go a long way in supporting our operations.{% endblocktrans %}

@@ -16,8 +16,8 @@
 </p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
-        <td style="font-weight: bold;">{% trans 'Donor' %}</td>
-        <td>{{ subscription.user.fullname }}</td>
+        <td style="font-weight: bold;">{% trans 'Donor name' %}</td>
+        <td>{{ subscription.user.display_fullname }}</td>
     </tr>
     <tr>
         <td style="font-weight: bold;">{% trans "Recurring donation identifier" %}</td>

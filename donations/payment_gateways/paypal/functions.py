@@ -106,8 +106,8 @@ def createPlan(session, product_id, donation):
     api_url = paypalSettings.api_url+'/v1/billing/plans'
     plan_dict = {
         "product_id": product_id,
-        "name": "Newstream Donation Plan for %s" % (donation.user.fullname),
-        "description": "Newstream Donation Plan for %s" % (donation.user.fullname),
+        "name": "Newstream Donation Plan for %s" % (donation.user.display_fullname()),
+        "description": "Newstream Donation Plan for %s" % (donation.user.display_fullname()),
         "status": "ACTIVE",
         "billing_cycles": [
             {

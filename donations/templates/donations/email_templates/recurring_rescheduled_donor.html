@@ -7,7 +7,7 @@
 
 {% block content %}
 <h2 style="{{ 'heading'|email_css }}">{% trans "RECURRING DONATION RESCHEDULED" %}</h2>
-<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ subscription.user.fullname }},</p>
+<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ subscription.user.display_fullname }},</p>
 {% url 'donations:my-recurring-donations' as donations_url %}
 <p style="{{ 'parag'|email_css }}">
     {% blocktrans %}A big "thank you" for your kind contribution - it is very much appreciated and it will go a long way in supporting our operations. Your monthly donation's billing date has been rescheduled to today.{% endblocktrans %}
@@ -24,8 +24,8 @@
 <p style="{{ 'parag'|email_css }}">{% trans "Details of your recurring donation:" %}</p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
-        <td style="font-weight: bold;">{% trans 'Donor' %}</td>
-        <td>{{ subscription.user.fullname }}</td>
+        <td style="font-weight: bold;">{% trans 'Donor name' %}</td>
+        <td>{{ subscription.user.display_fullname }}</td>
     </tr>
     <tr>
         <td style="font-weight: bold;">{% trans "Recurring donation identifier" %}</td>

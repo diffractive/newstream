@@ -103,8 +103,9 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
             renewal.save()
 
             # email notifications
-            sendRenewalReceiptToDonor(renewal)
-            sendRenewalNotifToAdmins(renewal)
+            # disabling renewal emails for the moment
+            # sendRenewalReceiptToDonor(renewal)
+            # sendRenewalNotifToAdmins(renewal)
 
             # also save required DonationPaymentMetas, purchase key is skipped here as it should be saved at the parent payment/subscription
             transaction_id_dpm = DonationPaymentMeta(donation=renewal, field_key='_give_payment_transaction_id', field_value=self.request.POST.get('txn_id', ''))

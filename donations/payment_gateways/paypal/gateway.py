@@ -115,8 +115,9 @@ class Gateway_Paypal(PaymentGatewayManager):
                     donation.save()
 
                     # email notifications
-                    sendRenewalReceiptToDonor(donation)
-                    sendRenewalNotifToAdmins(donation)
+                    # disabling renewal emails for the moment
+                    # sendRenewalReceiptToDonor(donation)
+                    # sendRenewalNotifToAdmins(donation)
                 else:
                     # this is a first time subscription payment
                     self.donation.payment_status = STATUS_COMPLETE

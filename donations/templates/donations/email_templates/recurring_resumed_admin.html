@@ -20,6 +20,10 @@
         <td>{{ subscription.user.display_fullname }}</td>
     </tr>
     <tr>
+        <td style="font-weight: bold;">{% trans 'Donor email' %}</td>
+        <td>{{ subscription.user.email }}</td>
+    </tr>
+    <tr>
         <td style="font-weight: bold;">{% trans "Recurring donation identifier" %}</td>
         <td>{{ subscription.profile_id }}</td>
     </tr>

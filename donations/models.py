@@ -374,6 +374,9 @@ class Donation(ClusterableModel):
     def display_donor_name(self):
         return self.donor_name if self.donor_name else '--'
 
+    def display_donor_email(self):
+        return self.donor_email if self.donor_email else '--'
+
     @property
     def donor_name(self):
         if self.user:
@@ -386,7 +389,7 @@ class Donation(ClusterableModel):
         if self.user:
             return self.user.email
         else:
-            return self.guest_email
+            return self.guest_email or ''
 
     @property
     def is_user_first_donation(self):

@@ -18,8 +18,12 @@
         <td>{{ donation.transaction_id }}</td>
     </tr>
     <tr>
-        <td style="font-weight: bold;">{% trans 'Donor' %}</td>
+        <td style="font-weight: bold;">{% trans 'Donor name' %}</td>
         <td>{{ donation.display_donor_name }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans 'Donor email' %}</td>
+        <td>{{ donation.display_donor_email }}</td>
     </tr>
     <tr>
         <td style="font-weight: bold;">{% trans 'Error title' %}</td>

@@ -10,7 +10,7 @@ from allauth.account.utils import send_email_confirmation
 
 from newstream.functions import get_site_settings_from_default_site, set_default_from_email
 from donations.functions import getDonationEmail
-from donations.templates.donations.email_templates.plain_texts import get_donation_revoked_admin_text, get_donation_revoked_donor_text, get_new_donation_text, get_donation_receipt_text, get_donation_status_change_text, get_new_recurring_admin_text, get_new_recurring_donor_text, get_recurring_rescheduled_admin_text, get_recurring_rescheduled_donor_text, get_subscription_status_change_text, get_new_renewal_text, get_renewal_receipt_text, get_recurring_adjusted_admin_text, get_recurring_adjusted_donor_text, get_recurring_paused_admin_text, get_recurring_paused_donor_text, get_recurring_resumed_admin_text, get_recurring_resumed_donor_text, get_recurring_cancelled_admin_text, get_recurring_cancel_request_admin_text, get_recurring_cancelled_donor_text, get_account_created_admin_text, get_account_deleted_admin_text, get_account_deleted_donor_text, get_donation_error_admin_text
+from donations.templates.donations.email_templates.plain_texts import get_donation_revoked_admin_text, get_donation_revoked_donor_text, get_new_donation_admin_text, get_donation_receipt_text, get_donation_status_change_text, get_new_recurring_admin_text, get_new_recurring_donor_text, get_recurring_rescheduled_admin_text, get_recurring_rescheduled_donor_text, get_subscription_status_change_text, get_new_renewal_text, get_renewal_receipt_text, get_recurring_adjusted_admin_text, get_recurring_adjusted_donor_text, get_recurring_paused_admin_text, get_recurring_paused_donor_text, get_recurring_resumed_admin_text, get_recurring_resumed_donor_text, get_recurring_cancelled_admin_text, get_recurring_cancel_request_admin_text, get_recurring_cancelled_donor_text, get_account_created_admin_text, get_account_deleted_admin_text, get_account_deleted_donor_text, get_donation_error_admin_text
 
 
 def setDonorLanguagePreference(user):
@@ -76,7 +76,7 @@ def sendDonationNotifToAdmins(donation):
     siteSettings = get_site_settings_from_default_site()
     mail_title = _("New One-off Donation")
     if siteSettings.admin_receive_checkout_emails:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, get_new_donation_text(donation), render_to_string(
+        sendEmailNotificationsToAdmins(siteSettings, mail_title, get_new_donation_admin_text(donation), render_to_string(
             'donations/email_templates/new_donation.html', context={'donation': donation}))
 
 

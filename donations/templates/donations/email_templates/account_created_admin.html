@@ -21,6 +21,10 @@
         <td style="font-weight: bold;">{% trans 'Donor name' %}</td>
         <td>{{ user.display_fullname }}</td>
     </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans 'Donor email' %}</td>
+        <td>{{ user.email }}</td>
+    </tr>
 </table>
 
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>

@@ -566,7 +566,7 @@ def get_recurring_cancelled_donor_text(subscription):
     return _("""
 Dear %(name)s,\n
 Thanks very much for your recent support.\n
-Your recurring donation to HKFP has been suspended at your request - no further payments will be processed.\n
+Your recurring donation to HKFP has been cancelled at your request - no further payments will be processed.\n
 Sign into our support page(%(siteurl)s) if you wish to support us again in the future. Please email donations@hongkongfp.com if you have any further enquiries.\n
 From all of us, thank you for backing our team and helping us keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n

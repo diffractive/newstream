@@ -171,4 +171,9 @@ def remember_filter(html):
 
 @register.filter(name='display_username')
 def display_username(user):
-    return user.fullname
+    return user.display_fullname()
+
+
+@register.filter(name='display_donor')
+def display_donor(donation):
+    return donation.display_donor()

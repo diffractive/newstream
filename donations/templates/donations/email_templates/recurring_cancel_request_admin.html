@@ -2,11 +2,10 @@
 {% load common_tags i18n %}
 
 {% block title %}
-{% trans 'Cancellation to a Recurring Donation is requested' %}
+{{ mail_title }}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "Cancellation to a Recurring Donation is requested" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans 'Hi Admins,' %}</p>
 <p style="{{ 'parag'|email_css }}">
     {% trans 'This email is to inform you that a cancellation to a recurring donation has been requested on your website. Please complete the request and manually change the subscription status to Cancelled at the link below:' %}
@@ -16,8 +15,12 @@
 </p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
-        <td style="font-weight: bold;">{% trans 'Donor' %}</td>
-        <td>{{ subscription.user.fullname }}</td>
+        <td style="font-weight: bold;">{% trans 'Donor name' %}</td>
+        <td>{{ subscription.user.display_fullname }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans 'Donor email' %}</td>
+        <td>{{ subscription.user.email }}</td>
     </tr>
     <tr>
         <td style="font-weight: bold;">{% trans "Recurring donation identifier" %}</td>

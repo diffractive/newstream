@@ -2,11 +2,10 @@
 {% load common_tags i18n %}
 
 {% block title %}
-{% trans 'A Recurring Donation Amount is Adjusted' %}
+{{ mail_title }}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "A Recurring Donation Amount is Adjusted" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans 'Hi Admins,' %}</p>
 <p style="{{ 'parag'|email_css }}">
     {% trans "A Recurring Donation's amount has been adjusted on your website:" %}
@@ -16,8 +15,12 @@
 </p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
-        <td style="font-weight: bold;">{% trans 'Donor' %}</td>
-        <td>{{ subscription.user.fullname }}</td>
+        <td style="font-weight: bold;">{% trans 'Donor name' %}</td>
+        <td>{{ subscription.user.display_fullname }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans 'Donor email' %}</td>
+        <td>{{ subscription.user.email }}</td>
     </tr>
     <tr>
         <td style="font-weight: bold;">{% trans "Recurring donation identifier" %}</td>

@@ -368,11 +368,28 @@ class Donation(ClusterableModel):
     def isRecurring(self):
         return 'Yes' if self.is_recurring else 'No'
 
+    def display_donor(self):
+        return self.donor_name or self.donor_email
+
+    def display_donor_name(self):
+        return self.donor_name if self.donor_name else '--'
+
+    def display_donor_email(self):
+        return self.donor_email if self.donor_email else '--'
+
+    @property
     def donor_name(self):
         if self.user:
             return self.user.fullname
         else:
-            return self.guest_email
+            return ''
+
+    @property
+    def donor_email(self):
+        if self.user:
+            return self.user.email
+        else:
+            return self.guest_email or ''
 
     @property
     def is_user_first_donation(self):

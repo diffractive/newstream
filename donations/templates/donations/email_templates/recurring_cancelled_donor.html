@@ -2,21 +2,20 @@
 {% load common_tags donation_tags i18n %}
 
 {% block title %}
-{% trans 'DONATION CANCELLED' %}
+{{ mail_title }}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "DONATION CANCELLED" %}</h2>
-<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ subscription.user.fullname }},</p>
+<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ subscription.user.display_fullname }},</p>
 {% url 'donations:my-recurring-donations' as donations_url %}
 <p style="{{ 'parag'|email_css }}">
     {% trans "Thanks very much for your recent support." %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    {% trans "Your recurring donation to HKFP has been suspended at your request - no further payments will be processed." %}
+    {% trans "Your recurring donation to HKFP has been cancelled at your request - no further payments will be processed." %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with site_url=''|site_rel_url %}<a href="{{ site_url }}" target="_blank" rel="noopener noreferrer">Sign into our support page</a> (click "forgot password?" if you have trouble logging in) if you wish to support us again in the future. Please email <a href="mailto:donations@hongkongfp.com">donations@hongkongfp.com</a> if you have any further enquiries.{% endblocktrans %}
+    {% blocktrans with site_url=''|site_rel_url %}<a href="{{ site_url }}" target="_blank" rel="noopener noreferrer">Sign into our support page</a> if you wish to support us again in the future. Please email <a href="mailto:donations@hongkongfp.com">donations@hongkongfp.com</a> if you have any further enquiries.{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
     {% blocktrans %}From all of us, <strong>thank you</strong> for helping us keep independent media alive in Hong Kong!{% endblocktrans %}
@@ -24,8 +23,8 @@
 <p style="{{ 'parag'|email_css }}">{% trans "Details of your recurring donation:" %}</p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
-        <td style="font-weight: bold;">{% trans 'Donor' %}</td>
-        <td>{{ subscription.user.fullname }}</td>
+        <td style="font-weight: bold;">{% trans 'Donor name' %}</td>
+        <td>{{ subscription.user.display_fullname }}</td>
     </tr>
     <tr>
         <td style="font-weight: bold;">{% trans "Recurring donation identifier" %}</td>

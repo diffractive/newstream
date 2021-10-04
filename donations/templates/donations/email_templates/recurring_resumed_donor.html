@@ -2,12 +2,11 @@
 {% load common_tags donation_tags i18n %}
 
 {% block title %}
-{% trans 'DONATION RESUMED' %}
+{{ mail_title }}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "DONATION RESUMED" %}</h2>
-<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ subscription.user.fullname }},</p>
+<p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ subscription.user.display_fullname }},</p>
 {% url 'donations:my-recurring-donations' as donations_url %}
 <p style="{{ 'parag'|email_css }}">
     {% blocktrans with donation_amount=subscription|recurring_amount_with_currency %}A big "thank you" for resuming your <strong>{{ donation_amount }}</strong> donation - it is very much appreciated and it will go a long way in supporting our operations. Recurring donations, in particular, are vital to our sustainability.{% endblocktrans %}
@@ -16,7 +15,7 @@
     {% blocktrans %}As an HKFP Patron, your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's <a href="https://hongkongfp.com/hong-kong-free-press-annual-report-2020/" target="_blank" rel="noopener noreferrer">latest Annual Report</a> - it includes our yearly, <a href="https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/" target="_blank" rel="noopener noreferrer">audited Transparency Report</a>, so you can see how carefully we spend our income.{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with donations_full_url=donations_url|site_rel_url %}Sign into our support page (click "forgot password?" if you have trouble logging in) to <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">adjust or suspend your donation</a>. Please email <a href="mailto:donations@hongkongfp.com">donations@hongkongfp.com</a> if you have any further enquiries.{% endblocktrans %}
+    {% blocktrans with donations_full_url=donations_url|site_rel_url %}Sign into our support page to <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">adjust, pause or cancel your donation</a>. Please email <a href="mailto:donations@hongkongfp.com">donations@hongkongfp.com</a> if you have any further enquiries.{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
     {% blocktrans %}From all of us, <strong>thank you</strong> for helping us keep independent media alive in Hong Kong!{% endblocktrans %}
@@ -24,8 +23,8 @@
 <p style="{{ 'parag'|email_css }}">{% trans "Details of your recurring donation:" %}</p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
-        <td style="font-weight: bold;">{% trans 'Donor' %}</td>
-        <td>{{ subscription.user.fullname }}</td>
+        <td style="font-weight: bold;">{% trans 'Donor name' %}</td>
+        <td>{{ subscription.user.display_fullname }}</td>
     </tr>
     <tr>
         <td style="font-weight: bold;">{% trans "Recurring donation identifier" %}</td>

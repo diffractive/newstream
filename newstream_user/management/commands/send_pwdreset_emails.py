@@ -63,7 +63,7 @@ class Command(BaseCommand):
                     'csrfmiddlewaretoken': get_token(HttpRequest())
                 }
                 PasswordResetView.as_view()(request)  # email will be sent!
-                self.print("[√] PasswordReset Email sent to %s(%d)" % (donor.fullname, donor.id))
+                self.print("[√] PasswordReset Email sent to %s(%d)" % (donor.display_fullname(), donor.id))
         except Exception as e:
             self.print(str(e))
             traceback.print_exc()

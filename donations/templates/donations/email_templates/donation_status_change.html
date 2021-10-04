@@ -2,11 +2,10 @@
 {% load common_tags donation_tags i18n %}
 
 {% block title %}
-{% trans 'ONE-OFF DONATION STATUS UPDATED' %}
+{{ mail_title }}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "ONE-OFF DONATION STATUS UPDATED" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.donor_name }},</p>
 {% if donation.is_recurring %}
 {% url 'donations:my-renewals' donation.subscription.id as donations_url %}
@@ -15,7 +14,7 @@
 {% endif %}
 {% if donation.user %}
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with donations_full_url=donations_url|site_rel_url %}Sign into our support page (click "forgot password?" if you have trouble logging in) to <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">view your updated donation</a>.{% endblocktrans %}
+    {% blocktrans with donations_full_url=donations_url|site_rel_url %}Sign into our support page to <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">view your updated donation</a>.{% endblocktrans %}
 </p>
 {% endif %}
 <p style="{{ 'parag'|email_css }}">{% trans "Details of your donation:" %}</p>

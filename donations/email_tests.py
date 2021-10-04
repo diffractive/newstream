@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
 
 from newstream.functions import get_default_site
-from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_FAILED, STATUS_REVOKED, STATUS_PAUSED, STATUS_CANCELLED
+from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_FAILED, STATUS_REVOKED, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING
 from donations.email_functions import *
 from site_settings.models import PaymentGateway, GATEWAY_STRIPE
 User = get_user_model()
@@ -139,6 +139,10 @@ class EmailTests(TestCase):
     def testRecurringCancelledNotifToAdmins(self):
         self.subscription.recurring_status = STATUS_CANCELLED
         sendRecurringCancelledNotifToAdmins(self.subscription)
+
+    def testRecurringCancelRequestNotifToAdmins(self):
+        self.subscription.recurring_status = STATUS_PROCESSING
+        sendRecurringCancelRequestNotifToAdmins(self.subscription)
 
     def testRecurringCancelledNotifToDonor(self):
         self.subscription.recurring_status = STATUS_CANCELLED

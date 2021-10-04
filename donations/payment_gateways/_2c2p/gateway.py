@@ -190,9 +190,10 @@ class Gateway_2C2P(PaymentGatewayManager):
             if donation.payment_status == STATUS_REVOKED:
                 sendDonationRevokedToDonor(donation)
                 sendDonationRevokedToAdmins(donation)
-            else:
-                sendRenewalReceiptToDonor(donation)
-                sendRenewalNotifToAdmins(donation)
+            # disabling renewal emails for the moment
+            # else:
+            #     sendRenewalReceiptToDonor(donation)
+            #     sendRenewalNotifToAdmins(donation)
 
             return HttpResponse(200)
         else:

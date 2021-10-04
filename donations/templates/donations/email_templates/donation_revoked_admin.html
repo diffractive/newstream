@@ -2,11 +2,10 @@
 {% load common_tags i18n %}
 
 {% block title %}
-{% trans 'A Donation is revoked' %}
+{{ mail_title }}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "Donation Revoked" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans 'Hi Admins,' %}</p>
 <p style="{{ 'parag'|email_css }}">{% trans 'This email is to inform you that a donation has been revoked on your website:' %}</p>
 <p style="{{ 'parag'|email_css }}">
@@ -14,8 +13,12 @@
 </p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>
-        <td style="font-weight: bold;">{% trans 'Donor' %}</td>
-        <td>{{ donation.donor_name }}</td>
+        <td style="font-weight: bold;">{% trans 'Donor name' %}</td>
+        <td>{{ donation.display_donor_name }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans 'Donor email' %}</td>
+        <td>{{ donation.display_donor_email }}</td>
     </tr>
     <tr>
         <td style="font-weight: bold;">{% trans 'Transaction ID' %}</td>

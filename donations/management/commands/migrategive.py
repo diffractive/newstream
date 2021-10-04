@@ -183,7 +183,7 @@ class Command(BaseCommand):
 
                             newUser.save()
                             if options['verbose']:
-                                self.print("[√] Created Newstream User (email: %s, name: %s)." % (newUser.email, newUser.fullname))
+                                self.print("[√] Created Newstream User (email: %s, name: %s)." % (newUser.email, newUser.display_fullname()))
 
                             # add subscriptions
                             if options['verbose']:

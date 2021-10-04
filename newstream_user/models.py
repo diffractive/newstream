@@ -167,9 +167,12 @@ class User(AbstractUser, ClusterableModel):
     def is_email_verified(self, val):
         pass
 
+    def display_fullname(self):
+        return self.fullname if self.fullname else '--'
+
     @property
     def fullname(self):
-        return ' '.join([self.first_name, self.last_name]) if self.first_name and self.last_name else self.email
+        return ' '.join([self.first_name, self.last_name]) if self.first_name and self.last_name else ''
 
     @fullname.setter
     def fullname(self, val):

@@ -123,8 +123,9 @@ class Gateway_Stripe(PaymentGatewayManager):
                     dpmeta.save()
 
                     # email notifications
-                    sendRenewalReceiptToDonor(donation)
-                    sendRenewalNotifToAdmins(donation)
+                    # disabling renewal emails for the moment
+                    # sendRenewalReceiptToDonor(donation)
+                    # sendRenewalNotifToAdmins(donation)
 
                 # log down the current subscription period span
                 spmeta = SubscriptionPaymentMeta(

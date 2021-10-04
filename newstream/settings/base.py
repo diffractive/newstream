@@ -34,10 +34,12 @@ LOGIN_REDIRECT_URL = "/en"
 LOGOUT_REDIRECT_URL = "/en"
 
 # django-allauth
+ACCOUNT_ADAPTER = 'newstream.adapters.NewstreamAccountAdapter'
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False
 ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_EMAIL_SUBJECT_PREFIX = None # for removing site prefix in password reset and email verification subject lines
 # this extra signup form class is shared by both account and socialaccount
 ACCOUNT_SIGNUP_FORM_CLASS = 'newstream.forms_signup.BaseSignupForm'
 ACCOUNT_LOGOUT_ON_GET = True

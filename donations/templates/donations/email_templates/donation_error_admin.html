@@ -2,11 +2,10 @@
 {% load common_tags i18n %}
 
 {% block title %}
-{% trans 'A Donation Error has occurred' %}
+{{ mail_title }}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "A Donation Error has occurred" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans 'Hi Admins,' %}</p>
 <p style="{{ 'parag'|email_css }}">{% trans 'This email is to inform you that a donation error has occurred on your website:' %}</p>
 <p style="{{ 'parag'|email_css }}">

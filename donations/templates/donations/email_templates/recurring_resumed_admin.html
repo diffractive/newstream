@@ -2,11 +2,10 @@
 {% load common_tags i18n %}
 
 {% block title %}
-{% trans 'A Recurring Donation is resumed' %}
+{{ mail_title }}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "A Recurring Donation is resumed" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans 'Hi Admins,' %}</p>
 <p style="{{ 'parag'|email_css }}">
     {% trans 'This email is to inform you that a recurring donation has been resumed on your website:' %}

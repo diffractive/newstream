@@ -6,7 +6,6 @@
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "NEW RENEWAL DONATION" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.user.display_fullname }},</p>
 {% url 'donations:my-renewals' donation.subscription.id as renewals_url %}
 {% url 'donations:my-recurring-donations' as donation_url %}

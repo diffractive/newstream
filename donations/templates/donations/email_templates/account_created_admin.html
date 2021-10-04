@@ -2,12 +2,10 @@
 {% load common_tags i18n %}
 
 {% block title %}
-{% trans 'A Donor Account is created' %}
+{{ mail_title }}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "A Donor Account is created" %}</h2>
-
 <p style="{{ 'parag'|email_css }}">{% trans 'Hi Admins,' %}</p>
 
 <p style="{{ 'parag'|email_css }}">{% trans 'This email is to inform you that a donor account has been created on your website:' %}</p>

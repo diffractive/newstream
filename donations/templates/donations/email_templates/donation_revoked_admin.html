@@ -2,11 +2,10 @@
 {% load common_tags i18n %}
 
 {% block title %}
-{% trans 'A Donation is revoked' %}
+{{ mail_title }}
 {% endblock %}
 
 {% block content %}
-<h2 style="{{ 'heading'|email_css }}">{% trans "Donation Revoked" %}</h2>
 <p style="{{ 'parag'|email_css }}">{% trans 'Hi Admins,' %}</p>
 <p style="{{ 'parag'|email_css }}">{% trans 'This email is to inform you that a donation has been revoked on your website:' %}</p>
 <p style="{{ 'parag'|email_css }}">

@@ -5,8 +5,7 @@ from donations.functions import displayDonationAmountWithCurrency, displayRecurr
 
 
 def get_new_donation_admin_text(donation):
-    return _("""New One-off Donation\n
-\n
+    return _("""
 Hi Admins,\n
 This email is to inform you that a new donation has been made on your website:\n
 %(url)s\n
@@ -71,8 +70,7 @@ Thank you,\n
 
 
 def get_donation_revoked_admin_text(donation):
-    return _("""A Donation is revoked\n
-\n
+    return _("""
 Hi Admins,\n
 This email is to inform you that a donation has been revoked on your website:\n
 %(url)s\n
@@ -187,8 +185,7 @@ Thank you,\n
 
 
 def get_new_renewal_text(donation):
-    return _("""New Renewal Donation\n
-\n
+    return _("""
 Hi Admins,\n
 This email is to inform you that a new renewal donation has been made on your website:\n
 %(url)s\n
@@ -249,8 +246,7 @@ Thank you,\n
 
 
 def get_recurring_adjusted_admin_text(subscription):
-    return _("""A Recurring Donation Amount is Adjusted\n
-\n
+    return _("""
 Hi Admins,\n
 A Recurring Donation's amount has been adjusted on your website:\n
 %(url)s\n
@@ -303,8 +299,7 @@ Thank you,\n
 
 
 def get_new_recurring_admin_text(subscription):
-    return _("""New Recurring Donation\n
-\n
+    return _("""
 Hi Admins,\n
 A new recurring donation has been activated on your website:\n
 %(url)s\n
@@ -357,8 +352,7 @@ Thank you,\n
 
 
 def get_recurring_rescheduled_admin_text(subscription):
-    return _("""A Recurring Donation is Rescheduled\n
-\n
+    return _("""
 Hi Admins,\n
 A Recurring Donation's billing date has been rescheduled to today:\n
 %(url)s\n
@@ -411,8 +405,7 @@ Thank you,\n
 
 
 def get_recurring_paused_admin_text(subscription):
-    return _("""A Recurring Donation is paused\n
-\n
+    return _("""
 Hi Admins,\n
 This email is to inform you that a recurring donation has been paused on your website:\n
 %(url)s\n
@@ -465,8 +458,7 @@ Thank you,\n
 
 
 def get_recurring_resumed_admin_text(subscription):
-    return _("""A Recurring Donation is resumed\n
-\n
+    return _("""
 Hi Admins,\n
 This email is to inform you that a recurring donation has been resumed on your website:\n
 %(url)s\n
@@ -519,8 +511,7 @@ Thank you,\n
 
 
 def get_recurring_cancelled_admin_text(subscription):
-    return _("""A Recurring Donation is cancelled\n
-\n
+    return _("""
 Hi Admins,\n
 This email is to inform you that a recurring donation has been cancelled on your website:\n
 %(url)s\n
@@ -546,8 +537,7 @@ Thank you,\n
 
 
 def get_recurring_cancel_request_admin_text(subscription):
-    return _("""Cancellation to a Recurring Donation is requested\n
-\n
+    return _("""
 Hi Admins,\n
 This email is to inform you that a cancellation to a recurring donation has been requested on your website. Please complete the request and manually change the subscription status to Cancelled at the link below:\n
 %(url)s\n
@@ -601,8 +591,7 @@ Thank you,\n
 
 
 def get_account_deleted_admin_text(user):
-    return _("""A Donor Account is deleted\n
-\n
+    return _("""
 Hi Admins,\n
 This email is to inform you that a donor account has been deleted on your website:\n
 %(url)s\n
@@ -634,8 +623,7 @@ Thank you,\n
 
 
 def get_account_created_admin_text(user):
-    return _("""A Donor Account is created\n
-\n
+    return _("""
 Hi Admins,\n
 This email is to inform you that a donor account has been created on your website:\n
 %(url)s\n
@@ -653,8 +641,7 @@ Thank you,\n
 
 
 def get_donation_error_admin_text(donation, error_title, error_description):
-    return _("""A Donation Error has occurred.\n
-\n
+    return _("""
 Hi Admins,\n
 This email is to inform you that a donation error has occurred on your website:\n
 %(url)s\n

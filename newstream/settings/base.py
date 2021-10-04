@@ -34,6 +34,7 @@ LOGIN_REDIRECT_URL = "/en"
 LOGOUT_REDIRECT_URL = "/en"
 
 # django-allauth
+ACCOUNT_ADAPTER = 'newstream.adapters.NewstreamAccountAdapter'
 ACCOUNT_AUTHENTICATION_METHOD = "email"
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_USERNAME_REQUIRED = False

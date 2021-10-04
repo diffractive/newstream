@@ -107,8 +107,7 @@ def get_donation_revoked_donor_text(donation):
         url_text = str(_('Go to %(url)s to view your donation on the website.') % {'url': donation_url})
     else:
         url_text = ''
-    return _("""DONATION REVOKED\n
-\n
+    return _("""
 Dear %(name)s,\n
 Your donation is unfortunately revoked by the payment gateway. %(url_text)s\n
 Here are the details of your donation:\n
@@ -177,7 +176,7 @@ Status: %(status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': subscription.user.display_display_fullname(),
+        'name': subscription.user.display_fullname(),
         'url': reverse_with_site_url('donations:my-recurring-donations'),
         'profile_id': subscription.profile_id,
         'gateway': displayGateway(subscription),
@@ -206,7 +205,7 @@ Payment status: %(status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'url': reverse_with_site_url('donations_donation_modeladmin_inspect', kwargs={'instance_pk': donation.id}),
-        'name': donation.user.display_display_fullname(),
+        'name': donation.user.display_fullname(),
         'email': donation.user.email,
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
@@ -236,7 +235,7 @@ Payment status: %(status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'name': donation.user.display_display_fullname(),
+        'name': donation.user.display_fullname(),
         'renewals_url': reverse_with_site_url('donations:my-renewals', kwargs={'id': donation.subscription.id}),
         'donation_url': reverse_with_site_url('donations:my-recurring-donations'),
         'transaction_id': donation.transaction_id,

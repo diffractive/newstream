@@ -94,8 +94,8 @@ def sendDonationRevokedToAdmins(donation):
 
 
 def sendDonationRevokedToDonor(donation):
-    mail_title = _("DONATION REVOKED")
-    sendEmailNotificationsToDonor(getDonationEmail(donation), mail_title, get_donation_revoked_donor_text(donation), render_to_string('donations/email_templates/donation_revoked_donor.html', context={'donation': donation}))
+    mail_title = _("Your Donation is Revoked")
+    sendEmailNotificationsToDonor(getDonationEmail(donation), mail_title, get_donation_revoked_donor_text(donation), render_to_string('donations/email_templates/donation_revoked_donor.html', context={'donation': donation, 'mail_title': mail_title}))
 
 
 def sendDonationStatusChangeToDonor(donation):

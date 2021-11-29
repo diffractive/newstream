@@ -42,6 +42,14 @@
                     </div>
                     <p class="secondary-text m-0" style="color: red;">{% trans 'Only required for guests donating one-time.' %}</p>
                 </div>
+                {% elif field.html_name == 'name' %}
+                <div class="mb-4 hidden">
+                    <div class="label-div">{{ field.label_tag }}</div>
+                    <div class="field-div widget_{{ field|widget_type }}" style="margin-bottom: 2px;">
+                        {{ field }}
+                    </div>
+                    <p class="secondary-text m-0" style="color: red;">{% trans 'Only required for guests donating one-time.' %}</p>
+                </div>
                 {% elif field.html_name == 'donation_amount_custom' %}
                 <div class="mb-4 hidden">
                     <div class="label-div">{{ field.label_tag }}</div>
@@ -119,6 +127,8 @@
         let customAmountDiv = document.getElementById('id_donation_amount_custom').parentNode.parentNode;
         let email = document.getElementById('id_email');
         let emailDiv = document.getElementById('id_email').parentNode.parentNode;
+        let name = document.getElementById('id_name');
+        let nameDiv = document.getElementById('id_name').parentNode.parentNode;
         let offlineInstructionsDiv = document.getElementById('offline-instructions-div');
         let guestBtnDiv = document.getElementById('guest-btn-unit');
         let registerBtnDiv = document.getElementById('register-btn-unit');
@@ -150,6 +160,7 @@
             if (event.target.value == 'onetime') {
                 if (!isLoggedIn)  {
                     emailDiv.classList.remove('hidden');
+                    nameDiv.classList.remove('hidden');
                     // email.required = true;
                     guestBtnDiv.classList.remove('hidden');
                     registerReminder.classList.remove('hidden');
@@ -158,11 +169,15 @@
                     emailDiv.classList.add('hidden');
                     email.value = '';
                     // email.required = false;
+                    nameDiv.classList.add('hidden');
+                    name.value = '';
                 }
             } else {
                 emailDiv.classList.add('hidden');
                 email.value = '';
                 // email.required = false;
+                nameDiv.classList.add('hidden');
+                name.value = '';
                 if (!isLoggedIn)  {
                     guestBtnDiv.classList.add('hidden');
                     registerReminder.classList.add('hidden');

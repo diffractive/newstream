@@ -325,6 +325,7 @@ class Donation(ClusterableModel):
         max_length=255, choices=PAYMENT_STATUS_CHOICES)
     donation_date = models.DateTimeField()
     guest_email = models.EmailField(blank=True)
+    guest_name = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
@@ -347,6 +348,7 @@ class Donation(ClusterableModel):
         FieldPanel('transaction_id', heading=_('Transaction ID')),
         FieldPanel('donation_amount', heading=_('Donation amount')),
         FieldPanel('guest_email', heading=_('Guest Email - for non-registered donors')),
+        FieldPanel('guest_name', heading=_('Guest Name - for non-registered donors')),
         FieldPanel('is_recurring', heading=_('Is Recurring Donation?')),
         FieldPanel('currency', heading=_('Currency')),
         FieldPanel('payment_status', heading=_('Payment status')),
@@ -382,7 +384,7 @@ class Donation(ClusterableModel):
         if self.user:
             return self.user.fullname
         else:
-            return ''
+            return self.guest_name or ''
 
     @property
     def donor_email(self):
@@ -445,6 +447,7 @@ class TempDonation(ClusterableModel):
     is_recurring = models.BooleanField(default=False)
     currency = models.CharField(max_length=20)
     guest_email = models.EmailField(blank=True)
+    guest_name = models.CharField(blank=True, max_length=255)
     status = models.CharField(
         max_length=255, choices=STATUS_CHOICES)
 

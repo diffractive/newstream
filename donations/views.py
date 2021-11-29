@@ -57,6 +57,7 @@ def donate(request):
                     temp_donation.currency = form.cleaned_data['currency']
                     temp_donation.temp_metas = temp_donation_metas
                     temp_donation.guest_email = form.cleaned_data.get('email', '')
+                    temp_donation.guest_name = form.cleaned_data.get('name', '')
                     temp_donation.save()
                 else:
                     temp_donation = TempDonation(
@@ -70,6 +71,7 @@ def donate(request):
                         status=STATUS_PENDING,
                         temp_metas=temp_donation_metas,
                         guest_email=form.cleaned_data.get('email', ''),
+                        guest_name=form.cleaned_data.get('name', ''),
                     )
                     temp_donation.save()
                     request.session['temp_donation_id'] = temp_donation.id
@@ -139,6 +141,7 @@ def confirm_donation(request):
                     donation_amount=tmpd.donation_amount,
                     currency=tmpd.currency,
                     guest_email=tmpd.guest_email if not request.user.is_authenticated else '',
+                    guest_name=tmpd.guest_name if not request.user.is_authenticated else '',
                     payment_status=STATUS_PROCESSING,
                     metas=temp_donation_meta_to_donation_meta(tmpd.temp_metas.all()),
                     donation_date=datetime.now(timezone.utc),

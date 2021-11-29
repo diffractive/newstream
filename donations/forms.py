@@ -20,6 +20,7 @@ DONATION_DETAILS_FIELDS = [
     'donation_amount',
     'donation_amount_custom',
     'email',
+    'name',
 ]
 
 
@@ -30,6 +31,7 @@ class DonationDetailsForm(forms.Form):
     ], label=_("Donation frequency"))
     currency = forms.CharField(widget=forms.HiddenInput())
     email = forms.EmailField(required=False, widget=forms.TextInput(attrs={'placeholder': _('Enter your email address')}), label=_("Email"))
+    name = forms.CharField(required=False, widget=forms.TextInput(attrs={'placeholder': _('Enter your full name')}), label=_("Name"))
 
     def __init__(self, *args, request=None, blueprint=None, **kwargs):
         super().__init__(*args, **kwargs)
@@ -97,6 +99,7 @@ class DonationDetailsForm(forms.Form):
             self.fields['payment_gateway'].initial = tmpd.gateway.id
             self.fields['donation_frequency'].initial = 'monthly' if tmpd.is_recurring else 'onetime'
             self.fields['email'].initial = tmpd.guest_email
+            self.fields['name'].initial = tmpd.guest_name
             self.fields['currency'].initial = tmpd.currency
             if tmpd.is_amount_custom:
                 self.fields['donation_amount'].initial = 'custom'
@@ -109,10 +112,17 @@ class DonationDetailsForm(forms.Form):
     def clean(self):
         cleaned_data = super().clean()
         email = cleaned_data.get("email")
+        name = cleaned_data.get("name")
         donation_frequency = cleaned_data.get("donation_frequency")
 
         # only requires email field if not logged in and donation-frequency is one-time
         if donation_frequency == 'onetime' and not self.request.user.is_authenticated and self.request.POST.get('submit-choice') == 'guest-submit' and not email:
             raise ValidationError(
                 _("You are required to fill in your email address.")
+            )
+
+        # only requires name field if not logged in and donation-frequency is one-time
+        if donation_frequency == 'onetime' and not self.request.user.is_authenticated and self.request.POST.get('submit-choice') == 'guest-submit' and not name:
+            raise ValidationError(
+                _("You are required to fill in your name.")
             )

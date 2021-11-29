@@ -56,6 +56,20 @@ class EmailTests(TestCase):
             recurring_status=STATUS_ACTIVE,
             subscribe_date=datetime.now(timezone.utc)
         )
+        # create test parent Donation for Subscription
+        self.parent_donation = Donation(
+            is_test=True,
+            transaction_id="TEST-ABCDE12346",
+            user=self.user,
+            gateway=PaymentGateway.objects.get(title=GATEWAY_STRIPE),
+            is_recurring=True,
+            subscription=self.subscription,
+            donation_amount=Decimal("10.00"),
+            currency="HKD",
+            guest_email='',
+            payment_status=STATUS_COMPLETE,
+            donation_date=datetime.now(timezone.utc),
+        )
         # create test Renewal Donation
         self.renewal_donation = Donation(
             is_test=True,

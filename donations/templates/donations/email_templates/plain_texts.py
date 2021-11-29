@@ -8,8 +8,8 @@ def get_donation_meta_data_text(donation):
     text = ""
     for meta in donation.metas.all():
         text += "%(key)s: %(value)s\n" % {
-            'key': meta.key,
-            'value': meta.value
+            'key': meta.field_key,
+            'value': meta.field_value
         }
     return text
 

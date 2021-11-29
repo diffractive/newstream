@@ -148,7 +148,7 @@
         <section id="tab-meta-data" role="tabpanel" aria-labelledby="tab-label-meta-data" data-tab="meta-data">
             <div class="nice-padding">
                 {% if dmetas %}
-                <h2>{% trans 'Donor Meta Data' %}</h2>
+                <h2>{% trans 'Donation Meta Data' %}</h2>
                 <dl>
                     {% for meta in dmetas %}
                     <dt>{{ meta.key }}</dt>
@@ -156,7 +156,7 @@
                     {% endfor %}
                 </dl>
                 {% else %}
-                <p>{% trans 'No donor meta data entered/registered.' %}</p>
+                <p>{% trans 'No donation meta data entered/registered.' %}</p>
                 {% endif %}
                 <hr>
                 {% if smetas %}

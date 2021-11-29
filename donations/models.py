@@ -278,6 +278,10 @@ class Subscription(ClusterableModel):
     def isRecurringProcessing(self):
         return True if self.recurring_status == STATUS_PROCESSING else False
 
+    @property
+    def parent_donation(self):
+        return self.donation_set.order_by('donation_date').first()
+
     class Meta:
         ordering = ['-subscribe_date', '-created_at']
         verbose_name = _('Subscription')

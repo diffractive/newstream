@@ -1,0 +1,8 @@
+{% if donation.metas|length >= 1 %}
+    {% for meta in donation.metas %}
+    <tr>
+        <td style="font-weight: bold;">{{ meta.field_key }}</td>
+        <td>{{ meta.field_value }}</td>
+    </tr>
+    {% endfor %}
+{% endif %}

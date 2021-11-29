@@ -4,6 +4,16 @@ from newstream.functions import get_site_name, get_site_url, reverse_with_site_u
 from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency, displayGateway
 
 
+def get_donation_meta_data_text(donation):
+    text = ""
+    for meta in donation.metas.all():
+        text += "%(key)s: %(value)s\n" % {
+            'key': meta.key,
+            'value': meta.value
+        }
+    return text
+
+
 def get_new_donation_admin_text(donation):
     return _("""
 Hi Admins,\n
@@ -18,6 +28,7 @@ Payment method: %(gateway)s\n
 Donation amount: %(amount)s\n
 Payment status: %(status)s\n
 %(recurring_status)s
+%(donation_meta_data)s
 \n
 Thank you,\n
 %(sitename)s""") % {
@@ -30,6 +41,7 @@ Thank you,\n
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
         'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring and donation.subscription else '',
+        'donation_meta_data': get_donation_meta_data_text(donation),
         'sitename': get_site_name()
     }
 
@@ -83,6 +95,7 @@ Payment method: %(gateway)s\n
 Donation amount: %(amount)s\n
 Payment status: %(status)s\n
 %(recurring_status)s
+%(donation_meta_data)s
 \n
 Thank you,\n
 %(sitename)s""") % {
@@ -95,6 +108,7 @@ Thank you,\n
         'amount': displayDonationAmountWithCurrency(donation),
         'status': donation.payment_status,
         'recurring_status': 'Recurring Status: '+donation.subscription.recurring_status + "\n" if donation.is_recurring and donation.subscription else '',
+        'donation_meta_data': get_donation_meta_data_text(donation),
         'sitename': get_site_name()
     }
 
@@ -310,6 +324,7 @@ Recurring donation identifier: %(profile_id)s\n
 Payment method: %(gateway)s\n
 Recurring donation amount: %(amount)s\n
 Recurring Status: %(recurring_status)s\n
+
 \n
 Thank you,\n
 %(sitename)s""") % {
@@ -320,6 +335,7 @@ Thank you,\n
         'gateway': subscription.gateway,
         'amount': displayRecurringAmountWithCurrency(subscription),
         'recurring_status': subscription.recurring_status,
+        'donation_meta_data': get_donation_meta_data_text(subscription.parent_donation),
         'sitename': get_site_name()
     }
 
@@ -651,6 +667,7 @@ Donor name: %(name)s\n
 Donor email: %(email)s\n
 Error title: %(error_title)s\n
 Error description: %(error_description)s\n
+%(donation_meta_data)s
 \n
 Thank you,\n
 %(sitename)s""") % {
@@ -660,5 +677,6 @@ Thank you,\n
         'email': donation.display_donor_email(),
         'error_title': error_title,
         'error_description': error_description,
+        'donation_meta_data': get_donation_meta_data_text(donation),
         'sitename': get_site_name()
     }

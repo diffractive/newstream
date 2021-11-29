@@ -38,6 +38,7 @@
         <td style="font-weight: bold;">{% trans 'Recurring donation status' %}</td>
         <td>{{ subscription.recurring_status|title }}</td>
     </tr>
+    {% include "donations/email_templates/template_parts/donation_meta_data_rows.html" with donation=subscription.parent_donation %}
 </table>
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 

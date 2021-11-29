@@ -38,7 +38,7 @@ class DonationInspectView(InspectView):
                 fields[field_name]['url'] = reverse('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': self.instance.subscription.id})
         return fields
 
-    def get_donor_meta_data(self):
+    def get_donation_meta_data(self):
         """
         Return a list of DonationMeta mapped as dictionaries from self.instance
         DonationMeta are supposed to be input by donor in frontend
@@ -76,7 +76,7 @@ class DonationInspectView(InspectView):
             'status_revoked': STATUS_REVOKED,
             'status_failed': STATUS_FAILED,
             'status_cancelled': STATUS_CANCELLED,
-            'dmetas': self.get_donor_meta_data(),
+            'dmetas': self.get_donation_meta_data(),
             'smetas': self.get_system_meta_data(),
             'buttons': self.button_helper.get_buttons_for_obj(
                 self.instance, exclude=['inspect', 'edit']),

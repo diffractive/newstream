@@ -32,6 +32,7 @@
         <td style="font-weight: bold;">{% trans 'Error description' %}</td>
         <td>{{ error_description }}</td>
     </tr>
+    {% include "donations/email_templates/template_parts/donation_meta_data_rows.html" with donation=donation %}
 </table>
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 

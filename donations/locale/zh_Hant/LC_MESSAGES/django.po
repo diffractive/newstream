@@ -2761,11 +2761,11 @@ msgid "Action Logs"
 msgstr ""
 
 #: templates/modeladmin/donations/donation/inspect.html:151
-msgid "Donor Meta Data"
+msgid "Donation Meta Data"
 msgstr ""
 
 #: templates/modeladmin/donations/donation/inspect.html:159
-msgid "No donor meta data entered/registered."
+msgid "No donation meta data entered/registered."
 msgstr ""
 
 #: templates/modeladmin/donations/donation/inspect.html:163

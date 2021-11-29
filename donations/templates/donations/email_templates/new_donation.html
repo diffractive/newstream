@@ -46,6 +46,7 @@
         <td>{{ donation.subscription.recurring_status|title }}</td>
     </tr>
     {% endif %}
+    {% include "donations/email_templates/template_parts/donation_meta_data_rows.html" with donation=donation %}
 </table>
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 

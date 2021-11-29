@@ -171,6 +171,12 @@
             }
         };
         frequencySelect.dispatchEvent(new Event("change"));
+
+        // fix for button still in loading state if user submitted form without filling in the required meta fields
+        const donationMetaInputs = document.querySelectorAll('input[name^=donationmeta_]');
+        donationMetaInputs.forEach(el => el.addEventListener('invalid', event => {
+            resetWhiteLoadingBtn();
+        }));
     });
 </script>
 {% endblock extra_js %}

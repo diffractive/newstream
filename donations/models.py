@@ -76,6 +76,8 @@ class DonationForm(ClusterableModel):
         max_length=20, choices=AMOUNT_TYPE_CHOICES)
     fixed_amount = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=2,
                                        help_text=_('Define fixed donation amount if you chose "Fixed Amount" for your Amount Type.'))
+    max_amount = models.DecimalField(blank=True, null=True, max_digits=20, decimal_places=2,
+                                       help_text=_('Define maximum amount per donation.'))
     allowed_gateways = models.ManyToManyField('site_settings.PaymentGateway')
     donation_footer_text = I18nRichTextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -89,6 +91,8 @@ class DonationForm(ClusterableModel):
         FieldPanel('amount_type', heading=_('Donation amount Type')),
         FieldPanel(
             'fixed_amount', heading=_('Define Fixed Donation amount')),
+        FieldPanel(
+            'max_amount', heading=_('Define Maxium per-Donation amount')),
         InlinePanel('amount_steps', label=_('Fixed Amount Steps'), heading=_('Define Fixed Donation amount Steps'),
                     help_text=_('Define fixed donation amount steps if you chose "Fixed Steps" for your Amount Type.')),
         AutocompletePanel('allowed_gateways', heading=_(

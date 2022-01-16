@@ -39,8 +39,12 @@ class DonationDetailsForm(forms.Form):
             raise ValueError(_('Please provide request object'))
         if not blueprint:
             raise ValueError(_('Please provide a DonationForm blueprint'))
+
+        # This is the DonationForm object which defines the configuration for this form
         form = blueprint
+        self.form = form
         self.request = request
+
         # manually casting donation_footer_text from LazyI18nString to str to avoid the "richtext expects a string" error in the template
         self.footer_html = str(form.donation_footer_text)
         self.site_settings = get_site_settings_from_default_site()
@@ -126,3 +130,19 @@ class DonationDetailsForm(forms.Form):
             raise ValidationError(
                 _("You are required to fill in your name.")
             )
+
+    def clean_donation_amount_custom(self):
+
+        if self.form.max_amount:
+            donation_amount_custom = self.cleaned_data.get("donation_amount_custom")
+            currency_set = getCurrencyDictAt(self.site_settings.currency)
+            decimal_places = currency_set['setting']['number_decimals']
+
+            print(donation_amount_custom, type(donation_amount_custom), self.form.max_amount, type(self.form.max_amount), decimal_places)
+
+            if donation_amount_custom > self.form.max_amount:
+                raise ValidationError(
+                    _("Maximum donation amount is %(max_amount)s. Please contact us if you want to donate more") % {
+                        'max_amount': '{0:.{precision}f}'.format(self.form.max_amount, precision=decimal_places)
+                    }
+                )

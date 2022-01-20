@@ -138,11 +138,11 @@ class DonationDetailsForm(forms.Form):
             currency_set = getCurrencyDictAt(self.site_settings.currency)
             decimal_places = currency_set['setting']['number_decimals']
 
-            print(donation_amount_custom, type(donation_amount_custom), self.form.max_amount, type(self.form.max_amount), decimal_places)
-
             if donation_amount_custom > self.form.max_amount:
                 raise ValidationError(
                     _("Maximum donation amount is %(max_amount)s. Please contact us if you want to donate more") % {
                         'max_amount': '{0:.{precision}f}'.format(self.form.max_amount, precision=decimal_places)
                     }
                 )
+
+        return self.cleaned_data["donation_amount_custom"]

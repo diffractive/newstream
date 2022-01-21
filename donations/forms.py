@@ -133,8 +133,12 @@ class DonationDetailsForm(forms.Form):
 
     def clean_donation_amount_custom(self):
 
+        donation_amount_custom = self.cleaned_data.get("donation_amount_custom")
+
+        if donation_amount_custom is None:
+            return None
+
         if self.form.max_amount:
-            donation_amount_custom = self.cleaned_data.get("donation_amount_custom")
             currency_set = getCurrencyDictAt(self.site_settings.currency)
             decimal_places = currency_set['setting']['number_decimals']
 
@@ -145,4 +149,4 @@ class DonationDetailsForm(forms.Form):
                     }
                 )
 
-        return self.cleaned_data["donation_amount_custom"]
+        return donation_amount_custom

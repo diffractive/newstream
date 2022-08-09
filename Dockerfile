@@ -17,7 +17,8 @@ RUN set -ex \
     && apt-get upgrade -yqq \
     && apt-get install -yqq --no-install-recommends \
         postgresql-client \
-        libmariadbclient-dev \
+        libmariadb-dev \
+        libgnutls28-dev \
         libcurl4-gnutls-dev \
         gcc \ 
         mime-support \

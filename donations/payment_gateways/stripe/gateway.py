@@ -67,6 +67,12 @@ class Gateway_Stripe(PaymentGatewayManager):
                 _debug("[Webhook] Current default_payment_method: " + existingSub.default_payment_method)
                 # only modify default_payment_method if not yet modified
                 if existingSub.default_payment_method != self.setup_intent.payment_method:
+                    # for fixing "The customer does not have a payment method" error,
+                    # we need to first attach the payment method to the customer
+                    stripe.PaymentMethod.attach(
+                        self.setup_intent.payment_method,
+                        customer=existingSub.customer,
+                    )
                     stripe.Subscription.modify(
                         self.subscription.profile_id,
                         default_payment_method=self.setup_intent.payment_method

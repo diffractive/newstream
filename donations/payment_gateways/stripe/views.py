@@ -348,6 +348,12 @@ def return_from_setup_stripe(request):
 
         # only modify default_payment_method if not yet modified
         if existingSub.default_payment_method != setup_intent.payment_method:
+            # for fixing "The customer does not have a payment method" error,
+            # we need to first attach the payment method to the customer
+            stripe.PaymentMethod.attach(
+                setup_intent.payment_method,
+                customer=existingSub.customer,
+            )
             stripe.Subscription.modify(
                 subscription.profile_id,
                 default_payment_method=setup_intent.payment_method

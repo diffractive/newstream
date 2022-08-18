@@ -38,12 +38,13 @@
                 <h2 class="mb-2">{% trans 'Recurring Donation Details' %}</h2>
                 {% include 'common/form_visible_fields.html' %}
                 <button class="ns-wide-btn right-arrow-btn need-white-loading-btn"
-                    type="submit">{% trans 'Update Recurring Donation' %}<span class="icon"></span></button>
-                <hr>
-                <button type="button" id="update-card-btn" class="ns-wide-btn right-arrow-btn need-white-loading-btn">{% trans 'Update Payment Method' %}<span class="icon"></span></button>
+                    type="submit">{% trans 'Update Recurring Donation' %}<span class="icon"></span>
+                </button>
             </div>
         </div>
     </form>
+    <hr>
+    <button type="button" id="update-card-btn" class="ns-wide-btn right-arrow-btn need-white-loading-btn">{% trans 'Update Payment Method' %}<span class="icon"></span></button>
 </div>
 {% endblock content %}
 

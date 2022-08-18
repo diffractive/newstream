@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import uuid4_str, reverse_with_site_url, _exception, _debug, object_to_json
@@ -326,8 +327,36 @@ def return_from_setup_stripe(request):
     """
 
     try:
-        gatewayManager = Factory_Stripe.initGatewayByReturn(request)
-        request.session['return-donation-id'] = gatewayManager.donation.id
+        initStripeApiKey()
+
+        session_id = request.GET.get("stripe_session_id", None)
+        if not session_id:
+            raise ValueError(_("Missing session_id in request.GET"))
+
+        session = stripe.checkout.Session.retrieve(session_id)
+        import json
+        _debug(json.dumps(session, indent=4))
+        setup_intent = stripe.SetupIntent.retrieve(session.setup_intent)
+        _debug(json.dumps(setup_intent, indent=4))
+
+        subscription = Subscription.objects.get(profile_id=setup_intent.metadata.subscription_id)
+
+        existingSub = stripe.Subscription.retrieve(
+            setup_intent.metadata.subscription_id,
+        )
+        _debug("Current default_payment_method: " + existingSub.default_payment_method)
+
+        stripe.Subscription.modify(
+            setup_intent.metadata.subscription_id,
+            default_payment_method=setup_intent.payment_method
+        )
+
+        updatedSub = stripe.Subscription.retrieve(
+            setup_intent.metadata.subscription_id,
+        )
+        _debug("New default_payment_method: " + updatedSub.default_payment_method)
+
+        messages.add_message(request, messages.SUCCESS, _("Your payment method for this recurring donation is updated."))
     except ValueError as e:
         _exception(str(e))
         request.session['error-title'] = str(_("ValueError"))
@@ -341,7 +370,7 @@ def return_from_setup_stripe(request):
         request.session['error-title'] = str(_("Unknown Exception"))
         request.session['error-message'] = str(_(
             "Results returned from gateway is invalid."))
-    return redirect('donations:thank-you')
+    return redirect('donations:edit-recurring', id=subscription.id)
 
 
 @csrf_exempt
@@ -354,16 +383,22 @@ def cancel_from_setup_stripe(request):
 
         @todo: revise error handling, avoid catching all exceptions at the end
     """
-
     try:
-        gatewayManager = Factory_Stripe.initGatewayByReturn(request)
-        request.session['return-donation-id'] = gatewayManager.donation.id
+        initStripeApiKey()
 
-        if gatewayManager.session:
-            if gatewayManager.session.mode == 'payment':
-                stripe.PaymentIntent.cancel(
-                    gatewayManager.session.payment_intent)
-            # for subscription mode, payment_intent is not yet created, so no need to cancel
+        session_id = request.GET.get("stripe_session_id", None)
+        if not session_id:
+            raise ValueError(_("Missing session_id in request.GET"))
+
+        session = stripe.checkout.Session.retrieve(session_id)
+        import json
+        _debug(json.dumps(session, indent=4))
+        setup_intent = stripe.SetupIntent.retrieve(session.setup_intent)
+        _debug(json.dumps(setup_intent, indent=4))
+
+        subscription = Subscription.objects.get(profile_id=setup_intent.metadata.subscription_id)
+
+        messages.add_message(request, messages.WARNING, _("Your payment method for this recurring donation is unchanged."))
     except ValueError as e:
         _exception(str(e))
         request.session['error-title'] = str(_("ValueError"))
@@ -374,7 +409,7 @@ def cancel_from_setup_stripe(request):
         request.session['error-message'] = e.user_message
     except Exception as e:
         _exception(str(e))
-        request.session['error-title'] = str(_("Unknown Error"))
+        request.session['error-title'] = str(_("Unknown Exception"))
         request.session['error-message'] = str(_(
             "Results returned from gateway is invalid."))
-    return redirect('donations:cancelled')
+    return redirect('donations:edit-recurring', id=subscription.id)

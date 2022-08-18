@@ -20,7 +20,7 @@ RUN set -ex \
         libmariadb-dev \
         libgnutls28-dev \
         libcurl4-gnutls-dev \
-        gcc \ 
+        gcc \
         mime-support \
         gettext \
     && apt-get autoremove -yqq --purge \
@@ -40,7 +40,7 @@ COPY ./requirements.txt /
 COPY ./requirements-docker.txt /
 RUN pip install --upgrade pip \
     && pip install -r /requirements.txt \
-    && pip install -r /requirements-docker.txt 
+    && pip install -r /requirements-docker.txt
 
 # Copy the pplication code to the container
 RUN mkdir /app/
@@ -78,3 +78,66 @@ COPY uwsgi.ini /app
 # Entrypoint script
 COPY docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]
+
+########################################
+#
+# Jupyter Image
+#
+# This lets us run a jupyter container as a REPL inside the environment
+#
+
+FROM python:3.9.11-slim-buster AS jupyter
+
+# Dockerfile parameters
+ARG APP_USER=newstream
+
+# Set environment varibles
+ENV PYTHONUNBUFFERED 1
+
+# Install postgres client
+# gcc is required for uwsgi
+# mime-support is required for uwsgi to serve static files correctly
+RUN set -ex \
+    && apt-get update -yqq \
+    && apt-get upgrade -yqq \
+    && apt-get install -yqq --no-install-recommends \
+        postgresql-client \
+        gcc \
+        mime-support \
+        gettext \
+        build-essential \
+    && apt-get autoremove -yqq --purge \
+    && apt-get clean \
+    && rm -rf \
+        /var/lib/apt/lists/* \
+        /tmp/* \
+        /var/tmp/* \
+        /usr/share/man \
+        /usr/share/doc \
+        /usr/share/doc-base
+
+# Add in jupyter packages
+COPY ./requirements-jupyter.txt /tmp/
+RUN pip install -r /tmp/requirements-jupyter.txt
+
+# Create a group and user to run the newstream db
+RUN groupadd -r ${APP_USER} && useradd --no-log-init -r -g ${APP_USER} ${APP_USER}
+
+# Set up the APP_USER for running jupyter
+RUN mkdir /home/${APP_USER}
+RUN mkdir -p /home/${APP_USER}/.jupyter/custom/
+COPY jupyter/custom.css /home/${APP_USER}/.jupyter/custom/custom.css
+RUN chown -R ${APP_USER}:${APP_USER} /home/${APP_USER}
+
+# Copy the application code to the container
+RUN mkdir /app/
+WORKDIR /app/
+ADD . /app
+
+# Change to a non-root user
+USER ${APP_USER}:${APP_USER}
+
+# Entrypoint script
+COPY docker/docker-entrypoint-jupyter.sh /docker-entrypoint-jupyter.sh
+ENTRYPOINT ["/docker-entrypoint-jupyter.sh"]
+CMD ["jupyter"]

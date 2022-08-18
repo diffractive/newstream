@@ -339,22 +339,26 @@ def return_from_setup_stripe(request):
         setup_intent = stripe.SetupIntent.retrieve(session.setup_intent)
         _debug(json.dumps(setup_intent, indent=4))
 
-        subscription = Subscription.objects.get(profile_id=setup_intent.metadata.subscription_id)
+        subscription = Subscription.objects.get(pk=setup_intent.metadata.subscription_id)
 
         existingSub = stripe.Subscription.retrieve(
-            setup_intent.metadata.subscription_id,
+            subscription.profile_id,
         )
         _debug("Current default_payment_method: " + existingSub.default_payment_method)
 
-        stripe.Subscription.modify(
-            setup_intent.metadata.subscription_id,
-            default_payment_method=setup_intent.payment_method
-        )
+        # only modify default_payment_method if not yet modified
+        if existingSub.default_payment_method != setup_intent.payment_method:
+            stripe.Subscription.modify(
+                subscription.profile_id,
+                default_payment_method=setup_intent.payment_method
+            )
 
-        updatedSub = stripe.Subscription.retrieve(
-            setup_intent.metadata.subscription_id,
-        )
-        _debug("New default_payment_method: " + updatedSub.default_payment_method)
+            updatedSub = stripe.Subscription.retrieve(
+                subscription.profile_id,
+            )
+            _debug("New default_payment_method: " + updatedSub.default_payment_method)
+        else:
+            _debug("default_payment_method already modified")
 
         messages.add_message(request, messages.SUCCESS, _("Your payment method for this recurring donation is updated."))
     except ValueError as e:

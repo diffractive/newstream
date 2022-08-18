@@ -34,7 +34,7 @@ class Gateway_Stripe(PaymentGatewayManager):
         super().__init__(request, donation, subscription)
         # set stripe settings object
         self.settings = getStripeSettings()
-        # saves all remaining kwargs into the manager, e.g. session, event, invoice
+        # saves all remaining kwargs into the manager, e.g. session, event, invoice, setup_intent
         self.__dict__.update(kwargs)
 
     def redirect_to_gateway_url(self):
@@ -58,16 +58,37 @@ class Gateway_Stripe(PaymentGatewayManager):
         # Decide what actions to perform on Newstream's side according to the results/events from the Stripe notifications
         # Event: checkout.session.completed
         if self.event['type'] == EVENT_CHECKOUT_SESSION_COMPLETED:
-            # Update payment status
-            self.donation.payment_status = STATUS_COMPLETE
-            # update donation_date
-            self.donation.donation_date = datetime.now(timezone.utc)
-            self.donation.save()
+            if self.session.mode == 'setup':
+                # update subscription default_payment_method
 
-            # Since for recurring payment, subscription.updated event might lag behind checkout.session.completed
-            if not self.donation.is_recurring:
-                sendDonationReceiptToDonor(self.donation)
-                sendDonationNotifToAdmins(self.donation)
+                existingSub = stripe.Subscription.retrieve(
+                    self.subscription.profile_id,
+                )
+                _debug("[Webhook] Current default_payment_method: " + existingSub.default_payment_method)
+                # only modify default_payment_method if not yet modified
+                if existingSub.default_payment_method != self.setup_intent.payment_method:
+                    stripe.Subscription.modify(
+                        self.subscription.profile_id,
+                        default_payment_method=self.setup_intent.payment_method
+                    )
+
+                    updatedSub = stripe.Subscription.retrieve(
+                        self.subscription.profile_id,
+                    )
+                    _debug("[Webhook] New default_payment_method: " + updatedSub.default_payment_method)
+                else:
+                    _debug("[Webhook] default_payment_method already modified")
+            else:
+                # Update payment status
+                self.donation.payment_status = STATUS_COMPLETE
+                # update donation_date
+                self.donation.donation_date = datetime.now(timezone.utc)
+                self.donation.save()
+
+                # Since for recurring payment, subscription.updated event might lag behind checkout.session.completed
+                if not self.donation.is_recurring:
+                    sendDonationReceiptToDonor(self.donation)
+                    sendDonationNotifToAdmins(self.donation)
 
             return HttpResponse(status=200)
 

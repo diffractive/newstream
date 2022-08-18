@@ -45,6 +45,14 @@ class Gateway_Stripe(PaymentGatewayManager):
 
         return render(self.request, 'donations/redirection_stripe.html', {'publishable_key': self.settings.publishable_key})
 
+    def redirect_to_setup_gateway_url(self):
+        """ Overriding parent implementation as Stripe redirects with js on client browser """
+
+        # save subscription id in session for use in later checkout session creation
+        self.request.session['subscription_id'] = self.subscription.id
+
+        return render(self.request, 'donations/redirection_setup_stripe.html', {'publishable_key': self.settings.publishable_key})
+
     def process_webhook_response(self):
         initStripeApiKey()
         # Decide what actions to perform on Newstream's side according to the results/events from the Stripe notifications

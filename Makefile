@@ -1,12 +1,9 @@
 .PHONY: jupyter
 
-build: build-django build-jupyter build-tests
+build: build-django build-tests
 
 build-django:
 	docker build . -t diffractive/newstream:latest
-
-build-jupyter:
-	docker build . -t diffractive/newstream-jupyter:latest --target jupyter
 
 build-tests:
 	cd selenium-tests && make build

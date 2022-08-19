@@ -10,6 +10,8 @@ services:
     image: postgres:12
     expose:
       - "5432"
+    networks:
+      - newstream
 
   app:
     environment:
@@ -51,26 +53,6 @@ services:
       newstream:
         aliases:
           - mailhog.newstream.local
-
-  jupyter:
-    image: diffractive/newstream-jupyter:latest
-    environment:
-      DATABASE_NAME: newstream
-      DATABASE_USER: newstream
-      DATABASE_HOST: database
-      DATABASE_PASSWORD: newstream
-    ports:
-      - "127.0.0.1:8888:8888"
-    links:
-      - database:database
-    networks:
-      newstream:
-        aliases:
-          - jupyter.newstream.local
-    depends_on:
-      - app
-    profiles:
-      - jupyter
 
   selenium:
     image: seleniarm/standalone-chromium:4.1.0-alpha-20211218

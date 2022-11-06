@@ -39,7 +39,7 @@ paypal-checkout-serversdk==1.0.1
 paypalhttp==1.0.0
 paypalrestsdk==1.13.1
 phpbridge==0.0.3
-Pillow==8.2.0
+Pillow==9.0.1
 protobuf==3.17.0
 psycopg2-binary==2.9.2
 pycparser==2.20

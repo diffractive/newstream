@@ -1,3 +1,4 @@
 sphinx>=3.0
 sphinx-rtd-theme==0.5.2
 linuxdoc
+setuptools>=65.5.1 # not directly required, pinned by Snyk to avoid a vulnerability

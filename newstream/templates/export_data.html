@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Download data{% endblock %}
+
+{% block content %}
+<h1>Download data</h1>
+<div class="p-2">
+    <a href="{% url 'export-donation-data' %}" class="ns-btn block">
+        Donation
+    </a>
+</div>
+<div class="p-2">
+    <a href="{% url 'export-subscription-data' %}" class="ns-btn block">
+        Subscription
+    </a>
+</div>
+<div class="p-2">
+    <a href="{% url 'export-donor-data' %}" class="ns-btn block">
+        Donors
+    </a>
+</div>
+{% endblock %}

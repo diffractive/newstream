@@ -137,7 +137,7 @@ def export_donation_data(request):
 
     for donation in donations:
         data_row = [getattr(donation, field) for field in headings1]
-        data_row = [getattr(donation, field) for field in headings2]
+        data_row += [getattr(donation, field) for field in headings2]
 
         created_at = getattr(donation, 'created_at').strftime("%Y-%m-%d %H:%M:%S")
         updated_at = getattr(donation, 'updated_at').strftime("%Y-%m-%d %H:%M:%S")
@@ -161,7 +161,7 @@ def export_subscription_data(request):
     response['Content-Disposition'] = 'attachment; filename=' + filename
 
     headings1 = ['id', 'profile_id','recurring_amount', 'currency', 'recurring_status']
-    headings2 = ['linked_donor_deleted', 'gateway']
+    headings2 = ['linked_user_deleted', 'gateway']
     headings3 = ['created_at', 'updated_at', 'subscribe_date']
     subscriptions = Subscription.objects.all().select_related('user')
     headings =  headings1 + headings2 + headings3
@@ -170,7 +170,7 @@ def export_subscription_data(request):
     writer.writerow(headings)
     for subscription in subscriptions:
         data_row = [getattr(subscription, field) for field in headings1]
-        data_row = [getattr(subscription, field) for field in headings2]
+        data_row += [getattr(subscription, field) for field in headings2]
 
         created_at = getattr(subscription, 'created_at').strftime("%Y-%m-%d %H:%M:%S")
         updated_at = getattr(subscription, 'updated_at').strftime("%Y-%m-%d %H:%M:%S")

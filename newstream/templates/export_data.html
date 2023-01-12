@@ -1,0 +1,23 @@
+{% extends "modeladmin/index.html" %}
+{% block title %}Download data{% endblock %}
+
+{% block content %}
+<div class="nice-padding">
+    <h1>Download data</h1>
+    <p>
+        <a href="{% url 'export-donation-data' %}" class="button block">
+            Donation
+        </a>
+    </p>
+    <p>
+        <a href="{% url 'export-subscription-data' %}" class="button block">
+            Subscription
+        </a>
+    </p>
+    <p>
+        <a href="{% url 'export-donor-data' %}" class="button block">
+            Donors
+        </a>
+    </p>
+</div>
+{% endblock %}

@@ -129,7 +129,7 @@ def export_donation_data(request):
     headings1 = ['id', 'transaction_id','donation_amount', 'is_recurring', 'currency', 'payment_status']
     headings2 = ['linked_user_deleted', 'gateway', 'subscription_id']
     headings3 = ['created_at', 'updated_at', 'donation_date',]
-    donations = Donation.objects.all().select_related('user')
+    donations = Donation.objects.all().select_related('user').select_related('gateway')
     headings =  headings1 + headings2 + headings3
 
     writer = csv.writer(response)
@@ -163,7 +163,7 @@ def export_subscription_data(request):
     headings1 = ['id', 'profile_id','recurring_amount', 'currency', 'recurring_status']
     headings2 = ['linked_user_deleted', 'gateway']
     headings3 = ['created_at', 'updated_at', 'subscribe_date']
-    subscriptions = Subscription.objects.all().select_related('user')
+    subscriptions = Subscription.objects.all().select_related('user').select_related('gateway')
     headings =  headings1 + headings2 + headings3
 
     writer = csv.writer(response)

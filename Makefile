@@ -14,9 +14,6 @@ clean:
 run:
 	docker-compose -f docker-compose.yml up
 
-run-jupyter:
-	docker-compose -f docker-compose.yml up jupyter
-
 run-selenium:
 	docker-compose -f docker-compose.yml --profile selenium up
 

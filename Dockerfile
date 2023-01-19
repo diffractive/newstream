@@ -73,8 +73,8 @@ RUN DATABASE_URL='' python manage.py collectstatic --noinput
 # Run compilemessages to build the mo files
 RUN DATABASE_URL='' python manage.py compilemessages
 
-COPY uwsgi.ini /app
+COPY docker/uwsgi.ini /
 
 # Entrypoint script
-COPY docker-entrypoint.sh /
+COPY docker/docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]

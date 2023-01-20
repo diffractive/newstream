@@ -128,7 +128,7 @@ def export_donation_data(request):
     # Include only fields that do not have a PII
     headings1 = ['id', 'transaction_id','donation_amount', 'is_recurring', 'currency', 'payment_status']
     headings2 = ['linked_user_deleted', 'gateway', 'subscription_id']
-    headings3 = ['created_at', 'updated_at', 'donation_date',]
+    headings3 = ['user_id', 'created_at', 'updated_at', 'donation_date',]
     donations = Donation.objects.all().select_related('user').select_related('gateway')
     headings =  headings1 + headings2 + headings3
 
@@ -138,6 +138,11 @@ def export_donation_data(request):
     for donation in donations:
         data_row = [getattr(donation, field) for field in headings1]
         data_row += [getattr(donation, field) for field in headings2]
+
+        if donation.user is None:
+            data_row += ['']
+        else:
+            data_row += [donation.user.id]
 
         created_at = getattr(donation, 'created_at').strftime("%Y-%m-%d %H:%M:%S")
         updated_at = getattr(donation, 'updated_at').strftime("%Y-%m-%d %H:%M:%S")
@@ -162,7 +167,7 @@ def export_subscription_data(request):
 
     headings1 = ['id', 'profile_id','recurring_amount', 'currency', 'recurring_status']
     headings2 = ['linked_user_deleted', 'gateway']
-    headings3 = ['created_at', 'updated_at', 'subscribe_date']
+    headings3 = ['user_id', 'created_at', 'updated_at', 'subscribe_date']
     subscriptions = Subscription.objects.all().select_related('user').select_related('gateway')
     headings =  headings1 + headings2 + headings3
 
@@ -171,6 +176,11 @@ def export_subscription_data(request):
     for subscription in subscriptions:
         data_row = [getattr(subscription, field) for field in headings1]
         data_row += [getattr(subscription, field) for field in headings2]
+
+        if subscription.user is None:
+            data_row += ['']
+        else:
+            data_row += [subscription.user.id]
 
         created_at = getattr(subscription, 'created_at').strftime("%Y-%m-%d %H:%M:%S")
         updated_at = getattr(subscription, 'updated_at').strftime("%Y-%m-%d %H:%M:%S")

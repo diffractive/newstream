@@ -5,7 +5,7 @@ set -e
 : "${RUN_MIGRATIONS:=1}"
 : "${COLLECT_STATIC:=1}"
 : "${DJANGO_SUPERUSER_EMAIL:=""}"
-: "${DJANGO_SUPERUSER_USERNAME:=""}"
+: "${DJANGO_SUPERUSER_EMAIL:=""}"
 : "${DJANGO_SUPERUSER_PASSWORD:=""}"
 : "${PY_AUTORELOAD:=0}"
 : "${WIPE_DB:=0}"
@@ -24,7 +24,7 @@ if [ "$RUN_MIGRATIONS" -eq 1 ]; then
     python manage.py migrate --noinput
 fi
 
-if [ "x$DJANGO_SUPERUSER_USERNAME" != x ]; then
+if [ "x$DJANGO_SUPERUSER_EMAIL" != x ]; then
     python manage.py createsuperuser --noinput || true
 fi
 

@@ -108,7 +108,7 @@ def donate(request):
     offlineSettings = getOfflineSettings()
     # manually casting offline_instructions_text from LazyI18nString to str to avoid the "richtext expects a string" error in the template
     offline_instructions_html = str(offlineSettings.offline_instructions_text)
-    
+
     return render(request, form_template, {'form': form, 'donation_details_fields': DONATION_DETAILS_FIELDS, 'offline_gateway_id': offline_gateway_id, 'offline_instructions_html': offline_instructions_html})
 
 
@@ -275,7 +275,7 @@ def cancel_recurring(request):
             'subscription_id': 1,
             'csrfmiddlewaretoken': 'LZSpOsb364pn9R3gEPXdw2nN3dBEi7RWtMCBeaCse2QawCFIndu93fD3yv9wy0ij'
         }
-        
+
         @todo: revise error handling, avoid catching all exceptions at the end
     """
 
@@ -313,7 +313,7 @@ def toggle_recurring(request):
             'subscription_id': 1,
             'csrfmiddlewaretoken': 'LZSpOsb364pn9R3gEPXdw2nN3dBEi7RWtMCBeaCse2QawCFIndu93fD3yv9wy0ij'
         }
-        
+
         @todo: revise error handling, avoid catching all exceptions at the end
     """
 
@@ -355,7 +355,7 @@ def edit_recurring(request, id):
             'billing_cycle_now': 'on'
         }
         * only Stripe's form has the billing_cycle_now option
-        
+
         @todo: revise error handling, avoid catching all exceptions at the end
     """
     try:
@@ -437,7 +437,7 @@ def export_donations(request):
     headings2 = ['created_at', 'updated_at', 'linked_donor_deleted', 'donation_form', 'donor_name', 'donor_email']
     headings3 = ['gateway', 'subscription_id', 'is_test']
     headings4 = ['donation_date', 'created_by', 'guest_email']
-    donations = Donation.objects.all().select_related('user')
+    donations = Donation.objects.all().select_related('user').select_related('gateway')
     headings =  headings1 + headings2 + headings3 + headings4
 
     writer = csv.writer(response)
@@ -472,7 +472,7 @@ def export_subscriptions(request):
     headings1 = ['id', 'profile_id','recurring_amount', 'currency', 'recurring_status']
     headings2 = ['created_at', 'updated_at', 'linked_donor_deleted', 'gateway', 'donor_name', 'donor_email']
     headings3 = ['is_test', 'subscribe_date', 'created_by']
-    subscriptions = Subscription.objects.all().select_related('user')
+    subscriptions = Subscription.objects.all().select_related('user').select_related('gateway')
     headings =  headings1 + headings2 + headings3
 
     writer = csv.writer(response)
@@ -502,7 +502,7 @@ def export_donors(request):
     filename = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S") + 'donors.csv'
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=' + filename
-    
+
     donors = User.objects.all()
     headings1 = ['id', 'first_name', 'last_name', 'email', 'is_active']
     headings2 = ['date_joined', 'opt_in_mailing_list']

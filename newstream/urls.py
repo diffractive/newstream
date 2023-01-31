@@ -39,6 +39,12 @@ urlpatterns += i18n_patterns(
          name='delete-account'),
     path('unsubscribe/<email>/<hash>/', user_views.unsubscribe,
          name='unsubscribe'),
+
+    # Export urls
+    path('export-data/', user_views.download_export_data),
+    path('export-data/donation', user_views.export_donation_data, name='export-donation-data'),
+    path('export-data/subscription', user_views.export_subscription_data, name='export-subscription-data'),
+    path('export-data/donor', user_views.export_donor_data, name='export-donor-data'),
 )
 
 

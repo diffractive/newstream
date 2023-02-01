@@ -8,7 +8,7 @@ set -e
 : "${DJANGO_SUPERUSER_PASSWORD:=""}"
 : "${PY_AUTORELOAD:=0}"
 : "${WIPE_DB:=0}"
-: "${TEST_DATA:=0}"
+: "${TEST_DATA:=1}"
 
 if [ "$WIPE_DB" -eq 1 ]; then
     echo "WARNING: Wiping Database due to ENV setting!!"

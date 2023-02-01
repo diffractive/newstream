@@ -436,7 +436,7 @@ Dear %(name)s,\n
 Thanks very much for your recent support.\n
 Your recurring donation to HKFP has been paused at your request - no further payments will be processed, unless you reactivate your contribution.\n
 Sign into our support page if you wish to support us again in the future(%(url)s). Please email donations@hongkongfp.com if you have any further enquiries.\n
-From all of us, thank you for backing our team and helping us keep independent media alive in Hong Kong!\n
+We are grateful to the minority of readers who help keep HKFP free to access for everyone. From all of us, thank you for backing our team and helping keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n
 \n
 Donor name: %(name)s\n
@@ -568,7 +568,7 @@ Dear %(name)s,\n
 Thanks very much for your recent support.\n
 Your recurring donation to HKFP has been cancelled at your request - no further payments will be processed.\n
 Sign into our support page(%(siteurl)s) if you wish to support us again in the future. Please email donations@hongkongfp.com if you have any further enquiries.\n
-From all of us, thank you for backing our team and helping us keep independent media alive in Hong Kong!\n
+We are grateful to the minority of readers who help keep HKFP free to access for everyone. From all of us, thank you for backing our team and helping keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n
 \n
 Donor name: %(name)s\n
@@ -613,7 +613,7 @@ def get_account_deleted_donor_text(user):
 Dear %(name)s,\n
 Thanks very much for your recent support.\n
 Your account at %(sitename)s has been deleted at your request.\n
-From all of us, thank you for backing our team and helping us keep independent media alive in Hong Kong!\n
+We are grateful to the minority of readers who help keep HKFP free to access for everyone. From all of us, thank you for backing our team and helping keep independent media alive in Hong Kong!\n
 \n
 Thank you,\n
 %(sitename)s""") % {

@@ -43,9 +43,9 @@ def get_donation_receipt_text(donation):
     return _("""
 Dear %(name)s,\n
 A big "thank you" for your kind %(amount)s donation - it is very much appreciated and it will go a long way in supporting our operations.\n
-Your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2020/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/), so you can see how carefully we spend our income.\n
+We are the city’s only independent English-language newspaper - run by journalists, backed by readers - no investors, shareholders or tycoons involved. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2022/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2022/) - so you can see how carefully we spend our income.\n
 %(url_text)s\n
-From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
+We are grateful to the minority of readers who help keep HKFP free to access for everyone. From all of us, thank you for helping keep independent media alive in Hong Kong!\n
 Details of your donation:\n
 \n
 Transaction ID: %(transaction_id)s\n
@@ -218,9 +218,9 @@ def get_renewal_receipt_text(donation):
     return _("""
 Dear %(name)s,\n
 A big "thank you" for your kind %(amount)s recurring donation - it is very much appreciated and it will go a long way in supporting our operations.\n
-Your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2020/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/), so you can see how carefully we spend our income.\n
+We are the city’s only independent English-language newspaper - run by journalists, backed by readers - no investors, shareholders or tycoons involved. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2022/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2022/) - so you can see how carefully we spend our income.\n
 Sign into our support page to view your renewal donations(%(renewals_url)s). You can also adjust, pause or cancel your recurring donation(%(donation_url)s). Please email donations@hongkongfp.com if you have any further enquiries.\n
-From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
+We are grateful to the minority of readers who help keep HKFP free to access for everyone. From all of us, thank you for helping keep independent media alive in Hong Kong!\n
 Details of your renewal donation:\n
 \n
 Transaction ID: %(transaction_id)s\n
@@ -275,9 +275,9 @@ def get_recurring_adjusted_donor_text(subscription):
     return _("""
 Dear %(name)s,\n
 Your monthly donation has been adjusted to %(amount)s per month. Thank you for your continued support.\n
-Your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2020/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/), so you can see how carefully we spend our income.\n
+We are the city’s only independent English-language newspaper - run by journalists, backed by readers - no investors, shareholders or tycoons involved. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2022/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2022/) - so you can see how carefully we spend our income.\n
 Sign into our support page to adjust, pause or cancel your donation(%(url)s). Please email donations@hongkongfp.com if you have any further enquiries.\n
-From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
+We are grateful to the minority of readers who help keep HKFP free to access for everyone. From all of us, thank you for helping keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n
 \n
 Donor name: %(name)s\n
@@ -328,9 +328,9 @@ def get_new_recurring_donor_text(subscription):
     return _("""
 Dear %(name)s,\n
 A big "thank you" for your kind %(amount)s recurring donation - it is very much appreciated and it will go a long way in supporting our operations. Recurring donations, in particular, are vital to our sustainability.
-As an HKFP Patron, your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2020/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/), so you can see how carefully we spend our income.\n
+We are the city’s only independent English-language newspaper - run by journalists, backed by readers - no investors, shareholders or tycoons involved. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2022/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2022/) - so you can see how carefully we spend our income.\n
 Sign into our support page (click "forgot password?" if you have trouble logging in) to adjust, pause or cancel your donation(%(url)s). Please email donations@hongkongfp.com if you have any further enquiries.\n
-From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
+We are grateful to the minority of readers who help keep HKFP free to access for everyone. From all of us, thank you for helping keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n
 \n
 Donor name: %(name)s\n
@@ -381,9 +381,9 @@ def get_recurring_rescheduled_donor_text(subscription):
     return _("""
 Dear %(name)s,\n
 Your monthly donation's billing date has been rescheduled to today. Thank you for your continued support.\n
-Your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2020/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/), so you can see how carefully we spend our income.\n
+We are the city’s only independent English-language newspaper - run by journalists, backed by readers - no investors, shareholders or tycoons involved. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2022/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2022/) - so you can see how carefully we spend our income.\n
 Sign into our support page to adjust, pause or cancel your donation(%(url)s). Please email donations@hongkongfp.com if you have any further enquiries.\n
-From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
+We are grateful to the minority of readers who help keep HKFP free to access for everyone. From all of us, thank you for helping keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n
 \n
 Donor name: %(name)s\n
@@ -487,9 +487,9 @@ def get_recurring_resumed_donor_text(subscription):
     return _("""
 Dear %(name)s,\n
 A big "thank you" for resuming your %(amount)s contribution - it is very much appreciated and it will go a long way in supporting our operations. Recurring donations, in particular, are vital to our sustainability.
-As an HKFP Patron, your contribution will be well-spent, allowing us to invest more in original reporting and safeguard press freedom. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2020/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2019/), so you can see how carefully we spend our income.\n
+We are the city’s only independent English-language newspaper - run by journalists, backed by readers - no investors, shareholders or tycoons involved. Please check out HKFP's latest Annual Report(https://hongkongfp.com/hong-kong-free-press-annual-report-2022/) - it includes our yearly, audited Transparency Report(https://hongkongfp.com/hong-kong-free-press-transparency-report-2022/) - so you can see how carefully we spend our income.\n
 Sign into our support page to adjust, pause or cancel your donation(%(url)s). Please email donations@hongkongfp.com if you have any further enquiries.\n
-From all of us, thank you for helping us keep independent media alive in Hong Kong!\n
+We are grateful to the minority of readers who help keep HKFP free to access for everyone. From all of us, thank you for helping keep independent media alive in Hong Kong!\n
 Details of your recurring donation:\n
 \n
 Donor name: %(name)s\n

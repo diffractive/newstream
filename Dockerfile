@@ -20,7 +20,7 @@ RUN set -ex \
         libmariadb-dev \
         libgnutls28-dev \
         libcurl4-gnutls-dev \
-        gcc \ 
+        gcc \
         mime-support \
         gettext \
     && apt-get autoremove -yqq --purge \
@@ -40,7 +40,7 @@ COPY ./requirements.txt /
 COPY ./requirements-docker.txt /
 RUN pip install --upgrade pip \
     && pip install -r /requirements.txt \
-    && pip install -r /requirements-docker.txt 
+    && pip install -r /requirements-docker.txt
 
 # Copy the pplication code to the container
 RUN mkdir /app/
@@ -73,8 +73,8 @@ RUN DATABASE_URL='' python manage.py collectstatic --noinput
 # Run compilemessages to build the mo files
 RUN DATABASE_URL='' python manage.py compilemessages
 
-COPY uwsgi.ini /app
+COPY docker/uwsgi.ini /
 
 # Entrypoint script
-COPY docker-entrypoint.sh /
+COPY docker/docker-entrypoint.sh /
 ENTRYPOINT ["/docker-entrypoint.sh"]

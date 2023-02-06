@@ -1,0 +1,8 @@
+drivers:
+  portal:
+    hostnames:
+      - app.newstream.local:8000
+    size:
+      # Macbook Air screen size - 1440, 1200
+      width: 1440
+      height: 1200

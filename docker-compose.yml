@@ -3,19 +3,23 @@ version: "2"
 services:
   database:
     environment:
-      POSTGRES_DB: newstream 
+      POSTGRES_DB: newstream
       POSTGRES_USER: newstream
       POSTGRES_PASSWORD: newstream
     restart: always
     image: postgres:12
     expose:
       - "5432"
+    networks:
+      - newstream
+
   app:
     environment:
       RUN_MIGRATIONS: 1
       COLLECTSTATIC: 1
       COMPILEMESSAGES: 1
       NEWSTREAM_DEBUG: 1
+      TEST_DATA: 1
       DATABASE_NAME: newstream
       DATABASE_USER: newstream
       DATABASE_HOST: database
@@ -34,6 +38,11 @@ services:
       - type: bind
         source: .
         target: /app
+    networks:
+      newstream:
+        aliases:
+          - app.newstream.local
+
   mailhog:
     image: mailhog/mailhog
     logging:
@@ -41,3 +50,45 @@ services:
     ports:
       - 1025:1025 # smtp server
       - 8025:8025 # web ui
+    networks:
+      newstream:
+        aliases:
+          - mailhog.newstream.local
+
+  selenium:
+    image: seleniarm/standalone-chromium:4.1.0-alpha-20211218
+    shm_size: 2gb
+    volumes:
+      - /dev/shm:/dev/shm
+    ports:
+      - "127.0.0.1:4444:4444"
+    environment:
+      NODE_MAX_SESSION: 5
+      GRID_MAX_SESSION: 5
+      SE_NODE_MAX_SESSIONS: 5
+      SE_NODE_OVERRIDE_MAX_SESSIONS: "true"
+    networks:
+      - newstream
+    profiles:
+      - selenium
+
+  selenium_tests:
+    image: diffractive/newstream-tests:latest
+    ports:
+      - "127.0.0.1:8890:8890"
+    environment:
+      SELENIUM_RUNNER: "remote"
+    volumes:
+      - './notebooks:/notebooks'
+      - ./selenium-config.yaml:/etc/diffractive/selenium.yaml
+    networks:
+      - newstream
+    depends_on:
+      - app
+      - selenium
+    profiles:
+      - selenium
+
+networks:
+  newstream:
+    driver: bridge

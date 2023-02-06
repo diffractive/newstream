@@ -12,11 +12,12 @@ DATABASE_PORT = os.environ.get("DATABASE_PORT", "")
 DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD", "")
 DEBUG = int(os.environ.get("NEWSTREAM_DEBUG", "0"))
 
-EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'mailhog'
 EMAIL_PORT = '1025'
 
 DEFAULT_FROM_EMAIL = 'newstream@diffractive.io'
+DEFAULT_ADMIN_EMAIL = 'admin@diffractive.io'
 
 DATABASES = {
     'default': {

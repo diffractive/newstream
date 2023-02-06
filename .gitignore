@@ -31,7 +31,7 @@ client/node_modules
 
 ### DJANGO
 *.mo
- 
+
 ### NEWSTREAM
 *.log
 .backups/
@@ -42,3 +42,7 @@ newstream/settings/dev.py
 newstream/settings/production.py
 /static/
 newstream.db
+
+### Jupyter
+.ipynb_checkpoints
+*.ipynb

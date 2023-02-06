@@ -19,6 +19,7 @@ services:
       COLLECTSTATIC: 1
       COMPILEMESSAGES: 1
       NEWSTREAM_DEBUG: 1
+      TEST_DATA: 1
       DATABASE_NAME: newstream
       DATABASE_USER: newstream
       DATABASE_HOST: database

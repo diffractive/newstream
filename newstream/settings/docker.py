@@ -17,6 +17,7 @@ EMAIL_HOST = 'mailhog'
 EMAIL_PORT = '1025'
 
 DEFAULT_FROM_EMAIL = 'newstream@diffractive.io'
+DEFAULT_ADMIN_EMAIL = 'admin@diffractive.io'
 
 DATABASES = {
     'default': {

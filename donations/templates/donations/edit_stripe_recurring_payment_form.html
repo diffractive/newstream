@@ -38,13 +38,22 @@
                 <h2 class="mb-2">{% trans 'Recurring Donation Details' %}</h2>
                 {% include 'common/form_visible_fields.html' %}
                 <button class="ns-wide-btn right-arrow-btn need-white-loading-btn"
-                    type="submit">{% trans 'Update Recurring Donation' %}<span class="icon"></span></button>
+                    type="submit">{% trans 'Update Recurring Donation' %}<span class="icon"></span>
+                </button>
             </div>
         </div>
     </form>
+    <hr>
+    <button type="button" id="update-card-btn" class="ns-wide-btn right-arrow-btn need-white-loading-btn">{% trans 'Update Payment Method' %}<span class="icon"></span></button>
 </div>
 {% endblock content %}
 
 {% block extra_js %}
+<script>
+    let updateCardBtn = document.getElementById('update-card-btn');
+    updateCardBtn.addEventListener("click", () => {
+        window.location.href = "{% url 'donations:update-recurring-card' subscription.id %}"
+    });
+</script>
 <script type="text/javascript" src="{% static 'js/edit_recurring_payment_validations.js' %}"></script>
 {% endblock %}

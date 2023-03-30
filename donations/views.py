@@ -345,6 +345,31 @@ def toggle_recurring(request):
 
 
 @login_required
+def update_recurring_card(request, id):
+    try:
+        subscription = get_object_or_404(Subscription, id=id)
+        if subscription.user == request.user:
+            request.session['subscription_id'] = subscription.id
+            # Form object is initialized according to the specific gateway and if request.method=='POST'
+            form = InitEditRecurringPaymentForm(request.POST, request.method, subscription)
+
+            # redirect to payment_gateway
+            gatewayManager = InitPaymentGateway(
+                request, subscription=subscription)
+            return gatewayManager.redirect_to_setup_gateway_url()
+        else:
+            raise PermissionError(_('You are not authorized to edit subscription %(id)d.') % {'id': id})
+    except PermissionError as e:
+        _exception(str(e))
+        messages.add_message(request, messages.ERROR, str(e))
+        return redirect('donations:my-recurring-donations')
+    except (ValueError, RuntimeError, Exception) as e:
+        _exception(str(e))
+        messages.add_message(request, messages.ERROR, str(e))
+    return render(request, getEditRecurringPaymentHtml(subscription), {'form': form, 'subscription': subscription})
+
+
+@login_required
 def edit_recurring(request, id):
     """ This is called when the user clicks the 'Edit recurring donation' button on page donations.views.my_recurring_donations
         We only update the subscription if it is owned by request.user
@@ -361,6 +386,7 @@ def edit_recurring(request, id):
     try:
         subscription = get_object_or_404(Subscription, id=id)
         if subscription.user == request.user:
+            request.session['subscription_id'] = subscription.id
             # Form object is initialized according to the specific gateway and if request.method=='POST'
             form = InitEditRecurringPaymentForm(request.POST, request.method, subscription)
             if request.method == 'POST':

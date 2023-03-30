@@ -3,10 +3,11 @@ from django.shortcuts import redirect
 from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib import messages
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import uuid4_str, reverse_with_site_url, _exception, _debug, object_to_json
-from donations.models import Donation, DonationPaymentMeta
+from donations.models import Donation, DonationPaymentMeta, Subscription
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.stripe.functions import initStripeApiKey, formatDonationAmount
 from donations.payment_gateways.stripe.factory import Factory_Stripe
@@ -131,6 +132,71 @@ def create_checkout_session(request):
         _exception(errorObj["description"])
         return JsonResponse(object_to_json(errorObj), status=500)
 
+def create_setup_checkout_session(request):
+    """ When the user clicks "Update payment method" on subscription details page,
+        user is redirected via gatewayManager.redirect_to_setup_gateway_url(), which renders redirection_setup_stripe.html
+        
+        This function calls to Stripe Api to create a Stripe Session object,
+        then this function returns the stripe session id to the stripe js api 'stripe.redirectToCheckout({ sessionId: session.id })' for the redirection to Stripe's checkout page
+
+        Sample (JSON) request: {
+            'csrfmiddlewaretoken': 'LZSpOsb364pn9R3gEPXdw2nN3dBEi7RWtMCBeaCse2QawCFIndu93fD3yv9wy0ij'
+        }
+        
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
+    errorObj = {
+        "issue": "Exception",
+        "description": ""
+    }
+    try:
+        initStripeApiKey()
+        stripeSettings = getStripeSettings()
+
+        subscription_id = request.session.pop('subscription_id', None)
+        if not subscription_id:
+            raise ValueError(_("No subscription_id in session"))
+
+        # might throw DoesNotExist error
+        subscription = Subscription.objects.get(pk=subscription_id)
+
+        # init session_kwargs with common parameters
+        session_kwargs = {
+            'payment_method_types': ['card'],
+            'mode': 'setup',
+            'setup_intent_data': {
+                'metadata': {
+                    'subscription_id': subscription.id
+                }
+            },
+            'success_url': reverse_with_site_url('donations:return-from-setup-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
+            'cancel_url': reverse_with_site_url('donations:cancel-from-setup-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
+            # 'idempotency_key': uuid4_str()
+        }
+
+        session = stripe.checkout.Session.create(**session_kwargs)
+
+        return JsonResponse({'id': session.id})
+    except ValueError as e:
+        _exception(str(e))
+        errorObj['issue'] = "ValueError"
+        errorObj['description'] = str(e)
+        return JsonResponse(object_to_json(errorObj), status=500)
+    except Subscription.DoesNotExist:
+        _exception("Subscription.DoesNotExist")
+        errorObj['issue'] = "Subscription.DoesNotExist"
+        errorObj['description'] = str(_("Subscription object not found by id: %(id)s") % {'id': subscription_id})
+        return JsonResponse(object_to_json(errorObj), status=500)
+    except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+        _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
+        errorObj['issue'] = type(e).__name__
+        errorObj['description'] = 'Message is: %s' % e.user_message
+        return JsonResponse(object_to_json(errorObj), status=int(e.http_status))
+    except Exception as e:
+        errorObj['description'] = str(e)
+        _exception(errorObj["description"])
+        return JsonResponse(object_to_json(errorObj), status=500)
 
 @csrf_exempt
 def verify_stripe_response(request):
@@ -244,3 +310,116 @@ def cancel_from_stripe(request):
         request.session['error-message'] = str(_(
             "Results returned from gateway is invalid."))
     return redirect('donations:cancelled')
+
+
+@csrf_exempt
+def return_from_setup_stripe(request):
+    """ This endpoint is submitted as the success_url when creating the Stripe session at create_checkout_session(request)
+        This url should receive a single GET param: 'stripe_session_id'
+        In Factory_Stripe.initGatewayByReturn(request), we save the stripe_session_id into the donationPaymentMeta data upon a successful request;
+        exception will be raised if the endpoint is reached but a previous meta value is found,
+        this is done to prevent this endpoint being called unlimitedly
+
+        For more info on how to build this endpoint, refer to Stripe documentation:
+        https://stripe.com/docs/payments/checkout/custom-success-page
+        
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
+    try:
+        initStripeApiKey()
+
+        session_id = request.GET.get("stripe_session_id", None)
+        if not session_id:
+            raise ValueError(_("Missing session_id in request.GET"))
+
+        session = stripe.checkout.Session.retrieve(session_id)
+        import json
+        _debug(json.dumps(session, indent=4))
+        setup_intent = stripe.SetupIntent.retrieve(session.setup_intent)
+        _debug(json.dumps(setup_intent, indent=4))
+
+        subscription = Subscription.objects.get(pk=setup_intent.metadata.subscription_id)
+
+        existingSub = stripe.Subscription.retrieve(
+            subscription.profile_id,
+        )
+        _debug("Current default_payment_method: " + existingSub.default_payment_method)
+
+        # only modify default_payment_method if not yet modified
+        if existingSub.default_payment_method != setup_intent.payment_method:
+            # for fixing "The customer does not have a payment method" error,
+            # we need to first attach the payment method to the customer
+            stripe.PaymentMethod.attach(
+                setup_intent.payment_method,
+                customer=existingSub.customer,
+            )
+            stripe.Subscription.modify(
+                subscription.profile_id,
+                default_payment_method=setup_intent.payment_method
+            )
+
+            updatedSub = stripe.Subscription.retrieve(
+                subscription.profile_id,
+            )
+            _debug("New default_payment_method: " + updatedSub.default_payment_method)
+        else:
+            _debug("default_payment_method already modified")
+
+        messages.add_message(request, messages.SUCCESS, _("Your payment method for this recurring donation is updated."))
+    except ValueError as e:
+        _exception(str(e))
+        request.session['error-title'] = str(_("ValueError"))
+        request.session['error-message'] = str(e)
+    except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+        _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
+        request.session['error-title'] = type(e).__name__
+        request.session['error-message'] = e.user_message
+    except Exception as e:
+        _exception(str(e))
+        request.session['error-title'] = str(_("Unknown Exception"))
+        request.session['error-message'] = str(_(
+            "Results returned from gateway is invalid."))
+    return redirect('donations:edit-recurring', id=subscription.id)
+
+
+@csrf_exempt
+def cancel_from_setup_stripe(request):
+    """ This endpoint is submitted as the cancel_url when creating the Stripe session at create_checkout_session(request)
+        This url should receive a single GET param: 'stripe_session_id'
+        In Factory_Stripe.initGatewayByReturn(request), we save the stripe_session_id into the donationPaymentMeta data upon a successful request;
+        exception will be raised if the endpoint is reached but a previous meta value is found,
+        this is done to prevent this endpoint being called unlimitedly, which would set the payment status as Cancelled each time
+
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+    try:
+        initStripeApiKey()
+
+        session_id = request.GET.get("stripe_session_id", None)
+        if not session_id:
+            raise ValueError(_("Missing session_id in request.GET"))
+
+        session = stripe.checkout.Session.retrieve(session_id)
+        import json
+        _debug(json.dumps(session, indent=4))
+        setup_intent = stripe.SetupIntent.retrieve(session.setup_intent)
+        _debug(json.dumps(setup_intent, indent=4))
+
+        subscription = Subscription.objects.get(profile_id=setup_intent.metadata.subscription_id)
+
+        messages.add_message(request, messages.WARNING, _("Your payment method for this recurring donation is unchanged."))
+    except ValueError as e:
+        _exception(str(e))
+        request.session['error-title'] = str(_("ValueError"))
+        request.session['error-message'] = str(e)
+    except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+        _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
+        request.session['error-title'] = type(e).__name__
+        request.session['error-message'] = e.user_message
+    except Exception as e:
+        _exception(str(e))
+        request.session['error-title'] = str(_("Unknown Exception"))
+        request.session['error-message'] = str(_(
+            "Results returned from gateway is invalid."))
+    return redirect('donations:edit-recurring', id=subscription.id)

@@ -33,6 +33,7 @@ class Factory_Stripe(PaymentGatewayFactory):
         can_skip_donation_id = False
         event = None
         session = None
+        setup_intent = None
         payment_intent = None
         donation = None
         subscription = None
@@ -70,6 +71,17 @@ class Factory_Stripe(PaymentGatewayFactory):
                         donation_id = subscription_obj.metadata['donation_id']
                     else:
                         raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
+                elif session.mode == 'setup' and session.setup_intent:
+                    setup_intent = stripe.SetupIntent.retrieve(session.setup_intent)
+                    subscription_id = setup_intent.metadata.subscription_id
+                    try:
+                        subscription = Subscription.objects.get(pk=subscription_id)
+                        donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
+                        can_skip_donation_id = True
+                        if not donation:
+                            raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
+                    except Subscription.DoesNotExist:
+                        raise ValueError(_('No matching Subscription found, id: ')+subscription_id)
 
         # Intercept the payment_intent.succeeded event
         if event['type'] == EVENT_PAYMENT_INTENT_SUCCEEDED:
@@ -196,6 +208,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                 donation = Donation.objects.get(pk=donation_id)
             kwargs['session'] = session
             kwargs['event'] = event
+            kwargs['setup_intent'] = setup_intent
             kwargs['payment_intent'] = payment_intent
             kwargs['subscription_obj'] = subscription_obj
             kwargs['invoice'] = invoice
@@ -213,6 +226,7 @@ class Factory_Stripe(PaymentGatewayFactory):
             raise ValueError(_("Missing session_id in request.GET"))
 
         session = stripe.checkout.Session.retrieve(session_id)
+
         # no matter 'payment' or 'subscription', metadata also saved at checkout session level
         if 'donation_id' in session.metadata:
             donation_id = session.metadata['donation_id']

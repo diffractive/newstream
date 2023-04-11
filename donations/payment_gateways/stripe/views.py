@@ -54,11 +54,19 @@ def create_checkout_session(request):
 
         # try to get existing stripe customer
         donor_email = donation.user.email if donation.user else donation.guest_email
-        customers = stripe.Customer.list(email=donor_email, limit=1)
-        if len(customers['data']) > 0:
-            session_kwargs['customer'] = customers['data'][0]['id']
-        else:
-            session_kwargs['customer_email'] = donor_email
+        if False:
+            # This returns stripe.error.InvalidRequestError: Unexpected email on localstripe
+            customers = stripe.Customer.list(email=donor_email, limit=1)
+            if len(customers['data']) > 0:
+                session_kwargs['customer'] = customers['data'][0]['id']
+            else:
+                session_kwargs['customer_email'] = donor_email
+
+        # Try and create the stripe product automatically so it doesn't need to be manually configured
+        try:
+            stripe.Product.create(name="Newstream Product", id=stripeSettings.product_id)
+        except Exception as e:
+            print(e)
 
         # Product should have been created by admin manually at the dashboard
         # todo: make sure the product_id in site_settings has been set by some kind of configuration enforcement before site is launched
@@ -102,7 +110,7 @@ def create_checkout_session(request):
                     'donation_id': donation.id
                 }
             }
-
+        
         session = stripe.checkout.Session.create(**session_kwargs)
 
         # save payment_intent id for recognition purposes when receiving the payment_intent.succeeded webhook for onetime donations

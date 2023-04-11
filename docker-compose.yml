@@ -43,6 +43,15 @@ services:
         aliases:
           - app.newstream.local
 
+  localstripe:
+    image: adrienverge/localstripe:latest
+    ports:
+      - 8420:8420
+    networks:
+      newstream:
+        aliases:
+          - localstripe.newstream.local
+
   mailhog:
     image: mailhog/mailhog
     logging:

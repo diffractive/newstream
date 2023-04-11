@@ -8,6 +8,8 @@ from donations.functions import getCurrencyDictAt
 def initStripeApiKey():
     stripeSettings = getStripeSettings()
     stripe.api_key = stripeSettings.secret_key
+    stripe.api_key = 'sk_test_12345'
+    stripe.api_base = 'http://localstripe.newstream.local:8420'
     # see Network errors: https://stripe.com/docs/error-handling#network-errors
     stripe.max_network_retries = 2
 

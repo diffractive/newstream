@@ -1,9 +1,64 @@
-from newstream.functions import get_site_settings_from_default_site
-from site_settings.models import AdminEmails, SiteSettings
+import secrets
+import random, string
 from django.conf import settings
+from allauth.account.models import EmailAddress
+from datetime import datetime, timezone
+from django.contrib.auth import get_user_model
+
+from newstream.functions import get_site_settings_from_default_site
+from donations.models import DonationForm, Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE
+from site_settings.models import AdminEmails, SiteSettings, PaymentGateway, GATEWAY_PAYPAL, GATEWAY_STRIPE
+User = get_user_model()
+
+def rand_alphanumeric(length):
+    """ for generating donation/subscription identifiers
+    """
+    return ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(length))
+
+test_users = [
+    {
+        "email": "david.donor@diffractive.io",
+        "password": "david.donor",
+        "first_name": "David",
+        "last_name": "Donor"
+    }
+]
+
+test_donations = [
+    {
+        "user_email": "david.donor@diffractive.io", # for matching up the right user
+        "transaction_id": "ch_3Mxo8cTTD2mrB42B1TnMfzL5",
+        "is_recurring": False,
+        "donation_amount": 1000,
+        "currency": "HKD",
+        "gateway": "stripe",
+        "guest_email": '',
+        "guest_name": '',
+        "payment_status": STATUS_COMPLETE,
+        "donation_date": datetime.strptime("2023-04-01", '%Y-%m-%d'),
+    }
+]
+
+test_subscriptions = [
+    {
+        "user_email": "david.donor@diffractive.io", # for matching up the right user
+        "profile_id": "sub_1Mxo8cTTD2mrB42B414bD7LS",
+        "recurring_amount": 250,
+        "currency": "HKD",
+        "gateway": "stripe",
+        "recurring_status": STATUS_ACTIVE,
+        "subscribe_date": datetime.strptime("2023-02-05", '%Y-%m-%d'),
+        "donation_count": 3 # including 1st donation and subsequent renewals to be created
+    }
+]
+
+# for referencing when setting up donations/subscriptions
+loaded_users = {}
 
 def load_test_data():
     load_settings()
+    load_test_users()
+    load_test_donations()
 
 def load_settings():
     """ Load necessary settings in order to let the app run smoothly e.g. sending emails ok
@@ -20,3 +75,83 @@ def load_settings():
         email=settings.DEFAULT_ADMIN_EMAIL,
     ))
     site_settings.save()
+
+    print("Loaded settings √")
+
+def load_test_users():
+    """ Load test users for setting up some test donations/subscriptions
+    """
+    for item in test_users:
+        user = User.objects.create_user(email=item["email"], password=item["password"])
+        user.first_name = item["first_name"]
+        user.last_name = item["last_name"]
+        user.save()
+        loaded_users[item["email"]] = user
+        # save donor email as verified and primary
+        email_obj = EmailAddress(email=item["email"], verified=True, primary=True, user=user)
+        email_obj.save()
+
+    print("Loaded test users √")
+
+def load_test_donations():
+    """ Load test donations/subscriptions
+    """
+    # load payment gateway, donation form
+    form = DonationForm.objects.get(title="Main Form")
+    # 2nd object is PayPal, 3rd is Stripe
+    gateways = PaymentGateway.objects.all().order_by("list_order")
+    gateway_map = {
+        "paypal": gateways[1],
+        "stripe": gateways[2]
+    }
+
+    for item in test_donations:
+        donation = Donation(
+            transaction_id=item["transaction_id"],
+            user=loaded_users[item["user_email"]],
+            form=form,
+            gateway=gateway_map[item["gateway"]],
+            is_recurring=item["is_recurring"],
+            donation_amount=item["donation_amount"],
+            currency=item["currency"],
+            guest_email=item["guest_email"],
+            guest_name=item["guest_name"],
+            payment_status=item["payment_status"],
+            donation_date=item["donation_date"],
+        )
+        donation.save()
+
+    print("Loaded test donations √")
+
+    for item in test_subscriptions:
+        subscription = Subscription(
+            profile_id=item["profile_id"],
+            user=loaded_users[item["user_email"]],
+            gateway=gateway_map[item["gateway"]],
+            recurring_amount=item["recurring_amount"],
+            currency=item["currency"],
+            recurring_status=item["recurring_status"],
+            subscribe_date=item["subscribe_date"]
+        )
+        subscription.save()
+
+        for i in range(item["donation_count"]):
+            sub_date = item["subscribe_date"]
+            donation_date = datetime(sub_date.year + int((sub_date.month + i) / 12), (sub_date.month + i) % 12, sub_date.day)
+            donation = Donation(
+                transaction_id='ch_'+rand_alphanumeric(24),
+                subscription=subscription,
+                user=loaded_users[item["user_email"]],
+                form=form,
+                gateway=gateway_map[item["gateway"]],
+                is_recurring=True,
+                donation_amount=item["recurring_amount"],
+                currency=item["currency"],
+                guest_email="",
+                guest_name="",
+                payment_status=STATUS_COMPLETE,
+                donation_date=donation_date,
+            )
+            donation.save()
+
+    print("Loaded test subscriptions √")

@@ -74,6 +74,14 @@ def load_settings():
         title="Admin",
         email=settings.DEFAULT_ADMIN_EMAIL,
     ))
+
+    # set stripe product ids
+    site_settings.stripe_testing_product_id = "TEST_PRODUCT_ID"
+    site_settings.stripe_product_id = "LIVE_PRODUCT_ID"
+
+    # set footer link
+    site_settings.privacy_policy_link = "https://github.com/diffractive/newstream"
+
     site_settings.save()
 
     print("Loaded settings √")

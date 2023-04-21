@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import uuid4_str, reverse_with_site_url, _exception, _debug, object_to_json
@@ -40,15 +41,16 @@ def create_checkout_session(request):
 
         # might throw DoesNotExist error
         donation = Donation.objects.get(pk=donation_id)
-
+        success_url = request.build_absolute_uri(reverse('donations:return-from-stripe'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'
+        cancel_url = request.build_absolute_uri(reverse('donations:cancel-from-stripe'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'
         # init session_kwargs with common parameters
         session_kwargs = {
             'payment_method_types': ['card'],
             'metadata': {
                 'donation_id': donation.id
             },
-            'success_url': reverse_with_site_url('donations:return-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url': reverse_with_site_url('donations:cancel-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
+            'success_url': success_url,
+            'cancel_url': cancel_url,
             'idempotency_key': uuid4_str()
         }
 

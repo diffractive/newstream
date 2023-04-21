@@ -1,13 +1,13 @@
-import secrets
 import random, string
 from django.conf import settings
 from allauth.account.models import EmailAddress
-from datetime import datetime, timezone
+from datetime import datetime
 from django.contrib.auth import get_user_model
 
-from newstream.functions import get_site_settings_from_default_site
 from donations.models import DonationForm, Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE
-from site_settings.models import AdminEmails, SiteSettings, PaymentGateway, GATEWAY_PAYPAL, GATEWAY_STRIPE
+from site_settings.models import AdminEmails, SiteSettings, PaymentGateway
+from django.utils.timezone import make_aware
+
 User = get_user_model()
 
 def rand_alphanumeric(length):
@@ -68,7 +68,7 @@ def load_settings():
     # set default from email address
     site_settings.default_from_email = settings.DEFAULT_FROM_EMAIL
     site_settings.default_from_name = 'Admin'
-    
+
     # set default admin_emails list
     site_settings.admin_emails.add(AdminEmails(
         title="Admin",
@@ -125,7 +125,7 @@ def load_test_donations():
             guest_email=item["guest_email"],
             guest_name=item["guest_name"],
             payment_status=item["payment_status"],
-            donation_date=item["donation_date"],
+            donation_date=make_aware(item["donation_date"]),
         )
         donation.save()
 
@@ -139,7 +139,7 @@ def load_test_donations():
             recurring_amount=item["recurring_amount"],
             currency=item["currency"],
             recurring_status=item["recurring_status"],
-            subscribe_date=item["subscribe_date"]
+            subscribe_date=make_aware(item["subscribe_date"])
         )
         subscription.save()
 
@@ -158,7 +158,7 @@ def load_test_donations():
                 guest_email="",
                 guest_name="",
                 payment_status=STATUS_COMPLETE,
-                donation_date=donation_date,
+                donation_date=make_aware(donation_date),
             )
             donation.save()
 

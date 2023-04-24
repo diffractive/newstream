@@ -30,7 +30,7 @@ class Dropdown:
     def __init__(self, driver, identifier):
         self.element = Select(get_element_by_identifier(driver, self.xpath, identifier))
     
-    def select(self, index=0, value=None):
+    def select(self, value=None, index=0):
         if value:
             try:
                 self.element.select_by_value(value)

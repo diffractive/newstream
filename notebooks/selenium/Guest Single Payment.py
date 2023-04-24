@@ -26,7 +26,6 @@ from diffractive.selenium.visualisation import gallery
 from components import Application
 
 import secrets
-import time
 
 # +
 randstr = secrets.token_hex(6).upper()
@@ -49,10 +48,10 @@ app.link('Donation Form').click()
 grabber.capture_screen('donation_form', 'Donation Form')
 
 # Cannot go to the signup page without setting a value into the custom amount or choosing a default from selector
-app.dropdown('id_donation_amount').select(1)
+app.dropdown('id_donation_amount').select('USD $100')
 app.input('id_email').fill(email)
 app.input('id_name').fill(name)
-app.dropdown('id_payment_gateway').select(1)
+app.dropdown('id_payment_gateway').select('Stripe')
 app.button('Continue as guest').click()
 grabber.capture_screen('guest_payment', 'Confirm Payment')
 
@@ -60,7 +59,7 @@ app.button('Confirm Donation').click()
 grabber.capture_screen('processing_payment', 'Processing Payment')
 
 # Wait until redirecting finishes
-time.sleep(15)
+wait_element(driver, '//input[@id="cardNumber"]')
 grabber.capture_screen('stripe_payment_gateway', 'Stripe payment gateway')
 
 app.input('cardNumber').fill(card_number)
@@ -72,3 +71,5 @@ wait_element(driver, '//h1[text()="Thank you!"]')
 grabber.capture_screen('thank_you', 'Thank you screen')
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
+
+

@@ -1,10 +1,10 @@
-import random, string
+import random, string, uuid
 from django.conf import settings
 from allauth.account.models import EmailAddress
 from datetime import datetime
 from django.contrib.auth import get_user_model
 
-from donations.models import DonationForm, Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE
+from donations.models import DonationForm, Donation, Subscription, SubscriptionInstance, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_CANCELLED
 from site_settings.models import AdminEmails, SiteSettings, PaymentGateway
 from django.utils.timezone import make_aware
 
@@ -41,6 +41,7 @@ test_donations = [
 
 test_subscriptions = [
     {
+        "parent_uuid": uuid.UUID('ade64816-cd44-4c91-a26a-273af8a3f06b'),
         "user_email": "david.donor@diffractive.io", # for matching up the right user
         "profile_id": "sub_1Mxo8cTTD2mrB42B414bD7LS",
         "recurring_amount": 250,
@@ -48,7 +49,40 @@ test_subscriptions = [
         "gateway": "stripe",
         "recurring_status": STATUS_ACTIVE,
         "subscribe_date": datetime.strptime("2023-02-05", '%Y-%m-%d'),
-        "donation_count": 3 # including 1st donation and subsequent renewals to be created
+        "donation_transaction_ids": [
+            "ch_4Mxo8cTTD2mrB42B1TnMfzL5",
+            "ch_5Mxo8cTTD2mrB42B1TnMfzL6",
+            "ch_6Mxo8cTTD2mrB42B1TnMfzL7"
+        ] # including 1st donation and subsequent renewals to be created
+    },
+    {
+        "parent_uuid": uuid.UUID('d21c4cc0-39b9-4990-8360-0859bbedc697'),
+        "user_email": "david.donor@diffractive.io", # for matching up the right user
+        "profile_id": "sub_2Qxo8cKTD2mrB42B414bD7LS",
+        "recurring_amount": 500,
+        "currency": "HKD",
+        "gateway": "paypal",
+        "recurring_status": STATUS_CANCELLED,
+        "subscribe_date": datetime.strptime("2022-12-08", '%Y-%m-%d'),
+        "donation_transaction_ids": [
+            "ch_7hCo8cTTD2mrB42B1TnMfh5F",
+            "ch_9P6o8cTTD2mrB42B1TnMf0Lm",
+            "ch_1D3o8cTTD2mrB42B1TnMfp4T"
+        ] # including 1st donation and subsequent renewals to be created
+    },
+    {
+        "parent_uuid": uuid.UUID('d21c4cc0-39b9-4990-8360-0859bbedc697'),
+        "user_email": "david.donor@diffractive.io", # for matching up the right user
+        "profile_id": "sub_4Gxo8cB2C2mrB42B414bDXS4",
+        "recurring_amount": 500,
+        "currency": "HKD",
+        "gateway": "paypal",
+        "recurring_status": STATUS_ACTIVE,
+        "subscribe_date": datetime.strptime("2023-03-08", '%Y-%m-%d'),
+        "donation_transaction_ids": [
+            "ch_0Jyo8cTTD2mrB42B1TnMfp3F",
+            "ch_n8bo8cTTD2mrB42B1TnMfKL4"
+        ] # including 1st donation and subsequent renewals to be created
     }
 ]
 
@@ -90,6 +124,8 @@ def load_test_users():
     """ Load test users for setting up some test donations/subscriptions
     """
     for item in test_users:
+        if User.objects.filter(email=item["email"]).exists():
+            continue
         user = User.objects.create_user(email=item["email"], password=item["password"])
         user.first_name = item["first_name"]
         user.last_name = item["last_name"]
@@ -114,6 +150,8 @@ def load_test_donations():
     }
 
     for item in test_donations:
+        if Donation.objects.filter(transaction_id=item["transaction_id"]).exists():
+            continue
         donation = Donation(
             transaction_id=item["transaction_id"],
             user=loaded_users[item["user_email"]],
@@ -126,29 +164,51 @@ def load_test_donations():
             guest_name=item["guest_name"],
             payment_status=item["payment_status"],
             donation_date=make_aware(item["donation_date"]),
+            created_at=make_aware(item["donation_date"]),
+            updated_at=make_aware(item["donation_date"]),
         )
         donation.save()
 
     print("Loaded test donations √")
 
     for item in test_subscriptions:
-        subscription = Subscription(
+        # create the parent first
+        if not Subscription.objects.filter(uuid=item["parent_uuid"]).exists():
+            subscription = Subscription(
+                uuid=item["parent_uuid"],
+                user=loaded_users[item["user_email"]],
+                created_by=loaded_users[item["user_email"]],
+                subscription_created_at=make_aware(item["subscribe_date"])
+            )
+            subscription.save()
+        else:
+            subscription = Subscription.objects.get(uuid=item["parent_uuid"])
+
+        # then create the instance
+        if SubscriptionInstance.objects.filter(profile_id=item["profile_id"]).exists():
+            continue
+        instance = SubscriptionInstance(
             profile_id=item["profile_id"],
             user=loaded_users[item["user_email"]],
             gateway=gateway_map[item["gateway"]],
+            parent=subscription,
             recurring_amount=item["recurring_amount"],
             currency=item["currency"],
             recurring_status=item["recurring_status"],
-            subscribe_date=make_aware(item["subscribe_date"])
+            subscribe_date=make_aware(item["subscribe_date"]),
+            created_at=make_aware(item["subscribe_date"]),
+            updated_at=make_aware(item["subscribe_date"])
         )
-        subscription.save()
+        instance.save()
 
-        for i in range(item["donation_count"]):
+        for i, transaction_id in enumerate(item["donation_transaction_ids"]):
+            if Donation.objects.filter(transaction_id=transaction_id).exists():
+                continue
             sub_date = item["subscribe_date"]
-            donation_date = datetime(sub_date.year + int((sub_date.month + i) / 12), (sub_date.month + i) % 12, sub_date.day)
+            donation_date = datetime(sub_date.year + int((sub_date.month + i) / 12), ((sub_date.month + i - 1) % 12) + 1, sub_date.day)
             donation = Donation(
-                transaction_id='ch_'+rand_alphanumeric(24),
-                subscription=subscription,
+                transaction_id=transaction_id,
+                subscription=instance,
                 user=loaded_users[item["user_email"]],
                 form=form,
                 gateway=gateway_map[item["gateway"]],

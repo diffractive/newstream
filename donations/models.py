@@ -1,4 +1,5 @@
 from decimal import Decimal
+import uuid
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
@@ -228,12 +229,13 @@ class Subscription(models.Model):
         specifically for the case when users updating payment method on Newstream
         while the system delete the old subscription and create a new subscription
     """
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(
         'newstream_user.User',
         on_delete=models.SET_NULL,
         null=True
     )
-    subscription_created_at = models.DateTimeField() # this should be the created_at of the first instance
+    subscription_created_at = models.DateTimeField(auto_now_add=True) # this should match the created_at of the first instance
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
@@ -249,14 +251,14 @@ class Subscription(models.Model):
     def first_instance(self):
         # return oldest instance
         # mainly for displaying the subscribe date
-        return self.subscription_instances.order_by("subscription_instances__subscribe_date", "subscription_instances__created_at").first()
+        return self.subscription_instances.all().order_by("subscribe_date", "created_at").first()
     
     @property
     def latest_instance(self):
         # return the latest instance
         # mainly for displaying the current subscription info
         # e.g. amount, currency, profile_id, status
-        return self.subscription_instances.order_by("subscription_instances__subscribe_date", "subscription_instances__created_at").last()
+        return self.subscription_instances.all().order_by("subscribe_date", "created_at").last()
 
 
 class SubscriptionInstance(ClusterableModel):

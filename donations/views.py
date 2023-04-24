@@ -15,7 +15,7 @@ from django.core.exceptions import PermissionDenied
 from newstream.functions import _exception, uuid4_str, get_site_settings_from_default_site
 from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
-from donations.models import DonationPaymentMeta, SubscriptionInstance, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
+from donations.models import DonationPaymentMeta, Subscription, SubscriptionInstance, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
 from donations.forms import DONATION_DETAILS_FIELDS, DonationDetailsForm
 from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, extract_temp_donation_meta, displayGateway, temp_donation_meta_to_donation_meta
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml, isGatewayHosted
@@ -403,7 +403,7 @@ def my_onetime_donations(request):
 def my_recurring_donations(request):
     # deleted=False should be valid whether soft-delete mode is on or off
     subscriptions = Subscription.objects.filter(
-        user=request.user, deleted=False).order_by('-created_at')
+        user=request.user, deleted=False).order_by('-subscription_created_at')
     siteSettings = get_site_settings_from_default_site()
     return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'siteSettings': siteSettings})
 

@@ -15,7 +15,7 @@ from django.core.exceptions import PermissionDenied
 from newstream.functions import _exception, uuid4_str, get_site_settings_from_default_site
 from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
-from donations.models import DonationPaymentMeta, Subscription, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
+from donations.models import DonationPaymentMeta, SubscriptionInstance, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
 from donations.forms import DONATION_DETAILS_FIELDS, DonationDetailsForm
 from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, extract_temp_donation_meta, displayGateway, temp_donation_meta_to_donation_meta
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml, isGatewayHosted
@@ -148,9 +148,9 @@ def confirm_donation(request):
                 )
                 # create a processing subscription if is_recurring
                 if tmpd.is_recurring:
-                    # create new Subscription object, with a temporary profile_id created by uuidv4
+                    # create new SubscriptionInstance object, with a temporary profile_id created by uuidv4
                     # user should have been authenticated according to flow logic
-                    subscription = Subscription(
+                    subscription = SubscriptionInstance(
                         is_test=tmpd.is_test,
                         profile_id=uuid4_str(),
                         user=request.user if request.user.is_authenticated else None,
@@ -286,7 +286,7 @@ def cancel_recurring(request):
                 print("No subscription_id in JSON body", flush=True)
                 return HttpResponse(status=400)
             subscription_id = int(json_data['subscription_id'])
-            subscription = get_object_or_404(Subscription, id=subscription_id)
+            subscription = get_object_or_404(SubscriptionInstance, id=subscription_id)
             if subscription.user == request.user:
                 gatewayManager = InitPaymentGateway(
                     request, subscription=subscription)
@@ -324,7 +324,7 @@ def toggle_recurring(request):
                 print("No subscription_id in JSON body", flush=True)
                 return HttpResponse(status=400)
             subscription_id = int(json_data['subscription_id'])
-            subscription = get_object_or_404(Subscription, id=subscription_id)
+            subscription = get_object_or_404(SubscriptionInstance, id=subscription_id)
             if subscription.user == request.user:
                 gatewayManager = InitPaymentGateway(
                     request, subscription=subscription)
@@ -359,7 +359,7 @@ def edit_recurring(request, id):
         @todo: revise error handling, avoid catching all exceptions at the end
     """
     try:
-        subscription = get_object_or_404(Subscription, id=id)
+        subscription = get_object_or_404(SubscriptionInstance, id=id)
         if subscription.user == request.user:
             # Form object is initialized according to the specific gateway and if request.method=='POST'
             form = InitEditRecurringPaymentForm(request.POST, request.method, subscription)
@@ -411,7 +411,7 @@ def my_recurring_donations(request):
 @login_required
 def my_renewals(request, id):
     # deleted=False should be valid whether soft-delete mode is on or off
-    subscription = get_object_or_404(Subscription, id=id, deleted=False)
+    subscription = get_object_or_404(SubscriptionInstance, id=id, deleted=False)
     try:
         if subscription.user == request.user:
             renewals = Donation.objects.filter(
@@ -472,7 +472,7 @@ def export_subscriptions(request):
     headings1 = ['id', 'profile_id','recurring_amount', 'currency', 'recurring_status']
     headings2 = ['created_at', 'updated_at', 'linked_donor_deleted', 'gateway', 'donor_name', 'donor_email']
     headings3 = ['is_test', 'subscribe_date', 'created_by']
-    subscriptions = Subscription.objects.all().select_related('user').select_related('gateway')
+    subscriptions = SubscriptionInstance.objects.all().select_related('user').select_related('gateway')
     headings =  headings1 + headings2 + headings3
 
     writer = csv.writer(response)

@@ -3,7 +3,7 @@ from django.utils.translation import gettext_lazy as _
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import _debug
-from donations.models import Donation, DonationPaymentMeta, Subscription
+from donations.models import Donation, DonationPaymentMeta, SubscriptionInstance
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.stripe.gateway import Gateway_Stripe
@@ -100,13 +100,13 @@ class Factory_Stripe(PaymentGatewayFactory):
                 else:
                     # givewp subscription
                     try:
-                        subscription = Subscription.objects.get(profile_id=subscription_id)
+                        subscription = SubscriptionInstance.objects.get(profile_id=subscription_id)
                         donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
                         can_skip_donation_id = True
                         if not donation:
-                            raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
-                    except Subscription.DoesNotExist:
-                        raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
+                            raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
+                    except SubscriptionInstance.DoesNotExist:
+                        raise ValueError(_('No matching SubscriptionInstance found, profile_id: ')+subscription_id)
             else:
                 raise ValueError(_('Missing subscription_id'))
 
@@ -128,13 +128,13 @@ class Factory_Stripe(PaymentGatewayFactory):
                 else:
                     # givewp subscription
                     try:
-                        subscription = Subscription.objects.get(profile_id=subscription_id)
+                        subscription = SubscriptionInstance.objects.get(profile_id=subscription_id)
                         donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
                         can_skip_donation_id = True
                         if not donation:
-                            raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
+                            raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
                     except Subscription.DoesNotExist:
-                        raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
+                        raise ValueError(_('No matching SubscriptionInstance found, profile_id: ')+subscription_id)
             else:
                 raise ValueError(_('Missing subscription_id'))
 
@@ -155,13 +155,13 @@ class Factory_Stripe(PaymentGatewayFactory):
                     # givewp subscription
                     subscription_id = subscription_obj.id
                     try:
-                        subscription = Subscription.objects.get(profile_id=subscription_id)
+                        subscription = SubscriptionInstance.objects.get(profile_id=subscription_id)
                         donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
                         can_skip_donation_id = True
                         if not donation:
-                            raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
-                    except Subscription.DoesNotExist:
-                        raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
+                            raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
+                    except SubscrSubscriptionInstanceiption.DoesNotExist:
+                        raise ValueError(_('No matching SubscriptionInstance found, profile_id: ')+subscription_id)
 
         # Intercept the subscription deleted event
         # This event links to either Newstream or Givewp created subscriptions
@@ -178,13 +178,13 @@ class Factory_Stripe(PaymentGatewayFactory):
                     # givewp subscription
                     subscription_id = subscription_obj.id
                     try:
-                        subscription = Subscription.objects.get(profile_id=subscription_id)
+                        subscription = SubscriptionInstance.objects.get(profile_id=subscription_id)
                         donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
                         can_skip_donation_id = True
                         if not donation:
-                            raise ValueError(_('Missing parent donation queried via Subscription, subscription_id: ')+subscription_id)
-                    except Subscription.DoesNotExist:
-                        raise ValueError(_('No matching Subscription found, profile_id: ')+subscription_id)
+                            raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
+                    except SubscriptionInstance.DoesNotExist:
+                        raise ValueError(_('No matching SubscriptionInstance found, profile_id: ')+subscription_id)
 
         # Finally init and return the Stripe Gateway Manager
         if not donation_id and not can_skip_donation_id:

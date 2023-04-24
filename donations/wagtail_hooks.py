@@ -12,7 +12,7 @@ from wagtail.core import hooks
 
 from newstream.functions import _exception, getUserTimezone
 from newstream_user.models import SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL, SUBS_ACTION_MANUAL, DONATION_ACTION_MANUAL
-from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED
+from donations.models import Donation, SubscriptionInstance, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED
 from donations.payment_gateways import InitPaymentGateway
 from donations.functions import addUpdateSubsActionLog, addUpdateDonationActionLog
 from donations.email_functions import sendDonationStatusChangeToDonor, sendSubscriptionStatusChangeToDonor
@@ -50,7 +50,7 @@ def set_subscription_status(request):
     try:
         if request.method == 'POST' and request.POST.get('id', None):
             id = int(request.POST.get('id'))
-            subscription = get_object_or_404(Subscription, id=id)
+            subscription = get_object_or_404(SubscriptionInstance, id=id)
             old_status = subscription.recurring_status
             if not request.POST.get('status', ''):
                 raise _("Empty value submitted for subscription status update")
@@ -74,7 +74,7 @@ def toggle_subscription(request):
     try:
         if request.method == 'POST' and request.POST.get('id', None):
             subscription_id = int(request.POST.get('id'))
-            subscription = get_object_or_404(Subscription, id=subscription_id)
+            subscription = get_object_or_404(SubscriptionInstance, id=subscription_id)
             gatewayManager = InitPaymentGateway(
                 request, subscription=subscription)
             resultSet = gatewayManager.toggle_recurring_payment()
@@ -94,7 +94,7 @@ def cancel_subscription(request):
     try:
         if request.method == 'POST' and request.POST.get('id', None):
             subscription_id = int(request.POST.get('id'))
-            subscription = get_object_or_404(Subscription, id=subscription_id)
+            subscription = get_object_or_404(SubscriptionInstance, id=subscription_id)
             gatewayManager = InitPaymentGateway(
                 request, subscription=subscription)
             resultSet = gatewayManager.cancel_recurring_payment()
@@ -132,7 +132,7 @@ class TodayStatisticsPanel:
         midnight = tz.localize(datetime.combine(today, time(0, 0)), is_dst=None)
         utc_dt = midnight.astimezone(utc) 
         today_donations = Donation.objects.filter(donation_date__gte=utc_dt, payment_status=STATUS_COMPLETE, deleted=False).count()
-        today_subscriptions = Subscription.objects.filter(subscribe_date__gte=utc_dt, recurring_status=STATUS_ACTIVE, deleted=False).count()
+        today_subscriptions = SubscriptionInstance.objects.filter(subscribe_date__gte=utc_dt, recurring_status=STATUS_ACTIVE, deleted=False).count()
         today_donors = User.objects.filter(date_joined__gte=utc_dt, is_staff=False).count()
         return mark_safe("<section class=\"summary nice-padding today-stats-panel\"><h1><strong>%(heading)s (%(date)s)</strong></h1><ul class=\"stats\"><li><span>%(completed_donations)i</span>%(completed_donations_subtext)s</li><li><span>%(active_subscriptions)i</span>%(active_subscriptions_subtext)s</li><li><span>%(donors)i</span>%(donors_subtext)s</li></ul></section>" % {
             'heading': str(_("Today's Statistics")),
@@ -153,8 +153,8 @@ class TotalStatisticsPanel:
         total_completed_donations = Donation.objects.filter(payment_status=STATUS_COMPLETE, deleted=False).count()
         total_donations = Donation.objects.filter(deleted=False).count()
         total_donors = User.objects.filter(is_staff=False).count()
-        total_active_subscriptions = Subscription.objects.filter(recurring_status=STATUS_ACTIVE, deleted=False).count()
-        total_subscriptions = Subscription.objects.filter(deleted=False).count()
+        total_active_subscriptions = SubscriptionInstance.objects.filter(recurring_status=STATUS_ACTIVE, deleted=False).count()
+        total_subscriptions = SubscriptionInstance.objects.filter(deleted=False).count()
         return mark_safe("<section class=\"summary nice-padding total-stats-panel\"><h1><strong>%(heading)s</strong></h1><ul class=\"stats\"><li><span>%(completed_donations)i</span>%(completed_donations_subtext)s</li><li><span>%(donations)i</span>%(donations_subtext)s</li><li><span>%(donors)i</span>%(donors_subtext)s</li><li><span>%(active_subscriptions)i</span>%(active_subscriptions_subtext)s</li><li><span>%(subscriptions)i</span>%(subscriptions_subtext)s</li></ul></section>" % {
             'heading': str(_("Total Statistics")),
             'completed_donations': total_completed_donations,

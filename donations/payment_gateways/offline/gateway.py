@@ -39,7 +39,7 @@ class Gateway_Offline(PaymentGatewayManager):
 
     def update_recurring_payment(self, form_data):
         if not self.subscription:
-            raise ValueError(_('Subscription object is None. Cannot update recurring payment.'))
+            raise ValueError(_('SubscriptionInstance object is None. Cannot update recurring payment.'))
         # update donation amount if it is different from database
         if form_data['recurring_amount'] != self.subscription.recurring_amount:
             self.subscription.recurring_amount = form_data['recurring_amount']
@@ -55,7 +55,7 @@ class Gateway_Offline(PaymentGatewayManager):
 
     def cancel_recurring_payment(self):
         if not self.subscription:
-            raise ValueError(_('Subscription object is None. Cannot cancel recurring payment.'))
+            raise ValueError(_('SubscriptionInstance object is None. Cannot cancel recurring payment.'))
         # update newstream model
         self.subscription.recurring_status = STATUS_PROCESSING
         self.subscription.save()
@@ -95,4 +95,4 @@ class Gateway_Offline(PaymentGatewayManager):
                 'success-message': str(_('Your recurring donation is paused.'))
             }
         else:
-            raise ValueError(_('Subscription object is neither Active or Paused'))
+            raise ValueError(_('SubscriptionInstance object is neither Active or Paused'))

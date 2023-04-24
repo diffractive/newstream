@@ -8,7 +8,7 @@ from wagtail.contrib.modeladmin.helpers import ButtonHelper
 
 from newstream.functions import get_site_settings_from_default_site
 from site_settings.models import GATEWAY_OFFLINE, GATEWAY_PAYPAL_LEGACY
-from donations.models import Donation, Subscription, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING, STATUS_INACTIVE
+from donations.models import Donation, SubscriptionInstance, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING, STATUS_INACTIVE
 from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
 from donations.payment_gateways import isGatewayEditSubSupported, isGatewayToggleSubSupported, isGatewayCancelSubSupported
 
@@ -253,7 +253,7 @@ class DonationAdmin(ModelAdmin):
 
 
 class SubscriptionAdmin(ModelAdmin):
-    model = Subscription
+    model = SubscriptionInstance
     button_helper_class = SubscriptionButtonHelper
     menu_label = _('Subscriptions')
     menu_icon = 'pilcrow'

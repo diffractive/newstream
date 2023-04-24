@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client
 
 from newstream.functions import printvars
-from donations.models import Subscription
+from donations.models import SubscriptionInstance
 User = get_user_model()
 
 # tweak these settings for your tests
@@ -44,7 +44,7 @@ class StripeApiTests(TestCase):
         global TEST_SUBSCRIPTION_ID
         if TEST_SUBSCRIPTION_ID == 0:
             user = User.objects.filter(username=USERNAME).first()
-            subs = Subscription.objects.filter(user=user).order_by('-id').first()
+            subs = SubscriptionInstance.objects.filter(user=user).order_by('-id').first()
             self.subscription = subs
             TEST_SUBSCRIPTION_ID = subs.id
 

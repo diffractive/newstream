@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from paypalcheckoutsdk.core import PayPalHttpClient
 
 from newstream.functions import _debug, round_half_up
-from donations.models import STATUS_PROCESSING, STATUS_FAILED, STATUS_ACTIVE, STATUS_CANCELLED, STATUS_COMPLETE, STATUS_PAUSED, Donation, Subscription, SubscriptionPaymentMeta, DonationPaymentMeta
+from donations.models import STATUS_PROCESSING, STATUS_FAILED, STATUS_ACTIVE, STATUS_CANCELLED, STATUS_COMPLETE, STATUS_PAUSED, Donation, SubscriptionInstance, SubscriptionPaymentMeta, DonationPaymentMeta
 from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendNewRecurringNotifToAdmins, sendNewRecurringNotifToDonor, sendRecurringAdjustedNotifToAdmins, sendRecurringAdjustedNotifToDonor, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
 from donations.functions import gen_transaction_id
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
@@ -75,7 +75,7 @@ class Gateway_Paypal(PaymentGatewayManager):
         # Event: EVENT_BILLING_SUBSCRIPTION_UPDATED
         if self.event_type == EVENT_BILLING_SUBSCRIPTION_UPDATED and hasattr(self, 'subscription_obj'):
             if self.subscription_obj['status'] == 'SUSPENDED' or self.subscription_obj['status'] == 'ACTIVE':
-                subscription = Subscription.objects.filter(profile_id=self.subscription_obj['id']).first()
+                subscription = SubscriptionInstance.objects.filter(profile_id=self.subscription_obj['id']).first()
                 if not subscription:
                     raise ValueError(_("Cannot find subscription object in database with profile_id %(id)s") % {'id': self.subscription_obj['id']})
                 subscription.recurring_amount = Decimal(self.subscription_obj['plan']['billing_cycles'][0]['pricing_scheme']['fixed_price']['value'])
@@ -151,7 +151,7 @@ class Gateway_Paypal(PaymentGatewayManager):
 
     def update_recurring_payment(self, form_data):
         if not self.subscription:
-            raise ValueError(_('Subscription object is None. Cannot update recurring payment.'))
+            raise ValueError(_('SubscriptionInstance object is None. Cannot update recurring payment.'))
         # update donation amount if it is different from database
         if form_data['recurring_amount'] != self.subscription.recurring_amount:
             updateSubscription(self.request.session, self.subscription.profile_id, str(form_data['recurring_amount']), self.subscription.currency)
@@ -169,7 +169,7 @@ class Gateway_Paypal(PaymentGatewayManager):
 
     def cancel_recurring_payment(self):
         if not self.subscription:
-            raise ValueError(_('Subscription object is None. Cannot cancel recurring payment.'))
+            raise ValueError(_('SubscriptionInstance object is None. Cannot cancel recurring payment.'))
         cancelSubscription(self.request.session, self.subscription.profile_id)
         # update newstream model
         self.subscription.recurring_status = STATUS_CANCELLED
@@ -211,4 +211,4 @@ class Gateway_Paypal(PaymentGatewayManager):
                 'success-message': str(_('Your recurring donation via PayPal  is paused.'))
             }
         else:
-            raise ValueError(_('Subscription object is neither Active or Paused'))
+            raise ValueError(_('SubscriptionInstance object is neither Active or Paused'))

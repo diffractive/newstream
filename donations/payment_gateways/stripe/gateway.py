@@ -10,7 +10,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils import translation
 from django.utils.translation import gettext_lazy as _
 
-from donations.models import Donation, DonationPaymentMeta, Subscription, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED
+from donations.models import Donation, DonationPaymentMeta, SubscriptionInstance, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.stripe.constants import *
@@ -184,7 +184,7 @@ class Gateway_Stripe(PaymentGatewayManager):
 
     def update_recurring_payment(self, form_data):
         if not self.subscription:
-            raise ValueError(_('Subscription object is None. Cannot update recurring payment.'))
+            raise ValueError(_('SubscriptionInstance object is None. Cannot update recurring payment.'))
         initStripeApiKey()
         # update donation amount if it is different from database
         if form_data['recurring_amount'] != self.subscription.recurring_amount:
@@ -257,7 +257,7 @@ class Gateway_Stripe(PaymentGatewayManager):
 
     def cancel_recurring_payment(self):
         if not self.subscription:
-            raise ValueError(_('Subscription object is None. Cannot cancel recurring payment.'))
+            raise ValueError(_('SubscriptionInstance object is None. Cannot cancel recurring payment.'))
         initStripeApiKey()
         # cancel subscription via stripe API
         try:
@@ -270,7 +270,7 @@ class Gateway_Stripe(PaymentGatewayManager):
             self.subscription.recurring_status = STATUS_CANCELLED
             self.subscription.save()
         else:
-            raise RuntimeError(_('Subscription object returned from stripe having status %(status)s instead of canceled') % {'status': cancelled_subscription.status})
+            raise RuntimeError(_('SubscriptionInstance object returned from stripe having status %(status)s instead of canceled') % {'status': cancelled_subscription.status})
 
     def toggle_recurring_payment(self):
         initStripeApiKey()
@@ -281,7 +281,7 @@ class Gateway_Stripe(PaymentGatewayManager):
         elif self.subscription.recurring_status == STATUS_ACTIVE:
             toggle_obj = {"behavior": "mark_uncollectible"}
         else:
-            raise ValueError(_('Subscription object is neither Active or Paused'))
+            raise ValueError(_('SubscriptionInstance object is neither Active or Paused'))
         try:
             updated_subscription = stripe.Subscription.modify(
                 self.subscription.profile_id, pause_collection=toggle_obj)
@@ -313,4 +313,4 @@ class Gateway_Stripe(PaymentGatewayManager):
                     'success-message': str(_('Your recurring donation via Stripe is resumed.'))
                 }
         else:
-            raise ValueError(_('Subscription object returned from stripe does not have valid pause_collection value'))
+            raise ValueError(_('SubscriptionInstance object returned from stripe does not have valid pause_collection value'))

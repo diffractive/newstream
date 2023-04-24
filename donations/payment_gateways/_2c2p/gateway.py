@@ -12,7 +12,7 @@ from django.utils.translation import gettext_lazy as _
 from newstream.functions import reverse_with_site_url, get_site_name, _debug
 from donations.functions import getNextDateFromRecurringInterval, gen_order_prefix_2c2p, getCurrencyDictAt, currencyCodeToKey
 from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor, sendDonationRevokedToAdmins, sendDonationRevokedToDonor, sendRecurringAdjustedNotifToAdmins, sendRecurringAdjustedNotifToDonor, sendRecurringRescheduledNotifToAdmins, sendRecurringRescheduledNotifToDonor, sendRenewalNotifToAdmins, sendRenewalReceiptToDonor, sendRecurringCancelledNotifToAdmins, sendRecurringCancelledNotifToDonor
-from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_CANCELLED, STATUS_REVOKED
+from donations.models import Donation, SubscriptionInstance, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_CANCELLED, STATUS_REVOKED
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import get2C2PSettings
 from donations.payment_gateways._2c2p.functions import format_payment_amount, extract_payment_amount, map2C2PPaymentStatus, getRequestParamOrder
@@ -142,8 +142,8 @@ class Gateway_2C2P(PaymentGatewayManager):
             self.donation.save()
 
             if self.donation.payment_status == STATUS_COMPLETE:
-                # create new Subscription object
-                subscription = Subscription(
+                # create new SubscriptionInstance object
+                subscription = SubscriptionInstance(
                     is_test=self.testing_mode,
                     profile_id=self.data['recurring_unique_id'],
                     user=self.donation.user,
@@ -201,7 +201,7 @@ class Gateway_2C2P(PaymentGatewayManager):
 
     def update_recurring_payment(self, form_data):
         if not self.subscription:
-            raise ValueError(_('Subscription object is None. Cannot update recurring payment.'))
+            raise ValueError(_('SubscriptionInstance object is None. Cannot update recurring payment.'))
         # init the params to the php-bridge script call
         script_path = os.path.dirname(os.path.realpath(__file__)) + '/php-bridge/payment_action.php'
         command_list = ['php', script_path, 
@@ -270,7 +270,7 @@ class Gateway_2C2P(PaymentGatewayManager):
 
     def cancel_recurring_payment(self):
         if not self.subscription:
-            raise ValueError(_('Subscription object is None. Cannot cancel recurring payment.'))
+            raise ValueError(_('SubscriptionInstance object is None. Cannot cancel recurring payment.'))
         # init the params to the php-bridge script call
         script_path = os.path.dirname(os.path.realpath(__file__)) + '/php-bridge/payment_action.php'
         command_list = ['php', script_path, 

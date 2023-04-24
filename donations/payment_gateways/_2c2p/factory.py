@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 from site_settings.models import GATEWAY_2C2P
 from newstream.functions import printvars, _debug
-from donations.models import Donation, Subscription
+from donations.models import Donation, SubscriptionInstance
 from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways._2c2p.gateway import Gateway_2C2P
 from donations.payment_gateways.setting_classes import get2C2PSettings
@@ -47,12 +47,12 @@ class Factory_2C2P(PaymentGatewayFactory):
                 # case two: either first time subscription or renewal donation
                 elif request.POST['recurring_unique_id']:
                     try:
-                        subscription = Subscription.objects.get(profile_id=str(request.POST['recurring_unique_id']), gateway__title=GATEWAY_2C2P)
+                        subscription = SubscriptionInstance.objects.get(profile_id=str(request.POST['recurring_unique_id']), gateway__title=GATEWAY_2C2P)
                         _debug('--2C2P initGatewayByVerification: subscription found--')
                         # subscription object found, indicating this is a renewal request
                         return Factory_2C2P.initGateway(request, None, subscription, data=data)
-                    except Subscription.DoesNotExist:
-                        # Subscription object not created yet, indicating this is the first time subscription
+                    except SubscriptionInstance.DoesNotExist:
+                        # SubscriptionInstance object not created yet, indicating this is the first time subscription
                         try:
                             donation = Donation.objects.get(pk=int(request.POST['user_defined_1']))
                             return Factory_2C2P.initGateway(request, donation, None, data=data, first_time_subscription=True)

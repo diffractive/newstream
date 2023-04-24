@@ -84,7 +84,7 @@ class UserSubscriptionUpdatesLog(models.Model):
         on_delete=models.CASCADE,
     )
     subscription = models.ForeignKey(
-        'donations.Subscription',
+        'donations.SubscriptionInstance',
         on_delete=models.SET_NULL,
         null=True
     )

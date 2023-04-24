@@ -7,7 +7,7 @@ from django.contrib.auth import get_user_model
 from django.test.utils import override_settings
 
 from newstream.functions import get_default_site
-from donations.models import Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_FAILED, STATUS_REVOKED, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING
+from donations.models import Donation, SubscriptionInstance, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_FAILED, STATUS_REVOKED, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING
 from donations.email_functions import *
 from site_settings.models import PaymentGateway, GATEWAY_STRIPE
 User = get_user_model()
@@ -45,8 +45,8 @@ class EmailTests(TestCase):
             payment_status=STATUS_COMPLETE,
             donation_date=datetime.now(timezone.utc),
         )
-        # create test Subscription
-        self.subscription = Subscription(
+        # create test SubscriptionInstance
+        self.subscription = SubscriptionInstance(
             is_test=True,
             profile_id='TEST-FGHIJ67890',
             user=self.user,

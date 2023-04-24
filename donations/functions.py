@@ -154,7 +154,7 @@ def temp_donation_meta_to_donation_meta(tmpd_metas):
 
 
 def displayGateway(instance):
-    ''' instance can be either TempDonation, Donation or Subscription'''
+    ''' instance can be either TempDonation, Donation or SubscriptionInstance'''
     siteSettings = get_site_settings_from_default_site()
     return getattr(siteSettings, instance.gateway.frontend_label_attr_name, instance.gateway.title)
 

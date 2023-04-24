@@ -15,7 +15,7 @@ from django.db import connection as django_connection
 from newstream_user.models import UserMeta
 from newstream.functions import round_half_up, uuid4_str
 from donations.functions import gen_transaction_id
-from donations.models import Donation, DonationPaymentMeta, Subscription, SubscriptionPaymentMeta, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED, STATUS_INACTIVE, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED
+from donations.models import Donation, DonationPaymentMeta, SubscriptionInstance, SubscriptionPaymentMeta, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED, STATUS_INACTIVE, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED
 from site_settings.models import PaymentGateway, GATEWAY_STRIPE, GATEWAY_PAYPAL_LEGACY, GATEWAY_MANUAL, GATEWAY_OFFLINE
 
 User = get_user_model()
@@ -240,7 +240,7 @@ class Command(BaseCommand):
                                 cursor.execute(renewals_query)
                                 renewalsResult = cursor.fetchall()
 
-                                newSubscription = Subscription(
+                                newSubscription = SubscriptionInstance(
                                     id=givewp_subscription_id,
                                     is_test=self.paymentmode_mapping(parentDonationMetaDict['_give_payment_mode']),
                                     profile_id=subscription_profile_id,
@@ -388,7 +388,7 @@ class Command(BaseCommand):
                 self.print("Total Migrated Donations: %d" % migrated_donations)
         
             # reset sequences for donations and subscriptions
-            sequence_sql = django_connection.ops.sequence_reset_sql(no_style(), [Donation, Subscription])
+            sequence_sql = django_connection.ops.sequence_reset_sql(no_style(), [Donation, SubscriptionInstance])
             with django_connection.cursor() as cursor:
                 for sql in sequence_sql:
                     cursor.execute(sql)

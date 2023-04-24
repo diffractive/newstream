@@ -30,7 +30,7 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
         if self.request.POST.get('txn_type', None) == 'subscr_payment':
             # copy what process_paypal_subscr_payment does in givewp to here
             # at this stage, Donation(parent) object is already populated from the custom param
-            # Subscription object should exist also, since it is linked to Donation either via parent_payment_id
+            # SubscriptionInstance object should exist also, since it is linked to Donation either via parent_payment_id
             # update profile_id if it's empty
             if not self.subscription.profile_id:
                 self.subscription.profile_id = self.request.POST.get('subscr_id', None)
@@ -132,7 +132,7 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
         
     def cancel_recurring_payment(self):
         if not self.subscription:
-            raise ValueError(_('Subscription object is None. Cannot cancel recurring payment.'))
+            raise ValueError(_('SubscriptionInstance object is None. Cannot cancel recurring payment.'))
         # update newstream model
         self.subscription.recurring_status = STATUS_PROCESSING
         self.subscription.save()

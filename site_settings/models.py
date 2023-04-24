@@ -105,11 +105,14 @@ class UserMetaField(I18nAbstractFormField):
 class SiteSettings(BaseSetting, ClusterableModel):
     default_from_email = models.EmailField()
     default_from_name = I18nCharField(
-        max_length=255, 
+        max_length=255,
         blank=True)
+    org_contact_email = models.EmailField(blank=True, null=True,
+        help_text=_("The e-mail users may use to contact the organisation"))
     email_general_panels = [
         FieldPanel('default_from_email', heading=_('Default From Email')),
         FieldPanel('default_from_name', heading=_('Default Name for From Email')),
+        FieldPanel('org_contact_email', heading=_('Organisation Contact Email')),
         InlinePanel('admin_emails', label=_("Admin Email"), heading=_("List of Admins' Emails"),
                     help_text=_('Email notifications such as new donations will be sent to this list.'))
     ]
@@ -203,7 +206,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     ]
 
     _2c2p_frontend_label = I18nCharField(
-        max_length=255, 
+        max_length=255,
         default=functools.partial(resolve_i18n_string, "2C2P(Credit Card)"),
         help_text=_("The Gateway name to be shown on the frontend website."))
     _2c2p_merchant_id = models.CharField(
@@ -231,7 +234,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     ]
 
     paypal_frontend_label = I18nCharField(
-        max_length=255, 
+        max_length=255,
         default=functools.partial(resolve_i18n_string, "PayPal"),
         help_text=_("The Gateway name to be shown on public-facing website."))
     paypal_sandbox_api_product_id = models.CharField(
@@ -365,10 +368,18 @@ class SiteSettings(BaseSetting, ClusterableModel):
         on_delete=models.SET_NULL,
         related_name='+'
     )
+    full_org_name = models.CharField(
+        max_length=255, blank=True,
+        null=True, help_text=_("The full organisation name that will display in e-mails"))
+    short_org_name = models.CharField(
+        max_length=255, blank=True,
+        null=True, help_text=_("The short form of the organisation that will be used as a signature in e-mails"))
 
     appearance_general_panels = [
         ImageChooserPanel('brand_logo', heading=('Brand Logo')),
         ImageChooserPanel('site_icon', heading=('Site Icon')),
+        FieldPanel('full_org_name', heading=_('Full Organisation Name')),
+        FieldPanel('short_org_name', heading=_('Short Organisation Name')),
     ]
 
     privacy_policy_link = models.URLField(max_length=200, default='#', blank=True)

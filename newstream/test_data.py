@@ -48,7 +48,11 @@ test_subscriptions = [
         "gateway": "stripe",
         "recurring_status": STATUS_ACTIVE,
         "subscribe_date": datetime.strptime("2023-02-05", '%Y-%m-%d'),
-        "donation_count": 3 # including 1st donation and subsequent renewals to be created
+        "donation_transaction_ids": [
+            "ch_4Mxo8cTTD2mrB42B1TnMfzL5",
+            "ch_5Mxo8cTTD2mrB42B1TnMfzL6",
+            "ch_6Mxo8cTTD2mrB42B1TnMfzL7"
+        ] # including 1st donation and subsequent renewals to be created
     }
 ]
 
@@ -90,6 +94,8 @@ def load_test_users():
     """ Load test users for setting up some test donations/subscriptions
     """
     for item in test_users:
+        if User.objects.filter(email=item["email"]).exists():
+            continue
         user = User.objects.create_user(email=item["email"], password=item["password"])
         user.first_name = item["first_name"]
         user.last_name = item["last_name"]
@@ -114,6 +120,8 @@ def load_test_donations():
     }
 
     for item in test_donations:
+        if Donation.objects.filter(transaction_id=item["transaction_id"]).exists():
+            continue
         donation = Donation(
             transaction_id=item["transaction_id"],
             user=loaded_users[item["user_email"]],
@@ -132,6 +140,8 @@ def load_test_donations():
     print("Loaded test donations √")
 
     for item in test_subscriptions:
+        if Subscription.objects.filter(profile_id=item["profile_id"]).exists():
+            continue
         subscription = Subscription(
             profile_id=item["profile_id"],
             user=loaded_users[item["user_email"]],
@@ -143,11 +153,14 @@ def load_test_donations():
         )
         subscription.save()
 
-        for i in range(item["donation_count"]):
+        counter = 0
+        for transaction_id in item["donation_transaction_ids"]:
+            if Donation.objects.filter(transaction_id=transaction_id).exists():
+                continue
             sub_date = item["subscribe_date"]
-            donation_date = datetime(sub_date.year + int((sub_date.month + i) / 12), (sub_date.month + i) % 12, sub_date.day)
+            donation_date = datetime(sub_date.year + int((sub_date.month + counter) / 12), (sub_date.month + counter) % 12, sub_date.day)
             donation = Donation(
-                transaction_id='ch_'+rand_alphanumeric(24),
+                transaction_id=transaction_id,
                 subscription=subscription,
                 user=loaded_users[item["user_email"]],
                 form=form,
@@ -161,5 +174,7 @@ def load_test_donations():
                 donation_date=make_aware(donation_date),
             )
             donation.save()
+
+            counter += 1
 
     print("Loaded test subscriptions √")

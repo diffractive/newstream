@@ -37,7 +37,7 @@
                                 {% with support_editsub=latest_instance|is_gateway_editsub_supported support_togglesub=latest_instance|is_gateway_togglesub_supported support_cancelsub=latest_instance|is_gateway_cancelsub_supported %}
                                 <div class="payment-recurring-options-div" data-id="{{ latest_instance.id }}">
                                     <button class="view-recurring-donation" data-id="{{ latest_instance.id }}"
-                                        data-href="{% url 'donations:my-renewals' latest_instance.id %}">{% trans 'View all renewals' %}</button>
+                                        data-href="{% url 'donations:my-renewals' subscription.uuid %}">{% trans 'View all renewals' %}</button>
                                     <button class="edit-recurring-donation" data-id="{{ latest_instance.id }}"
                                         data-href="{% url 'donations:edit-recurring' latest_instance.id %}" {% if latest_instance.isRecurringCancelled or latest_instance.isRecurringProcessing or not support_editsub %}disabled{% endif %}>{% trans 'Edit Recurring donation' %}</button>
                                     <button class="toggle-recurring-donation need-black-loading-btn adhoc-right-pad"
@@ -112,7 +112,7 @@
                             {% with support_editsub=latest_instance|is_gateway_editsub_supported support_togglesub=latest_instance|is_gateway_togglesub_supported support_cancelsub=latest_instance|is_gateway_cancelsub_supported %}
                             <div class="payment-recurring-options-div" data-id="{{ latest_instance.id }}">
                                 <button class="view-recurring-donation" data-id="{{ latest_instance.id }}"
-                                    data-href="{% url 'donations:my-renewals' latest_instance.id %}">{% trans 'View all renewals' %}</button>
+                                    data-href="{% url 'donations:my-renewals' subscription.uuid %}">{% trans 'View all renewals' %}</button>
                                 <button class="edit-recurring-donation" data-id="{{ latest_instance.id }}"
                                     data-href="{% url 'donations:edit-recurring' latest_instance.id %}" {% if latest_instance.isRecurringCancelled or latest_instance.isRecurringProcessing or not support_editsub %}disabled{% endif %}>{% trans 'Edit Recurring donation' %}</button>
                                 <button class="toggle-recurring-donation need-black-loading-btn adhoc-right-pad"

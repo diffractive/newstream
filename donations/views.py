@@ -421,15 +421,17 @@ def my_recurring_donations(request):
 
 
 @login_required
-def my_renewals(request, id):
+def my_renewals(request, uuid):
     # deleted=False should be valid whether soft-delete mode is on or off
-    subscription = get_object_or_404(SubscriptionInstance, id=id, deleted=False)
+    subscription = get_object_or_404(Subscription, uuid=uuid, deleted=False)
     try:
         if subscription.user == request.user:
+            # find donations under all SubscriptionInstances under the same Subscription
             renewals = Donation.objects.filter(
-                subscription=subscription, deleted=False).order_by('-donation_date')
+                subscription__parent=subscription, deleted=False).order_by('-donation_date')
             siteSettings = get_site_settings_from_default_site()
-            return render(request, 'donations/my_renewals.html', {'subscription': subscription, 'renewals': renewals, 'siteSettings': siteSettings})
+            # subscription details should be fetched from the latest instance
+            return render(request, 'donations/my_renewals.html', {'subscription': subscription.latest_instance, 'renewals': renewals, 'siteSettings': siteSettings})
         else:
             raise PermissionError(_('You are not authorized to view renewals of subscription %(id)d.') % {'id': id})
     except PermissionError as e:

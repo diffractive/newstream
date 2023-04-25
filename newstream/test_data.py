@@ -1,4 +1,4 @@
-import random, string, uuid
+import random, string, uuid, math
 from django.conf import settings
 from allauth.account.models import EmailAddress
 from datetime import datetime
@@ -58,30 +58,30 @@ test_subscriptions = [
     {
         "parent_uuid": uuid.UUID('d21c4cc0-39b9-4990-8360-0859bbedc697'),
         "user_email": "david.donor@diffractive.io", # for matching up the right user
-        "profile_id": "sub_2Qxo8cKTD2mrB42B414bD7LS",
+        "profile_id": "I-J23PB6KN3BC7",
         "recurring_amount": 500,
         "currency": "HKD",
         "gateway": "paypal",
         "recurring_status": STATUS_CANCELLED,
         "subscribe_date": datetime.strptime("2022-12-08", '%Y-%m-%d'),
         "donation_transaction_ids": [
-            "ch_7hCo8cTTD2mrB42B1TnMfh5F",
-            "ch_9P6o8cTTD2mrB42B1TnMf0Lm",
-            "ch_1D3o8cTTD2mrB42B1TnMfp4T"
+            "9V798077EC622080D",
+            "5VP98746NC241063R",
+            "6AF881233D529931Y"
         ] # including 1st donation and subsequent renewals to be created
     },
     {
         "parent_uuid": uuid.UUID('d21c4cc0-39b9-4990-8360-0859bbedc697'),
         "user_email": "david.donor@diffractive.io", # for matching up the right user
-        "profile_id": "sub_4Gxo8cB2C2mrB42B414bDXS4",
+        "profile_id": "I-N23EB6KN9BC2",
         "recurring_amount": 500,
         "currency": "HKD",
         "gateway": "paypal",
         "recurring_status": STATUS_ACTIVE,
         "subscribe_date": datetime.strptime("2023-03-08", '%Y-%m-%d'),
         "donation_transaction_ids": [
-            "ch_0Jyo8cTTD2mrB42B1TnMfp3F",
-            "ch_n8bo8cTTD2mrB42B1TnMfKL4"
+            "7OF881233D529932Q",
+            "3XF881233D529432M"
         ] # including 1st donation and subsequent renewals to be created
     }
 ]
@@ -89,10 +89,15 @@ test_subscriptions = [
 # for referencing when setting up donations/subscriptions
 loaded_users = {}
 
-def load_test_data():
-    load_settings()
+def load_test_data(init=True):
+    if init:
+        load_settings()
     load_test_users()
     load_test_donations()
+
+def reset_test_data():
+    remove_test_data()
+    load_test_data(init=False)
 
 def load_settings():
     """ Load necessary settings in order to let the app run smoothly e.g. sending emails ok
@@ -205,7 +210,7 @@ def load_test_donations():
             if Donation.objects.filter(transaction_id=transaction_id).exists():
                 continue
             sub_date = item["subscribe_date"]
-            donation_date = datetime(sub_date.year + int((sub_date.month + i) / 12), ((sub_date.month + i - 1) % 12) + 1, sub_date.day)
+            donation_date = datetime(sub_date.year + math.floor((sub_date.month + i - 1) / 12), ((sub_date.month + i - 1) % 12) + 1, sub_date.day)
             donation = Donation(
                 transaction_id=transaction_id,
                 subscription=instance,
@@ -223,3 +228,23 @@ def load_test_donations():
             donation.save()
 
     print("Loaded test subscriptions √")
+
+def remove_test_data():
+    remove_test_users()
+    remove_test_donations()
+
+def remove_test_users():
+    for item in test_users:
+        User.objects.filter(email=item["email"]).delete()
+    print("Removed test users √")
+
+def remove_test_donations():
+    for item in test_donations:
+        Donation.objects.filter(transaction_id=item["transaction_id"]).delete()
+    print("Removed test donations √")
+
+    for item in test_subscriptions:
+        Donation.objects.filter(subscription__profile_id=item["profile_id"]).delete()
+        SubscriptionInstance.objects.filter(profile_id=item["profile_id"]).delete()
+        Subscription.objects.filter(uuid=item["parent_uuid"]).delete()
+    print("Removed test subscriptions √")

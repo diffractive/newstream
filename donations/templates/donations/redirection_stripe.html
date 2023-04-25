@@ -6,7 +6,7 @@
 {% block body_class %}newstream-redirect-stripe-page{% endblock %}
 
 {% block extra_head %}
-<script src="http://localstripe.newstream.local:8420/js.stripe.com/v3/"></script>
+<script src={{ settings.STRIPE_JS_URL }}></script>
 {% endblock %}
 
 {% block content %}

@@ -63,12 +63,6 @@ def create_checkout_session(request):
         else:
             session_kwargs['customer_email'] = donor_email
 
-        # Try and create the stripe product automatically so it doesn't need to be manually configured
-        try:
-            stripe.Product.create(name="Newstream Product", id=stripeSettings.product_id)
-        except Exception as e:
-            print(e)
-
         # Product should have been created by admin manually at the dashboard
         # todo: make sure the product_id in site_settings has been set by some kind of configuration enforcement before site is launched
         # stripe.error.InvalidRequestError would be raised if the product_id is either not found or empty/None

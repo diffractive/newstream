@@ -18,6 +18,13 @@ import django.conf.locale
 from django.utils.translation import gettext_lazy as _
 from django.conf import global_settings
 
+import environ
+
+env = environ.Env(
+    STRIPE_JS_URL=(str, 'https://js.stripe.com/v3/'),
+    STRIPE_API_BASE=(str, ""),
+)
+
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(PROJECT_DIR)
 
@@ -56,7 +63,6 @@ WAGTAIL_USER_CUSTOM_FIELDS = ['opt_in_mailing_list', 'language_preference']
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
-
 
 # Application definition
 
@@ -152,6 +158,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.i18n',
+                'django_settings_export.settings_export',
                 'pages.context_processors.homepage',
             ],
             'libraries': {
@@ -332,3 +339,13 @@ SOCIALACCOUNT_PROVIDERS = {
         'VERIFIED_EMAIL': True,
     }
 }
+
+#########################################################################################
+#
+# Stripe settings
+#
+
+STRIPE_JS_URL = env('STRIPE_JS_URL')
+STRIPE_API_BASE = env('STRIPE_API_BASE')
+
+SETTINGS_EXPORT = ['STRIPE_JS_URL']

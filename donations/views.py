@@ -1,6 +1,5 @@
 import json
 import csv
-from datetime import datetime, timezone
 from pprint import pprint
 from django.urls import reverse
 from django.http import HttpResponse, JsonResponse
@@ -8,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
@@ -144,32 +144,41 @@ def confirm_donation(request):
                     guest_name=tmpd.guest_name if not request.user.is_authenticated else '',
                     payment_status=STATUS_PROCESSING,
                     metas=temp_donation_meta_to_donation_meta(tmpd.temp_metas.all()),
-                    donation_date=datetime.now(timezone.utc),
+                    donation_date=timezone.now(),
                 )
                 # create a processing subscription if is_recurring
                 if tmpd.is_recurring:
-                    # create new SubscriptionInstance object, with a temporary profile_id created by uuidv4
                     # user should have been authenticated according to flow logic
-                    subscription = SubscriptionInstance(
+                    if not request.user or not request.user.is_authenticated:
+                        raise PermissionDenied
+
+                    # create new Subscription + SubscriptionInstance object, with a temporary profile_id created by uuidv4
+                    subscription = Subscription(
+                        user=request.user,
+                        created_by=request.user,
+                        subscription_created_at=timezone.now()
+                    )
+                    subscription.save()
+                    
+                    instance = SubscriptionInstance(
                         is_test=tmpd.is_test,
                         profile_id=uuid4_str(),
-                        user=request.user if request.user.is_authenticated else None,
+                        user=request.user,
+                        parent=subscription,
                         gateway=tmpd.gateway,
                         recurring_amount=tmpd.donation_amount,
                         currency=tmpd.currency,
                         recurring_status=STATUS_PROCESSING,
-                        subscribe_date=datetime.now(timezone.utc)
+                        subscribe_date=timezone.now()
                     )
-                    subscription.save()
+                    instance.save()
                     # link subscription to the donation
-                    donation.subscription = subscription
+                    donation.subscription = instance
 
                 donation.save()
                 request.session.pop('temp_donation_id')
                 # delete temp donation instead of saving it as processed
                 tmpd.delete()
-                # tmpd.status = STATUS_PROCESSED
-                # tmpd.save()
 
                 if 'first_time_registration' in request.session:
                     dpmeta = DonationPaymentMeta(
@@ -185,6 +194,9 @@ def confirm_donation(request):
                 raise Exception(_('No valid submit-choice is being submitted.'))
     except TempDonation.DoesNotExist as e:
         messages.add_message(request, messages.ERROR, str(_('Session data has expired. Please enter the donation details again.')))
+        return redirect('donations:donate')
+    except PermissionDenied as e:
+        messages.add_message(request, messages.ERROR, str(_('You are not allowed to make a recurring payment without user authentication.')))
         return redirect('donations:donate')
     except Exception as e:
         # Should rarely happen, but in case some bugs or order id repeats itself
@@ -429,7 +441,7 @@ def my_renewals(request, id):
 def export_donations(request):
     if not request.user.is_staff:
         raise PermissionDenied
-    filename = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S") + 'donations.csv'
+    filename = timezone.now().strftime("%Y%m%d-%H%M%S") + 'donations.csv'
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=' + filename
 
@@ -465,7 +477,7 @@ def export_donations(request):
 def export_subscriptions(request):
     if not request.user.is_staff:
         raise PermissionDenied
-    filename = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S") + 'subscriptions.csv'
+    filename = timezone.now().strftime("%Y%m%d-%H%M%S") + 'subscriptions.csv'
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=' + filename
 
@@ -499,7 +511,7 @@ def export_subscriptions(request):
 def export_donors(request):
     if not request.user.is_staff:
         raise PermissionDenied
-    filename = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S") + 'donors.csv'
+    filename = timezone.now().strftime("%Y%m%d-%H%M%S") + 'donors.csv'
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=' + filename
 

@@ -235,7 +235,11 @@ class Subscription(models.Model):
         on_delete=models.SET_NULL,
         null=True
     )
-    subscription_created_at = models.DateTimeField(auto_now_add=True) # this should match the created_at of the first instance
+    # reason for subscription_created_at field is because when we list Subscriptions on user's recurring donations page,
+    # we need to order them by date of subscription, created_at isn't accurate as it might be created by the data migration
+    # which is much later than the original subscription date by the user
+    # that's why this field should be very close/same as the created_at of its first instance
+    subscription_created_at = models.DateTimeField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(

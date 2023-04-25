@@ -153,8 +153,8 @@ def load_test_donations():
         )
         subscription.save()
 
+        counter = 0
         for transaction_id in item["donation_transaction_ids"]:
-            counter = 0
             if Donation.objects.filter(transaction_id=transaction_id).exists():
                 continue
             sub_date = item["subscribe_date"]

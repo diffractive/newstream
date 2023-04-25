@@ -7,6 +7,10 @@ from django.contrib.auth import get_user_model
 from donations.models import DonationForm, Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE
 from site_settings.models import AdminEmails, SiteSettings, PaymentGateway
 from django.utils.timezone import make_aware
+from donations.payment_gateways.stripe.constants import (EVENT_CHECKOUT_SESSION_COMPLETED,
+    EVENT_PAYMENT_INTENT_SUCCEEDED, EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID,
+    EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED)
+import requests
 
 User = get_user_model()
 
@@ -52,11 +56,19 @@ test_subscriptions = [
     }
 ]
 
+stripe_settings = {
+    "test_product_id": "TEST_PRODUCT_ID",
+    "test_webhook_key": "TEST_WEBHOOK_KEY",
+    "live_product_id": "LIVE_PRODUCT_ID",
+    "live_webhook_key": "LIVE_WEBHOOK_KEY",
+}
+
 # for referencing when setting up donations/subscriptions
 loaded_users = {}
 
 def load_test_data():
     load_settings()
+    load_localstripe_webhooks()
     load_test_users()
     load_test_donations()
 
@@ -76,9 +88,10 @@ def load_settings():
     ))
 
     # set stripe product ids
-    site_settings.stripe_testing_product_id = "TEST_PRODUCT_ID"
-    site_settings.stripe_product_id = "LIVE_PRODUCT_ID"
-
+    site_settings.stripe_testing_product_id = stripe_settings["test_product_id"]
+    site_settings.stripe_testing_webhook_secret = stripe_settings["test_webhook_key"]
+    site_settings.stripe_product_id = stripe_settings["live_product_id"]
+    site_settings.stripe_webhook_secret = stripe_settings["live_webhook_key"]
     # set footer link
     site_settings.privacy_policy_link = "https://github.com/diffractive/newstream"
 
@@ -163,3 +176,22 @@ def load_test_donations():
             donation.save()
 
     print("Loaded test subscriptions √")
+
+
+def load_localstripe_webhooks():
+    post_data = {
+        "url": 'http://app.newstream.local:8000/en/donations/verify-stripe-response/',
+        "secret": stripe_settings["test_webhook_key"],
+        "events": [
+            EVENT_CHECKOUT_SESSION_COMPLETED,
+            EVENT_PAYMENT_INTENT_SUCCEEDED,
+            EVENT_INVOICE_CREATED,
+            EVENT_INVOICE_PAID,
+            EVENT_CUSTOMER_SUBSCRIPTION_UPDATED,
+            EVENT_CUSTOMER_SUBSCRIPTION_DELETED
+        ]
+    }
+
+    requests.post('http://localstripe.newstream.local:8420/_config/webhooks/newstream', json=post_data)
+
+    print("Localstripe webhooks registered √")

@@ -15,6 +15,7 @@ def rand_alphanumeric(length):
     """
     return ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase + string.digits) for _ in range(length))
 
+# note that these test data should not appear on production environments
 test_users = [
     {
         "email": "david.donor@diffractive.io",

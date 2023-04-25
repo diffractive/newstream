@@ -169,7 +169,8 @@ def confirm_donation(request):
                         recurring_amount=tmpd.donation_amount,
                         currency=tmpd.currency,
                         recurring_status=STATUS_PROCESSING,
-                        subscribe_date=timezone.now()
+                        subscribe_date=timezone.now(),
+                        created_by=request.user
                     )
                     instance.save()
                     # link subscription to the donation

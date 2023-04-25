@@ -35,7 +35,7 @@ class DonationInspectView(InspectView):
         for field_name in self.model_admin.get_inspect_view_fields():
             fields[field_name] = self.get_dict_for_field(field_name)
             if field_name == 'subscription' and self.instance.subscription:
-                fields[field_name]['url'] = reverse('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': self.instance.subscription.id})
+                fields[field_name]['url'] = reverse('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': self.instance.subscription.id})
         return fields
 
     def get_donor_meta_data(self):

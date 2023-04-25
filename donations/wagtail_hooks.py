@@ -63,11 +63,11 @@ def set_subscription_status(request):
             sendSubscriptionStatusChangeToDonor(subscription)
 
             messages.add_message(request, messages.SUCCESS, str(_('Subscription %(id)d status set to %(status)s.') % {'id': id, 'status': subscription.recurring_status}))
-            return redirect(reverse('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': id}))
+            return redirect(reverse('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': id}))
     except Exception as e:
         _exception(str(e))
         messages.add_message(request, messages.ERROR, str(e))
-    return redirect(reverse('donations_subscription_modeladmin_index'))
+    return redirect(reverse('donations_subscriptioninstance_modeladmin_index'))
 
 @login_required
 def toggle_subscription(request):
@@ -82,11 +82,11 @@ def toggle_subscription(request):
             addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_PAUSE if resultSet['recurring-status'] == STATUS_PAUSED else SUBS_ACTION_RESUME, user=request.user)
 
             messages.add_message(request, messages.SUCCESS, str(_('Subscription %(id)d status is toggled to %(status)s.') % {'id': subscription_id, 'status': resultSet['recurring-status'].capitalize()}))
-            return redirect(reverse('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription_id}))
+            return redirect(reverse('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription_id}))
     except Exception as e:
         _exception(str(e))
         messages.add_message(request, messages.ERROR, str(e))
-    return redirect(reverse('donations_subscription_modeladmin_index'))
+    return redirect(reverse('donations_subscriptioninstance_modeladmin_index'))
 
 
 @login_required
@@ -102,11 +102,11 @@ def cancel_subscription(request):
             addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL, user=request.user)
 
             messages.add_message(request, messages.SUCCESS, str(_('Subscription %(id)d status is cancelled.') % {'id': subscription_id}))
-            return redirect(reverse('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription_id}))
+            return redirect(reverse('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription_id}))
     except Exception as e:
         _exception(str(e))
         messages.add_message(request, messages.ERROR, str(e))
-    return redirect(reverse('donations_subscription_modeladmin_index'))
+    return redirect(reverse('donations_subscriptioninstance_modeladmin_index'))
 
 
 @hooks.register('register_admin_urls')

@@ -3,10 +3,15 @@ from django.conf import settings
 from allauth.account.models import EmailAddress
 from datetime import datetime
 from django.contrib.auth import get_user_model
+from django.conf import settings
 
 from donations.models import DonationForm, Donation, Subscription, STATUS_COMPLETE, STATUS_ACTIVE
 from site_settings.models import AdminEmails, SiteSettings, PaymentGateway
 from django.utils.timezone import make_aware
+from donations.payment_gateways.stripe.constants import (EVENT_CHECKOUT_SESSION_COMPLETED,
+    EVENT_PAYMENT_INTENT_SUCCEEDED, EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID,
+    EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED)
+import requests
 
 User = get_user_model()
 
@@ -56,11 +61,22 @@ test_subscriptions = [
     }
 ]
 
+stripe_settings = {
+    "test_product_id": "prod_TEST_PRODUCT_ID",
+    "test_webhook_key": "whsec_TEST_WEBHOOK_KEY",
+    "test_secret_key": "sk_TEST_SECRET_KEY",
+    "live_product_id": "prod_LIVE_PRODUCT_ID",
+    "live_webhook_key": "whsec_LIVE_WEBHOOK_KEY",
+    "live_secret_key": "sk_LIVE_SECRET_KEY",
+}
+
 # for referencing when setting up donations/subscriptions
 loaded_users = {}
 
 def load_test_data():
     load_settings()
+    load_localstripe_webhooks()
+    load_localstripe_create_product()
     load_test_users()
     load_test_donations()
 
@@ -80,9 +96,12 @@ def load_settings():
     ))
 
     # set stripe product ids
-    site_settings.stripe_testing_product_id = "TEST_PRODUCT_ID"
-    site_settings.stripe_product_id = "LIVE_PRODUCT_ID"
-
+    site_settings.stripe_testing_product_id = stripe_settings["test_product_id"]
+    site_settings.stripe_testing_webhook_secret = stripe_settings["test_webhook_key"]
+    site_settings.stripe_testing_api_secret_key = stripe_settings["test_secret_key"]
+    site_settings.stripe_product_id = stripe_settings["live_product_id"]
+    site_settings.stripe_webhook_secret = stripe_settings["live_webhook_key"]
+    site_settings.stripe_api_secret_key = stripe_settings["live_secret_key"]
     # set footer link
     site_settings.privacy_policy_link = "https://github.com/diffractive/newstream"
 
@@ -178,3 +197,33 @@ def load_test_donations():
             counter += 1
 
     print("Loaded test subscriptions √")
+
+
+def load_localstripe_create_product():
+    auth = requests.auth.HTTPBasicAuth(stripe_settings["test_secret_key"], '')
+    post_data = {
+        "name": "Newstream Product",
+        "id": stripe_settings["test_product_id"]
+    }
+    requests.post(settings.STRIPE_API_BASE + '/v1/products', auth=auth, json=post_data)
+
+    print("Localstripe product created √")
+
+
+def load_localstripe_webhooks():
+    post_data = {
+        "url": 'http://app.newstream.local:8000/en/donations/verify-stripe-response/',
+        "secret": stripe_settings["test_webhook_key"],
+        "events": [
+            EVENT_CHECKOUT_SESSION_COMPLETED,
+            EVENT_PAYMENT_INTENT_SUCCEEDED,
+            EVENT_INVOICE_CREATED,
+            EVENT_INVOICE_PAID,
+            EVENT_CUSTOMER_SUBSCRIPTION_UPDATED,
+            EVENT_CUSTOMER_SUBSCRIPTION_DELETED
+        ]
+    }
+
+    requests.post(settings.STRIPE_API_BASE + '/_config/webhooks/newstream', json=post_data)
+
+    print("Localstripe webhooks registered √")

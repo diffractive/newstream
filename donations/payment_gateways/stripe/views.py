@@ -3,6 +3,7 @@ from django.shortcuts import redirect
 from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
+from django.urls import reverse
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import uuid4_str, reverse_with_site_url, _exception, _debug, object_to_json
@@ -15,14 +16,14 @@ from donations.payment_gateways.stripe.factory import Factory_Stripe
 def create_checkout_session(request):
     """ When the user reaches last step after confirming the donation,
         user is redirected via gatewayManager.redirect_to_gateway_url(), which renders redirection_stripe.html
-        
+
         This function calls to Stripe Api to create a Stripe Session object,
         then this function returns the stripe session id to the stripe js api 'stripe.redirectToCheckout({ sessionId: session.id })' for the redirection to Stripe's checkout page
 
         Sample (JSON) request: {
             'csrfmiddlewaretoken': 'LZSpOsb364pn9R3gEPXdw2nN3dBEi7RWtMCBeaCse2QawCFIndu93fD3yv9wy0ij'
         }
-        
+
         @todo: revise error handling, avoid catching all exceptions at the end
     """
 
@@ -40,20 +41,22 @@ def create_checkout_session(request):
 
         # might throw DoesNotExist error
         donation = Donation.objects.get(pk=donation_id)
-
+        success_url = request.build_absolute_uri(reverse('donations:return-from-stripe'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'
+        cancel_url = request.build_absolute_uri(reverse('donations:cancel-from-stripe'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'
         # init session_kwargs with common parameters
         session_kwargs = {
             'payment_method_types': ['card'],
             'metadata': {
                 'donation_id': donation.id
             },
-            'success_url': reverse_with_site_url('donations:return-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
-            'cancel_url': reverse_with_site_url('donations:cancel-from-stripe')+'?stripe_session_id={CHECKOUT_SESSION_ID}',
+            'success_url': success_url,
+            'cancel_url': cancel_url,
             'idempotency_key': uuid4_str()
         }
 
         # try to get existing stripe customer
         donor_email = donation.user.email if donation.user else donation.guest_email
+
         customers = stripe.Customer.list(email=donor_email, limit=1)
         if len(customers['data']) > 0:
             session_kwargs['customer'] = customers['data'][0]['id']
@@ -106,7 +109,7 @@ def create_checkout_session(request):
         session = stripe.checkout.Session.create(**session_kwargs)
 
         # save payment_intent id for recognition purposes when receiving the payment_intent.succeeded webhook for onetime donations
-        if session.payment_intent:
+        if session.get('payment_intent'):
             dpm = DonationPaymentMeta(donation=donation, field_key='stripe_payment_intent_id', field_value=session.payment_intent)
             dpm.save()
 
@@ -146,7 +149,7 @@ def verify_stripe_response(request):
 
         For more info on how to build this webhook endpoint, refer to Stripe documentation:
         https://stripe.com/docs/webhooks
-        
+
         @todo: revise error handling, avoid catching all exceptions at the end
     """
 
@@ -187,7 +190,7 @@ def return_from_stripe(request):
 
         For more info on how to build this endpoint, refer to Stripe documentation:
         https://stripe.com/docs/payments/checkout/custom-success-page
-        
+
         @todo: revise error handling, avoid catching all exceptions at the end
     """
 

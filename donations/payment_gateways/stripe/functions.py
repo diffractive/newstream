@@ -3,11 +3,13 @@ from decimal import Decimal
 
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.functions import getCurrencyDictAt
+from django.conf import settings
 
 
 def initStripeApiKey():
     stripeSettings = getStripeSettings()
     stripe.api_key = stripeSettings.secret_key
+    stripe.api_base = settings.STRIPE_API_BASE or stripe.api_base
     # see Network errors: https://stripe.com/docs/error-handling#network-errors
     stripe.max_network_retries = 2
 

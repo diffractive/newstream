@@ -31,9 +31,10 @@ import secrets
 randstr = secrets.token_hex(6).upper()
 
 email = f'test_user{randstr}@newstream.com'
-first_name = 'Test'
-last_name = 'User'
-password = 'strongpwd'
+name = 'Test User'
+card_number = '4242424242424242'
+card_expiry = '1133'
+cvc = '123'
 # -
 
 driver = get_webdriver('portal')
@@ -48,20 +49,27 @@ grabber.capture_screen('donation_form', 'Donation Form')
 
 # Cannot go to the signup page without setting a value into the custom amount or choosing a default from selector
 app.dropdown('id_donation_amount').select('USD $100')
-app.button('Register or Login').click()
-grabber.capture_screen('register_login', 'Register or login page')
-
-app.link('Continue with Email Sign up').click()
-grabber.capture_screen('sign_up', 'Sign up form')
-
 app.input('id_email').fill(email)
-app.input('id_first_name').fill(first_name)
-app.input('id_last_name').fill(last_name)
-app.input('id_password1').fill(password)
-app.input('id_password2').fill(password)
-grabber.capture_screen('filled_form', 'Filled signup form')
+app.input('id_name').fill(name)
+app.dropdown('id_payment_gateway').select('Stripe')
+app.button('Continue as guest').click()
+grabber.capture_screen('guest_payment', 'Confirm Payment')
 
-app.button('Continue').click()
-grabber.capture_screen('signed_up', 'Successfully signed up')
+app.button('Confirm Donation').click()
+grabber.capture_screen('processing_payment', 'Processing Payment')
+
+# Wait until redirecting finishes
+wait_element(driver, '//input[@id="cardNumber"]')
+grabber.capture_screen('stripe_payment_gateway', 'Stripe payment gateway')
+
+app.input('cardNumber').fill(card_number)
+app.input('cardExpiry').fill(card_expiry)
+app.input('cardCvc').fill(cvc)
+app.input('billingName').fill(name)
+app.button('Pay').click()
+wait_element(driver, '//h1[text()="Thank you!"]')
+grabber.capture_screen('thank_you', 'Thank you screen')
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
+
+

@@ -1,0 +1,20 @@
+version: "3.8"
+
+services:
+
+  database:
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  app:
+    environment:
+      TEST_DATA: 1
+      DEBUG: 1
+      PY_AUTORELOAD: 1
+    volumes:
+      - '../django-app:/app'
+
+  selenium_tests:
+    volumes:
+      - '../selenium-tests/test_scripts:/home/jupyter/notebooks/test_scripts'
+      - '../selenium-tests/output:/home/jupyter/notebooks/output'

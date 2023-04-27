@@ -48,6 +48,9 @@ class Input:
     
     def fill(self, value):
         self.element.send_keys(value)
+    
+    def clear(self):
+        self.element.clear()
 
 
 class Application:

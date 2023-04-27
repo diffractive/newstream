@@ -30,11 +30,9 @@ import secrets
 # +
 randstr = secrets.token_hex(6).upper()
 
+cancel_url = '/en/donations/cancel-from-stripe/'
 email = f'test_user{randstr}@newstream.com'
 name = 'Test User'
-card_number = '4242424242424242'
-card_expiry = '1133'
-cvc = '123'
 # -
 
 driver = get_webdriver('portal')
@@ -62,14 +60,9 @@ grabber.capture_screen('processing_payment', 'Processing Payment')
 wait_element(driver, '//input[@id="cardNumber"]')
 grabber.capture_screen('stripe_payment_gateway', 'Stripe payment gateway')
 
-app.input('cardNumber').fill(card_number)
-app.input('cardExpiry').fill(card_expiry)
-app.input('cardCvc').fill(cvc)
-app.input('billingName').fill(name)
-app.button('Pay').click()
-wait_element(driver, '//h1[text()="Thank you!"]')
-grabber.capture_screen('thank_you', 'Thank you screen')
+app.link(cancel_url).click()
+wait_element(driver, '//h1[text()="Donation Cancelled"]')
+grabber.capture_screen('cancelled', 'Cancelled Donation')
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
-
 

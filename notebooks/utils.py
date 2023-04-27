@@ -7,7 +7,7 @@ def get_element_by_identifier(driver, element, identifier):
     Get element instance given an identifier
     element: xpath used to identify the html element e.g. "button"
         can also contain a more complex xpath structure depending on the element
-    identifier: by default an element's ID but it also has a name and text() fallback
+    identifier: by default an element's ID but it also has a name, href and text() fallback
     """
     try:
         return driver.find_element(By.XPATH, f'//{element}[@id="{identifier}"]')
@@ -17,6 +17,11 @@ def get_element_by_identifier(driver, element, identifier):
         return driver.find_element(By.XPATH, f'//{element}[@name="{identifier}"]')
     except NoSuchElementException:
         pass
+    try:
+        return driver.find_element(By.XPATH, f'//{element}[contains(@href, "{identifier}")]')
+    except NoSuchElementException:
+        pass
+    
     return driver.find_element(By.XPATH, f'//{element}[text()="{identifier}"]')
 
 

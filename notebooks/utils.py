@@ -1,6 +1,8 @@
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import NoSuchElementException
-
+import requests
+import quopri
+import base64
 
 def get_element_by_identifier(driver, element, identifier):
     """
@@ -21,7 +23,7 @@ def get_element_by_identifier(driver, element, identifier):
         return driver.find_element(By.XPATH, f'//{element}[contains(@href, "{identifier}")]')
     except NoSuchElementException:
         pass
-    
+
     return driver.find_element(By.XPATH, f'//{element}[text()="{identifier}"]')
 
 
@@ -32,3 +34,34 @@ def get_children_elements(driver, element):
         can also contain a more complex xpath structure depending on the element
     """
     return driver.find_elements(By.XPATH, f'//{element}')
+
+# +
+def get_email_content(index=0):
+    """
+    Returns the HTML content (base64 encoded) of the most recent email received
+    TODO: Should add to selenium runner
+    """
+
+    response = requests.get("http://mailhog.newstream.local:8025/api/v2/messages")
+    response.encoding = 'utf-8'
+    response = response.json()
+
+    if not response['items']:
+        return ''
+
+    html_content = next(filter(
+        lambda part: part['Headers']['Content-Type'][0].startswith('text/html'),
+        response['items'][index]['MIME']['Parts']))
+    
+    html_content = quopri.decodestring(html_content['Body'])
+
+#     if 'quoted-printable' in html_content['Headers']['Content-Transfer-Encoding']:
+#         html_content = quopri.decodestring(html_content['Body'])
+#     else:
+#         html_content = html_content.encode()
+
+    html_content = base64.b64encode(html_content).decode()
+    return html_content
+# -
+
+

@@ -24,8 +24,10 @@ from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, not
 from diffractive.selenium.visualisation import gallery
 
 from components import Application
+from utils import get_email_content
 
 import secrets
+import time
 
 # +
 randstr = secrets.token_hex(6).upper()
@@ -88,6 +90,11 @@ app.input('billingName').fill(name)
 app.button('Pay').click()
 wait_element(driver, '//h1[text()="Thank you!"]')
 grabber.capture_screen('thank_you', 'Thank you screen')
+
+grabber.capture_html(get_email_content(0), 'email_1', 'Sign up or Subscription email 1')
+grabber.capture_html(get_email_content(1), 'email_2', 'Sign up or Subscription email 2')
+grabber.capture_html(get_email_content(2), 'email_3', 'Sign up or Subscription email 3')
+grabber.capture_html(get_email_content(3), 'email_4', 'Sign up or Subscription email 4')
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
 

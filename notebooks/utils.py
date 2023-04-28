@@ -3,6 +3,7 @@ from selenium.common.exceptions import NoSuchElementException
 import requests
 import quopri
 import base64
+import time
 
 def get_element_by_identifier(driver, element, identifier):
     """
@@ -35,11 +36,37 @@ def get_children_elements(driver, element):
     """
     return driver.find_elements(By.XPATH, f'//{element}')
 
-# +
-def get_email_content(index=0):
+def get_email_count():
     """
-    Returns the HTML content (base64 encoded) of the most recent email received
-    TODO: Should add to selenium runner
+    Returns current count of emails in mailhog
+    """
+    response = requests.get("http://mailhog.newstream.local:8025/api/v2/messages")
+    response.encoding = 'utf-8'
+    response = response.json()
+    
+    return len(response['items'])
+
+
+def wait_for_email(offset=0, timeout=15):
+    """
+    Returns true when the count of emails is more than "offset", indicating there are new emails than expected
+    offset is the amount of emails expected to already be in mailhog
+    """
+    loaded = False
+    start_ts = time.time()
+    while not loaded:
+        if timeout is not None and time.time() - start_ts > timeout:
+            raise TimeoutError("Exceeded %i seconds waiting for e-mail to be received" % (timeout))
+        if get_email_count() > offset:
+            loaded = True
+        else:
+            time.sleep(1)
+
+
+def get_emails(index=0, count=1):
+    """
+    Returns the email content from mailhog
+    TODO: we would like to get the html_content of this so we can have a screenshot of the email
     """
 
     response = requests.get("http://mailhog.newstream.local:8025/api/v2/messages")
@@ -48,20 +75,6 @@ def get_email_content(index=0):
 
     if not response['items']:
         return ''
-
-    html_content = next(filter(
-        lambda part: part['Headers']['Content-Type'][0].startswith('text/html'),
-        response['items'][index]['MIME']['Parts']))
     
-    html_content = quopri.decodestring(html_content['Body'])
-
-#     if 'quoted-printable' in html_content['Headers']['Content-Transfer-Encoding']:
-#         html_content = quopri.decodestring(html_content['Body'])
-#     else:
-#         html_content = html_content.encode()
-
-    html_content = base64.b64encode(html_content).decode()
-    return html_content
-# -
-
+    return response['items'][index:index+count]
 

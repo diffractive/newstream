@@ -107,7 +107,7 @@ services:
     environment:
       SELENIUM_RUNNER: "remote"
     volumes:
-      - './notebooks:/notebooks'
+      - '../notebooks:/notebooks'
       - ./selenium-config.yaml:/etc/diffractive/selenium.yaml
     networks:
       - newstream

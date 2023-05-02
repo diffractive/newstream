@@ -1,0 +1,23 @@
+version: "3.8"
+
+networks:
+  default:
+    external:
+      name: cloudbuild
+
+services:
+  app_init:
+    image: "${IMAGE_PREFIX}${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
+
+  app:
+    environment:
+      TEST_DATA: 1
+      WIPE_DB: 1
+      DEBUG: 1
+      PY_AUTORELOAD: 1
+    image: "${IMAGE_PREFIX}${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
+
+  selenium_tests:
+    image: "${IMAGE_PREFIX}${SELENIUM_IMAGE_NAME}:${IMAGE_TAG}"
+    volumes:
+      - '/workspace/output:/notebooks/output'

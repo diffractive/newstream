@@ -1,0 +1,84 @@
+#
+# Cloudbuild config for main branch
+#
+
+# [START cloudbuild]
+steps:
+
+  # Create the output directory for selenium to write to
+  - id: chmod
+    name: 'ubuntu'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+        mkdir -p /workspace/output && chmod -R 777 /workspace/output
+    waitFor: ['-']
+
+  - id: "build-django-image"
+    name: "gcr.io/kaniko-project/executor:v1.6.0"
+    args: [
+        "--destination", "asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:pr-${_PR_NUMBER}",
+        "--cache=true",
+        "--cache-ttl=336h0m0s", # 2 weeks (default)
+        "--context=django-app",
+        "--target=runtime"
+    ]
+    waitFor: ['-']
+
+  - id: "build-selenium-image"
+    name: "gcr.io/kaniko-project/executor:v1.6.0"
+    args: [
+      "--destination", "asia.gcr.io/${PROJECT_ID}/${_SELENIUM_SERVICE_NAME}:pr-${_PR_NUMBER}",
+      "--cache=true",
+      "--cache-ttl=336h0m0s", # 2 weeks (default)
+      "--context=selenium-tests",
+      "--build-arg", "BASE_IMAGE=asia.gcr.io/${PROJECT_ID}/selenium-runner:latest"
+    ]
+    waitFor: ['-']
+
+  # Pull the images. It seems more efficient to do this separately. At least, this means
+  # we can start pulling the image for each, prior to both builds completing
+  - id: docker-pull-django
+    name: 'gcr.io/cloud-builders/docker:20.10.14'
+    args: [
+        'pull', 'asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:pr-${_PR_NUMBER}',
+    ]
+    waitFor: [build-django-image]
+
+  - id: docker-pull-selenium
+    name: 'gcr.io/cloud-builders/docker:20.10.14'
+    args: [
+        'pull', 'asia.gcr.io/${PROJECT_ID}/${_SELENIUM_SERVICE_NAME}:pr-${_PR_NUMBER}',
+    ]
+    waitFor: [build-selenium-image]
+
+  # Run selenium tests
+  - id: selenium-tests
+    name: 'gcr.io/cloud-builders/docker:20.10.14'
+    args: [
+      'compose', '-f', 'docker/docker-compose.yml', '-f', 'docker/docker-compose-gcp.yml', 'run', 'selenium_tests', 'run_tests',
+    ]
+    env:
+      - 'PROJECT_ID=$PROJECT_ID'
+      - 'IMAGE_TAG=pr-${_PR_NUMBER}'
+      - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
+    waitFor: [docker-pull-django, docker-pull-selenium, chmod]
+
+  # Bring down the docker-compose stack
+  - id: docker-compose-down
+    name: 'gcr.io/cloud-builders/docker:20.10.14'
+    args: ['compose', '-f', 'docker/docker-compose.yml', 'down', '--remove-orphans']
+    env:
+      - 'PROJECT_ID=$PROJECT_ID'
+    waitFor: [selenium-tests]
+
+substitutions:
+  _BACKEND_SERVICE_NAME: newstream
+  _SELENIUM_SERVICE_NAME: newstream-tests
+
+# We use a higher spec machine for performance, particularly for the selenium tests
+options:
+  machineType: 'N1_HIGHCPU_8'
+
+# [END cloudbuild]]

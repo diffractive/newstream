@@ -22,7 +22,7 @@ steps:
         "--cache=true",
         "--cache-ttl=336h0m0s", # 2 weeks (default)
         "--context=django-app",
-        "--target=runtime"
+        "--target=build-image"
     ]
     waitFor: ['-']
 

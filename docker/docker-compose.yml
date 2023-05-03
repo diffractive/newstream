@@ -114,6 +114,7 @@ services:
     depends_on:
       - app
       - selenium
+      - localstripe
     profiles:
       - selenium
 

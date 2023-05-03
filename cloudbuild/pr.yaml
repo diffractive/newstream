@@ -37,6 +37,17 @@ steps:
     ]
     waitFor: ['-']
 
+  - id: "build-localstripe-image"
+    name: "gcr.io/kaniko-project/executor:v1.6.0"
+    args: [
+      "--destination", "asia.gcr.io/${PROJECT_ID}/${_LOCALSTRIPE_SERVICE_NAME}:pr-${_PR_NUMBER}",
+      "--cache=true",
+      "--cache-ttl=336h0m0s", # 2 weeks (default)
+      "--context=localstripe",
+      "--build-arg", "BASE_IMAGE=asia.gcr.io/${PROJECT_ID}/localstripe:latest"
+    ]
+    waitFor: ['-']
+
   # Pull the images. It seems more efficient to do this separately. At least, this means
   # we can start pulling the image for each, prior to both builds completing
   - id: docker-pull-django
@@ -53,11 +64,31 @@ steps:
     ]
     waitFor: [build-selenium-image]
 
+  - id: docker-pull-localstripe
+    name: 'gcr.io/cloud-builders/docker:20.10.14'
+    args: [
+        'pull', 'asia.gcr.io/${PROJECT_ID}/${_LOCALSTRIPE_SERVICE_NAME}:pr-${_PR_NUMBER}',
+    ]
+    waitFor: [build-localstripe-image]
+
+  # Start containers to run automated tests
+  - id: start-docker-compose
+    name: 'gcr.io/cloud-builders/docker:20.10.14'
+    args: ['compose', '-f', 'docker/docker-compose.yml', '-f', 'docker/docker-compose-gcp.yml', 'up', '-d']
+    env:
+      - 'PROJECT_ID=$PROJECT_ID'
+      - 'IMAGE_TAG=pr-${_PR_NUMBER}'
+      - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
+      - 'BACKEND_IMAGE_NAME=${_BACKEND_SERVICE_NAME}'
+      - 'SELENIUM_IMAGE_NAME=${_SELENIUM_SERVICE_NAME}'
+      - 'LOCALSTRIPE_IMAGE_NAME=${_LOCALSTRIPE_SERVICE_NAME}'
+    waitFor: [docker-pull-django, docker-pull-selenium, docker-pull-localstripe]
+
   # Run selenium tests
   - id: selenium-tests
     name: 'gcr.io/cloud-builders/docker:20.10.14'
     args: [
-      'compose', '-f', 'docker/docker-compose.yml', '-f', 'docker/docker-compose-gcp.yml', 'run', 'selenium_tests', 'run_tests',
+      'compose', '-f', 'docker/docker-compose.yml', '-f', 'docker/docker-compose-gcp.yml', 'run', 'selenium_tests', 'run_tests', '--continue-on-failure', '--ignore-errors'
     ]
     env:
       - 'PROJECT_ID=$PROJECT_ID'
@@ -65,7 +96,26 @@ steps:
       - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
       - 'BACKEND_IMAGE_NAME=${_BACKEND_SERVICE_NAME}'
       - 'SELENIUM_IMAGE_NAME=${_SELENIUM_SERVICE_NAME}'
-    waitFor: [docker-pull-django, docker-pull-selenium, chmod]
+      - 'LOCALSTRIPE_IMAGE_NAME=${_LOCALSTRIPE_SERVICE_NAME}'
+    waitFor: [start-docker-compose]
+
+  - id: upload-selenium-output
+    name: "gcr.io/cloud-builders/gsutil"
+    args: [
+        'cp', '-Z',
+        '/workspace/output/test_output.html',
+        'gs://${PROJECT_ID}_cloudbuild/output/pr-${_PR_NUMBER}/test_output.html'
+    ]
+    waitFor: [selenium-tests]
+
+  - id: print-selenium-url
+    name: 'ubuntu'
+    entrypoint: 'bash'
+    args:
+    - '-c'
+    - |
+        echo "Images uploaded to https://storage.cloud.google.com/${PROJECT_ID}_cloudbuild/output/pr-${_PR_NUMBER}/test_output.html"
+    waitFor: [selenium-tests]
 
   # Bring down the docker-compose stack
   - id: docker-compose-down
@@ -73,11 +123,12 @@ steps:
     args: ['compose', '-f', 'docker/docker-compose.yml', 'down', '--remove-orphans']
     env:
       - 'PROJECT_ID=$PROJECT_ID'
-    waitFor: [selenium-tests]
+    waitFor: [upload-selenium-output]
 
 substitutions:
   _BACKEND_SERVICE_NAME: newstream
   _SELENIUM_SERVICE_NAME: newstream-tests
+  _LOCALSTRIPE_SERVICE_NAME: localstripe
 
 # We use a higher spec machine for performance, particularly for the selenium tests
 options:

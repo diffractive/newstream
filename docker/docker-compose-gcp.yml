@@ -20,6 +20,9 @@ services:
       PY_AUTORELOAD: 1
     image: "${IMAGE_PREFIX}${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
 
+  localstripe:
+    image: "${IMAGE_PREFIX}${LOCALSTRIPE_IMAGE_NAME}:${IMAGE_TAG}"
+
   selenium_tests:
     image: "${IMAGE_PREFIX}${SELENIUM_IMAGE_NAME}:${IMAGE_TAG}"
     volumes:

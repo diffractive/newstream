@@ -1,4 +1,5 @@
-FROM docker.io/diffractive/selenium-runner:latest
+ARG BASE_IMAGE=diffractive/selenium-runner:latest
+FROM ${BASE_IMAGE}
 
 RUN pip install openpyxl
 

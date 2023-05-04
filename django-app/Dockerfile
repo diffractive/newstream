@@ -1,4 +1,4 @@
-FROM python:3.7-slim
+FROM python:3.7-slim AS build-image
 LABEL maintainer="support@diffractive.io"
 
 # Dockerfile parameters
@@ -42,7 +42,7 @@ RUN pip install --upgrade pip \
     && pip install -r /requirements.txt \
     && pip install -r /requirements-docker.txt
 
-# Copy the pplication code to the container
+# Copy the application code to the container
 RUN mkdir /app/
 WORKDIR /app/
 ADD . /app/
@@ -57,7 +57,7 @@ ENV DJANGO_SETTINGS_MODULE=newstream.settings.docker
 RUN groupadd -r ${APP_USER} && useradd --no-log-init -r -g ${APP_USER} ${APP_USER}
 
 # Create the static files dir and set to be owned by the application
-RUN mkdir /app/static
+RUN mkdir -p /app/static
 RUN chown newstream:newstream /app/static
 
 # We also need to be able to write to the locales folder for compilemessages

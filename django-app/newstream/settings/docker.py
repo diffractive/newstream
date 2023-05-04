@@ -10,7 +10,7 @@ DATABASE_USER = os.environ.get("DATABASE_USER", "newstream")
 DATABASE_HOST = os.environ.get("DATABASE_HOST", "")
 DATABASE_PORT = os.environ.get("DATABASE_PORT", "")
 DATABASE_PASSWORD = os.environ.get("DATABASE_PASSWORD", "")
-DEBUG = int(os.environ.get("NEWSTREAM_DEBUG", "0"))
+DEBUG = int(os.environ.get("DEBUG", "0"))
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'mailhog'

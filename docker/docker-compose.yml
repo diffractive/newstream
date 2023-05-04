@@ -1,4 +1,4 @@
-version: "2"
+version: "3.8"
 
 services:
   database:
@@ -13,14 +13,10 @@ services:
     networks:
       - newstream
 
-  app:
+  app_init:
     environment:
-      STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
-      STRIPE_JS_URL: 'http://localstripe.newstream.local:8420/js.stripe.com/v3/'
       RUN_MIGRATIONS: 1
       COLLECTSTATIC: 1
-      COMPILEMESSAGES: 1
-      NEWSTREAM_DEBUG: 1
       TEST_DATA: 1
       DATABASE_NAME: newstream
       DATABASE_USER: newstream
@@ -34,12 +30,33 @@ services:
       dockerfile: ./Dockerfile
     links:
       - database:database
+    depends_on:
+      - database
+      - mailhog
+    command: init
+    networks:
+      newstream:
+        aliases:
+          - app.newstream.local
+
+  app:
+    environment:
+      TEST_DATA: 1
+      DATABASE_NAME: newstream
+      DATABASE_USER: newstream
+      DATABASE_HOST: database
+      DATABASE_PASSWORD: newstream
+      DJANGO_SUPERUSER_EMAIL: newstream@test.local
+      DJANGO_SUPERUSER_PASSWORD: newstream
+    image: diffractive/newstream:latest
+    links:
+      - database:database
+    command: run
+    depends_on:
+      app_init:
+        condition: service_completed_successfully
     ports:
       - "8000:8000"
-    volumes:
-      - type: bind
-        source: .
-        target: /app
     networks:
       newstream:
         aliases:
@@ -90,13 +107,14 @@ services:
     environment:
       SELENIUM_RUNNER: "remote"
     volumes:
-      - './notebooks:/notebooks'
+      - '../notebooks:/notebooks'
       - ./selenium-config.yaml:/etc/diffractive/selenium.yaml
     networks:
       - newstream
     depends_on:
       - app
       - selenium
+      - localstripe
     profiles:
       - selenium
 

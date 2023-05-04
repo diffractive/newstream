@@ -33,15 +33,9 @@ client/node_modules
 *.mo
 
 ### NEWSTREAM
-*.log
-.backups/
-test_pkcs7/
-fixure.json
-fixture-converted.json
-newstream/settings/dev.py
-newstream/settings/production.py
+/django-app/newstream/settings/dev.py
+/django-app/static/
 /static/
-newstream.db
 
 ### Jupyter
 .ipynb_checkpoints

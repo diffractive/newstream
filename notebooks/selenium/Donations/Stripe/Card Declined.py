@@ -24,6 +24,7 @@ from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, not
 from diffractive.selenium.visualisation import gallery
 
 from components import Application
+from utils import get_email_count, wait_for_email, get_emails
 
 import secrets
 
@@ -33,8 +34,10 @@ randstr = secrets.token_hex(6).upper()
 email = f'test_user{randstr}@newstream.com'
 name = 'Test User'
 card_number = '4242424242424242'
+declined_card = '4000000000000002'
 card_expiry = '1133'
 cvc = '123'
+email_count = get_email_count()
 # -
 
 driver = get_webdriver('portal')
@@ -62,6 +65,18 @@ grabber.capture_screen('processing_payment', 'Processing Payment')
 wait_element(driver, '//input[@id="cardNumber"]')
 grabber.capture_screen('stripe_payment_gateway', 'Stripe payment gateway')
 
+# ## Test card declined
+
+app.input('cardNumber').fill(declined_card)
+app.input('cardExpiry').fill(card_expiry)
+app.input('cardCvc').fill(cvc)
+app.input('billingName').fill(name)
+app.button('Pay').click()
+wait_element(driver, '//div[text()="Your credit card was declined. Try paying with a debit card instead."]')
+grabber.capture_screen('declined_card', 'Card has been declined error')
+
+# ## Happy path
+
 app.input('cardNumber').fill(card_number)
 app.input('cardExpiry').fill(card_expiry)
 app.input('cardCvc').fill(cvc)
@@ -69,6 +84,26 @@ app.input('billingName').fill(name)
 app.button('Pay').click()
 wait_element(driver, '//h1[text()="Thank you!"]')
 grabber.capture_screen('thank_you', 'Thank you screen')
+
+# +
+# There should be two emails sent, one for admins one for the user
+wait_for_email(email_count+1)
+emails = get_emails(0, 2)
+user_email = 'Thank you for your Donation'
+admin_email = 'New One-off Donation'
+
+# Email order is not guaranteed
+email_titles = [admin_email, user_email]
+for email_content in emails:
+    email_title = email_content['Content']['Headers']['Subject'][0]
+    email_recipient = email_content['Content']['Headers']['To'][0]
+    
+    assert email_title in email_titles, f'Unexpected e-mail found: {email_title}'
+    if email_title == user_email:
+        assert email_recipient == email, \
+            f"Unexpected e-mail recipient {email_recipient}, expected: {email}"
+    email_titles.remove(email_title)
+# -
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
 

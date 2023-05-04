@@ -30,6 +30,8 @@
     {% meta_tags %}
     {% endif %}
 
+    {% include "common/datadog.html" %}
+
     {% block extra_head %}
     {# Override this in templates to add extra stuff in the head #}
     {% endblock %}

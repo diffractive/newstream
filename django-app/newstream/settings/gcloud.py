@@ -9,8 +9,11 @@ from .base import *
 
 import io
 import os
+import sys
 
 import environ
+
+from newstream.logging_utils import CustomJsonFormatter
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 env_file = os.path.join(BASE_DIR, ".env")
@@ -100,6 +103,7 @@ WAGTAIL_2FA_OTP_TOTP_NAME=env('WAGTAIL_2FA_OTP_TOTP_NAME')
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
+    # how the logs are formatted
     'formatters': {
         'verbose': {
             'format': '[{levelname}] {asctime} [{module}] {message}',
@@ -109,20 +113,32 @@ LOGGING = {
             'format': '{levelname} {message}',
             'style': '{',
         },
+        "json": {
+            "()": CustomJsonFormatter,
+            "format": "",
+        },
     },
+    # where the logs should be sent to
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
             'stream': sys.stdout
         },
+        'console-json': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+            'formatter': 'json',
+        },
     },
+    # parent logger
     'root': {
-        'handlers': ['console'],
-        'level': 'WARNING',
+        'handlers': ['console-json'],
+        'level': 'INFO',
     },
+    # children loggers
     'loggers': {
         'newstream': {
-            'handlers': ['console'],
+            'handlers': ['console-json'],
             'level': 'DEBUG',
             'propagate': False,
         },

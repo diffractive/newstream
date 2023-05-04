@@ -75,10 +75,13 @@ loaded_users = {}
 
 def load_test_data():
     load_settings()
-    load_localstripe_webhooks()
-    load_localstripe_create_product()
     load_test_users()
     load_test_donations()
+
+    if settings.STRIPE_API_BASE:
+        load_localstripe_webhooks()
+        load_localstripe_create_product()
+
 
 def load_settings():
     """ Load necessary settings in order to let the app run smoothly e.g. sending emails ok

@@ -78,7 +78,7 @@ def load_test_data():
     load_test_users()
     load_test_donations()
 
-    if settings.STRIPE_API_BASE:
+    if settings.RUN_LOCALSTRIPE:
         load_localstripe_webhooks()
         load_localstripe_create_product()
 

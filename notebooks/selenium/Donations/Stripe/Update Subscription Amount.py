@@ -23,13 +23,13 @@ from selenium.common.exceptions import NoSuchElementException
 from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, notebook_root
 from diffractive.selenium.visualisation import gallery
 
-from utils import get_email_count, wait_for_email, get_email_by_email_subject
+from utils import get_email_count, wait_for_email, get_email_by_email_subject, clear_all_emails, get_emails
 from components import Application
 from functions import create_subscription
 
 import secrets
 # -
-
+clear_all_emails()
 randstr = secrets.token_hex(6).upper()
 data = {
     "email": f'test_user{randstr}@newstream.com',
@@ -51,11 +51,14 @@ app = Application(driver)
 create_subscription(driver, app, data)
 # 4 emails are delivered
 wait_for_email(email_count + 3)
+email_count += 4
 grabber.capture_screen('thank_you', 'Donation created')
 
 subject = "Please Confirm Your Email Address"
 reg_str = "(?P<url>http://app.newstream.local:8000/en/accounts/confirm-email/[^/]*/)"
 url = get_email_by_email_subject(subject, reg_str)
+# get_email_by_email_subject deletes the email
+email_count -= 1
 driver.get(url)
 grabber.capture_screen('email_confirm', 'Confirm email')
 
@@ -95,6 +98,26 @@ grabber.capture_screen('updated_amount_list', 'Update amount list')
 
 row = app.table('my-donations-table').first_row()
 assert row[0] == f'USD ${new_amount}.00'
+
+# +
+# There should be two emails sent, one for admins one for the user
+wait_for_email(email_count+1)
+emails = get_emails(0, 2)
+user_email = 'Your Recurring Donation Amount is Adjusted'
+admin_email = 'A Recurring Donation Amount is Adjusted'
+
+# Email order is not guaranteed
+email_titles = [admin_email, user_email]
+for email_content in emails:
+    email_title = email_content['Content']['Headers']['Subject'][0]
+    email_recipient = email_content['Content']['Headers']['To'][0]
+
+    assert email_title in email_titles, f'Unexpected e-mail found: {email_title}'
+    if email_title == user_email:
+        assert email_recipient == data['email'], \
+            f"Unexpected e-mail recipient {email_recipient}, expected: {data['email']}"
+    email_titles.remove(email_title)
+# -
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
 

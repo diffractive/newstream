@@ -24,11 +24,12 @@ from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, not
 from diffractive.selenium.visualisation import gallery
 
 from components import Application
-from utils import get_email_count, wait_for_email, get_emails
+from utils import get_email_count, wait_for_email, get_emails, clear_all_emails
 
 import secrets
 
 # +
+clear_all_emails()
 randstr = secrets.token_hex(6).upper()
 
 email = f'test_user{randstr}@newstream.com'
@@ -78,7 +79,7 @@ email_titles = [admin_email, user_email]
 for email_content in emails:
     email_title = email_content['Content']['Headers']['Subject'][0]
     email_recipient = email_content['Content']['Headers']['To'][0]
-    
+
     assert email_title in email_titles, f'Unexpected e-mail found: {email_title}'
     if email_title == user_email:
         assert email_recipient == email, \

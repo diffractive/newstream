@@ -29,6 +29,7 @@ from functions import create_subscription
 
 import secrets
 # -
+
 clear_all_emails()
 randstr = secrets.token_hex(6).upper()
 data = {
@@ -75,33 +76,75 @@ grabber.capture_screen('single_donations', 'My donations page')
 app.link('Recurring Donations').click()
 grabber.capture_screen('subscriptions', 'Recurring donations')
 
+row = app.table('my-donations-table').first_row()
+assert row[5] == 'Active'
 
 app.label('md2_dropdown-toggle-checkbox1').click()
 grabber.capture_screen('open_menu', 'Open subscription menu')
 
 # This is not working so falling back to driver.find_element
 # app.button('Edit Recurring donation').click()
-driver.find_elements(By.XPATH, '//div[contains(@class, "dropdown-menu-popup ")]//div//button[text()="Edit Recurring donation"]')[1].click()
-grabber.capture_screen('edit_subscription', 'Edit subscription page')
+driver.find_elements(By.XPATH, '//div[contains(@class, "dropdown-menu-popup ")]//div//button//span[text()="Pause Recurring Donation"]')[1].click()
+grabber.capture_screen('pause_subscription_popup', 'Pause subscription popup')
 
-app.label('Change Billing Cycle to Now').click()
-app.button('Update Recurring Donation').click()
-grabber.capture_screen('update_cycle', 'Update cycle')
+app.button('confirm-ok').click()
+wait_element(driver, '//h4[text()="Your recurring donation via Stripe is paused."]')
+grabber.capture_screen('paused_subscription_popup_confirm', 'Paused subscription popup confirm')
 
-app.link('Back to My Donations').click()
-grabber.capture_screen('updated_amount_list', 'Update amount list')
+app.button('confirm-ok').click()
 
-
-app.label('md2_dropdown-toggle-checkbox1').click()
-driver.find_elements(By.XPATH, '//div[contains(@class, "dropdown-menu-popup ")]//div//button[text()="View all renewals"]')[1].click()
-grabber.capture_screen('all_renewals', 'All renewals')
+row = app.table('my-donations-table').first_row()
+assert row[5] == 'Paused'
+grabber.capture_screen('paused_subscription', 'Subscription has been paused')
 
 # +
 # There should be two emails sent, one for admins one for the user
 wait_for_email(email_count+1)
 emails = get_emails(0, 2)
-user_email = 'Your Recurring Donation is Rescheduled'
-admin_email = 'A Recurring Donation is Rescheduled'
+user_email = 'Your Recurring Donation is Paused'
+admin_email = 'A Recurring Donation is paused'
+
+# Email order is not guaranteed
+email_titles = [admin_email, user_email]
+for email_content in emails:
+    email_title = email_content['Content']['Headers']['Subject'][0]
+    email_recipient = email_content['Content']['Headers']['To'][0]
+
+    assert email_title in email_titles, f'Unexpected e-mail found: {email_title}'
+    if email_title == user_email:
+        assert email_recipient == data['email'], \
+            f"Unexpected e-mail recipient {email_recipient}, expected: {data['email']}"
+    email_titles.remove(email_title)
+
+email_count += 2
+# -
+
+# ## Resume subscription
+
+app.label('md2_dropdown-toggle-checkbox1').click()
+grabber.capture_screen('open_menu', 'Open subscription menu')
+
+# This is not working so falling back to driver.find_element
+# app.button('Edit Recurring donation').click()
+driver.find_elements(By.XPATH, '//div[contains(@class, "dropdown-menu-popup ")]//div//button//span[text()="Resume Recurring Donation"]')[1].click()
+grabber.capture_screen('resume_subscription_popup', 'Resume subscription popup')
+
+app.button('confirm-ok').click()
+wait_element(driver, '//h4[text()="Your recurring donation via Stripe is resumed."]')
+grabber.capture_screen('resume_subscription_popup_confirm', 'Resumed subscription popup confirm')
+
+app.button('confirm-ok').click()
+
+row = app.table('my-donations-table').first_row()
+assert row[5] == 'Active'
+grabber.capture_screen('resumed_subscription', 'Subscription has been resumed')
+
+# +
+# There should be two emails sent, one for admins one for the user
+wait_for_email(email_count+1)
+emails = get_emails(0, 2)
+user_email = 'Your Recurring Donation is Resumed'
+admin_email = 'A Recurring Donation is resumed'
 
 # Email order is not guaranteed
 email_titles = [admin_email, user_email]
@@ -117,5 +160,3 @@ for email_content in emails:
 # -
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
-
-

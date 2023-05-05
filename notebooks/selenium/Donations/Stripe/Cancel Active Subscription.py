@@ -23,7 +23,7 @@ from selenium.common.exceptions import NoSuchElementException
 from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, notebook_root
 from diffractive.selenium.visualisation import gallery
 
-from utils import get_email_count, wait_for_email, get_email_by_email_subject, clear_all_emails
+from utils import get_email_count, wait_for_email, get_emails, get_email_by_email_subject, clear_all_emails
 from components import Application
 from functions import create_subscription
 
@@ -51,11 +51,14 @@ app = Application(driver)
 create_subscription(driver, app, data)
 # 4 emails are delivered
 wait_for_email(email_count + 3)
+email_count += 4
 grabber.capture_screen('thank_you', 'Donation created')
 
 subject = "Please Confirm Your Email Address"
 reg_str = "(?P<url>http://app.newstream.local:8000/en/accounts/confirm-email/[^/]*/)"
 url = get_email_by_email_subject(subject, reg_str)
+# get_email_by_email_subject deletes the email
+email_count -= 1
 driver.get(url)
 grabber.capture_screen('email_confirm', 'Confirm email')
 
@@ -81,37 +84,40 @@ grabber.capture_screen('open_menu', 'Open subscription menu')
 
 # This is not working so falling back to driver.find_element
 # app.button('Edit Recurring donation').click()
-driver.find_elements(By.XPATH, '//div[contains(@class, "dropdown-menu-popup ")]//div//button//span[text()="Pause Recurring Donation"]')[1].click()
-grabber.capture_screen('pause_subscription_popup', 'Pause subscription popup')
+driver.find_elements(By.XPATH, '//div[contains(@class, "dropdown-menu-popup ")]//div//button[text()="Cancel recurring donation"]')[1].click()
+grabber.capture_screen('cancel_subscription_popup', 'Cancel subscription popup')
 
 app.button('confirm-ok').click()
-wait_element(driver, '//h4[text()="Your recurring donation via Stripe is paused."]')
-grabber.capture_screen('paused_subscription_popup_confirm', 'Paused subscription popup confirm')
-
-app.button('confirm-ok').click()
-
-row = app.table('my-donations-table').first_row()
-assert row[5] == 'Paused'
-grabber.capture_screen('paused_subscription', 'Subscription has been paused')
-
-# ## Resume subscription
-
-app.label('md2_dropdown-toggle-checkbox1').click()
-grabber.capture_screen('open_menu', 'Open subscription menu')
-
-# This is not working so falling back to driver.find_element
-# app.button('Edit Recurring donation').click()
-driver.find_elements(By.XPATH, '//div[contains(@class, "dropdown-menu-popup ")]//div//button//span[text()="Resume Recurring Donation"]')[1].click()
-grabber.capture_screen('resume_subscription_popup', 'Resume subscription popup')
-
-app.button('confirm-ok').click()
-wait_element(driver, '//h4[text()="Your recurring donation via Stripe is resumed."]')
-grabber.capture_screen('resume_subscription_popup_confirm', 'Resumed subscription popup confirm')
+wait_element(driver, '//h4[text()="Recurring donation cancelled!"]')
+grabber.capture_screen('cancel_subscription_popup_confirm', 'Cancel subscription popup confirm')
 
 app.button('confirm-ok').click()
 
 row = app.table('my-donations-table').first_row()
-assert row[5] == 'Active'
-grabber.capture_screen('resumed_subscription', 'Subscription has been resumed')
+assert row[5] == 'Cancelled'
+grabber.capture_screen('cancel_subscription', 'Subscription has been cancelled')
+
+
+# +
+# There should be two emails sent, one for admins one for the user
+wait_for_email(email_count+1)
+emails = get_emails(0, 2)
+user_email = 'Your Recurring Donation is Cancelled'
+admin_email = 'A Recurring Donation is cancelled'
+
+# Email order is not guaranteed
+email_titles = [admin_email, user_email]
+for email_content in emails:
+    email_title = email_content['Content']['Headers']['Subject'][0]
+    email_recipient = email_content['Content']['Headers']['To'][0]
+
+    assert email_title in email_titles, f'Unexpected e-mail found: {email_title}'
+    if email_title == user_email:
+        assert email_recipient == data['email'], \
+            f"Unexpected e-mail recipient {email_recipient}, expected: {data['email']}"
+    email_titles.remove(email_title)
+# -
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
+
+

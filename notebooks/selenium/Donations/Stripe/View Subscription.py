@@ -23,13 +23,13 @@ from selenium.common.exceptions import NoSuchElementException
 from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, notebook_root
 from diffractive.selenium.visualisation import gallery
 
-from utils import get_email_count, wait_for_email
+from utils import get_email_count, wait_for_email, clear_all_emails
 from components import Application
 from functions import create_subscription
 
 import secrets
 # -
-
+clear_all_emails()
 randstr = secrets.token_hex(6).upper()
 data = {
     "email": f'test_user{randstr}@newstream.com',

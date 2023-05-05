@@ -53,6 +53,15 @@ class Input:
         self.element.clear()
 
 
+class Label:
+    xpath = 'label'
+    def __init__(self, driver, identifier):
+        self.element = get_element_by_identifier(driver, self.xpath, identifier)
+
+    def click(self):
+        self.element.click()
+
+
 class Application:
     def __init__(self, driver):
         self.driver = driver
@@ -70,6 +79,9 @@ class Application:
     
     def input(self, identifier):
         return Input(self.driver, identifier)
+    
+    def label(self, identifier):
+        return Label(self.driver, identifier)
     
     #### Methods ####
     

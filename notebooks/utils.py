@@ -120,3 +120,12 @@ def clear_email(message_id):
         "http://mailhog.newstream.local:8025/api/v1/messages/%s" % (message_id)
     )
 
+
+
+def clear_all_emails():
+    """
+    Delete all emails to clear up the email
+    """
+    json_object = requests.delete(
+        'http://mailhog.newstream.local:8025/api/v1/messages'
+    )

@@ -55,9 +55,7 @@ grabber.capture_screen('thank_you', 'Donation created')
 app.label('dropdown-toggle-checkbox').click()
 grabber.capture_screen('expanded_menu', 'Expanded menu')
 
-# This is not working for some reason so fallback into drive.find_element
-# app.link("My Donations").click()
-driver.find_element(By.XPATH, '//div[contains(@class, "user-dropdown-menu")]//a[text()="My Donations"]').click()
+app.link("header-donations").click()
 grabber.capture_screen('single_donations', 'My donations page')
 
 row = app.table('my-donations-table').first_row()

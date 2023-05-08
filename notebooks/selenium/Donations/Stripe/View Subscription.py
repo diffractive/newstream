@@ -55,9 +55,7 @@ grabber.capture_screen('thank_you', 'Donation created')
 app.label('dropdown-toggle-checkbox').click()
 grabber.capture_screen('expanded_menu', 'Expanded menu')
 
-# This is not working for some reason so fallback into drive.find_element
-# app.link("My Donations").click()
-driver.find_element(By.XPATH, '//div[contains(@class, "user-dropdown-menu")]//a[text()="My Donations"]').click()
+app.link("header-donations").click()
 grabber.capture_screen('single_donations', 'My donations page')
 
 app.link('Recurring Donations').click()
@@ -66,7 +64,7 @@ grabber.capture_screen('subscriptions', 'Recurring donations')
 row = app.table('my-donations-table').first_row()
 assert row[0] == 'USD $100.00'
 assert row[1] == 'Monthly'
-assert row[2][0:4] == 'sub_' # Not consistent due to another bug
+assert row[2][0:4] == 'sub_'
 assert row[4] == 'Stripe'
 assert row[5] == 'Active'
 

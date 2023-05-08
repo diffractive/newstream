@@ -68,9 +68,7 @@ grabber.capture_screen('email_confirmed', 'Email confirmed')
 app.label('dropdown-toggle-checkbox').click()
 grabber.capture_screen('expanded_menu', 'Expanded menu')
 
-# This is not working for some reason so fallback into drive.find_element
-# app.link("My Donations").click()
-driver.find_element(By.XPATH, '//div[contains(@class, "user-dropdown-menu")]//a[text()="My Donations"]').click()
+app.link("header-donations").click()
 grabber.capture_screen('single_donations', 'My donations page')
 
 app.link('Recurring Donations').click()
@@ -83,9 +81,7 @@ assert row[0] == 'USD $100.00'
 app.label('md2_dropdown-toggle-checkbox1').click()
 grabber.capture_screen('open_menu', 'Open subscription menu')
 
-# This is not working so falling back to driver.find_element
-# app.button('Edit Recurring donation').click()
-driver.find_elements(By.XPATH, '//div[contains(@class, "dropdown-menu-popup ")]//div//button[text()="Edit Recurring donation"]')[1].click()
+app.button('edit-recurring-donation-wide').click()
 grabber.capture_screen('edit_subscription', 'Edit subscription page')
 
 app.input('id_recurring_amount').clear()

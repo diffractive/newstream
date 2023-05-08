@@ -85,7 +85,7 @@ def get_emails(index=0, count=1):
 
     return response['items'][index:index+count]
 
-def get_email_by_email_subject(subject, reg_str):
+def get_link_by_email_subject_and_regex(subject, reg_str):
     """
     Get url from email given subjeect, and reg_str of what the expected link format should be
     """

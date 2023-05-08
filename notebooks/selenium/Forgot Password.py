@@ -24,7 +24,7 @@ from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, not
 from diffractive.selenium.visualisation import gallery
 
 from components import Application
-from utils import get_email_count, wait_for_email, get_emails, get_email_by_email_subject, clear_all_emails
+from utils import get_email_count, wait_for_email, get_emails, get_link_by_email_subject_and_regex, clear_all_emails
 # +
 clear_all_emails()
 
@@ -66,7 +66,7 @@ assert email_recipient == email, \
 
 subject = "Please Reset Your Password"
 reg_str = "(?P<url>http://app.newstream.local:8000/en/accounts/password/reset/key/[^/]*/)"
-url = get_email_by_email_subject(subject, reg_str)
+url = get_link_by_email_subject_and_regex(subject, reg_str)
 driver.get(url)
 grabber.capture_screen('password_reset', 'Reset password form')
 
@@ -102,7 +102,7 @@ app.button('Submit').click()
 wait_for_email(email_count)
 subject = "Please Reset Your Password"
 reg_str = "(?P<url>http://app.newstream.local:8000/en/accounts/password/reset/key/[^/]*/)"
-url = get_email_by_email_subject(subject, reg_str)
+url = get_link_by_email_subject_and_regex(subject, reg_str)
 driver.get(url)
 app.input('id_password1').fill(old_pwd)
 app.input('id_password2').fill(old_pwd)

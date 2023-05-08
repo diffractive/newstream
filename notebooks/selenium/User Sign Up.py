@@ -24,7 +24,7 @@ from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, not
 from diffractive.selenium.visualisation import gallery
 
 from components import Application
-from utils import get_email_count, wait_for_email, get_emails, get_email_by_email_subject, clear_all_emails
+from utils import get_email_count, wait_for_email, get_emails, get_link_by_email_subject_and_regex, clear_all_emails
 
 import secrets
 
@@ -99,7 +99,7 @@ for email_content in emails:
 
 subject = "Please Confirm Your Email Address"
 reg_str = "(?P<url>http://app.newstream.local:8000/en/accounts/confirm-email/[^/]*/)"
-url = get_email_by_email_subject(subject, reg_str)
+url = get_link_by_email_subject_and_regex(subject, reg_str)
 driver.get(url)
 grabber.capture_screen('email_confirm', 'Confirm email')
 

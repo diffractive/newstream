@@ -23,7 +23,7 @@ import environ
 env = environ.Env(
     STRIPE_JS_URL=(str, 'https://js.stripe.com/v3/'),
     STRIPE_API_BASE=(str, ""),
-    RUN_LOCALSTRIPE=(bool, False),
+    INIT_LOCALSTRIPE=(bool, False),
 )
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -349,6 +349,6 @@ SOCIALACCOUNT_PROVIDERS = {
 
 STRIPE_JS_URL = env('STRIPE_JS_URL')
 STRIPE_API_BASE = env('STRIPE_API_BASE')
-RUN_LOCALSTRIPE = env('RUN_LOCALSTRIPE')
+INIT_LOCALSTRIPE = env('INIT_LOCALSTRIPE')
 
 SETTINGS_EXPORT = ['STRIPE_JS_URL']

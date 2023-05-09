@@ -23,6 +23,7 @@ import environ
 env = environ.Env(
     STRIPE_JS_URL=(str, 'https://js.stripe.com/v3/'),
     STRIPE_API_BASE=(str, ""),
+    INIT_LOCALSTRIPE=(bool, False),
 
     DATADOG_APPID=(str, None),
     DATADOG_TOKEN=(str, None),
@@ -113,6 +114,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'django_extensions',
 
     'wagtail_2fa',
 
@@ -352,6 +354,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 STRIPE_JS_URL = env('STRIPE_JS_URL')
 STRIPE_API_BASE = env('STRIPE_API_BASE')
+INIT_LOCALSTRIPE = env('INIT_LOCALSTRIPE')
 
 ################################################
 #

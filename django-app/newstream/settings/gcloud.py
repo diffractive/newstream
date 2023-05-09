@@ -46,6 +46,8 @@ env = environ.Env(
 
     DEFAULT_FROM_EMAIL=(str, ''),
 
+    INIT_LOCALSTRIPE=(bool, False),
+
     WAGTAIL_2FA_REQUIRED=(str, False),
     WAGTAIL_2FA_OTP_TOTP_NAME=(str, "Newstream"),
 )
@@ -81,6 +83,9 @@ if env('EMAIL_HOST'): EMAIL_HOST = env('EMAIL_HOST')
 if env('EMAIL_HOST_USER'): EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 if env('EMAIL_HOST_PASSWORD'): EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
+# added temporary to fix cloud run job error
+DEFAULT_ADMIN_EMAIL = DEFAULT_FROM_EMAIL
 
 # Serve static files from google cloud storage if it is configured, otherwise
 # will serve static files locally via uwsgi
@@ -97,6 +102,9 @@ ALLOWED_HOSTS = [host.strip() for host in env('ALLOWED_HOSTS').split(',')]
 # 2FA Config
 WAGTAIL_2FA_REQUIRED=env('WAGTAIL_2FA_REQUIRED')
 WAGTAIL_2FA_OTP_TOTP_NAME=env('WAGTAIL_2FA_OTP_TOTP_NAME')
+
+# localstripe
+INIT_LOCALSTRIPE = env('INIT_LOCALSTRIPE')
 
 # Log evenrything to the console. Google cloud expects logging to the console
 # and will capture and display these in the logs panel

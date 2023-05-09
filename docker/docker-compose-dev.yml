@@ -10,6 +10,7 @@ services:
     environment:
       STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
       STRIPE_JS_URL: 'http://localstripe.newstream.local:8420/js.stripe.com/v3/'
+      INIT_LOCALSTRIPE: 1
     volumes:
       - '../django-app:/app'
 

@@ -75,7 +75,7 @@ loaded_users = {}
 
 def load_test_data():
     load_settings()
-    if settings.RUN_LOCALSTRIPE:
+    if settings.INIT_LOCALSTRIPE:
         load_localstripe_webhooks()
         load_localstripe_create_product()
     load_test_users()

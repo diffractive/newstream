@@ -54,7 +54,7 @@ def get_email_count():
     response = requests.get("http://mailhog.newstream.local:8025/api/v2/messages")
     response.encoding = 'utf-8'
     response = response.json()
-    
+
     return len(response['items'])
 
 
@@ -86,11 +86,10 @@ def get_emails(index=0, count=1):
 
     if not response['items']:
         return ''
-    
+
     return response['items'][index:index+count]
 
-
-def get_email_by_email_subject(subject, reg_str):
+def get_link_by_email_subject_and_regex(subject, reg_str):
     """
     Get url from email given subjeect, and reg_str of what the expected link format should be
     """

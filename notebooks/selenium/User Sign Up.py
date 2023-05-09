@@ -24,13 +24,15 @@ from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, not
 from diffractive.selenium.visualisation import gallery
 
 from components import Application
-from utils import get_email_count, wait_for_email, get_emails
+from utils import get_email_count, wait_for_email, get_emails, get_link_by_email_subject_and_regex, clear_all_emails
 
 import secrets
 
 # +
+clear_all_emails()
 randstr = secrets.token_hex(6).upper()
 
+used_email = 'david.donor@diffractive.io'
 email = f'test_user{randstr}@newstream.com'
 first_name = 'Test'
 last_name = 'User'
@@ -56,12 +58,21 @@ grabber.capture_screen('register_login', 'Register or login page')
 app.link('Continue with Email Sign up').click()
 grabber.capture_screen('sign_up', 'Sign up form')
 
-app.input('id_email').fill(email)
+app.input('id_email').fill(used_email)
 app.input('id_first_name').fill(first_name)
 app.input('id_last_name').fill(last_name)
 app.input('id_password1').fill(password)
 app.input('id_password2').fill(password)
 grabber.capture_screen('filled_form', 'Filled signup form')
+
+app.button('Continue').click()
+grabber.capture_screen('failed_sign_up', 'Email already taken')
+
+app.input('id_email').clear()
+app.input('id_email').fill(email)
+app.input('id_password1').fill(password)
+app.input('id_password2').fill(password)
+grabber.capture_screen('correct_filled_form', 'Correct Filled signup form')
 
 app.button('Continue').click()
 grabber.capture_screen('signed_up', 'Successfully signed up')
@@ -78,12 +89,21 @@ email_titles = [admin_email, user_email]
 for email_content in emails:
     email_title = email_content['Content']['Headers']['Subject'][0]
     email_recipient = email_content['Content']['Headers']['To'][0]
-    
+
     assert email_title in email_titles, f'Unexpected e-mail found: {email_title}'
     if email_title == user_email:
         assert email_recipient == email, \
             f"Unexpected e-mail recipient {email_recipient}, expected: {email}"
     email_titles.remove(email_title)
 # -
+
+subject = "Please Confirm Your Email Address"
+reg_str = "(?P<url>http://app.newstream.local:8000/en/accounts/confirm-email/[^/]*/)"
+url = get_link_by_email_subject_and_regex(subject, reg_str)
+driver.get(url)
+grabber.capture_screen('email_confirm', 'Confirm email')
+
+app.button('Confirm').click()
+grabber.capture_screen('email_confirmed', 'Email confirmed')
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")

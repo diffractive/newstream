@@ -23,7 +23,7 @@ from selenium.common.exceptions import NoSuchElementException
 from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, notebook_root
 from diffractive.selenium.visualisation import gallery
 
-from utils import get_email_count, wait_for_email, get_email_by_email_subject, clear_all_emails, get_emails
+from utils import get_email_count, wait_for_email, get_link_by_email_subject_and_regex, clear_all_emails, get_emails
 from components import Application
 from functions import create_subscription
 
@@ -55,8 +55,8 @@ grabber.capture_screen('thank_you', 'Donation created')
 
 subject = "Please Confirm Your Email Address"
 reg_str = "(?P<url>http://app.newstream.local:8000/en/accounts/confirm-email/[^/]*/)"
-url = get_email_by_email_subject(subject, reg_str)
-# get_email_by_email_subject deletes the email
+url = get_link_by_email_subject_and_regex(subject, reg_str)
+# get_link_by_email_subject_and_regex deletes the email
 email_count -= 1
 driver.get(url)
 grabber.capture_screen('email_confirm', 'Confirm email')

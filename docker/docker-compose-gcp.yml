@@ -10,7 +10,7 @@ services:
     environment:
       STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
       STRIPE_JS_URL: 'http://localstripe.newstream.local:8420/js.stripe.com/v3/'
-      RUN_LOCALSTRIPE: 1
+      INIT_LOCALSTRIPE: 1
     image: "${IMAGE_PREFIX}${BACKEND_IMAGE_NAME}:${IMAGE_TAG}"
 
   app:

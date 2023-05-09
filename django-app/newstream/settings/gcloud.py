@@ -43,7 +43,7 @@ env = environ.Env(
 
     DEFAULT_FROM_EMAIL=(str, ''),
 
-    RUN_LOCALSTRIPE=(bool, False),
+    INIT_LOCALSTRIPE=(bool, False),
 
     WAGTAIL_2FA_REQUIRED=(str, False),
     WAGTAIL_2FA_OTP_TOTP_NAME=(str, "Newstream"),
@@ -101,7 +101,7 @@ WAGTAIL_2FA_REQUIRED=env('WAGTAIL_2FA_REQUIRED')
 WAGTAIL_2FA_OTP_TOTP_NAME=env('WAGTAIL_2FA_OTP_TOTP_NAME')
 
 # localstripe
-RUN_LOCALSTRIPE = env('RUN_LOCALSTRIPE')
+INIT_LOCALSTRIPE = env('INIT_LOCALSTRIPE')
 
 # Log evenrything to the console. Google cloud expects logging to the console
 # and will capture and display these in the logs panel

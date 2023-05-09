@@ -31,7 +31,6 @@ def get_element_by_identifier(driver, element, identifier):
         return driver.find_element(By.XPATH, f'//{element}[@for="{identifier}"]')
     except NoSuchElementException:
         pass
-    # For tables
     try:
         return driver.find_element(By.XPATH, f'//{element}[contains(@class, "{identifier}")]')
     except NoSuchElementException:
@@ -55,7 +54,7 @@ def get_email_count():
     response = requests.get("http://mailhog.newstream.local:8025/api/v2/messages")
     response.encoding = 'utf-8'
     response = response.json()
-    
+
     return len(response['items'])
 
 
@@ -87,11 +86,10 @@ def get_emails(index=0, count=1):
 
     if not response['items']:
         return ''
-    
+
     return response['items'][index:index+count]
 
-
-def get_email_by_email_subject(subject, reg_str):
+def get_link_by_email_subject_and_regex(subject, reg_str):
     """
     Get url from email given subjeect, and reg_str of what the expected link format should be
     """
@@ -119,7 +117,6 @@ def clear_email(message_id):
     json_object = requests.delete(
         "http://mailhog.newstream.local:8025/api/v1/messages/%s" % (message_id)
     )
-
 
 
 def clear_all_emails():

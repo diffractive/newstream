@@ -71,6 +71,21 @@ class Text:
         return self.element.text
 
 
+class Table:
+    xpath = "table"
+    def __init__(self, driver, identifier):
+        self.element = get_element_by_identifier(driver, self.xpath, identifier)
+
+    def first_row(self):
+        table_values = []
+        for val in get_children_elements(self.element, 'tbody//tr//td'):
+            # This query returns a bunch of empty values so we should just keep the values
+            if val.text:
+                table_values.append(val.text)
+
+        return table_values
+
+
 class Application:
     def __init__(self, driver):
         self.driver = driver
@@ -94,6 +109,9 @@ class Application:
 
     def text(self, identifier):
         return Text(self.driver, identifier)
+
+    def table(self, identifier):
+        return Table(self.driver, identifier)
 
     #### Methods ####
 

@@ -68,7 +68,6 @@ grabber.capture_screen('email_confirmed', 'Email confirmed')
 app.label('dropdown-toggle-checkbox').click()
 grabber.capture_screen('expanded_menu', 'Expanded menu')
 
-# This is not working for some reason so fallback into drive.find_element
 app.link("header-donations").click()
 grabber.capture_screen('single_donations', 'My donations page')
 

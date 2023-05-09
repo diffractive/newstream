@@ -123,7 +123,7 @@ WebDriverWait(driver, 10).until(
     EC.invisibility_of_element((By.XPATH, '//p[text()="Your recurring donation amount at Stripe is updated successfully."]'))
 )
 app.link('Back to My Donations').click()
-grabber.capture_screen('updated_amount_list', 'Update amount list')
+grabber.capture_screen('recurrent_donations', 'Recurrent Donations')
 
 
 app.label('md2_dropdown-toggle-checkbox1').click()

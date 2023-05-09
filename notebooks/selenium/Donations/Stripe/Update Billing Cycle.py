@@ -84,8 +84,12 @@ app.label('Change Billing Cycle to Now').click()
 app.button('Update Recurring Donation').click()
 grabber.capture_screen('update_cycle', 'Update cycle')
 
+# Wait for popups to go down
+WebDriverWait(driver, 10).until(
+    EC.invisibility_of_element((By.XPATH, '//p[text()="Your recurring donation via Stripe is set to bill on today\'s date every month."]'))
+)
 app.link('Back to My Donations').click()
-grabber.capture_screen('updated_amount_list', 'Update amount list')
+grabber.capture_screen('recurrent_donations', 'Recurrent donations')
 
 
 app.label('md2_dropdown-toggle-checkbox1').click()

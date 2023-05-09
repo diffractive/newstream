@@ -31,6 +31,10 @@ def get_element_by_identifier(driver, element, identifier):
         return driver.find_element(By.XPATH, f'//{element}[@for="{identifier}"]')
     except NoSuchElementException:
         pass
+    try:
+        return driver.find_element(By.XPATH, f'//{element}[contains(@class, "{identifier}")]')
+    except NoSuchElementException:
+        pass
 
     return driver.find_element(By.XPATH, f'//{element}[text()="{identifier}"]')
 

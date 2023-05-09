@@ -116,6 +116,19 @@ steps:
     - |
         echo "Images uploaded to https://storage.cloud.google.com/${PROJECT_ID}_cloudbuild/output/pr-${_PR_NUMBER}/test_output.html"
     waitFor: [selenium-tests]
+  
+  # Check that all tests passed successfully
+  - id: check-test-status
+    name: 'gcr.io/cloud-builders/docker:20.10.14'
+    args: [
+      'compose', '-f', 'docker/docker-compose.yml', '-f', 'docker/docker-compose-gcp.yml', 'run', 'selenium_tests', 'check_test_status'
+    ]
+    env:
+      - 'PROJECT_ID=$PROJECT_ID'
+      - 'IMAGE_TAG=pr-${_PR_NUMBER}'
+      - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
+      - 'SELENIUM_IMAGE_NAME=${_SELENIUM_SERVICE_NAME}'
+    waitFor: [upload-selenium-output, print-selenium-url]
 
   # Bring down the docker-compose stack
   - id: docker-compose-down
@@ -123,7 +136,7 @@ steps:
     args: ['compose', '-f', 'docker/docker-compose.yml', 'down', '--remove-orphans']
     env:
       - 'PROJECT_ID=$PROJECT_ID'
-    waitFor: [upload-selenium-output]
+    waitFor: [check-test-status]
 
 substitutions:
   _BACKEND_SERVICE_NAME: newstream

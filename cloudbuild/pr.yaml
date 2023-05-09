@@ -79,9 +79,6 @@ steps:
       - 'PROJECT_ID=$PROJECT_ID'
       - 'IMAGE_TAG=pr-${_PR_NUMBER}'
       - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
-      - 'BACKEND_IMAGE_NAME=${_BACKEND_SERVICE_NAME}'
-      - 'SELENIUM_IMAGE_NAME=${_SELENIUM_SERVICE_NAME}'
-      - 'LOCALSTRIPE_IMAGE_NAME=${_LOCALSTRIPE_SERVICE_NAME}'
     waitFor: [docker-pull-django, docker-pull-selenium, docker-pull-localstripe]
 
   # Run selenium tests
@@ -94,9 +91,6 @@ steps:
       - 'PROJECT_ID=$PROJECT_ID'
       - 'IMAGE_TAG=pr-${_PR_NUMBER}'
       - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
-      - 'BACKEND_IMAGE_NAME=${_BACKEND_SERVICE_NAME}'
-      - 'SELENIUM_IMAGE_NAME=${_SELENIUM_SERVICE_NAME}'
-      - 'LOCALSTRIPE_IMAGE_NAME=${_LOCALSTRIPE_SERVICE_NAME}'
     waitFor: [start-docker-compose]
 
   - id: upload-selenium-output
@@ -127,7 +121,6 @@ steps:
       - 'PROJECT_ID=$PROJECT_ID'
       - 'IMAGE_TAG=pr-${_PR_NUMBER}'
       - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
-      - 'SELENIUM_IMAGE_NAME=${_SELENIUM_SERVICE_NAME}'
     waitFor: [upload-selenium-output, print-selenium-url]
 
   # Bring down the docker-compose stack

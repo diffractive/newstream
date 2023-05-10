@@ -8,7 +8,7 @@
 {% block content %}
 <p style="{{ 'parag'|email_css }}">{% trans "Dear" %} {{ donation.donor_name }},</p>
 {% if donation.is_recurring %}
-{% url 'donations:my-renewals' donation.subscription.id as donations_url %}
+{% url 'donations:my-renewals' donation.subscription.parent.uuid as donations_url %}
 {% else %}
 {% url 'donations:my-onetime-donations' as donations_url %}
 {% endif %}

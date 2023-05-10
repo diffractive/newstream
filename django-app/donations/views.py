@@ -299,14 +299,14 @@ def cancel_recurring(request):
                 print("No subscription_id in JSON body", flush=True)
                 return HttpResponse(status=400)
             subscription_id = int(json_data['subscription_id'])
-            subscription = get_object_or_404(SubscriptionInstance, id=subscription_id)
-            if subscription.user == request.user:
+            subscription_instance = get_object_or_404(SubscriptionInstance, id=subscription_id)
+            if subscription_instance.user == request.user:
                 gatewayManager = InitPaymentGateway(
-                    request, subscription=subscription)
+                    request, subscription=subscription_instance)
                 gatewayManager.cancel_recurring_payment()
                 # add to the update actions log
                 addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL)
-                return JsonResponse({'status': 'success', 'button-text': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
+                return JsonResponse({'status': 'success', 'button-text': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'uuid': subscription_instance.parent.uuid})})
             else:
                 raise PermissionError(_('You are not authorized to cancel subscription %(id)d.') % {'id': subscription_id})
         else:

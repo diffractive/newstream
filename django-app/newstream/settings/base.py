@@ -24,6 +24,11 @@ env = environ.Env(
     STRIPE_JS_URL=(str, 'https://js.stripe.com/v3/'),
     STRIPE_API_BASE=(str, ""),
     INIT_LOCALSTRIPE=(bool, False),
+
+    DATADOG_APPID=(str, None),
+    DATADOG_TOKEN=(str, None),
+    DATADOG_ENV=(str, None),
+    DATADOG_SERVICE=(str, None)
 )
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -351,4 +356,18 @@ STRIPE_JS_URL = env('STRIPE_JS_URL')
 STRIPE_API_BASE = env('STRIPE_API_BASE')
 INIT_LOCALSTRIPE = env('INIT_LOCALSTRIPE')
 
-SETTINGS_EXPORT = ['STRIPE_JS_URL']
+################################################
+#
+# Datadog
+#
+
+DATADOG_APPID = env('DATADOG_APPID')
+DATADOG_TOKEN = env('DATADOG_TOKEN')
+DATADOG_ENV = env('DATADOG_ENV')
+DATADOG_SERVICE = env('DATADOG_SERVICE')
+
+
+SETTINGS_EXPORT = [
+    'STRIPE_JS_URL',
+    'DATADOG_APPID', 'DATADOG_TOKEN', 'DATADOG_ENV', 'DATADOG_SERVICE'
+]

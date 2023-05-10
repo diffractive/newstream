@@ -248,8 +248,6 @@ def load_test_donations():
             )
             donation.save()
 
-            counter += 1
-
     print("Loaded test subscriptions √")
 
 def remove_test_data():

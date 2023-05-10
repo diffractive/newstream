@@ -27,7 +27,7 @@
                 <span class="user-fullname">{{ user|display_username }}</span>
                 <span class="dropdown-chevron-icon"></span>
                 <div class="user-dropdown-menu dropdown-menu-popup flex flex-col items-stretch">
-                    <a href="{% url 'personal-info' %}">{% trans 'Profile Settings' %}</a>
+                    <a id="header-settings" href="{% url 'personal-info' %}">{% trans 'Profile Settings' %}</a>
                     <a id="header-donations" href="{% url 'donations:my-onetime-donations' %}">{% trans 'My Donations' %}</a>
                     <a id="header-logout" href="{% url 'account_logout' %}">{% trans 'Logout' %}</a>
                 </div>

@@ -62,6 +62,15 @@ class Label:
         self.element.click()
 
 
+class Text:
+    xpath = 'span'
+    def __init__(self, driver, identifier):
+        self.element = get_element_by_identifier(driver, self.xpath, identifier)
+
+    def text(self):
+        return self.element.text
+
+
 class Table:
     xpath = "table"
     def __init__(self, driver, identifier):
@@ -97,6 +106,9 @@ class Application:
 
     def label(self, identifier):
         return Label(self.driver, identifier)
+
+    def text(self, identifier):
+        return Text(self.driver, identifier)
 
     def table(self, identifier):
         return Table(self.driver, identifier)

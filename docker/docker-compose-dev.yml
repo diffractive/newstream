@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+
+  database:
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  app_init:
+    environment:
+      STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
+      STRIPE_JS_URL: 'http://localstripe.newstream.local:8420/js.stripe.com/v3/'
+      INIT_LOCALSTRIPE: 1
+    volumes:
+      - '../django-app:/app'
+
+  app:
+    environment:
+      STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
+      STRIPE_JS_URL: 'http://localstripe.newstream.local:8420/js.stripe.com/v3/'
+      TEST_DATA: 1
+      DEBUG: 1
+      PY_AUTORELOAD: 1
+    volumes:
+      - '../django-app:/app'
+
+  selenium_tests:
+    volumes:
+      - '../selenium-tests/test_scripts:/home/jupyter/notebooks/test_scripts'
+      - '../selenium-tests/output:/home/jupyter/notebooks/output'

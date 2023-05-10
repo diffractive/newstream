@@ -24,20 +24,16 @@ from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, not
 from diffractive.selenium.visualisation import gallery
 
 from components import Application
-from utils import get_email_count, wait_for_email, get_emails, get_link_by_email_subject_and_regex, clear_all_emails
 
 import secrets
 
 # +
-clear_all_emails()
 randstr = secrets.token_hex(6).upper()
 
-used_email = 'david.donor@diffractive.io'
 email = f'test_user{randstr}@newstream.com'
 first_name = 'Test'
 last_name = 'User'
 password = 'strongpwd'
-email_count = get_email_count()
 # -
 
 driver = get_webdriver('portal')
@@ -58,7 +54,7 @@ grabber.capture_screen('register_login', 'Register or login page')
 app.link('Continue with Email Sign up').click()
 grabber.capture_screen('sign_up', 'Sign up form')
 
-app.input('id_email').fill(used_email)
+app.input('id_email').fill(email)
 app.input('id_first_name').fill(first_name)
 app.input('id_last_name').fill(last_name)
 app.input('id_password1').fill(password)
@@ -66,44 +62,33 @@ app.input('id_password2').fill(password)
 grabber.capture_screen('filled_form', 'Filled signup form')
 
 app.button('Continue').click()
-grabber.capture_screen('failed_sign_up', 'Email already taken')
-
-app.input('id_email').clear()
-app.input('id_email').fill(email)
-app.input('id_password1').fill(password)
-app.input('id_password2').fill(password)
-grabber.capture_screen('correct_filled_form', 'Correct Filled signup form')
-
-app.button('Continue').click()
 grabber.capture_screen('signed_up', 'Successfully signed up')
 
-# +
-# There should be two emails sent, one for admins one for the user
-wait_for_email(email_count+1)
-emails = get_emails(0, 2)
-user_email = 'Please Confirm Your Email Address'
-admin_email = 'A Donor Account is created'
+app.label('dropdown-toggle-checkbox').click()
+grabber.capture_screen('expanded_menu', 'Expanded user menu')
 
-# Email order is not guaranteed
-email_titles = [admin_email, user_email]
-for email_content in emails:
-    email_title = email_content['Content']['Headers']['Subject'][0]
-    email_recipient = email_content['Content']['Headers']['To'][0]
+app.link('header-settings').click()
+grabber.capture_screen('profile_udpate_screen', 'Update profile screen')
 
-    assert email_title in email_titles, f'Unexpected e-mail found: {email_title}'
-    if email_title == user_email:
-        assert email_recipient == email, \
-            f"Unexpected e-mail recipient {email_recipient}, expected: {email}"
-    email_titles.remove(email_title)
-# -
 
-subject = "Please Confirm Your Email Address"
-reg_str = "(?P<url>http://app.newstream.local:8000/en/accounts/confirm-email/[^/]*/)"
-url = get_link_by_email_subject_and_regex(subject, reg_str)
-driver.get(url)
-grabber.capture_screen('email_confirm', 'Confirm email')
+app.link('Advanced Settings').click()
+grabber.capture_screen('advanced_settings', 'Advanced settings')
 
-app.button('Confirm').click()
-grabber.capture_screen('email_confirmed', 'Email confirmed')
+app.button('Delete My Account').click()
+grabber.capture_screen('confirm_delete', 'Confirm delete')
+
+app.input('id_confirm_text').fill('Delete My Account')
+grabber.capture_screen('filled_confirm_form', 'Filled confirm form')
+
+app.button('Delete My Account Now').click()
+grabber.capture_screen('account_deleted', 'Account deleted')
+
+# ## Test
+
+app.link("header-sign-in").click()
+app.input('id_login').fill(email)
+app.input('id_password').fill(password)
+app.button('Login').click()
+grabber.capture_screen('Failed to login', 'Failed to login')
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")

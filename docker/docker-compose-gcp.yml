@@ -1,0 +1,30 @@
+version: "3.8"
+
+networks:
+  default:
+    external:
+      name: cloudbuild
+
+services:
+  app_init:
+    environment:
+      STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
+      STRIPE_JS_URL: 'http://localstripe.newstream.local:8420/js.stripe.com/v3/'
+      INIT_LOCALSTRIPE: 1
+    image: "${IMAGE_PREFIX}newstream:${IMAGE_TAG}"
+
+  app:
+    environment:
+      STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
+      STRIPE_JS_URL: 'http://localstripe.newstream.local:8420/js.stripe.com/v3/'
+      DEBUG: 1
+      PY_AUTORELOAD: 1
+    image: "${IMAGE_PREFIX}newstream:${IMAGE_TAG}"
+
+  localstripe:
+    image: "${IMAGE_PREFIX}localstripe:${IMAGE_TAG}"
+
+  selenium_tests:
+    image: "${IMAGE_PREFIX}newstream-tests:${IMAGE_TAG}"
+    volumes:
+      - '/workspace/output:/notebooks/output'

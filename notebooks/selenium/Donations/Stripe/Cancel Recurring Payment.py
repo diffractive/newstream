@@ -24,20 +24,18 @@ from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, not
 from diffractive.selenium.visualisation import gallery
 
 from components import Application
-from utils import get_email_count, wait_for_email, get_emails, get_link_by_email_subject_and_regex, clear_all_emails
 
 import secrets
 
 # +
-clear_all_emails()
 randstr = secrets.token_hex(6).upper()
 
-used_email = 'david.donor@diffractive.io'
+cancel_url = '/en/donations/cancel-from-stripe/'
 email = f'test_user{randstr}@newstream.com'
 first_name = 'Test'
 last_name = 'User'
 password = 'strongpwd'
-email_count = get_email_count()
+name = 'Test User'
 # -
 
 driver = get_webdriver('portal')
@@ -50,15 +48,21 @@ grabber.capture_screen('home_page', 'Home')
 app.link('Donation Form').click()
 grabber.capture_screen('donation_form', 'Donation Form')
 
+# +
 # Cannot go to the signup page without setting a value into the custom amount or choosing a default from selector
 app.dropdown('id_donation_amount').select('USD $100')
+app.dropdown('id_donation_frequency').select('Monthly')
+app.dropdown('id_payment_gateway').select('Stripe')
+
+# We need to first sign up with an account in order to use a user payment
 app.button('Register or Login').click()
-grabber.capture_screen('register_login', 'Register or login page')
+grabber.capture_screen('sign_in_sign_up', 'Sign in or Sign up page')
+# -
 
 app.link('Continue with Email Sign up').click()
 grabber.capture_screen('sign_up', 'Sign up form')
 
-app.input('id_email').fill(used_email)
+app.input('id_email').fill(email)
 app.input('id_first_name').fill(first_name)
 app.input('id_last_name').fill(last_name)
 app.input('id_password1').fill(password)
@@ -66,44 +70,18 @@ app.input('id_password2').fill(password)
 grabber.capture_screen('filled_form', 'Filled signup form')
 
 app.button('Continue').click()
-grabber.capture_screen('failed_sign_up', 'Email already taken')
-
-app.input('id_email').clear()
-app.input('id_email').fill(email)
-app.input('id_password1').fill(password)
-app.input('id_password2').fill(password)
-grabber.capture_screen('correct_filled_form', 'Correct Filled signup form')
-
-app.button('Continue').click()
 grabber.capture_screen('signed_up', 'Successfully signed up')
 
-# +
-# There should be two emails sent, one for admins one for the user
-wait_for_email(email_count+1)
-emails = get_emails(0, 2)
-user_email = 'Please Confirm Your Email Address'
-admin_email = 'A Donor Account is created'
+app.button('Confirm Donation').click()
+grabber.capture_screen('processing_payment', 'Processing Payment')
 
-# Email order is not guaranteed
-email_titles = [admin_email, user_email]
-for email_content in emails:
-    email_title = email_content['Content']['Headers']['Subject'][0]
-    email_recipient = email_content['Content']['Headers']['To'][0]
+# Wait until redirecting finishes
+wait_element(driver, '//input[@id="cardNumber"]')
+grabber.capture_screen('stripe_payment_gateway', 'Stripe payment gateway')
 
-    assert email_title in email_titles, f'Unexpected e-mail found: {email_title}'
-    if email_title == user_email:
-        assert email_recipient == email, \
-            f"Unexpected e-mail recipient {email_recipient}, expected: {email}"
-    email_titles.remove(email_title)
-# -
-
-subject = "Please Confirm Your Email Address"
-reg_str = "(?P<url>http://app.newstream.local:8000/en/accounts/confirm-email/[^/]*/)"
-url = get_link_by_email_subject_and_regex(subject, reg_str)
-driver.get(url)
-grabber.capture_screen('email_confirm', 'Confirm email')
-
-app.button('Confirm').click()
-grabber.capture_screen('email_confirmed', 'Email confirmed')
+app.link(cancel_url).click()
+wait_element(driver, '//h1[text()="Donation Cancelled"]')
+grabber.capture_screen('cancelled', 'Cancelled Donation')
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
+

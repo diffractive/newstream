@@ -1,0 +1,85 @@
+<script>
+    (function(h,o,u,n,d) {
+        h=h[d]=h[d]||{q:[],onReady:function(c){h.q.push(c)}}
+        d=o.createElement(u);d.async=1;d.src=n
+        n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n)
+    })(window,document,'script','https://www.datadoghq-browser-agent.com/datadog-rum-v4.js','DD_RUM')
+  </script>
+  
+  {% if settings.DATADOG_APPID and settings.DATADOG_TOKEN %}
+  <script>
+    DD_RUM.onReady(function() {
+      DD_RUM.init({
+        applicationId: '{{ settings.DATADOG_APPID }}',
+        clientToken: '{{ settings.DATADOG_TOKEN }}',
+        site: 'datadoghq.eu',
+        env: '{{ settings.DATADOG_ENV }}',
+        service: '{{ settings.DATADOG_SERVICE }}',
+        // version: '{{ APP_VERSION }}',
+        sampleRate: 100,
+        trackInteractions: true,
+        trackResources: true,
+        trackLongTasks: true,
+        actionNameAttribute: 'data-action',
+      });
+    })
+  </script>
+  {% else %}
+  <script>
+    DD_RUM.onReady(function() {
+      console.info("Datadog actions will be logged to console")
+  
+      let __dd_actions;
+  
+      __dd_actions = __dd_actions || []
+  
+      DD_RUM.init({
+        clientToken: '_',
+        applicationId: '_',
+        trackInteractions: true,
+        actionNameAttribute: 'data-action',
+        beforeSend: (event) => {
+          const {type, action, view, context} = event;
+          let message;
+  
+          switch (type) {
+            case 'action': {
+              __dd_actions.push({
+                event: type,
+                type: action.type,
+                name: action.target.name
+              })
+              message = `[${action.type}] ${action.target.name}`
+  
+              if (Object.keys(context).length) {
+                console.log(message, context)
+              } else {
+                console.log(message)
+              }
+              break;
+            }
+            case 'view': {
+                const {loading_type, loading_time, is_active, url} = view
+                if (is_active && !loading_time) {
+                  const path = new URL(url).pathname
+                  __dd_actions.push({
+                    event: type,
+                    loading_type,
+                    path})
+                  message = `[${loading_type}] ${path}`
+                  console.log(message)
+                }
+                break;
+            }
+          }
+  
+          if (type !== 'view') return false;
+  
+          // Turning off perisisting datadog RUM logs as it'll spam storage
+          // Instead, opt-in to this just for Selenium.
+          // sessionStorage.setItem("__dd_actions", JSON.stringify(__dd_actions))
+        },
+      })
+    })
+  </script>
+  {% endif %}

@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% load static widget_tweaks i18n %}
+
+{% block title %}{% trans 'Redirecting to Stripe' %}{% endblock %}
+
+{% block body_class %}newstream-redirect-stripe-page{% endblock %}
+
+{% block extra_head %}
+<script src={{ settings.STRIPE_JS_URL }}></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="flex donation-header">
+    <div class="step-div w-30 md:w-40 p-6 text-right">{% trans 'Step 3 of 3' %}</div>
+    <div class="step-label-div flex-1 p-6 text-left text-white">{% trans 'Donation Confirmation' %}</div>
+</div>
+
+<div class="container-tight redirect-loading-div flex flex-col justify-center items-center">
+    {% csrf_token %}
+    <img src="{% static 'img/loading-spinner.gif' %}" class="w-10 h-10 lg:w-16 lg:h-16 mb-4" alt="loading-spinner">
+    <p>{% trans 'Redirecting to Payment Gateway Page...' %}</p>
+</div>
+
+<div class="container-tight error-div flex flex-col justify-center items-center hidden">
+    <img src="{% static 'img/warning.png' %}" class="w-10 h-10 lg:w-16 lg:h-16 mb-3" alt="something went wrong">
+    <h2 class="mb-4">{% trans 'Something went wrong...' %}</h2>
+    <p id='error-msg-stripe'></p>
+</div>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    // Create an instance of the Stripe object with your publishable API key
+    var stripe = Stripe('{{ publishable_key }}');
+    let serverError = false;
+    let data = new FormData();
+    data.append('csrfmiddlewaretoken', getCookie('csrftoken'));
+    let request = new Request(
+        '{% url "donations:create-stripe-session" %}',
+        {headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+        }}
+    );
+
+    setTimeout(() => {
+        // Create a new Checkout Session using the server-side endpoint you
+        fetch(request, {
+            method: 'POST',
+            body: data,
+            credentials: 'same-origin',
+        })
+            .then(function (response) {
+                if (!response.ok) { // not 2xx codes
+                    serverError = true;
+                }
+                return response.json();
+            })
+            .then(function (session) {
+                if (serverError) {
+                    throw new Error(`${session['issue']}: ${session['description']}`)
+                }
+                return stripe.redirectToCheckout({ sessionId: session.id });
+            })
+            .then(function (result) {
+                // If `redirectToCheckout` fails due to a browser or network
+                // error, you should display the localized error message to your
+                // customer using `error.message`.
+                if (result.error) {
+                    document.getElementsByClassName('redirect-loading-div')[0].classList.add('hidden');
+                    document.getElementsByClassName('error-div')[0].classList.remove('hidden');
+                    document.getElementById('error-msg-stripe').innerText = result.error.message;
+                }
+            })
+            .catch(function (error) {
+                console.error('Error:', error);
+                document.getElementsByClassName('redirect-loading-div')[0].classList.add('hidden');
+                document.getElementsByClassName('error-div')[0].classList.remove('hidden');
+                document.getElementById('error-msg-stripe').innerText = error;
+            });
+    }, 100);
+</script>
+{% endblock extra_js %}

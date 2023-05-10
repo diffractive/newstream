@@ -24,7 +24,7 @@ from diffractive.selenium import wait_element, ScreenGrabber, get_webdriver, not
 from diffractive.selenium.visualisation import gallery
 
 from components import Application
-from utils import get_email_count, wait_for_email, get_emails, get_link_by_email_subject_and_regex, clear_all_emails
+from utils import get_email_count, wait_for_email, get_emails, clear_all_emails
 
 import secrets
 
@@ -32,11 +32,12 @@ import secrets
 clear_all_emails()
 randstr = secrets.token_hex(6).upper()
 
-used_email = 'david.donor@diffractive.io'
 email = f'test_user{randstr}@newstream.com'
-first_name = 'Test'
-last_name = 'User'
-password = 'strongpwd'
+name = 'Test User'
+card_number = '4242424242424242'
+declined_card = '4000000000000002'
+card_expiry = '1133'
+cvc = '123'
 email_count = get_email_count()
 # -
 
@@ -52,37 +53,45 @@ grabber.capture_screen('donation_form', 'Donation Form')
 
 # Cannot go to the signup page without setting a value into the custom amount or choosing a default from selector
 app.dropdown('id_donation_amount').select('USD $100')
-app.button('Register or Login').click()
-grabber.capture_screen('register_login', 'Register or login page')
-
-app.link('Continue with Email Sign up').click()
-grabber.capture_screen('sign_up', 'Sign up form')
-
-app.input('id_email').fill(used_email)
-app.input('id_first_name').fill(first_name)
-app.input('id_last_name').fill(last_name)
-app.input('id_password1').fill(password)
-app.input('id_password2').fill(password)
-grabber.capture_screen('filled_form', 'Filled signup form')
-
-app.button('Continue').click()
-grabber.capture_screen('failed_sign_up', 'Email already taken')
-
-app.input('id_email').clear()
 app.input('id_email').fill(email)
-app.input('id_password1').fill(password)
-app.input('id_password2').fill(password)
-grabber.capture_screen('correct_filled_form', 'Correct Filled signup form')
+app.input('id_name').fill(name)
+app.dropdown('id_payment_gateway').select('Stripe')
+app.button('Continue as guest').click()
+grabber.capture_screen('guest_payment', 'Confirm Payment')
 
-app.button('Continue').click()
-grabber.capture_screen('signed_up', 'Successfully signed up')
+app.button('Confirm Donation').click()
+grabber.capture_screen('processing_payment', 'Processing Payment')
+
+# Wait until redirecting finishes
+wait_element(driver, '//input[@id="cardNumber"]')
+grabber.capture_screen('stripe_payment_gateway', 'Stripe payment gateway')
+
+# ## Test card declined
+
+app.input('cardNumber').fill(declined_card)
+app.input('cardExpiry').fill(card_expiry)
+app.input('cardCvc').fill(cvc)
+app.input('billingName').fill(name)
+app.button('Pay').click()
+wait_element(driver, '//div[text()="Your credit card was declined. Try paying with a debit card instead."]')
+grabber.capture_screen('declined_card', 'Card has been declined error')
+
+# ## Happy path
+
+app.input('cardNumber').fill(card_number)
+app.input('cardExpiry').fill(card_expiry)
+app.input('cardCvc').fill(cvc)
+app.input('billingName').fill(name)
+app.button('Pay').click()
+wait_element(driver, '//h1[text()="Thank you!"]')
+grabber.capture_screen('thank_you', 'Thank you screen')
 
 # +
 # There should be two emails sent, one for admins one for the user
 wait_for_email(email_count+1)
 emails = get_emails(0, 2)
-user_email = 'Please Confirm Your Email Address'
-admin_email = 'A Donor Account is created'
+user_email = 'Thank you for your Donation'
+admin_email = 'New One-off Donation'
 
 # Email order is not guaranteed
 email_titles = [admin_email, user_email]
@@ -97,13 +106,6 @@ for email_content in emails:
     email_titles.remove(email_title)
 # -
 
-subject = "Please Confirm Your Email Address"
-reg_str = "(?P<url>http://app.newstream.local:8000/en/accounts/confirm-email/[^/]*/)"
-url = get_link_by_email_subject_and_regex(subject, reg_str)
-driver.get(url)
-grabber.capture_screen('email_confirm', 'Confirm email')
-
-app.button('Confirm').click()
-grabber.capture_screen('email_confirmed', 'Email confirmed')
-
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
+
+

@@ -4,6 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from django.urls import reverse
+from django.db import transaction
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import uuid4_str, reverse_with_site_url, _exception, _debug, object_to_json
@@ -136,6 +137,7 @@ def create_checkout_session(request):
 
 
 @csrf_exempt
+@transaction.atomic
 def verify_stripe_response(request):
     """ This endpoint should be set as the listening endpoint for the webhook set in Stripe's dashboard
         The verification of the incoming Stripe requests is done via Factory_Stripe.initGatewayByVerification(request)

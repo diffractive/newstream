@@ -17,6 +17,10 @@ def create_subscriptions_for_instances(apps, schema_editor):
         )
         subscription.save()
 
+        # link as instance's parent
+        instance.parent = subscription
+        instance.save()
+
 
 def remove_subscriptions(apps, schema_editor):
     """ For reversing this migration, removing all created Subscriptions(parents of the instances)

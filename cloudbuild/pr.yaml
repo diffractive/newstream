@@ -84,30 +84,14 @@ steps:
   # Run selenium tests
   - id: selenium-tests
     name: 'gcr.io/cloud-builders/docker:20.10.14'
-    entrypoint: 'bash'
-    args:
-    - '-c'
-    - |
-      docker compose -f docker/docker-compose.yml -f docker/docker-compose-gcp.yml run selenium_tests run_tests --continue-on-failure --ignore-errors || exit 0
+    args: [
+      'compose', '-f', 'docker/docker-compose.yml', '-f', 'docker/docker-compose-gcp.yml', 'run', 'selenium_tests', 'run_tests', '--continue-on-failure', '--ignore-errors'
+    ]
     env:
       - 'PROJECT_ID=$PROJECT_ID'
       - 'IMAGE_TAG=pr-${_PR_NUMBER}'
       - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
     waitFor: [start-docker-compose]
-
-  # Run selenium tests
-  - id: selenium-tests-logs
-    name: 'gcr.io/cloud-builders/docker:20.10.14'
-    entrypoint: 'bash'
-    args:
-    - '-c'
-    - |
-        docker logs -t docker-app_init-1
-    env:
-      - 'PROJECT_ID=$PROJECT_ID'
-      - 'IMAGE_TAG=pr-${_PR_NUMBER}'
-      - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
-    waitFor: [selenium-tests]
 
   - id: upload-selenium-output
     name: "gcr.io/cloud-builders/gsutil"

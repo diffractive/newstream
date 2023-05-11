@@ -217,7 +217,7 @@ def load_test_donations():
             # update the Subscription parent to match with test_data
             # and delete the one created by data migration
             instance = SubscriptionInstance.objects.get(profile_id=item["profile_id"])
-            if instance.parent is not subscription:
+            if str(instance.parent_id) != str(item["parent_uuid"]):
                 instance.parent.delete()
                 instance.parent = subscription
                 instance.save()

@@ -214,6 +214,13 @@ def load_test_donations():
 
         # then create the instance
         if SubscriptionInstance.objects.filter(profile_id=item["profile_id"]).exists():
+            # update the Subscription parent to match with test_data
+            # and delete the one created by data migration
+            instance = SubscriptionInstance.objects.get(profile_id=item["profile_id"])
+            if instance.parent is not subscription:
+                instance.parent.delete()
+                instance.parent = subscription
+                instance.save()
             continue
         instance = SubscriptionInstance(
             profile_id=item["profile_id"],

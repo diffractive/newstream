@@ -150,7 +150,9 @@ def load_test_users():
     """ Load test users for setting up some test donations/subscriptions
     """
     for item in test_users:
-        if User.objects.filter(email=item["email"]).exists():
+        user_qs = User.objects.filter(email=item["email"])
+        if user_qs.count() == 1:
+            loaded_users[item["email"]] = user_qs.first()
             continue
         user = User.objects.create_user(email=item["email"], password=item["password"])
         user.first_name = item["first_name"]

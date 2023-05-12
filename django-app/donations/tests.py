@@ -14,14 +14,14 @@ from site_settings.models import PaymentGateway
 
 User = get_user_model()
 
-test_user = {
+TEST_USER = {
     "email": "david.donor@diffractive.io",
     "password": "david.donor",
     "first_name": "David",
     "last_name": "Donor"
 }
 
-test_subscription = {
+TEST_SUBSCRIPTION = {
     "user_email": "david.donor@diffractive.io", # for matching up the right user
     "profile_id": "sub_1Mxo8cTTD2mrB42B414bD7LS",
     "recurring_amount": 250,
@@ -32,26 +32,25 @@ test_subscription = {
 }
 
 # https://requests.readthedocs.io/en/latest/user/quickstart/#errors-and-exceptions
-errors = {
+ERRORS = [
     # Covers all types of stripe errors
-    "stripe_error": stripe.error.InvalidRequestError("Test Error", "", 403),
+    {"type": "stripe", "error": stripe.error.InvalidRequestError("Test Error", "", 403)},
 
     # This covers DNS errors
-    "connection_error": requests.exceptions.ConnectionError('Test Error'),
+    {"type": "connection", "error": requests.exceptions.ConnectionError('Test Error')},
 
     # SSL Issues
-    "ssl_error": requests.exceptions.SSLError('Test Error'),
+    {"type": "ssl", "error": requests.exceptions.SSLError('Test Error')},
 
     # Timeouts
-    "timeout_error": requests.exceptions.Timeout('Test Error'),
+    {"type": "timeout", "error": requests.exceptions.Timeout('Test Error')},
 
     # Http errors
-    "http_error": requests.exceptions.HTTPError('Test Error')
-
-}
+    {"type": "http", "error": requests.exceptions.HTTPError('Test Error')}
+]
 
 TEST_DOMAIN_NAME = "newstream.hongkongfp.com"
-TEST_USER_CREDS = {'username':test_user['email'], 'password':test_user['password']}
+TEST_USER_CREDS = {'username':TEST_USER['email'], 'password':TEST_USER['password']}
 
 # Create your tests here.
 class MockStripeResponses(TestCase):
@@ -64,9 +63,9 @@ class MockStripeResponses(TestCase):
         """
 
         # Create test user
-        self.user = User.objects.create_user(email="david.donor@diffractive.io", password="david.donor")
-        self.user.first_name = "David"
-        self.user.last_name = "Donor"
+        self.user = User.objects.create_user(email=TEST_USER['email'], password=TEST_USER['password'])
+        self.user.first_name = TEST_USER['first_name']
+        self.user.last_name = TEST_USER['last_name']
         self.user.save()
 
         gateways = PaymentGateway.objects.all().order_by("list_order")
@@ -76,13 +75,13 @@ class MockStripeResponses(TestCase):
         }
 
         self.subscription = Subscription(
-            profile_id=test_subscription["profile_id"],
+            profile_id=TEST_SUBSCRIPTION["profile_id"],
             user=self.user,
-            gateway=gateway_map[test_subscription["gateway"]],
-            recurring_amount=test_subscription["recurring_amount"],
-            currency=test_subscription["currency"],
-            recurring_status=test_subscription["recurring_status"],
-            subscribe_date=make_aware(test_subscription["subscribe_date"])
+            gateway=gateway_map[TEST_SUBSCRIPTION["gateway"]],
+            recurring_amount=TEST_SUBSCRIPTION["recurring_amount"],
+            currency=TEST_SUBSCRIPTION["currency"],
+            recurring_status=TEST_SUBSCRIPTION["recurring_status"],
+            subscribe_date=make_aware(TEST_SUBSCRIPTION["subscribe_date"])
         )
         self.subscription.save()
 
@@ -95,10 +94,10 @@ class MockStripeResponses(TestCase):
     def test_pause_subscription_errors(self, modify_mock):
         data = {"subscription_id": self.subscription.id}
 
-        for key, val in errors.items():
-            modify_mock.side_effect = val
+        for error in ERRORS:
+            modify_mock.side_effect = error['error']
             res = self.client.post(reverse('donations:toggle-recurring'), data=data, content_type='application/json').json()
-            if key == "stripe_error":
+            if error['type'] == "stripe":
                 self.assertEqual(res['reason'],
                     'Stripe API Error(InvalidRequestError): Status(None), Code(403), Param(), Message(Test Error)')
             else:
@@ -109,10 +108,10 @@ class MockStripeResponses(TestCase):
     def test_cancel_subscription_errors(self, delete_mock):
         data = {"subscription_id": self.subscription.id}
 
-        for key, val in errors.items():
-            delete_mock.side_effect = val
+        for error in ERRORS:
+            delete_mock.side_effect = error['error']
             res = self.client.post(reverse('donations:cancel-recurring'), data=data, content_type='application/json').json()
-            if key == "stripe_error":
+            if error['type'] == "stripe":
                 self.assertEqual(res['reason'],
                     'Stripe API Error(InvalidRequestError): Status(None), Code(403), Param(), Message(Test Error)')
             else:
@@ -129,15 +128,15 @@ class MockStripeResponses(TestCase):
         mock_obj = SimpleNamespace(**mock_dict)
         mock_res = {"data": [mock_obj]}
 
-        for key, val in errors.items():
+        for error in ERRORS:
             # Test SubscriptionItem.list errors
-            list_mock.side_effect = val
+            list_mock.side_effect = error['error']
             res = self.client.post(
                 reverse('donations:edit-recurring', kwargs={'id': self.subscription.id}),
                 data = data, follow=True)
             messages = list(get_messages(res.wsgi_request))
             self.assertEqual(len(messages), 1)
-            if key == "stripe_error":
+            if error['type'] == "stripe":
                 self.assertEqual(messages[0].message,
                     'Stripe API Error(InvalidRequestError): Status(None), Code(403), Param(), Message(Test Error)')
             else:
@@ -148,12 +147,12 @@ class MockStripeResponses(TestCase):
             # We want list to return a value that will get us through the checks and run
             # the modify function
             list_mock.return_value = mock_res
-            modify_mock.side_effect = val
+            modify_mock.side_effect = error['error']
             res = self.client.post(
                 reverse('donations:edit-recurring', kwargs={'id': self.subscription.id}),
                 data = data, follow=True)
             messages = list(get_messages(res.wsgi_request))
-            if key == "stripe_error":
+            if error['type'] == "stripe":
                 self.assertEqual(messages[0].message,
                     'Stripe API Error(InvalidRequestError): Status(None), Code(403), Param(), Message(Test Error)')
             else:
@@ -163,15 +162,14 @@ class MockStripeResponses(TestCase):
     def test_update_billing_cycle(self, modify_mock):
         data = {'recurring_amount': [self.subscription.recurring_amount], 'billing_cycle_now': ['on']}
 
-        for key, val in errors.items():
-            modify_mock.side_effect = val
+        for error in ERRORS:
+            modify_mock.side_effect = error['error']
             res = self.client.post(
                 reverse('donations:edit-recurring', kwargs={'id': self.subscription.id}),
                 data = data, follow=True)
             messages = list(get_messages(res.wsgi_request))
             self.assertEqual(len(messages), 1)
-            if key == "stripe_error":
-                print(messages[0])
+            if error['type'] == "stripe":
                 self.assertEqual(messages[0].message,
                     'Stripe API Error(InvalidRequestError): Status(None), Code(403), Param(), Message(Test Error)')
             else:

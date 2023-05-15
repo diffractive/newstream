@@ -133,6 +133,29 @@ steps:
       - 'PROJECT_ID=$PROJECT_ID'
     waitFor: [check-test-status]
 
+  ## Deploy to staging #######################
+
+  # Update the google cloud run job to use the latest image
+  - id: backend-job-update
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: ['beta', 'run', 'jobs', 'update', 'newstream-init', '--project', '${_TARGET_PROJECT_ID}', '--region', 'asia-southeast1', '--image', 'asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:${_COMMIT_TAG}']
+    waitFor: [check-test-status]
+
+  # Execution the cloud run job to run migrations, etc
+  - id: backend-migrate
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: ['beta', 'run', 'jobs', 'execute', 'newstream-init', '--project', '${_TARGET_PROJECT_ID}', '--region', 'asia-southeast1', '--wait']
+    waitFor: [backend-job-update]
+
+  # Deploy the backend update
+  - id: deploy-backend-cloud-run
+    name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args: ['run', 'deploy', 'backend', '--project', '${_TARGET_PROJECT_ID}', '--platform', 'managed', '--image', 'asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:${_COMMIT_TAG}', '--region', 'asia-southeast1']
+    waitFor: [backend-migrate]
+
 substitutions:
   _BACKEND_SERVICE_NAME: newstream
   _SELENIUM_SERVICE_NAME: newstream-tests

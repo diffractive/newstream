@@ -61,7 +61,7 @@ grabber.capture_screen('single_donations', 'My donations page')
 row = app.table('my-donations-table').first_row()
 assert row[0] == 'USD $100.00'
 assert row[1] == 'One-time'
-# assert row[2][0:3] == 'pi_' # Not consistent due to another bug
+assert row[2][0:3] == 'ch_'
 assert row[4] == 'Stripe'
 assert row[5] == 'Complete'
 

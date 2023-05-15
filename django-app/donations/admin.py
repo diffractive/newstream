@@ -8,7 +8,7 @@ from wagtail.contrib.modeladmin.helpers import ButtonHelper
 
 from newstream.functions import get_site_settings_from_default_site
 from site_settings.models import GATEWAY_OFFLINE, GATEWAY_PAYPAL_LEGACY
-from donations.models import Donation, SubscriptionInstance, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING, STATUS_INACTIVE
+from donations.models import Donation, Subscription, SubscriptionInstance, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING, STATUS_INACTIVE
 from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
 from donations.payment_gateways import isGatewayEditSubSupported, isGatewayToggleSubSupported, isGatewayCancelSubSupported
 
@@ -21,6 +21,14 @@ class DonationCreateView(CreateView):
 
 class SubscriptionCreateView(CreateView):
     def form_valid(self, form):
+        # save parent Subscription object
+        subscription = Subscription(
+            user=form.instance.user,
+            created_by=self.request.user
+        )
+        subscription.save()
+        
+        form.instance.parent = subscription
         form.instance.created_by = self.request.user
         return super().form_valid(form)
 
@@ -172,10 +180,24 @@ class SubscriptionDeleteView(DeleteView):
         super().__init__(*args, **kwargs)
     
     def delete_instance(self):
+        # loop all child instances, if all others are deleted or this is the only instance to be deleted
+        # proceed to set parent to deleted as well
+        delete_parent = True
+        for instance in self.instance.parent.subscription_instances.all():
+            if instance.id == self.instance.id:
+                continue
+            elif not instance.deleted:
+                delete_parent = False
+
         if self.siteSettings.donations_soft_delete_mode:
+            if delete_parent:
+                self.instance.parent.deleted = True
+                self.instance.parent.save()
             self.instance.deleted = True
             self.instance.save()
         else:
+            if delete_parent:
+                self.instance.parent.delete()
             self.instance.delete()
 
     def confirmation_message(self):

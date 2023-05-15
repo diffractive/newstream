@@ -77,10 +77,11 @@ class Factory_Stripe(PaymentGatewayFactory):
             # Fulfill the purchase...
             if payment_intent:
                 try:
-                    dpm = DonationPaymentMeta.objects.get(field_key='stripe_payment_intent_id', field_value=payment_intent.id)
-                    donation = dpm.donation
+                    # adding select_for_update() for locking the donation row
+                    # for fixing race condition between payment_intent.succeeded and checkout.session.completed
+                    donation = Donation.objects.select_for_update().get(payment_metas__field_key='stripe_payment_intent_id', payment_metas__field_value=payment_intent.id)
                     can_skip_donation_id = True
-                except DonationPaymentMeta.DoesNotExist:
+                except Donation.DoesNotExist:
                     # should be renewal payments since only one-time payments have saved stripe_payment_intent_id
                     raise WebhookNotProcessedError(_('Payment Intent Id not found in DonationPaymentMeta:') + payment_intent.id)
 
@@ -193,7 +194,9 @@ class Factory_Stripe(PaymentGatewayFactory):
         try:
             # no need to query donation object if can skip
             if not can_skip_donation_id and not donation:
-                donation = Donation.objects.get(pk=donation_id)
+                # adding select_for_update() for locking the donation row
+                # for fixing race condition between payment_intent.succeeded and checkout.session.completed
+                donation = Donation.objects.select_for_update().get(pk=donation_id)
             kwargs['session'] = session
             kwargs['event'] = event
             kwargs['payment_intent'] = payment_intent

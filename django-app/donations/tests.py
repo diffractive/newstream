@@ -22,7 +22,6 @@ TEST_USER = {
 }
 
 TEST_SUBSCRIPTION = {
-    "user_email": "david.donor@diffractive.io", # for matching up the right user
     "profile_id": "sub_1Mxo8cTTD2mrB42B414bD7LS",
     "recurring_amount": 250,
     "currency": "HKD",

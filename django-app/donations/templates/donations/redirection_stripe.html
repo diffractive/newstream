@@ -67,7 +67,7 @@
                 // If `redirectToCheckout` fails due to a browser or network
                 // error, you should display the localized error message to your
                 // customer using `error.message`.
-                if (result.error) {
+                if (result?.error) {
                     document.getElementsByClassName('redirect-loading-div')[0].classList.add('hidden');
                     document.getElementsByClassName('error-div')[0].classList.remove('hidden');
                     document.getElementById('error-msg-stripe').innerText = result.error.message;

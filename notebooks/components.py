@@ -2,15 +2,18 @@
 from selenium.webdriver.support.ui import Select
 from selenium.common.exceptions import NoSuchElementException
 
-from utils import get_element_by_identifier, get_children_elements
+from utils import get_element_by_identifier, get_children_elements, get_element_by_data
 
 
 # -
 
 class Button:
     xpath = 'button'
-    def __init__(self, driver, identifier):
-        self.element = get_element_by_identifier(driver, self.xpath, identifier)
+    def __init__(self, driver, identifier, data=None):
+        if data:
+            self.element = get_element_by_data(driver, self.xpath, identifier, data)
+        else:
+            self.element = get_element_by_identifier(driver, self.xpath, identifier)
 
     def click(self):
         self.element.click()
@@ -76,14 +79,24 @@ class Table:
     def __init__(self, driver, identifier):
         self.element = get_element_by_identifier(driver, self.xpath, identifier)
 
-    def first_row(self):
+    def row_values(self):
         table_values = []
-        for val in get_children_elements(self.element, 'tbody//tr//td'):
-            # This query returns a bunch of empty values so we should just keep the values
-            if val.text:
-                table_values.append(val.text)
-
+        for row in self.rows():
+            row_val = []
+            for col in row:
+                if col.text:
+                    row_val.append(col.text)
+            table_values.append(row_val)
         return table_values
+
+    def rows(self):
+        rows = [row for row in get_children_elements(self.element, 'tr') if row.text]
+        row_vals = []
+        for row in rows:
+            val = [col for col in get_children_elements(row, 'td') if col.text]
+            if len(val):
+                row_vals.append(val)
+        return row_vals
 
 
 class Application:
@@ -92,8 +105,8 @@ class Application:
 
     #### Components ####
 
-    def button(self, identifier):
-        return Button(self.driver, identifier)
+    def button(self, identifier, data=None):
+        return Button(self.driver, identifier, data)
 
     def link(self, identifier):
         return Link(self.driver, identifier)

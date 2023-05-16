@@ -58,12 +58,12 @@ grabber.capture_screen('expanded_menu', 'Expanded menu')
 app.link("header-donations").click()
 grabber.capture_screen('single_donations', 'My donations page')
 
-row = app.table('my-donations-table').first_row()
-assert row[0] == 'USD $100.00'
-assert row[1] == 'One-time'
-assert row[2][0:3] == 'ch_'
-assert row[4] == 'Stripe'
-assert row[5] == 'Complete'
+rows = app.table('my-donations-table').row_values()
+assert rows[0][0] == 'USD $100.00'
+assert rows[0][1] == 'One-time'
+assert rows[0][2][0:3] == 'ch_'
+assert rows[0][4] == 'Stripe'
+assert rows[0][5] == 'Complete'
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
 

@@ -39,13 +39,20 @@ def get_element_by_identifier(driver, element, identifier):
     return driver.find_element(By.XPATH, f'//{element}[text()="{identifier}"]')
 
 
-def get_children_elements(driver, element):
+def get_element_by_data(driver, element, identifier, data):
     """
-    Get all children of a specified element type e.g. //select//option
-    element: xpath used to identify the html element e.g. "div"
-        can also contain a more complex xpath structure depending on the element
+    We have elements that can only be differentiated by data-id, this will help with fetching those elements
     """
-    return driver.find_elements(By.XPATH, f'//{element}')
+    return driver.find_element(By.XPATH, f'//{element}[contains(@class, "{identifier}") and @data-id="{data}"]')
+
+
+def get_children_elements(driver, tag):
+    """
+    Get all children of a specified tag type e.g. //select//option
+    tag: xpath used to identify the html tag e.g. "div"
+        can also contain a more complex xpath structure depending on the tag
+    """
+    return driver.find_elements(By.TAG_NAME, f'{tag}')
 
 def get_email_count():
     """

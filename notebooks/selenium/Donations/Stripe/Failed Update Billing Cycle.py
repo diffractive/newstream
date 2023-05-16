@@ -54,10 +54,14 @@ grabber.capture_screen('single_donations', 'My donations page')
 app.link('Recurring Donations').click()
 grabber.capture_screen('subscriptions', 'Recurring donations')
 
-app.label('md2_dropdown-toggle-checkbox1').click()
+# 2nd row
+app.label('md2_dropdown-toggle-checkbox2').click()
 grabber.capture_screen('open_menu', 'Open subscription menu')
 
-app.button('edit-recurring-donation-wide').click()
+rows = app.table('my-donations-table').rows()
+# We need this data_id to fetch the right buttons
+data_id = rows[1][5].get_attribute('data-id')
+app.button('edit-recurring-donation-wide', data_id).click()
 grabber.capture_screen('edit_subscription', 'Edit subscription page')
 
 app.label('Change Billing Cycle to Now').click()

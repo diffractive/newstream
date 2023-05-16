@@ -74,7 +74,7 @@ grabber.capture_screen('single_donations', 'My donations page')
 app.link('Recurring Donations').click()
 grabber.capture_screen('subscriptions', 'Recurring donations')
 
-row = app.table('my-donations-table').first_row()
+row = app.table('my-donations-table').row_values()
 assert row[5] == 'Active'
 
 app.label('md2_dropdown-toggle-checkbox1').click()
@@ -89,7 +89,7 @@ grabber.capture_screen('paused_subscription_popup_confirm', 'Paused subscription
 
 app.button('confirm-ok').click()
 
-row = app.table('my-donations-table').first_row()
+row = app.table('my-donations-table').row_values()
 assert row[5] == 'Paused'
 grabber.capture_screen('paused_subscription', 'Subscription has been paused')
 
@@ -129,7 +129,7 @@ grabber.capture_screen('resume_subscription_popup_confirm', 'Resumed subscriptio
 
 app.button('confirm-ok').click()
 
-row = app.table('my-donations-table').first_row()
+row = app.table('my-donations-table').row_values()
 assert row[5] == 'Active'
 grabber.capture_screen('resumed_subscription', 'Subscription has been resumed')
 

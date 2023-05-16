@@ -74,7 +74,7 @@ grabber.capture_screen('single_donations', 'My donations page')
 app.link('Recurring Donations').click()
 grabber.capture_screen('subscriptions', 'Recurring donations')
 
-row = app.table('my-donations-table').first_row()
+row = app.table('my-donations-table').row_values()
 assert row[0] == 'USD $100.00'
 
 
@@ -92,7 +92,7 @@ grabber.capture_screen('update_amount', 'Update amount')
 app.link('Back to My Donations').click()
 grabber.capture_screen('updated_amount_list', 'Update amount list')
 
-row = app.table('my-donations-table').first_row()
+row = app.table('my-donations-table').row_values()
 assert row[0] == f'USD ${new_amount}.00'
 
 # +

@@ -61,7 +61,7 @@ grabber.capture_screen('single_donations', 'My donations page')
 app.link('Recurring Donations').click()
 grabber.capture_screen('subscriptions', 'Recurring donations')
 
-row = app.table('my-donations-table').first_row()
+row = app.table('my-donations-table').row_values()
 assert row[0] == 'USD $100.00'
 assert row[1] == 'Monthly'
 assert row[2][0:4] == 'sub_'

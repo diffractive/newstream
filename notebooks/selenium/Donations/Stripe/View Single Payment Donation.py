@@ -58,7 +58,7 @@ grabber.capture_screen('expanded_menu', 'Expanded menu')
 app.link("header-donations").click()
 grabber.capture_screen('single_donations', 'My donations page')
 
-row = app.table('my-donations-table').first_row()
+row = app.table('my-donations-table').row_values()
 assert row[0] == 'USD $100.00'
 assert row[1] == 'One-time'
 assert row[2][0:3] == 'ch_'

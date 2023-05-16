@@ -11,7 +11,7 @@ from django.core.exceptions import PermissionDenied
 from django.conf import settings
 from django.utils import translation
 
-from donations.models import Subscription, Donation, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED
+from donations.models import SubscriptionInstance, Donation, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED
 from donations.email_functions import sendAccountDeletedNotifToAdmins, sendAccountDeletedNotifToDonor
 from newstream.functions import generateIDSecretHash, process_user_meta
 from newstream.forms import PersonalInfoForm, DeleteAccountForm
@@ -78,7 +78,7 @@ def security(request):
 def advanced_settings(request):
     # check if user can delete account or not
     cannot_delete_text = _('You need to cancel all your recurring donations before you are allowed to delete your account.')
-    subs = Subscription.objects.filter(user=request.user, recurring_status__in=[STATUS_ACTIVE, STATUS_PAUSED, STATUS_PROCESSING], deleted=False)
+    subs = SubscriptionInstance.objects.filter(user=request.user, recurring_status__in=[STATUS_ACTIVE, STATUS_PAUSED, STATUS_PROCESSING], deleted=False)
     if len(subs) > 0:
         deletable = False
     else:
@@ -168,7 +168,7 @@ def export_subscription_data(request):
     headings1 = ['id', 'profile_id','recurring_amount', 'currency', 'recurring_status']
     headings2 = ['linked_user_deleted', 'gateway']
     headings3 = ['user_id', 'created_at', 'updated_at', 'subscribe_date']
-    subscriptions = Subscription.objects.all().select_related('user').select_related('gateway')
+    subscriptions = SubscriptionInstance.objects.all().select_related('user').select_related('gateway')
     headings =  headings1 + headings2 + headings3
 
     writer = csv.writer(response)

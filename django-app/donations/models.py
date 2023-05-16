@@ -1,4 +1,5 @@
 from decimal import Decimal
+import uuid
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import pre_delete
@@ -204,7 +205,7 @@ class SubscriptionPaymentMeta(models.Model):
     SubscriptionPaymentMeta is used for storing meta data mainly used by the code or system itself.
     '''
     subscription = ParentalKey(
-        'Subscription',
+        'SubscriptionInstance',
         related_name='payment_metas',
         on_delete=models.CASCADE,
     )
@@ -223,7 +224,50 @@ class SubscriptionPaymentMeta(models.Model):
         return self.field_key
 
 
-class Subscription(ClusterableModel):
+class Subscription(models.Model):
+    """ This model is a parent wrapper for chronically-related SubscriptionInstances
+        specifically for the case when users updating payment method on Newstream
+        while the system delete the old subscription and create a new subscription
+    """
+    uuid = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(
+        'newstream_user.User',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    # reason for subscription_created_at field is because when we list Subscriptions on user's recurring donations page,
+    # we need to order them by date of subscription, created_at isn't accurate as it might be created by the data migration
+    # which is much later than the original subscription date by the user
+    # that's why this field should be very close/same as the created_at of its first instance
+    subscription_created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    created_by = models.ForeignKey(
+        'newstream_user.User',
+        related_name='subscription_created_by',
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
+    deleted = models.BooleanField(default=False)
+
+    @property
+    def first_instance(self):
+        # return oldest instance
+        # mainly for displaying the subscribe date
+        return self.subscription_instances.all().order_by("subscribe_date", "created_at").first()
+    
+    @property
+    def latest_instance(self):
+        # return the latest instance
+        # mainly for displaying the current subscription info
+        # e.g. amount, currency, profile_id, status
+        return self.subscription_instances.all().order_by("subscribe_date", "created_at").last()
+
+
+class SubscriptionInstance(ClusterableModel):
+    """ This model corresponds to the actual Subscription object in the gateways
+    """
     RECURRING_STATUS_CHOICES = [
         (STATUS_ACTIVE, _(STATUS_ACTIVE.capitalize())),
         (STATUS_PROCESSING, _(STATUS_PROCESSING.capitalize())),
@@ -241,6 +285,12 @@ class Subscription(ClusterableModel):
         on_delete=models.SET_NULL,
         null=True
     )
+    parent = models.ForeignKey(
+        'Subscription',
+        related_name='subscription_instances',
+        on_delete=models.SET_NULL,
+        null=True
+    )
     is_test = models.BooleanField(default=False)
     profile_id = models.CharField(max_length=191, unique=True)
     recurring_amount = models.DecimalField(max_digits=20, decimal_places=2)
@@ -252,7 +302,7 @@ class Subscription(ClusterableModel):
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(
         'newstream_user.User',
-        related_name='subscription_created_by',
+        related_name='subscription_instance_created_by',
         on_delete=models.SET_NULL,
         blank=True,
         null=True
@@ -315,7 +365,7 @@ class Donation(ClusterableModel):
         null=True
     )
     subscription = models.ForeignKey(
-        'Subscription',
+        'SubscriptionInstance',
         on_delete=models.SET_NULL,
         blank=True,
         null=True
@@ -481,7 +531,7 @@ def update_deleted_users_donations(sender, instance, using, **kwargs):
     for donation in donations:
         donation.linked_user_deleted = True
         donation.save()
-    subscriptions = Subscription.objects.filter(user=instance).all()
+    subscriptions = SubscriptionInstance.objects.filter(user=instance).all()
     for subscription in subscriptions:
         subscription.linked_user_deleted = True
         subscription.save()

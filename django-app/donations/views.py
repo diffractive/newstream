@@ -1,6 +1,5 @@
 import json
 import csv
-from datetime import datetime, timezone
 from pprint import pprint
 from django.urls import reverse
 from django.http import HttpResponse, JsonResponse
@@ -8,6 +7,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
 from django.contrib.auth.decorators import login_required
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from django.core.exceptions import PermissionDenied
@@ -15,7 +15,7 @@ from django.core.exceptions import PermissionDenied
 from newstream.functions import _exception, uuid4_str, get_site_settings_from_default_site
 from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
-from donations.models import DonationPaymentMeta, Subscription, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
+from donations.models import DonationPaymentMeta, Subscription, SubscriptionInstance, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
 from donations.forms import DONATION_DETAILS_FIELDS, DonationDetailsForm
 from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, extract_temp_donation_meta, displayGateway, temp_donation_meta_to_donation_meta
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml, isGatewayHosted
@@ -144,32 +144,42 @@ def confirm_donation(request):
                     guest_name=tmpd.guest_name if not request.user.is_authenticated else '',
                     payment_status=STATUS_PROCESSING,
                     metas=temp_donation_meta_to_donation_meta(tmpd.temp_metas.all()),
-                    donation_date=datetime.now(timezone.utc),
+                    donation_date=timezone.now(),
                 )
                 # create a processing subscription if is_recurring
                 if tmpd.is_recurring:
-                    # create new Subscription object, with a temporary profile_id created by uuidv4
                     # user should have been authenticated according to flow logic
+                    if not request.user or not request.user.is_authenticated:
+                        raise PermissionDenied
+
+                    # create new Subscription + SubscriptionInstance object, with a temporary profile_id created by uuidv4
                     subscription = Subscription(
+                        user=request.user,
+                        created_by=request.user,
+                        subscription_created_at=timezone.now()
+                    )
+                    subscription.save()
+                    
+                    instance = SubscriptionInstance(
                         is_test=tmpd.is_test,
                         profile_id=uuid4_str(),
-                        user=request.user if request.user.is_authenticated else None,
+                        user=request.user,
+                        parent=subscription,
                         gateway=tmpd.gateway,
                         recurring_amount=tmpd.donation_amount,
                         currency=tmpd.currency,
                         recurring_status=STATUS_PROCESSING,
-                        subscribe_date=datetime.now(timezone.utc)
+                        subscribe_date=timezone.now(),
+                        created_by=request.user
                     )
-                    subscription.save()
+                    instance.save()
                     # link subscription to the donation
-                    donation.subscription = subscription
+                    donation.subscription = instance
 
                 donation.save()
                 request.session.pop('temp_donation_id')
                 # delete temp donation instead of saving it as processed
                 tmpd.delete()
-                # tmpd.status = STATUS_PROCESSED
-                # tmpd.save()
 
                 if 'first_time_registration' in request.session:
                     dpmeta = DonationPaymentMeta(
@@ -185,6 +195,9 @@ def confirm_donation(request):
                 raise Exception(_('No valid submit-choice is being submitted.'))
     except TempDonation.DoesNotExist as e:
         messages.add_message(request, messages.ERROR, str(_('Session data has expired. Please enter the donation details again.')))
+        return redirect('donations:donate')
+    except PermissionDenied as e:
+        messages.add_message(request, messages.ERROR, str(_('You are not allowed to make a recurring payment without user authentication.')))
         return redirect('donations:donate')
     except Exception as e:
         # Should rarely happen, but in case some bugs or order id repeats itself
@@ -286,14 +299,14 @@ def cancel_recurring(request):
                 print("No subscription_id in JSON body", flush=True)
                 return HttpResponse(status=400)
             subscription_id = int(json_data['subscription_id'])
-            subscription = get_object_or_404(Subscription, id=subscription_id)
-            if subscription.user == request.user:
+            subscription_instance = get_object_or_404(SubscriptionInstance, id=subscription_id)
+            if subscription_instance.user == request.user:
                 gatewayManager = InitPaymentGateway(
-                    request, subscription=subscription)
+                    request, subscription=subscription_instance)
                 gatewayManager.cancel_recurring_payment()
                 # add to the update actions log
                 addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL)
-                return JsonResponse({'status': 'success', 'button-text': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'id': subscription_id})})
+                return JsonResponse({'status': 'success', 'button-text': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'uuid': subscription_instance.parent.uuid})})
             else:
                 raise PermissionError(_('You are not authorized to cancel subscription %(id)d.') % {'id': subscription_id})
         else:
@@ -324,7 +337,7 @@ def toggle_recurring(request):
                 print("No subscription_id in JSON body", flush=True)
                 return HttpResponse(status=400)
             subscription_id = int(json_data['subscription_id'])
-            subscription = get_object_or_404(Subscription, id=subscription_id)
+            subscription = get_object_or_404(SubscriptionInstance, id=subscription_id)
             if subscription.user == request.user:
                 gatewayManager = InitPaymentGateway(
                     request, subscription=subscription)
@@ -359,7 +372,7 @@ def edit_recurring(request, id):
         @todo: revise error handling, avoid catching all exceptions at the end
     """
     try:
-        subscription = get_object_or_404(Subscription, id=id)
+        subscription = get_object_or_404(SubscriptionInstance, id=id)
         if subscription.user == request.user:
             # Form object is initialized according to the specific gateway and if request.method=='POST'
             form = InitEditRecurringPaymentForm(request.POST, request.method, subscription)
@@ -403,21 +416,23 @@ def my_onetime_donations(request):
 def my_recurring_donations(request):
     # deleted=False should be valid whether soft-delete mode is on or off
     subscriptions = Subscription.objects.filter(
-        user=request.user, deleted=False).order_by('-created_at')
+        user=request.user, deleted=False).order_by('-subscription_created_at')
     siteSettings = get_site_settings_from_default_site()
     return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'siteSettings': siteSettings})
 
 
 @login_required
-def my_renewals(request, id):
+def my_renewals(request, uuid):
     # deleted=False should be valid whether soft-delete mode is on or off
-    subscription = get_object_or_404(Subscription, id=id, deleted=False)
+    subscription = get_object_or_404(Subscription, uuid=uuid, deleted=False)
     try:
         if subscription.user == request.user:
+            # find donations under all SubscriptionInstances under the same Subscription
             renewals = Donation.objects.filter(
-                subscription=subscription, deleted=False).order_by('-donation_date')
+                subscription__parent=subscription, deleted=False).order_by('-donation_date')
             siteSettings = get_site_settings_from_default_site()
-            return render(request, 'donations/my_renewals.html', {'subscription': subscription, 'renewals': renewals, 'siteSettings': siteSettings})
+            # subscription details should be fetched from the latest instance
+            return render(request, 'donations/my_renewals.html', {'subscription': subscription.latest_instance, 'renewals': renewals, 'siteSettings': siteSettings})
         else:
             raise PermissionError(_('You are not authorized to view renewals of subscription %(id)d.') % {'id': id})
     except PermissionError as e:
@@ -429,7 +444,7 @@ def my_renewals(request, id):
 def export_donations(request):
     if not request.user.is_staff:
         raise PermissionDenied
-    filename = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S") + 'donations.csv'
+    filename = timezone.now().strftime("%Y%m%d-%H%M%S") + 'donations.csv'
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=' + filename
 
@@ -465,14 +480,14 @@ def export_donations(request):
 def export_subscriptions(request):
     if not request.user.is_staff:
         raise PermissionDenied
-    filename = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S") + 'subscriptions.csv'
+    filename = timezone.now().strftime("%Y%m%d-%H%M%S") + 'subscriptions.csv'
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=' + filename
 
     headings1 = ['id', 'profile_id','recurring_amount', 'currency', 'recurring_status']
     headings2 = ['created_at', 'updated_at', 'linked_donor_deleted', 'gateway', 'donor_name', 'donor_email']
     headings3 = ['is_test', 'subscribe_date', 'created_by']
-    subscriptions = Subscription.objects.all().select_related('user').select_related('gateway')
+    subscriptions = SubscriptionInstance.objects.all().select_related('user').select_related('gateway')
     headings =  headings1 + headings2 + headings3
 
     writer = csv.writer(response)
@@ -499,7 +514,7 @@ def export_subscriptions(request):
 def export_donors(request):
     if not request.user.is_staff:
         raise PermissionDenied
-    filename = datetime.now(timezone.utc).strftime("%Y%m%d-%H%M%S") + 'donors.csv'
+    filename = timezone.now().strftime("%Y%m%d-%H%M%S") + 'donors.csv'
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename=' + filename
 

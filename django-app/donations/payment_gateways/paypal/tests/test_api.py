@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.test import Client
 
 from newstream.functions import printvars
-from donations.models import Subscription
+from donations.models import SubscriptionInstance
 # from newstream.classes import PersistentSessionClient
 User = get_user_model()
 
@@ -44,7 +44,7 @@ class PayPalApiTests(TestCase):
         global TEST_SUBSCRIPTION_ID
         if TEST_SUBSCRIPTION_ID == 0:
             user = User.objects.filter(username=USERNAME).first()
-            subs = Subscription.objects.filter(user=user).order_by('-id').first()
+            subs = SubscriptionInstance.objects.filter(user=user).order_by('-id').first()
             TEST_SUBSCRIPTION_ID = subs.id
 
     def update_recurring(self, form_data, assertStatus=302):

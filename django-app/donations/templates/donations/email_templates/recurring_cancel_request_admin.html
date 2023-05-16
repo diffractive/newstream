@@ -11,7 +11,7 @@
     {% trans 'This email is to inform you that a cancellation to a recurring donation has been requested on your website. Please complete the request and manually change the subscription status to Cancelled at the link below:' %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    <a href="{% site_url %}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}" target="_blank" rel="noopener noreferrer">{% site_url %}{% url 'donations_subscription_modeladmin_inspect' instance_pk=subscription.id %}</a>
+    <a href="{% site_url %}{% url 'donations_subscriptioninstance_modeladmin_inspect' instance_pk=subscription.id %}" target="_blank" rel="noopener noreferrer">{% site_url %}{% url 'donations_subscriptioninstance_modeladmin_inspect' instance_pk=subscription.id %}</a>
 </p>
 <table cellpadding="8" style="margin-bottom: 30px;">
     <tr>

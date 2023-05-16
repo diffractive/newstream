@@ -132,7 +132,7 @@ Thank you,\n
 
 
 def get_donation_status_change_text(donation):
-    donation_url = reverse_with_site_url('donations:my-renewals', kwargs={'id': donation.subscription.id}) if donation.is_recurring else reverse_with_site_url('donations:my-onetime-donations')
+    donation_url = reverse_with_site_url('donations:my-renewals', kwargs={'id': donation.subscription.parent.uuid}) if donation.is_recurring else reverse_with_site_url('donations:my-onetime-donations')
     if donation.user:
         url_text = str(_('Sign into our support page to view your updated donation(%(url)s).') % {'url': donation_url}) + "\n"
     else:
@@ -233,7 +233,7 @@ Payment status: %(status)s\n
 Thank you,\n
 %(sitename)s""") % {
         'name': donation.user.display_fullname(),
-        'renewals_url': reverse_with_site_url('donations:my-renewals', kwargs={'id': donation.subscription.id}),
+        'renewals_url': reverse_with_site_url('donations:my-renewals', kwargs={'id': donation.subscription.parent.uuid}),
         'donation_url': reverse_with_site_url('donations:my-recurring-donations'),
         'transaction_id': donation.transaction_id,
         'frequency': donation.donation_frequency,
@@ -260,7 +260,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'url': reverse_with_site_url('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.display_fullname(),
         'email': subscription.user.email,
         'profile_id': subscription.profile_id,
@@ -313,7 +313,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'url': reverse_with_site_url('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.display_fullname(),
         'email': subscription.user.email,
         'profile_id': subscription.profile_id,
@@ -366,7 +366,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'url': reverse_with_site_url('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.display_fullname(),
         'email': subscription.user.email,
         'profile_id': subscription.profile_id,
@@ -419,7 +419,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'url': reverse_with_site_url('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.display_fullname(),
         'email': subscription.user.email,
         'profile_id': subscription.profile_id,
@@ -472,7 +472,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'url': reverse_with_site_url('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.display_fullname(),
         'email': subscription.user.email,
         'profile_id': subscription.profile_id,
@@ -525,7 +525,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'url': reverse_with_site_url('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.display_fullname(),
         'email': subscription.user.email,
         'profile_id': subscription.profile_id,
@@ -551,7 +551,7 @@ Recurring Status: %(recurring_status)s\n
 \n
 Thank you,\n
 %(sitename)s""") % {
-        'url': reverse_with_site_url('donations_subscription_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
+        'url': reverse_with_site_url('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription.id}),
         'name': subscription.user.display_fullname(),
         'email': subscription.user.email,
         'profile_id': subscription.profile_id,

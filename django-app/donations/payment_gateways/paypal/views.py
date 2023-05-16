@@ -145,7 +145,7 @@ def verify_paypal_response(request):
 
 @csrf_exempt
 def return_from_paypal(request):
-    """ This endpoint is submitted as the return_url when creating the PayPal Subscription/Order at create_paypal_transaction(request)
+    """ This endpoint is submitted as the return_url when creating the PayPal SubscriptionInstance/Order at create_paypal_transaction(request)
         This url should receive GET params: 'token' and 'subscription_id'(only recurring payments); 'ba_token' is not used
         In Factory_PayPal.initGatewayByReturn(request), we save the subscription_id/token into the donationPaymentMeta data upon a successful request;
         exception will be raised if the endpoint is reached but a previous meta value is found,
@@ -193,7 +193,7 @@ def return_from_paypal(request):
 
 @csrf_exempt
 def cancel_from_paypal(request):
-    """ This endpoint is submitted as the cancel_url when creating the PayPal Subscription/Order at create_paypal_transaction(request)
+    """ This endpoint is submitted as the cancel_url when creating the PayPal SubscriptionInstance/Order at create_paypal_transaction(request)
         This url should receive GET params: 'token' and 'subscription_id'(only recurring payments); 'ba_token' is not used
         In Factory_PayPal.initGatewayByReturn(request), we save the subscription_id/token into the donationPaymentMeta data upon a successful request;
         exception will be raised if the endpoint is reached but a previous meta value is found,

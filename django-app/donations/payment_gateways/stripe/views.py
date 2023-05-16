@@ -79,7 +79,7 @@ def create_checkout_session(request):
         }
         if donation.is_recurring:
             adhoc_price['recurring'] = {
-                'interval': 'day',
+                'interval': 'month',
                 'interval_count': 1
             }
         session_kwargs['line_items'] = [{

@@ -112,7 +112,7 @@ def createPlan(session, product_id, donation):
         "billing_cycles": [
             {
                 "frequency": {
-                    "interval_unit": "DAY",
+                    "interval_unit": "MONTH",
                     "interval_count": 1
                 },
                 "tenure_type": "REGULAR",

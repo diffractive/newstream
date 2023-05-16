@@ -161,7 +161,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                         can_skip_donation_id = True
                         if not donation:
                             raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
-                    except SubscrSubscriptionInstanceiption.DoesNotExist:
+                    except SubscriptionInstance.DoesNotExist:
                         raise ValueError(_('No matching SubscriptionInstance found, profile_id: ')+subscription_id)
 
         # Intercept the subscription deleted event

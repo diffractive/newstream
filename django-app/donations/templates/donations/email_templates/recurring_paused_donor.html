@@ -12,10 +12,12 @@
     {% trans "Thanks very much for your recent support." %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    {% trans "Your recurring donation to HKFP has been paused at your request - no further payments will be processed, unless you reactivate your contribution." %}
+    {% blocktrans with short_org_name='short_org_name'|site_settings %}Your recurring donation to {{ short_org_name }} has been paused at your request - no further payments will be processed, unless you reactivate your contribution.{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with donations_full_url=donations_url|site_rel_url %}Sign into our support page if you wish to <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">support us again</a> in the future. Please email <a href="mailto:donations@hongkongfp.com">donations@hongkongfp.com</a> if you have any further enquiries.{% endblocktrans %}
+    {% blocktrans with donations_full_url=donations_url|site_rel_url org_contact_email='org_contact_email'|site_settings %}
+    Sign into our support page if you wish to <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">support us again</a> in the future. Please email <a href="mailto:{{ org_contact_email }}">{{ org_contact_email }}</a> if you have any further enquiries.
+    {% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
     {% blocktrans %}We are grateful to the minority of readers who help keep HKFP free to access for everyone. From all of us, <strong>thank you</strong> for helping keep independent media alive in Hong Kong!{% endblocktrans %}
@@ -45,5 +47,5 @@
 </table>
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 
-<p style="{{ 'parag'|email_css }}">{% site_name %}</p>
+<p style="{{ 'parag'|email_css }}">{{ 'short_org_name'|site_settings }}</p>
 {% endblock %}

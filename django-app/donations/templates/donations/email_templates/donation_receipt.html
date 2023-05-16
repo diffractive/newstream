@@ -20,7 +20,7 @@
 </p>
 {% if donation.user %}
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with donations_full_url=donations_url|site_rel_url %}Sign into our support page (click "forgot password?" if you have trouble logging in) to <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">view your donation</a>. Please email <a href="mailto:donations@hongkongfp.com">donations@hongkongfp.com</a> if you have any further enquiries.{% endblocktrans %}
+    {% blocktrans with donations_full_url=donations_url|site_rel_url org_contact_email='org_contact_email'|site_settings %}Sign into our support page (click "forgot password?" if you have trouble logging in) to <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">view your donation</a>. Please email <a href="mailto:{{ org_contact_email }}">{{ org_contact_email }}</a> if you have any further enquiries.{% endblocktrans %}
 </p>
 {% endif %}
 <p style="{{ 'parag'|email_css }}">
@@ -57,5 +57,5 @@
 </table>
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 
-<p style="{{ 'parag'|email_css }}">{% site_name %}</p>
+<p style="{{ 'parag'|email_css }}">{{ 'short_org_name'|site_settings }}</p>
 {% endblock %}

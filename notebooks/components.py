@@ -81,11 +81,12 @@ class Table:
 
     def row_values(self):
         table_values = []
-        for val in get_children_elements(self.element, 'td'):
-            # This query returns a bunch of empty values so we should just keep the values
-            if val.text:
-                table_values.append(val.text)
-
+        for row in self.rows():
+            row_val = []
+            for col in row:
+                if col.text:
+                    row_val.append(col.text)
+            table_values.append(row_val)
         return table_values
 
     def rows(self):

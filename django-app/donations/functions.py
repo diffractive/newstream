@@ -45,7 +45,7 @@ def getDonationEmail(donation):
 
 def isUpdateSubsFrequencyLimitationPassed(gatewayManager):
     site_settings = get_site_settings_from_default_site()
-    if site_settings.limit_fiveactions_per_fivemins:
+    if site_settings.donation_updates_rate_limiter:
         # get count of the actions carried out by the same donor in the last 5 minutes
         nowdt = datetime.now(dt_timezone.utc)
         fiveminsbf = nowdt - timedelta(minutes=5)

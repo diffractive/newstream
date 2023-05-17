@@ -12,10 +12,10 @@
     {% trans "Thanks very much for your recent support." %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    {% trans "Your recurring donation to HKFP has been cancelled at your request - no further payments will be processed." %}
+    {% blocktrans with short_org_name='short_org_name'|site_settings %}Your recurring donation to {{ short_org_name }} has been cancelled at your request - no further payments will be processed.{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with site_url=''|site_rel_url %}<a href="{{ site_url }}" target="_blank" rel="noopener noreferrer">Sign into our support page</a> if you wish to support us again in the future. Please email <a href="mailto:donations@hongkongfp.com">donations@hongkongfp.com</a> if you have any further enquiries.{% endblocktrans %}
+    {% blocktrans with site_url=''|site_rel_url org_contact_email='org_contact_email'|site_settings %}<a href="{{ site_url }}" target="_blank" rel="noopener noreferrer">Sign into our support page</a> if you wish to support us again in the future. Please email <a href="mailto:{{ org_contact_email }}">{{ org_contact_email }}</a> if you have any further enquiries.{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
     {% blocktrans %}We are grateful to the minority of readers who help keep HKFP free to access for everyone. From all of us, <strong>thank you</strong> for helping keep independent media alive in Hong Kong!{% endblocktrans %}
@@ -45,5 +45,5 @@
 </table>
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 
-<p style="{{ 'parag'|email_css }}">{% site_name %}</p>
+<p style="{{ 'parag'|email_css }}">{{ 'short_org_name'|site_settings }}</p>
 {% endblock %}

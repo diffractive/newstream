@@ -8,14 +8,14 @@
 
 {% block content %}
 {% autoescape off %}
-<p style="{{ 'parag'|email_css }}">{% blocktrans with site_name=current_site.name %}Hello from {{ site_name }}!{% endblocktrans %}</p>
+<p style="{{ 'parag'|email_css }}">{% blocktrans with site_name='short_org_name'|site_settings %}Hello from {{ site_name }}!{% endblocktrans %}</p>
 
 <p style="{{ 'parag'|email_css }}">{% blocktrans %}You're receiving this e-mail because user {{ user_display }} has given yours as an e-mail address to connect their account.{% endblocktrans %}</p>
 
-<p style="{{ 'last-parag'|email_css }}">{% blocktrans %}To confirm this is correct, go to {{ activate_url }}.{% endblocktrans %}</p>
+<p style="{{ 'last-parag'|email_css }}">{% blocktrans %}To confirm this is correct, go to <a href="{{ activate_url }}" target="_blank" rel="noopener noreferrer">{{ activate_url }}</a>.{% endblocktrans %}</p>
 
 <p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
 
-<p style="{{ 'parag'|email_css }}">{{ current_site.name }}</p>
+<p style="{{ 'parag'|email_css }}">{{ 'short_org_name'|site_settings }}</p>
 {% endautoescape %}
 {% endblock %}

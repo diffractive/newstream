@@ -15,7 +15,15 @@ from donations.functions import getDonationEmail
 
 
 def textify(html):
-    # Remove html tags and continuous whitespaces 
+    # Copy links out of the anchor tags and append to text (anchor tags will be stripped next step)
+    # e.g. <a href="https://google.com">Google</a> becomes <a href="https://google.com">Google(link: https://google.com)</a>
+    # Below is a modified regex from https://regexr.com/39rsv that gets 4 capture groups:
+    # 1. opening anchor tag
+    # 2. the href link
+    # 3. the wrapped text (that should not have "http")
+    # 4. closing anchor tag
+    html = re.sub(r'(<a(?:[^>]+)href="(?!mailto)([^"]+)"(?:[^>]*)>)((?!http)(?:.(?!\<\/a\>))*.)(<\/a>)', r'\1\3(link: \2)\4', html)
+    # Remove html tags and continuous whitespaces
     text_only = re.sub('[ \t]+', ' ', strip_tags(html))
     # Strip single spaces in the beginning of each line
     text_only = text_only.replace('\n ', '\n').strip()

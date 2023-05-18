@@ -17,7 +17,7 @@ EMAIL_HOST = 'mailhog'
 EMAIL_PORT = '1025'
 
 # used by allauth
-DEFAULT_FROM_EMAIL = 'newstream@diffractive.io'
+DEFAULT_FROM_EMAIL = site_settings_envvars('NEWSTREAM_DEFAULT_FROM_EMAIL')
 
 DATABASES = {
     'default': {

@@ -108,7 +108,7 @@ assert rows[0][5] == 'Payment_Failed'
 # There should be four emails sent, rwo for admins two for the user
 
 wait_for_email(email_count+3)
-emails = get_emails(0, 2)
+emails = get_emails(0, 4)
 user_email_1 = 'Your Recurring Donation is Rescheduled'
 admin_email_1 = 'A Recurring Donation is Rescheduled'
 user_email_2 = 'Your Monthly Payment was Unsuccessful'
@@ -146,6 +146,9 @@ WebDriverWait(driver, 10).until(
 app.link('Back to My Donations').click()
 grabber.capture_screen('successful_payment', 'Payment succeeded')
 
+rows = app.table('my-donations-table').row_values()
+assert rows[0][5] == 'Active'
+
 app.label('md2_dropdown-toggle-checkbox1').click()
 app.button('view-recurring-donation-wide').click()
 grabber.capture_screen('all_renewals', 'All renewals')
@@ -153,7 +156,7 @@ grabber.capture_screen('all_renewals', 'All renewals')
 # +
 # There should be two emails sent, one for admins one for the user
 wait_for_email(email_count+3)
-emails = get_emails(0, 2)
+emails = get_emails(0, 4)
 user_email_1 = 'Your Recurring Donation is Rescheduled'
 admin_email_1 = 'A Recurring Donation is Rescheduled'
 user_email_2 = 'Your Monthly Payment is Active again'

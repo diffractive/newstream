@@ -30,6 +30,7 @@ STATUS_FAILED = 'failed'
 STATUS_CANCELLED = 'cancelled'
 STATUS_PAUSED = 'paused'
 STATUS_PROCESSING = 'processing'
+STATUS_PAYMENT_FAILED = 'payment_failed'
 
 # Temp Donation Statuses
 STATUS_PENDING = 'pending'
@@ -256,7 +257,7 @@ class Subscription(models.Model):
         # return oldest instance
         # mainly for displaying the subscribe date
         return self.subscription_instances.all().order_by("subscribe_date", "created_at").first()
-    
+
     @property
     def latest_instance(self):
         # return the latest instance
@@ -274,6 +275,7 @@ class SubscriptionInstance(ClusterableModel):
         (STATUS_PAUSED, _(STATUS_PAUSED.capitalize())),
         (STATUS_CANCELLED, _(STATUS_CANCELLED.capitalize())),
         (STATUS_INACTIVE, _(STATUS_INACTIVE.capitalize())),
+        (STATUS_PAYMENT_FAILED, _(STATUS_PAYMENT_FAILED.capitalize())),
     ]
     user = models.ForeignKey(
         'newstream_user.User',

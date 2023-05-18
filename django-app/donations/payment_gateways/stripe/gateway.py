@@ -139,7 +139,8 @@ class Gateway_Stripe(PaymentGatewayManager):
         # Event: invoice.payment_failed
         if self.event['type'] == EVENT_INVOICE_PAYMENT_FAILED and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):
             # We don't want to update processing failures or cancelled subscriptions
-            if self.subscription.recurring_status == STATUS_ACTIVE or self.subscription.recurring_status == STATUS_PAYMENT_FAILED:
+            if self.donation.subscription.recurring_status in [STATUS_ACTIVE, STATUS_PAYMENT_FAILED]:
+
                 # Update subscription to payment_failed status
                 self.donation.subscription.recurring_status = STATUS_PAYMENT_FAILED
                 self.donation.subscription.save()
@@ -170,6 +171,7 @@ class Gateway_Stripe(PaymentGatewayManager):
 
                 elif self.donation.subscription.recurring_status == STATUS_PAYMENT_FAILED:
                     self.donation.subscription.recurring_status = STATUS_ACTIVE
+                    self.donation.subscription.save()
 
                     # send notif emails to admins and donor as a previously failed payment has now succeeded
                     sendReactivatedPaymentNotifToAdmins(self.donation.subscription)

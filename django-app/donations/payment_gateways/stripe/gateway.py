@@ -17,7 +17,7 @@ from donations.email_functions import (sendDonationReceiptToDonor, sendDonationN
     sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringPausedNotifToDonor,
     sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins,
     sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins, sendFailedPaymentNotifToAdmins,
-    sendFailedPaymentNotifToDonor)
+    sendFailedPaymentNotifToDonor, sendReactivatedPaymentNotifToAdmins, sendReactivatedPaymentNotifToDonor)
 from newstream.functions import _debug
 from donations.payment_gateways.stripe.functions import initStripeApiKey, formatDonationAmount, formatDonationAmountFromGateway
 
@@ -167,6 +167,14 @@ class Gateway_Stripe(PaymentGatewayManager):
                     # send the new recurring notifs to admins and donor as subscription is just active
                     sendNewRecurringNotifToAdmins(self.donation.subscription)
                     sendNewRecurringNotifToDonor(self.donation.subscription)
+
+                elif self.donation.subscription.recurring_status == STATUS_PAYMENT_FAILED:
+                    self.donation.subscription.recurring_status = STATUS_ACTIVE
+
+                    # send notif emails to admins and donor as a previously failed payment has now succeeded
+                    sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
+                    sendReactivatedPaymentNotifToDonor(self.donation.subscription)
+
                 else:
                     # check if pause_collection is marked_uncollectible
                     if self.subscription_obj['pause_collection'] and self.subscription_obj['pause_collection']['behavior'] == 'mark_uncollectible':

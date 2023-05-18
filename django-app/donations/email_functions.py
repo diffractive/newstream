@@ -259,3 +259,14 @@ def sendFailedPaymentNotifToAdmins(subscription):
     mail_title = _("A Recurring Donation has failed")
     sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
         'donations/email_templates/subscription_failed_admin.html', context={'subscription': subscription, 'mail_title': mail_title}))
+
+def sendReactivatedPaymentNotifToDonor(subscription):
+    mail_title = _("Your Monthly Payment is Active again")
+    sendEmailNotificationsToDonor(subscription.user.email, mail_title, render_to_string('donations/email_templates/subscription_reactivated_donor.html', context={'subscription': subscription, 'mail_title': mail_title}))
+
+def sendReactivatedPaymentNotifToAdmins(subscription):
+    siteSettings = get_site_settings_from_default_site()
+    mail_title = _("A Recurring Donation has been reactivated")
+    sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+        'donations/email_templates/subscription_reactivated_admin.html', context={'subscription': subscription, 'mail_title': mail_title}))
+

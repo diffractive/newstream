@@ -10,7 +10,8 @@ from site_settings.models import AdminEmails, SiteSettings, PaymentGateway
 from django.utils.timezone import make_aware
 from donations.payment_gateways.stripe.constants import (EVENT_CHECKOUT_SESSION_COMPLETED,
     EVENT_PAYMENT_INTENT_SUCCEEDED, EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID,
-    EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED)
+    EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
+    EVENT_INVOICE_PAYMENT_FAILED)
 import requests
 
 User = get_user_model()
@@ -299,6 +300,7 @@ def load_localstripe_webhooks():
             EVENT_PAYMENT_INTENT_SUCCEEDED,
             EVENT_INVOICE_CREATED,
             EVENT_INVOICE_PAID,
+            EVENT_INVOICE_PAYMENT_FAILED,
             EVENT_CUSTOMER_SUBSCRIPTION_UPDATED,
             EVENT_CUSTOMER_SUBSCRIPTION_DELETED
         ]

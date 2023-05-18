@@ -1,0 +1,45 @@
+{% extends "base_email.html" %}
+{% load common_tags i18n %}
+
+{% block title %}
+{{ mail_title }}
+{% endblock %}
+
+{% block content %}
+<p style="{{ 'parag'|email_css }}">{% trans 'Hi Admins,' %}</p>
+<p style="{{ 'parag'|email_css }}">
+    {% trans 'This email is to inform you that a recurring donation has been reactivated on your website:' %}
+</p>
+<p style="{{ 'parag'|email_css }}">
+    <a href="{% site_url %}{% url 'donations_subscriptioninstance_modeladmin_inspect' instance_pk=subscription.id %}" target="_blank" rel="noopener noreferrer">{% site_url %}{% url 'donations_subscriptioninstance_modeladmin_inspect' instance_pk=subscription.id %}</a>
+</p>
+<table cellpadding="8" style="margin-bottom: 30px;">
+    <tr>
+        <td style="font-weight: bold;">{% trans 'Donor name' %}</td>
+        <td>{{ subscription.user.display_fullname }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans 'Donor email' %}</td>
+        <td>{{ subscription.user.email }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans "Recurring donation identifier" %}</td>
+        <td>{{ subscription.profile_id }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans "Payment method" %}</td>
+        <td>{{ subscription.gateway }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans "Recurring donation amount" %}</td>
+        <td>{{ subscription|recurring_amount_with_currency }}</td>
+    </tr>
+    <tr>
+        <td style="font-weight: bold;">{% trans 'Recurring donation status' %}</td>
+        <td>{{ subscription.recurring_status|title }}</td>
+    </tr>
+</table>
+<p style="{{ 'parag'|email_css }}">{% trans "Thank you," %}</p>
+
+<p style="{{ 'parag'|email_css }}">{{ 'short_org_name'|site_settings }}</p>
+{% endblock %}

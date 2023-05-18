@@ -1,21 +1,23 @@
 import stripe
-from decimal import Decimal
 from datetime import datetime, timezone
 from django.conf import settings
-from django.shortcuts import render, redirect
-from django.shortcuts import get_object_or_404
-from django.views.decorators.csrf import csrf_exempt
+from django.shortcuts import render
 from django.contrib import messages
-from django.http import HttpResponse, JsonResponse
-from django.utils import translation
+from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
 
-from donations.models import Donation, DonationPaymentMeta, SubscriptionInstance, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED
+from donations.models import (Donation, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE,
+    STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PAYMENT_FAILED)
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.stripe.constants import *
-from donations.functions import gen_transaction_id
-from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendNewRecurringNotifToAdmins, sendNewRecurringNotifToDonor, sendRecurringAdjustedNotifToAdmins, sendRecurringAdjustedNotifToDonor, sendRecurringRescheduledNotifToAdmins, sendRecurringRescheduledNotifToDonor, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
+from donations.email_functions import (sendDonationReceiptToDonor, sendDonationNotifToAdmins,
+    sendNewRecurringNotifToAdmins, sendNewRecurringNotifToDonor, sendRecurringAdjustedNotifToAdmins,
+    sendRecurringAdjustedNotifToDonor, sendRecurringRescheduledNotifToAdmins, sendRecurringRescheduledNotifToDonor,
+    sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringPausedNotifToDonor,
+    sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins,
+    sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins, sendFailedPaymentNotifToAdmins,
+    sendFailedPaymentNotifToDonor, sendReactivatedPaymentNotifToAdmins, sendReactivatedPaymentNotifToDonor)
 from newstream.functions import _debug
 from donations.payment_gateways.stripe.functions import initStripeApiKey, formatDonationAmount, formatDonationAmountFromGateway
 
@@ -134,6 +136,19 @@ class Gateway_Stripe(PaymentGatewayManager):
 
                 return HttpResponse(status=200)
 
+        # Event: invoice.payment_failed
+        if self.event['type'] == EVENT_INVOICE_PAYMENT_FAILED and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):
+            # We don't want to update processing failures or cancelled subscriptions
+            if self.donation.subscription.recurring_status in [STATUS_ACTIVE, STATUS_PAYMENT_FAILED]:
+
+                # Update subscription to payment_failed status
+                self.donation.subscription.recurring_status = STATUS_PAYMENT_FAILED
+                self.donation.subscription.save()
+
+                # Semd email notifying user and admin of issue
+                sendFailedPaymentNotifToAdmins(self.donation.subscription)
+                sendFailedPaymentNotifToDonor(self.donation.subscription)
+
         # Event: customer.subscription.updated
         if self.event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_UPDATED and hasattr(self, 'subscription_obj'):
             # Subscription active after invoice paid
@@ -153,6 +168,15 @@ class Gateway_Stripe(PaymentGatewayManager):
                     # send the new recurring notifs to admins and donor as subscription is just active
                     sendNewRecurringNotifToAdmins(self.donation.subscription)
                     sendNewRecurringNotifToDonor(self.donation.subscription)
+
+                elif self.donation.subscription.recurring_status == STATUS_PAYMENT_FAILED:
+                    self.donation.subscription.recurring_status = STATUS_ACTIVE
+                    self.donation.subscription.save()
+
+                    # send notif emails to admins and donor as a previously failed payment has now succeeded
+                    sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
+                    sendReactivatedPaymentNotifToDonor(self.donation.subscription)
+
                 else:
                     # check if pause_collection is marked_uncollectible
                     if self.subscription_obj['pause_collection'] and self.subscription_obj['pause_collection']['behavior'] == 'mark_uncollectible':
@@ -178,7 +202,7 @@ class Gateway_Stripe(PaymentGatewayManager):
             sendRecurringCancelledNotifToDonor(self.donation.subscription)
 
             return HttpResponse(status=200)
-        
+
         # for other events:
         return HttpResponse(status=400)
 

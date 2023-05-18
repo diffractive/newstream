@@ -25,6 +25,9 @@ services:
       - '../django-app:/app'
 
   selenium_tests:
+    environment:
+      STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
+      STRIPE_SECRET_KEY: 'sk_TEST_SECRET_KEY'
     volumes:
       - '../selenium-tests/test_scripts:/home/jupyter/notebooks/test_scripts'
       - '../selenium-tests/output:/home/jupyter/notebooks/output'

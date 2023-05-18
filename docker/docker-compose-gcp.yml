@@ -26,5 +26,8 @@ services:
 
   selenium_tests:
     image: "${IMAGE_PREFIX}newstream-tests:${IMAGE_TAG}"
+    environment:
+      STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
+      STRIPE_SECRET_KEY: 'sk_TEST_SECRET_KEY'
     volumes:
       - '/workspace/output:/notebooks/output'

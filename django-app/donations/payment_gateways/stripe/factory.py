@@ -39,7 +39,7 @@ class Factory_Stripe(PaymentGatewayFactory):
         subscription_obj = None
         invoice = None
         kwargs = {}
-        expected_events = [EVENT_CHECKOUT_SESSION_COMPLETED, EVENT_PAYMENT_INTENT_SUCCEEDED, EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID, EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED]
+        expected_events = [EVENT_CHECKOUT_SESSION_COMPLETED, EVENT_PAYMENT_INTENT_SUCCEEDED, EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID, EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED, EVENT_INVOICE_PAYMENT_FAILED]
 
         # the following call will raise ValueError/stripe.error.SignatureVerificationError
         event = stripe.Webhook.construct_event(
@@ -134,10 +134,33 @@ class Factory_Stripe(PaymentGatewayFactory):
                         can_skip_donation_id = True
                         if not donation:
                             raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
-                    except Subscription.DoesNotExist:
+                    except SubscriptionInstance.DoesNotExist:
                         raise ValueError(_('No matching SubscriptionInstance found, profile_id: ')+subscription_id)
             else:
                 raise ValueError(_('Missing subscription_id'))
+
+        # Intercept invoice payment failed event
+        if event['type'] == EVENT_INVOICE_PAYMENT_FAILED:
+            invoice = event['data']['object']
+            subscription_id = invoice.subscription
+
+            if subscription_id:
+                subscription_obj = stripe.Subscription.retrieve(subscription_id)
+
+                if 'donation_id' in subscription_obj.metadata:
+                    # newstream-created subscription
+                    donation_id = subscription_obj.metadata['donation_id']
+                else:
+                    try:
+                        # Fetch locally created subscription
+                        subscription = SubscriptionInstance.objects.get(profile_id=subscription_id)
+                        donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
+                        can_skip_donation_id = True
+                        if not donation:
+                            raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
+                    except SubscriptionInstance.DoesNotExist:
+                        raise ValueError(_('No matching SubscriptionInstance found, profile_id: ')+subscription_id)
+
 
         # The subscription created event is not to be used for subscription model init, so as to prevent race condition with the subscription model init in updated event
         # That is because there is no guarantee which event hits first, it's better to let one event handles the model init as well.

@@ -125,7 +125,17 @@ def get_site_settings_from_default_site():
     """
 
     site = get_default_site()
-    return SiteSettings.for_site(site)
+    instance = SiteSettings.for_site(site)
+
+    # override attributes where a corresponding env var is defined
+    for field in instance.fields:
+        # map to the corresponding env var key
+        envkey = "NEWSTREAM_"+field.upper()
+        settings_value = getattr(settings, envkey, None)
+        if settings_value is not None:
+            setattr(instance, field, settings_value)
+    
+    return instance
 
 
 def trans_next_url(next_url, lang_code):

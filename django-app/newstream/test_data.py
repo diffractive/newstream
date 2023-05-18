@@ -127,10 +127,12 @@ def load_settings():
     site_settings.default_from_name = 'Admin'
 
     # set default admin_emails list
-    site_settings.admin_emails.add(AdminEmails(
-        title="Admin",
-        email=settings.DEFAULT_ADMIN_EMAIL,
-    ))
+    admin_emails = settings.NEWSTREAM_ADMIN_EMAILS.split(',')
+    for admin_email in admin_emails:
+        site_settings.admin_emails.add(AdminEmails(
+            title="Admin",
+            email=admin_email,
+        ))
 
     # set stripe product ids
     site_settings.stripe_testing_product_id = stripe_settings["test_product_id"]

@@ -439,6 +439,11 @@ class SiteSettings(BaseSetting, ClusterableModel):
         ], heading=_("Others")),
     ])
 
+    @property
+    def fields(self):
+        # the following list doesn't include relational fields like admin_emails
+        return [ f.name for f in self._meta.fields + self._meta.many_to_many ]
+
     class Meta:
         verbose_name = _('Site Setting')
         verbose_name_plural = _('Site Settings')

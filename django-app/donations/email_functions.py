@@ -62,8 +62,11 @@ def sendEmailNotificationsToAdmins(site_settings, subject, htmlStr):
     # set default language for admins' emails
     # translation.activate(settings.LANGUAGE_CODE)
 
-    admin_list = [
-        admin_email.email for admin_email in site_settings.admin_emails.all()]
+    if settings.NEWSTREAM_ADMIN_EMAILS is not None:
+        admin_list = settings.NEWSTREAM_ADMIN_EMAILS.split(',')
+    else:
+        admin_list = [
+            admin_email.email for admin_email in site_settings.admin_emails.all()]
     # default_from_name is an I18nCharField
     if str(site_settings.default_from_name):
         from_email = '%s <%s>' % (str(site_settings.default_from_name), site_settings.default_from_email)
@@ -83,18 +86,18 @@ def sendEmailNotificationsToAdmins(site_settings, subject, htmlStr):
 
 
 def sendDonationErrorNotifToAdmins(donation, error_title, error_description):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("Donation Error")
-    if siteSettings.notify_admin_donation_error:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    if site_settings.notify_admin_donation_error:
+        sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
             'donations/email_templates/donation_error_admin.html', context={'donation': donation, 'mail_title': mail_title, 'error_title': error_title, 'error_description': error_description}))
 
 
 def sendDonationNotifToAdmins(donation):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("New One-off Donation")
-    if siteSettings.notify_admin_new_donation:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    if site_settings.notify_admin_new_donation:
+        sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
             'donations/email_templates/new_donation.html', context={'donation': donation, 'mail_title': mail_title}))
 
 
@@ -104,10 +107,10 @@ def sendDonationReceiptToDonor(donation):
 
 
 def sendDonationRevokedToAdmins(donation):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("A Donation is revoked")
-    if siteSettings.notify_admin_donation_revoked:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    if site_settings.notify_admin_donation_revoked:
+        sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
             'donations/email_templates/donation_revoked_admin.html', context={'donation': donation, 'mail_title': mail_title}))
 
 
@@ -127,10 +130,10 @@ def sendSubscriptionStatusChangeToDonor(subscription):
 
 
 def sendRenewalNotifToAdmins(donation):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("New Renewal Donation")
-    if siteSettings.notify_admin_monthly_renewal:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    if site_settings.notify_admin_monthly_renewal:
+        sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
             'donations/email_templates/new_renewal.html', context={'donation': donation, 'mail_title': mail_title}))
 
 
@@ -140,10 +143,10 @@ def sendRenewalReceiptToDonor(donation):
 
 
 def sendRecurringAdjustedNotifToAdmins(subscription):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("A Recurring Donation Amount is Adjusted")
-    if siteSettings.notify_admin_recurring_adjusted:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    if site_settings.notify_admin_recurring_adjusted:
+        sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
             'donations/email_templates/recurring_adjusted_admin.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
@@ -153,10 +156,10 @@ def sendRecurringAdjustedNotifToDonor(subscription):
 
 
 def sendNewRecurringNotifToAdmins(subscription):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("New Recurring Donation")
-    if siteSettings.notify_admin_new_recurring:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    if site_settings.notify_admin_new_recurring:
+        sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
             'donations/email_templates/new_recurring_donation.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
@@ -166,10 +169,10 @@ def sendNewRecurringNotifToDonor(subscription):
 
 
 def sendRecurringRescheduledNotifToAdmins(subscription):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("A Recurring Donation is Rescheduled")
-    if siteSettings.notify_admin_recurring_rescheduled:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    if site_settings.notify_admin_recurring_rescheduled:
+        sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
             'donations/email_templates/recurring_rescheduled_admin.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
@@ -179,10 +182,10 @@ def sendRecurringRescheduledNotifToDonor(subscription):
 
 
 def sendRecurringPausedNotifToAdmins(subscription):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("A Recurring Donation is paused")
-    if siteSettings.notify_admin_recurring_paused:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    if site_settings.notify_admin_recurring_paused:
+        sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
             'donations/email_templates/recurring_paused_admin.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
@@ -192,10 +195,10 @@ def sendRecurringPausedNotifToDonor(subscription):
 
 
 def sendRecurringResumedNotifToAdmins(subscription):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("A Recurring Donation is resumed")
-    if siteSettings.notify_admin_recurring_resumed:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    if site_settings.notify_admin_recurring_resumed:
+        sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
             'donations/email_templates/recurring_resumed_admin.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
@@ -205,17 +208,17 @@ def sendRecurringResumedNotifToDonor(subscription):
 
 
 def sendRecurringCancelledNotifToAdmins(subscription):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("A Recurring Donation is cancelled")
-    if siteSettings.notify_admin_recurring_cancelled:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    if site_settings.notify_admin_recurring_cancelled:
+        sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
             'donations/email_templates/recurring_cancelled_admin.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
 def sendRecurringCancelRequestNotifToAdmins(subscription):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("Cancellation to a Recurring Donation is requested")
-    sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
         'donations/email_templates/recurring_cancel_request_admin.html', context={'subscription': subscription, 'mail_title': mail_title}))
 
 
@@ -225,18 +228,18 @@ def sendRecurringCancelledNotifToDonor(subscription):
 
 
 def sendAccountCreatedNotifToAdmins(user):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("A Donor Account is created")
-    if siteSettings.notify_admin_account_created:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    if site_settings.notify_admin_account_created:
+        sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
             'donations/email_templates/account_created_admin.html', context={'user': user, 'mail_title': mail_title}))
 
 
 def sendAccountDeletedNotifToAdmins(user):
-    siteSettings = get_site_settings_from_default_site()
+    site_settings = get_site_settings_from_default_site()
     mail_title = _("A Donor Account is deleted")
-    if siteSettings.notify_admin_account_deleted:
-        sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
+    if site_settings.notify_admin_account_deleted:
+        sendEmailNotificationsToAdmins(site_settings, mail_title, render_to_string(
             'donations/email_templates/account_deleted_admin.html', context={'user': user, 'mail_title': mail_title}))
 
 

@@ -62,11 +62,14 @@ def sendEmailNotificationsToAdmins(site_settings, subject, htmlStr):
     # set default language for admins' emails
     # translation.activate(settings.LANGUAGE_CODE)
 
-    if settings.NEWSTREAM_ADMIN_EMAILS is not None:
-        admin_list = settings.NEWSTREAM_ADMIN_EMAILS.split(',')
-    else:
+    # get admin_list from env vars if none is defined on wagtail admin
+    db_admin_emails = site_settings.admin_emails.all()
+    if len(db_admin_emails) > 0:
         admin_list = [
             admin_email.email for admin_email in site_settings.admin_emails.all()]
+    elif settings.NEWSTREAM_ADMIN_EMAILS is not None:
+        admin_list = settings.NEWSTREAM_ADMIN_EMAILS.split(',')
+
     # default_from_name is an I18nCharField
     if str(site_settings.default_from_name):
         from_email = '%s <%s>' % (str(site_settings.default_from_name), site_settings.default_from_email)

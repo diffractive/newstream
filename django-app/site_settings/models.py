@@ -156,7 +156,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
                    heading=_('Send admins email notifications of erroneous donations?')),
     ]
 
-    social_login_enabled = models.BooleanField(default=True)
+    social_login_enabled = models.BooleanField(default=False)
     social_skip_signup = models.BooleanField(default=False)
     signup_footer_text = I18nRichTextField(blank=True)
     signup_general_panels = [
@@ -294,7 +294,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
         help_text=_("The Gateway name to be shown on the frontend website."))
     stripe_testing_webhook_secret = models.CharField(
         max_length=255, blank=True, help_text=_("The Secret for the Testing Webhook used by the server for payment verification"))
-    stripe_testing_product_id = models.CharField(max_length=255, blank=False, null=True, help_text=_(
+    stripe_testing_product_id = models.CharField(max_length=255, blank=True, null=True, help_text=_(
         "Testing Product ID accessible on your Stripe Dashboard"))
     stripe_testing_api_publishable_key = models.CharField(
         max_length=255, blank=True, help_text=_("The Testing API publishable key"))
@@ -302,7 +302,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
         max_length=255, blank=True, help_text=_("The Testing API secret key"))
     stripe_webhook_secret = models.CharField(
         max_length=255, blank=True, help_text=_("The Secret for the Live Webhook used by the server for payment verification"))
-    stripe_product_id = models.CharField(max_length=255, blank=False, null=True, help_text=_(
+    stripe_product_id = models.CharField(max_length=255, blank=True, null=True, help_text=_(
         "Product ID accessible on your Stripe Dashboard"))
     stripe_api_publishable_key = models.CharField(
         max_length=255, blank=True, help_text=_("The Live API publishable key"))

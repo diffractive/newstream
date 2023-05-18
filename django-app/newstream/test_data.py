@@ -92,13 +92,10 @@ test_subscriptions = [
     }
 ]
 
-stripe_settings = {
+localstripe_settings = {
     "test_product_id": "prod_TEST_PRODUCT_ID",
     "test_webhook_key": "whsec_TEST_WEBHOOK_KEY",
     "test_secret_key": "sk_TEST_SECRET_KEY",
-    "live_product_id": "prod_LIVE_PRODUCT_ID",
-    "live_webhook_key": "whsec_LIVE_WEBHOOK_KEY",
-    "live_secret_key": "sk_LIVE_SECRET_KEY",
 }
 
 # for referencing when setting up donations/subscriptions
@@ -134,13 +131,6 @@ def load_settings():
             email=admin_email,
         ))
 
-    # set stripe product ids
-    site_settings.stripe_testing_product_id = stripe_settings["test_product_id"]
-    site_settings.stripe_testing_webhook_secret = stripe_settings["test_webhook_key"]
-    site_settings.stripe_testing_api_secret_key = stripe_settings["test_secret_key"]
-    site_settings.stripe_product_id = stripe_settings["live_product_id"]
-    site_settings.stripe_webhook_secret = stripe_settings["live_webhook_key"]
-    site_settings.stripe_api_secret_key = stripe_settings["live_secret_key"]
     # set footer link
     site_settings.privacy_policy_link = "https://github.com/diffractive/newstream"
 
@@ -282,10 +272,10 @@ def remove_test_donations():
     print("Removed test subscriptions √")
 
 def load_localstripe_create_product():
-    auth = requests.auth.HTTPBasicAuth(stripe_settings["test_secret_key"], '')
+    auth = requests.auth.HTTPBasicAuth(localstripe_settings["test_secret_key"], '')
     post_data = {
         "name": "Newstream Product",
-        "id": stripe_settings["test_product_id"]
+        "id": localstripe_settings["test_product_id"]
     }
     requests.post(settings.STRIPE_API_BASE + '/v1/products', auth=auth, json=post_data)
 
@@ -295,7 +285,7 @@ def load_localstripe_create_product():
 def load_localstripe_webhooks():
     post_data = {
         "url": 'http://app.newstream.local:8000/en/donations/verify-stripe-response/',
-        "secret": stripe_settings["test_webhook_key"],
+        "secret": localstripe_settings["test_webhook_key"],
         "events": [
             EVENT_CHECKOUT_SESSION_COMPLETED,
             EVENT_PAYMENT_INTENT_SUCCEEDED,

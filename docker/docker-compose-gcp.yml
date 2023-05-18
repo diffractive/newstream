@@ -21,6 +21,9 @@ services:
       STRIPE_JS_URL: 'http://localstripe.newstream.local:8420/js.stripe.com/v3/'
       DEBUG: 1
       PY_AUTORELOAD: 1
+      NEWSTREAM_STRIPE_TESTING_WEBHOOK_SECRET: 'whsec_TEST_WEBHOOK_KEY'
+      NEWSTREAM_STRIPE_TESTING_PRODUCT_ID: 'prod_TEST_PRODUCT_ID'
+      NEWSTREAM_STRIPE_TESTING_API_SECRET_KEY: 'sk_TEST_SECRET_KEY'
     image: "${IMAGE_PREFIX}newstream:${IMAGE_TAG}"
 
   localstripe:

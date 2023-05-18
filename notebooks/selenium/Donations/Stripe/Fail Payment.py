@@ -26,7 +26,7 @@ from diffractive.selenium.visualisation import gallery
 from utils import get_email_count, wait_for_email, get_link_by_email_subject_and_regex, clear_all_emails, get_emails
 from components import Application
 from functions import create_subscription
-from localstripe import Localstripe
+from stripe_api import Stripe
 
 import secrets
 # -
@@ -47,7 +47,7 @@ email_count = get_email_count()
 driver = get_webdriver('portal')
 grabber = ScreenGrabber(driver)
 app = Application(driver)
-localstripe = Localstripe()
+stripe = Stripe()
 
 create_subscription(driver, app, data)
 # 4 emails are delivered
@@ -79,7 +79,7 @@ grabber.capture_screen('subscriptions', 'Recurring donations')
 # Get subscription id and update payment method so that the payment fails
 rows = app.table('my-donations-table').row_values()
 sub_id = rows[0][2]
-localstripe.update_to_failing_card(sub_id)
+stripe.update_to_failing_card(sub_id)
 
 # Update the billing cycle to trigger a new payment
 
@@ -131,7 +131,7 @@ email_count += 4
 # ## Fix payment method
 
 # Fix the payment method and create another payment
-localstripe.update_to_working_card(sub_id)
+stripe.update_to_working_card(sub_id)
 
 app.label('md2_dropdown-toggle-checkbox1').click()
 app.button('edit-recurring-donation-wide').click()

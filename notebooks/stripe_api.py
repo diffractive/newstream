@@ -13,25 +13,28 @@
 # ---
 
 import requests
+import os
 
 
-class Localstripe:
+class Stripe:
     def __init__(self):
-        test_key = 'sk_TEST_SECRET_KEY'
+        api_url = os.getenv('STRIPE_API_BASE')
+        test_key = os.getenv('STRIPE_SECRET_KEY')
+
         self.auth = requests.auth.HTTPBasicAuth(test_key, '')
-        self.api_url = 'http://localstripe.newstream.local:8420/v1/'
-        
+        self.api_url = api_url+'/v1/'
+
     def update_to_failing_card(self, sub_id):
         """
         Takes a subscription and creates a new payment method that will fail payment and attaches to user of provided subscription
         """
-        # We get subscription to get customer_id 
+        # We get subscription to get customer_id
         sub = requests.get(self.api_url + f'subscriptions/{sub_id}', auth=self.auth).json()
-        
+
         # We get customer data to create the payment method
         cus_id = sub['customer']
         customer = requests.get(self.api_url + f'customers/{cus_id}', auth=self.auth).json()
-        
+
         # Create payment method
         pm_data = {
             "type": "card",
@@ -48,11 +51,11 @@ class Localstripe:
         }
         pm = requests.post(self.api_url + 'payment_methods', auth=self.auth, json=pm_data).json()
         pm_id = pm['id']
-        
+
         # Attach new payment method to customer
         requests.post(self.api_url + f'payment_methods/{pm_id}', auth=self.auth, json={"customer": cus_id})
         requests.post(self.api_url + f'customers/{cus_id}', auth=self.auth, json={"invoice_settings": {'default_payment_method': pm_id}})
-    
+
     def update_to_working_card(self, sub_id):
         """
         Takes a subscription and creates a new payment method that will succeed and attaches to user of provided subscription
@@ -60,13 +63,13 @@ class Localstripe:
         """
         Takes a subscription and creates a new payment method that will fail payment and attaches to user of provided subscription
         """
-        # We get subscription to get customer_id 
+        # We get subscription to get customer_id
         sub = requests.get(self.api_url + f'subscriptions/{sub_id}', auth=self.auth).json()
-        
+
         # We get customer data to create the payment method
         cus_id = sub['customer']
         customer = requests.get(self.api_url + f'customers/{cus_id}', auth=self.auth).json()
-        
+
         # Create payment method
         pm_data = {
             "type": "card",
@@ -83,7 +86,7 @@ class Localstripe:
         }
         pm = requests.post(self.api_url + 'payment_methods', auth=self.auth, json=pm_data).json()
         pm_id = pm['id']
-        
+
         # Attach new payment method to customer
         requests.post(self.api_url + f'payment_methods/{pm_id}', auth=self.auth, json={"customer": cus_id})
         requests.post(self.api_url + f'customers/{cus_id}', auth=self.auth, json={"invoice_settings": {'default_payment_method': pm_id}})

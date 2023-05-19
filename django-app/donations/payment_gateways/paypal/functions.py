@@ -3,6 +3,7 @@ import time
 import pycurl
 import certifi
 from io import BytesIO
+from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersCaptureRequest, OrdersCreateRequest
@@ -11,7 +12,7 @@ from paypalhttp import HttpError
 from donations.models import STATUS_FAILED
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.email_functions import sendDonationErrorNotifToAdmins
-from newstream.functions import get_site_name, reverse_with_site_url, uuid4_str, _debug, printvars
+from newstream.functions import get_site_name, uuid4_str, _debug, printvars
 
 def common_headers(paypal_token):
     return ['Content-Type: application/json', 'Authorization: Bearer %s' % (paypal_token), 'PayPal-Request-Id: %s' % (uuid4_str())]
@@ -143,8 +144,13 @@ def getUserGivenName(user):
         return user.email.split('@')[0]
 
 
-def createSubscription(session, plan_id, donation, is_test=False):
-    checkAccessTokenExpiry(session)
+def createSubscription(request, plan_id, donation):
+    """ This function creates the PayPal Subscription via REST API
+        param request   : django request obj, for getting session and building return urls
+        param plan_id   : the id of the PayPal Plan object
+        param donation  : newstream donation instance
+    """
+    checkAccessTokenExpiry(request.session)
     paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/subscriptions'
     subscription_dict = {
@@ -166,14 +172,14 @@ def createSubscription(session, plan_id, donation, is_test=False):
                 "payer_selected": "PAYPAL",
                 "payee_preferred": "IMMEDIATE_PAYMENT_REQUIRED"
             },
-            "return_url": reverse_with_site_url('donations:return-from-paypal') if not is_test else 'http://example.com/return/',
-            "cancel_url": reverse_with_site_url('donations:cancel-from-paypal') if not is_test else 'http://example.com/cancel/'
+            "return_url": request.build_absolute_uri(reverse('donations:return-from-paypal')),
+            "cancel_url": request.build_absolute_uri(reverse('donations:cancel-from-paypal'))
         },
         "custom_id": str(donation.id)
     }
-    if paypalSettings.sandbox_mode and session.get('negtest_createSubscription', None):
-        subscription_dict['plan_id'] = session.get('negtest_createSubscription')
-    return curlPaypal(api_url, common_headers(session['paypal_token']), post_data=json.dumps(subscription_dict))
+    if paypalSettings.sandbox_mode and request.session.get('negtest_createSubscription', None):
+        subscription_dict['plan_id'] = request.session.get('negtest_createSubscription')
+    return curlPaypal(api_url, common_headers(request.session['paypal_token']), post_data=json.dumps(subscription_dict))
 
 
 def getSubscriptionDetails(session, subscription_id):
@@ -276,8 +282,11 @@ def capture_paypal_order(donation, order_id):
     return response.result
 
 
-def build_onetime_request_body(donation):
-    """Method to create body with CAPTURE intent"""
+def build_onetime_request_body(request, donation):
+    """ Method to create body with CAPTURE intent
+        param   request: django request object, used for creating return urls
+        param  donation: newstream donation instance
+    """
     # returl_url or cancel_url params in application_context tested to be only useful if order not initiated by Javascript APK
     return \
     {
@@ -287,8 +296,8 @@ def build_onetime_request_body(donation):
             "landing_page": "NO_PREFERENCE",
             "shipping_preference": "NO_SHIPPING",
             "user_action": "PAY_NOW",
-            "return_url": reverse_with_site_url('donations:return-from-paypal'),
-            "cancel_url": reverse_with_site_url('donations:cancel-from-paypal')
+            "return_url": request.build_absolute_uri(reverse('donations:return-from-paypal')),
+            "cancel_url": request.build_absolute_uri(reverse('donations:cancel-from-paypal'))
         },
         "purchase_units": [
             {
@@ -303,15 +312,15 @@ def build_onetime_request_body(donation):
     }
 
 
-def create_paypal_order(session, donation):
+def create_paypal_order(request, donation):
     paypalSettings = getPayPalSettings()
     client = PayPalHttpClient(paypalSettings.environment)
 
     req = OrdersCreateRequest()
     # set dictionary object in session['extra_test_headers'] in TestCases
-    if session.get('extra_test_headers', None) and donation.is_test:
-        for key, value in session.get('extra_test_headers').items():
+    if request.session.get('extra_test_headers', None) and donation.is_test:
+        for key, value in request.session.get('extra_test_headers').items():
             req.headers[key] = value
     req.prefer('return=representation')
-    req.request_body(build_onetime_request_body(donation))
+    req.request_body(build_onetime_request_body(request, donation))
     return client.execute(req)

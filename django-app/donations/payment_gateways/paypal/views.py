@@ -69,7 +69,7 @@ def create_paypal_transaction(request):
                 raise ValueError(_("Newly created PayPal plan is not active, status: %(status)s") % {'status': plan['status']})
         # else: one-time donation
         else:
-            response = create_paypal_order(request.session, donation)
+            response = create_paypal_order(request, donation)
             ppresult = response.result
             _debug('PayPal: Order Created Status: '+ppresult.status)
             # set approval_link attribute

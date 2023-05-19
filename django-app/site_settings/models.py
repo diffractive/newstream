@@ -186,7 +186,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     ]
 
     sandbox_mode = models.BooleanField(default=True)
-    currency = models.CharField(default='USD', max_length=10, choices=[(key, html.unescape(
+    currency = models.CharField(default='HKD', max_length=10, choices=[(key, html.unescape(
         val['admin_label'])) for key, val in currency_dict.items()])
     donation_form = models.ForeignKey(
         'donations.DonationForm',

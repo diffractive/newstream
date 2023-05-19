@@ -60,7 +60,7 @@ def create_paypal_transaction(request):
             # Create plan and subscription
             plan = createPlan(request.session, product['id'], donation)
             if plan['status'] == 'ACTIVE':
-                subscription = createSubscription(request.session, plan['id'], donation)
+                subscription = createSubscription(request, plan['id'], donation)
                 result['subscription_id'] = subscription['id']
                 for link in subscription['links']:
                     if link['rel'] == 'approve':

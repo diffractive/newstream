@@ -5,6 +5,9 @@
 # https://stripe.com/docs/currencies#presentment-currencies
 # todo: check for 2c2p and paypal's supported currencies
 currency_dict = {
+    'None': {
+        'admin_label': 'None',
+    },
     'USD': {
         'admin_label': 'US Dollars (&#36;)',
         'symbol': '&#36;',

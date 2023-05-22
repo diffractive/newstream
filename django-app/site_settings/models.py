@@ -117,18 +117,18 @@ class SiteSettings(BaseSetting, ClusterableModel):
                     help_text=_('Email notifications such as new donations will be sent to this list.'))
     ]
 
-    notify_admin_account_created = models.BooleanField(default=True)
-    notify_admin_account_deleted = models.BooleanField(default=True)
-    notify_admin_new_donation = models.BooleanField(default=True)
-    notify_admin_donation_revoked = models.BooleanField(default=True)
-    notify_admin_monthly_renewal = models.BooleanField(default=False)
-    notify_admin_new_recurring = models.BooleanField(default=True)
-    notify_admin_recurring_adjusted = models.BooleanField(default=True)
-    notify_admin_recurring_rescheduled = models.BooleanField(default=True)
-    notify_admin_recurring_paused = models.BooleanField(default=True)
-    notify_admin_recurring_resumed = models.BooleanField(default=True)
-    notify_admin_recurring_cancelled = models.BooleanField(default=True)
-    notify_admin_donation_error = models.BooleanField(default=True)
+    notify_admin_account_created = models.BooleanField(null=True)
+    notify_admin_account_deleted = models.BooleanField(null=True)
+    notify_admin_new_donation = models.BooleanField(null=True)
+    notify_admin_donation_revoked = models.BooleanField(null=True)
+    notify_admin_monthly_renewal = models.BooleanField(null=True)
+    notify_admin_new_recurring = models.BooleanField(null=True)
+    notify_admin_recurring_adjusted = models.BooleanField(null=True)
+    notify_admin_recurring_rescheduled = models.BooleanField(null=True)
+    notify_admin_recurring_paused = models.BooleanField(null=True)
+    notify_admin_recurring_resumed = models.BooleanField(null=True)
+    notify_admin_recurring_cancelled = models.BooleanField(null=True)
+    notify_admin_donation_error = models.BooleanField(null=True)
     email_admin_panels = [
         FieldPanel('notify_admin_account_created',
                    heading=_('Send admins email notifications of donor accounts being created?')),
@@ -156,8 +156,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
                    heading=_('Send admins email notifications of erroneous donations?')),
     ]
 
-    social_login_enabled = models.BooleanField(default=False)
-    social_skip_signup = models.BooleanField(default=False)
+    social_login_enabled = models.BooleanField(null=True)
+    social_skip_signup = models.BooleanField(null=True)
     signup_footer_text = I18nRichTextField(blank=True)
     signup_general_panels = [
         FieldPanel('social_login_enabled',
@@ -169,24 +169,24 @@ class SiteSettings(BaseSetting, ClusterableModel):
         FieldPanel('signup_footer_text',
                    heading=_('Footer Text(Under Signup Form)')),
     ]
-    google_login_enabled = models.BooleanField(default=True)
+    google_login_enabled = models.BooleanField(null=True)
     signup_google_panels = [
         FieldPanel('google_login_enabled',
                    heading=_('Enable Google Login ? (Only if Social Login is enabled)')),
     ]
-    facebook_login_enabled = models.BooleanField(default=True)
+    facebook_login_enabled = models.BooleanField(null=True)
     signup_facebook_panels = [
         FieldPanel('facebook_login_enabled',
                    heading=_('Enable Facebook Login ? (Only if Social Login is enabled)')),
     ]
-    twitter_login_enabled = models.BooleanField(default=True)
+    twitter_login_enabled = models.BooleanField(null=True)
     signup_twitter_panels = [
         FieldPanel('twitter_login_enabled',
                    heading=_('Enable Twitter Login ? (Only if Social Login is enabled)')),
     ]
 
-    sandbox_mode = models.BooleanField(default=True)
-    currency = models.CharField(default='HKD', max_length=10, choices=[(key, html.unescape(
+    sandbox_mode = models.BooleanField(null=True)
+    currency = models.CharField(default='None', max_length=10, choices=[(key, html.unescape(
         val['admin_label'])) for key, val in currency_dict.items()])
     donation_form = models.ForeignKey(
         'donations.DonationForm',
@@ -194,8 +194,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
         on_delete=models.SET_NULL,
         related_name='+'
     )
-    donation_updates_rate_limiter = models.BooleanField(default=True, help_text=_('Enable this will limit donor to only 5 subscription update-actions(edit/pause/resume) every 5 minutes'))
-    donations_soft_delete_mode = models.BooleanField(default=True, help_text=_('Enabling this will ensure Donations and Subscriptions will still exist in the database even after being deleted from wagtail admin'))
+    donation_updates_rate_limiter = models.BooleanField(null=True, help_text=_('Enable this will limit donor to only 5 subscription update-actions(edit/pause/resume) every 5 minutes'))
+    donations_soft_delete_mode = models.BooleanField(null=True, help_text=_('Enabling this will ensure Donations and Subscriptions will still exist in the database even after being deleted from wagtail admin'))
     donations_general_panels = [
         FieldPanel('sandbox_mode', heading=_('Sandbox Mode')),
         FieldPanel('currency', heading=_('Currency')),

@@ -112,7 +112,7 @@ def createPlan(session, product_id, donation):
         "billing_cycles": [
             {
                 "frequency": {
-                    "interval_unit": "MONTH",
+                    "interval_unit": "DAY",
                     "interval_count": 1
                 },
                 "tenure_type": "REGULAR",
@@ -128,7 +128,7 @@ def createPlan(session, product_id, donation):
         ],
         "payment_preferences": {
             "auto_bill_outstanding": 'true',
-            "payment_failure_threshold": 3
+            "payment_failure_threshold": 1
         }
     }
     if paypalSettings.sandbox_mode and session.get('negtest_createPlan', None):

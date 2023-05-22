@@ -1,6 +1,6 @@
 var gulp = require('gulp');
 const { watch } = require('gulp');
-var sass = require('gulp-sass');
+var sass = require('gulp-sass')(require('node-sass'));
 var postcss = require('gulp-postcss');
 var rename = require('gulp-rename');
 const cleanCSS = require('gulp-clean-css');

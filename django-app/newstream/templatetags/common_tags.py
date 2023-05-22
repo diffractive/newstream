@@ -5,6 +5,7 @@ from django.utils.safestring import mark_safe
 
 from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
 from newstream.functions import get_site_name, get_site_url, printvars, get_site_settings_from_default_site
+from donations.models import STATUS_ACTIVE, STATUS_CANCELLED, STATUS_PAYMENT_FAILED, STATUS_PAUSED
 
 register = template.Library()
 
@@ -72,9 +73,9 @@ def site_name_filter(var):
 @register.filter(name='site_settings')
 def site_settings(attribute):
     """
-    The standard way of fetching custom site settings is too clumsy: 
+    The standard way of fetching custom site settings is too clumsy:
     (see: https://docs.wagtail.io/en/v2.12/reference/contrib/settings.html#using-in-django-templates)
-    
+
     This filter should allow templates to be more succinct
     """
 
@@ -177,3 +178,35 @@ def display_username(user):
 @register.filter(name='display_donor')
 def display_donor(donation):
     return donation.display_donor()
+
+
+@register.filter(name="status_icon")
+def status_icon(status):
+    if status == STATUS_ACTIVE:
+        return 'active-icon'
+    elif status == STATUS_PAUSED:
+        return 'paused-icon'
+    elif status == STATUS_PAYMENT_FAILED:
+        return 'payment-failed-icon'
+    else:
+        return 'cancelled-icon'
+
+
+@register.filter(name="status_bg_color")
+def status_bg_color(status):
+    if status == STATUS_ACTIVE:
+        return 'bg-primary-light'
+    elif status == STATUS_PAYMENT_FAILED:
+        return 'bg-warning-light'
+    else:
+        return 'bg-gray-light'
+
+
+@register.filter(name="status_text_color")
+def status_text_color(status):
+    if status == STATUS_ACTIVE:
+        return 'text-primary'
+    elif status == STATUS_PAYMENT_FAILED:
+        return 'text-warning'
+    else:
+        return 'text-gray'

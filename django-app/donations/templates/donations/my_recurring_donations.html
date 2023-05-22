@@ -20,7 +20,7 @@
         {% if subscriptions %}
         {% for subscription in subscriptions %}
         {% with first_instance=subscription.first_instance latest_instance=subscription.latest_instance %}
-        <div class="donation-record p-4 rounded-lg bg-primary-light mb-4">
+        <div class="donation-record p-4 rounded-lg {{latest_instance.recurring_status|status_bg_color}} mb-4">
             <table class="w-full">
                 <tr>
                     <td colspan="2"><span class="font-bold">#&nbsp;</span>{{ latest_instance.profile_id }}</td>
@@ -67,7 +67,11 @@
                 </tr>
                 <tr>
                     <td colspan="3" class="recurring-status-td" data-id="{{ latest_instance.id }}">
-                        {{ latest_instance.recurring_status|title }}</td>
+                        <span class="{{ latest_instance.recurring_status|status_icon}}"></span>
+                        <span class="status-text {{latest_instance.recurring_status|status_text_color}}">
+                            {{ latest_instance.recurring_status|title }}
+                        </span>
+                    </td>
                 </tr>
             </table>
         </div>
@@ -91,14 +95,18 @@
             {% if subscriptions %}
             {% for subscription in subscriptions %}
             {% with first_instance=subscription.first_instance latest_instance=subscription.latest_instance %}
-            <tr>
+            <tr class="{{latest_instance.recurring_status|status_bg_color}}">
                 <td>{{ latest_instance|recurring_amount_with_currency }}</td>
                 <td>{% trans 'Monthly' %}</td>
                 <td>{{ latest_instance.profile_id }}</td>
                 <td>{{ first_instance.subscribe_date|date:'j M Y' }}</td>
                 <td>{{ site_settings|get_attr:latest_instance.gateway.frontend_label_attr_name }}</td>
                 <td class="recurring-status-td" data-id="{{ latest_instance.id }}">
-                    {{ latest_instance.recurring_status|title }}</td>
+                    <span class="{{ latest_instance.recurring_status|status_icon}}"></span>
+                    <span class="status-text {{latest_instance.recurring_status|status_text_color}}">
+                        {{ latest_instance.recurring_status|title }}
+                    </span>
+                </td>
                 <td>
                     <div class="more-dropdown-div flex items-center dropdown-div-wrapper">
                         <input type="checkbox" name="md2_dropdown-toggle-checkbox"
@@ -211,7 +219,7 @@
                                         buttonsDiv.querySelector('button.cancel-recurring-donation').disabled = true;
                                     }
                                 }
-                                for (let statusTd of document.querySelectorAll(`td.recurring-status-td[data-id='${subscription_id}']`)) {
+                                for (let statusTd of document.querySelectorAll(`td.recurring-status-td[data-id='${subscription_id}'] > span.status-text`)) {
                                     statusTd.innerText = data['recurring-status'];
                                 }
                             } else {
@@ -245,7 +253,7 @@
                                 for (let toggleBtn of document.querySelectorAll(`button.toggle-recurring-donation[data-id='${subscription_id}']`)) {
                                     toggleBtn.querySelector('.btn-text').innerText = data['button-text'];
                                 }
-                                for (let statusTd of document.querySelectorAll(`td.recurring-status-td[data-id='${subscription_id}']`)) {
+                                for (let statusTd of document.querySelectorAll(`td.recurring-status-td[data-id='${subscription_id}'] > span.status-text`)) {
                                     statusTd.innerText = data['recurring-status'];
                                 }
                             } else {

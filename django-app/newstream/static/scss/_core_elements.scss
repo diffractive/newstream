@@ -569,3 +569,33 @@ span.no-icon {
         margin-bottom: 1.5rem;
     }
 }
+
+.svg-status-icon {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    position: absolute;
+    background-size: contain;
+}
+
+span.active-icon {
+    @extend .svg-status-icon;
+    background-image: url("../svg/active.svg")
+}
+span.paused-icon {
+    @extend .svg-status-icon;
+    background-image: url("../svg/paused.svg")
+}
+span.payment-failed-icon {
+    @extend .svg-status-icon;
+    background-image: url("../svg/payment-failed.svg")
+}
+span.cancelled-icon {
+    @extend .svg-status-icon;
+    background-image: url("../svg/cancelled.svg")
+}
+
+span.status-text {
+    padding-left: 28px;
+    font-weight: 600;
+}

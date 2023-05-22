@@ -75,7 +75,7 @@ app.link('Recurring Donations').click()
 grabber.capture_screen('subscriptions', 'Recurring donations')
 
 rows = app.table('my-donations-table').row_values()
-assert rows[0][0] == 'USD $100.00'
+assert rows[0][0] == 'HKD $100.00'
 
 
 app.label('md2_dropdown-toggle-checkbox1').click()
@@ -93,7 +93,7 @@ app.link('Back to My Donations').click()
 grabber.capture_screen('updated_amount_list', 'Update amount list')
 
 rows = app.table('my-donations-table').row_values()
-assert rows[0][0] == f'USD ${new_amount}.00'
+assert rows[0][0] == f'HKD ${new_amount}.00'
 
 # +
 # There should be two emails sent, one for admins one for the user

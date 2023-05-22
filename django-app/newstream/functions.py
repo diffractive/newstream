@@ -130,7 +130,7 @@ def get_site_settings_from_default_site():
     # get from environment variables if nothing is defined in the database
     for field in instance.fields:
         db_value = getattr(instance, field, None)
-        if isinstance(db_value, str) and db_value == "" or db_value == None:
+        if isinstance(db_value, str) and (db_value == "" or db_value == "None") or db_value == None:
             # map to the corresponding env var key
             envkey = "NEWSTREAM_"+field.upper()
             settings_value = getattr(settings, envkey, None)

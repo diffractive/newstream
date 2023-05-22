@@ -7,6 +7,14 @@
 currency_dict = {
     'None': {
         'admin_label': 'None',
+        'symbol': '&#36;',
+        'code': '000',
+        'setting': {
+            'currency_position': 'before',
+            'thousands_separator': ',',
+            'decimal_separator': '.',
+            'number_decimals': 2,
+        },
     },
     'USD': {
         'admin_label': 'US Dollars (&#36;)',

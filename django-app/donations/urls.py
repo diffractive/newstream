@@ -32,6 +32,7 @@ urlpatterns = [
     path('my-onetime-donations/', views.my_onetime_donations, name='my-onetime-donations'),
     path('my-recurring-donations/', views.my_recurring_donations, name='my-recurring-donations'),
     path('my-renewals/<str:uuid>/', views.my_renewals, name='my-renewals'),
+    path('update-card/<int:id>/', views.confirm_update_card_details, name='update-card-details'),
     path('export-donations/', views.export_donations, name='export-donations'),
     path('export-subscriptions', views.export_subscriptions, name='export-subscriptions'),
     path('export-donors/', views.export_donors, name='export-donors')

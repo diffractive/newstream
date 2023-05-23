@@ -159,7 +159,7 @@ def confirm_donation(request):
                         subscription_created_at=timezone.now()
                     )
                     subscription.save()
-                    
+
                     instance = SubscriptionInstance(
                         is_test=tmpd.is_test,
                         profile_id=uuid4_str(),
@@ -401,6 +401,10 @@ def edit_recurring(request, id):
         messages.add_message(request, messages.ERROR, str(e))
     return render(request, getEditRecurringPaymentHtml(subscription), {'form': form, 'subscription': subscription})
 
+@login_required
+def confirm_update_card_details(request, id):
+    subscription = get_object_or_404(SubscriptionInstance, id=id)
+    return render(request, 'donations/update_payment_details.html', {'subscription': subscription})
 
 @login_required
 def my_onetime_donations(request):

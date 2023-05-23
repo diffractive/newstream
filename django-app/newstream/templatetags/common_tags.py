@@ -210,3 +210,10 @@ def status_text_color(status):
         return 'text-warning'
     else:
         return 'text-gray'
+
+@register.filter(name="status_text")
+def status_text(status):
+    if status == STATUS_PAYMENT_FAILED:
+        return 'Payment failed'
+    else:
+        return status.capitalize()

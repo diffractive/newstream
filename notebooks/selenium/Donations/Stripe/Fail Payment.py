@@ -102,7 +102,7 @@ grabber.capture_screen('recurrent_donations', 'Recurrent donations')
 
 
 rows = app.table('my-donations-table').row_values()
-assert rows[0][5] == 'Payment_Failed'
+assert rows[0][5] == 'Payment failed'
 
 # +
 # There should be four emails sent, rwo for admins two for the user

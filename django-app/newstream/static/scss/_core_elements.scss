@@ -599,3 +599,35 @@ span.status-text {
     padding-left: 28px;
     font-weight: 600;
 }
+
+.subscription-title {
+    @apply text-primary-dark;
+    font-size: 16px;
+}
+
+.subscription-subtitle {
+    color: #0C385C;
+    font-size: 12px;
+}
+
+.info-box {
+    display: flex;
+    padding: 1rem;
+    background: #D8EBFF;
+    border-radius: 10px;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+
+    span.info-icon {
+        width: 24px;
+        height: 24px;
+        display: inline-block;
+        position: absolute;
+        background-size: contain;
+        background-image: url("../svg/info.svg")
+    }
+
+    .info-text {
+        margin-left: 2rem;
+    }
+}

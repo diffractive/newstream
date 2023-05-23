@@ -12,7 +12,7 @@ from wagtail.core import hooks
 
 from newstream.functions import _exception, getUserTimezone
 from newstream_user.models import SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL, SUBS_ACTION_MANUAL, DONATION_ACTION_MANUAL
-from donations.models import Donation, SubscriptionInstance, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED
+from donations.models import Donation, SubscriptionInstance, STATUS_COMPLETE, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED
 from donations.payment_gateways import InitPaymentGateway
 from donations.functions import addUpdateSubsActionLog, addUpdateDonationActionLog
 from donations.email_functions import sendDonationStatusChangeToDonor, sendSubscriptionStatusChangeToDonor
@@ -54,6 +54,8 @@ def set_subscription_status(request):
             old_status = subscription.recurring_status
             if not request.POST.get('status', ''):
                 raise _("Empty value submitted for subscription status update")
+            if request.POST.get('status').lower() == STATUS_CANCELLED:
+                subscription.cancel_reason = SubscriptionInstance.CancelReason.BY_ADMIN
             subscription.recurring_status = request.POST.get('status').lower()
             subscription.save()
             new_status = subscription.recurring_status
@@ -97,7 +99,7 @@ def cancel_subscription(request):
             subscription = get_object_or_404(SubscriptionInstance, id=subscription_id)
             gatewayManager = InitPaymentGateway(
                 request, subscription=subscription)
-            resultSet = gatewayManager.cancel_recurring_payment()
+            resultSet = gatewayManager.cancel_recurring_payment(reason=SubscriptionInstance.CancelReason.BY_ADMIN)
             # add to the update actions log
             addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL, user=request.user)
 

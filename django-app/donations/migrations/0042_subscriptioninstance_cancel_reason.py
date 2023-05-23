@@ -13,6 +13,6 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='subscriptioninstance',
             name='cancel_reason',
-            field=models.CharField(blank=True, choices=[('by-admin', 'By admin'), ('by-donor', 'By donor'), ('stripe-retries-failed', 'Stripe retries failed')], max_length=30, null=True),
+            field=models.CharField(blank=True, choices=[('declined-checkout', 'Declined checkout'), ('by-admin', 'By admin'), ('by-donor', 'By donor'), ('payments-failed', 'Payments failed')], max_length=30, null=True),
         ),
     ]

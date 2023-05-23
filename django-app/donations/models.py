@@ -270,10 +270,14 @@ class SubscriptionInstance(ClusterableModel):
     """ This model corresponds to the actual Subscription object in the gateways
     """
     class CancelReason(models.TextChoices):
+        # This is when user cancels the gateway transaction before subscribing and returns back to Newstream
+        DECLINED_CHECKOUT = "declined-checkout", _("Declined checkout")
+        # After subscription has become active, cancelled manually by admin via Newstream
         BY_ADMIN = "by-admin", _("By admin")
+        # After subscription has become active, cancelled manually by donor via Newstream
         BY_DONOR = "by-donor", _("By donor")
         # under current settings, Stripe cancels any subscription having failed 3 payment retries
-        STRIPE_RETRIES_FAILED = "stripe-retries-failed", _("Stripe retries failed")
+        PAYMENTS_FAILED = "payments-failed", _("Payments failed")
 
     RECURRING_STATUS_CHOICES = [
         (STATUS_ACTIVE, _(STATUS_ACTIVE.capitalize())),

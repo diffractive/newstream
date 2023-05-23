@@ -9,43 +9,6 @@ class Migration(migrations.Migration):
         ('site_settings', '0035_auto_20230518_1022'),
     ]
 
-    # This is necessary for now because old default values were set in migrations prior this one
-    def reset_defaults_to_none(apps, schema_editor):
-        Site = apps.get_model('wagtailcore.Site')
-        SiteSettings = apps.get_model('site_settings', 'SiteSettings')
-        ss = SiteSettings.objects.get(pk=1)
-        
-        ss.notify_admin_account_created = None
-        ss.notify_admin_account_deleted = None
-        ss.notify_admin_new_donation = None
-        ss.notify_admin_donation_revoked = None
-        ss.notify_admin_monthly_renewal = None
-        ss.notify_admin_new_recurring = None
-        ss.notify_admin_recurring_adjusted = None
-        ss.notify_admin_recurring_rescheduled = None
-        ss.notify_admin_recurring_paused = None
-        ss.notify_admin_recurring_resumed = None
-        ss.notify_admin_recurring_cancelled = None
-        ss.notify_admin_donation_error = None
-
-        ss.social_login_enabled = None
-        ss.social_skip_signup = None
-        
-        ss.google_login_enabled = None
-        ss.facebook_login_enabled = None
-        ss.twitter_login_enabled = None
-
-        ss.sandbox_mode = None
-        ss.currency = "None"
-
-        ss.donation_updates_rate_limiter = None
-        ss.donations_soft_delete_mode = None
-        
-        ss.save()
-
-    def reverse_operation(apps, schema_editor):
-        pass
-
     operations = [
         migrations.AlterField(
             model_name='sitesettings',
@@ -152,5 +115,4 @@ class Migration(migrations.Migration):
             name='twitter_login_enabled',
             field=models.BooleanField(null=True),
         ),
-        migrations.RunPython(reset_defaults_to_none, reverse_operation),
     ]

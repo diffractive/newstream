@@ -153,18 +153,18 @@ class SubscriptionInspectView(InspectView):
 
 class DonationDeleteView(DeleteView):
     def __init__(self, *args, **kwargs):
-        self.siteSettings = get_site_settings_from_default_site()
+        self.site_settings = get_site_settings_from_default_site()
         super().__init__(*args, **kwargs)
 
     def delete_instance(self):
-        if self.siteSettings.donations_soft_delete_mode:
+        if self.site_settings.donations_soft_delete_mode:
             self.instance.deleted = True
             self.instance.save()
         else:
             self.instance.delete()
 
     def confirmation_message(self):
-        if self.siteSettings.donations_soft_delete_mode:
+        if self.site_settings.donations_soft_delete_mode:
             return _(
                 "Are you sure you want to soft-delete this %s? If other things in your "
                 "site are related to it, they may also be affected. "
@@ -176,7 +176,7 @@ class DonationDeleteView(DeleteView):
 
 class SubscriptionDeleteView(DeleteView):
     def __init__(self, *args, **kwargs):
-        self.siteSettings = get_site_settings_from_default_site()
+        self.site_settings = get_site_settings_from_default_site()
         super().__init__(*args, **kwargs)
     
     def delete_instance(self):
@@ -189,7 +189,7 @@ class SubscriptionDeleteView(DeleteView):
             elif not instance.deleted:
                 delete_parent = False
 
-        if self.siteSettings.donations_soft_delete_mode:
+        if self.site_settings.donations_soft_delete_mode:
             if delete_parent:
                 self.instance.parent.deleted = True
                 self.instance.parent.save()
@@ -201,7 +201,7 @@ class SubscriptionDeleteView(DeleteView):
             self.instance.delete()
 
     def confirmation_message(self):
-        if self.siteSettings.donations_soft_delete_mode:
+        if self.site_settings.donations_soft_delete_mode:
             return _(
                 "Are you sure you want to soft-delete this %s? If other things in your "
                 "site are related to it, they may also be affected. "

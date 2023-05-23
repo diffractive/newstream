@@ -76,7 +76,7 @@ app.link('Recurring Donations').click()
 grabber.capture_screen('subscriptions', 'Recurring donations')
 
 rows = app.table('my-donations-table').row_values()
-assert rows[0][0] == 'USD $100.00'
+assert rows[0][0] == 'HKD $100.00'
 
 
 app.label('md2_dropdown-toggle-checkbox1').click()
@@ -131,7 +131,7 @@ app.button('view-recurring-donation-wide').click()
 grabber.capture_screen('all_renewals', 'All renewals')
 
 rows = app.table('my-donations-table').row_values()
-assert rows[0][0] == f'USD ${new_amount}.00'
+assert rows[0][0] == f'HKD ${new_amount}.00'
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
 

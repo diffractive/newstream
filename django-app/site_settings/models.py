@@ -117,47 +117,47 @@ class SiteSettings(BaseSetting, ClusterableModel):
                     help_text=_('Email notifications such as new donations will be sent to this list.'))
     ]
 
-    admin_receive_account_created_emails = models.BooleanField(default=True)
-    admin_receive_account_deleted_emails = models.BooleanField(default=True)
-    admin_receive_checkout_emails = models.BooleanField(default=True)
-    admin_receive_revoked_emails = models.BooleanField(default=True)
-    admin_receive_renewal_emails = models.BooleanField(default=False)
-    admin_receive_new_recurring_emails = models.BooleanField(default=True)
-    admin_receive_adjusted_recurring_emails = models.BooleanField(default=True)
-    admin_receive_rescheduled_recurring_emails = models.BooleanField(default=True)
-    admin_receive_pause_recurring_emails = models.BooleanField(default=True)
-    admin_receive_resume_recurring_emails = models.BooleanField(default=True)
-    admin_receive_cancel_recurring_emails = models.BooleanField(default=True)
-    admin_receive_donation_error_emails = models.BooleanField(default=True)
+    notify_admin_account_created = models.BooleanField(null=True)
+    notify_admin_account_deleted = models.BooleanField(null=True)
+    notify_admin_new_donation = models.BooleanField(null=True)
+    notify_admin_donation_revoked = models.BooleanField(null=True)
+    notify_admin_monthly_renewal = models.BooleanField(null=True)
+    notify_admin_new_recurring = models.BooleanField(null=True)
+    notify_admin_recurring_adjusted = models.BooleanField(null=True)
+    notify_admin_recurring_rescheduled = models.BooleanField(null=True)
+    notify_admin_recurring_paused = models.BooleanField(null=True)
+    notify_admin_recurring_resumed = models.BooleanField(null=True)
+    notify_admin_recurring_cancelled = models.BooleanField(null=True)
+    notify_admin_donation_error = models.BooleanField(null=True)
     email_admin_panels = [
-        FieldPanel('admin_receive_account_created_emails',
-                   heading=_('Allow admins receive notifications of donor accounts being created?')),
-        FieldPanel('admin_receive_account_deleted_emails',
-                   heading=_('Allow admins receive notifications of donor accounts being deleted?')),
-        FieldPanel('admin_receive_checkout_emails',
-                   heading=_('Allow admins receive notifications of donation completions? (donor returning from gateway page)')),
-        FieldPanel('admin_receive_revoked_emails',
-                   heading=_('Allow admins receive notifications of revoked donations?')),
-        FieldPanel('admin_receive_renewal_emails',
-                   heading=_('Allow admins receive notifications of recurring donation renewals?')),
-        FieldPanel('admin_receive_new_recurring_emails',
-                   heading=_('Allow admins receive notifications of new recurring donations?')),
-        FieldPanel('admin_receive_adjusted_recurring_emails',
-                   heading=_('Allow admins receive notifications of recurring donations with adjusted amounts?')),
-        FieldPanel('admin_receive_rescheduled_recurring_emails',
-                   heading=_('Allow admins receive notifications of recurring donations with rescheduled billing dates?')),
-        FieldPanel('admin_receive_pause_recurring_emails',
-                   heading=_('Allow admins receive notifications of recurring donations being paused?')),
-        FieldPanel('admin_receive_resume_recurring_emails',
-                   heading=_('Allow admins receive notifications of recurring donations being resumed?')),
-        FieldPanel('admin_receive_cancel_recurring_emails',
-                   heading=_('Allow admins receive notifications of recurring donations being cancelled?')),
-        FieldPanel('admin_receive_donation_error_emails',
-                   heading=_('Allow admins receive notifications of erroneous donations?')),
+        FieldPanel('notify_admin_account_created',
+                   heading=_('Send admins email notifications of donor accounts being created?')),
+        FieldPanel('notify_admin_account_deleted',
+                   heading=_('Send admins email notifications of donor accounts being deleted?')),
+        FieldPanel('notify_admin_new_donation',
+                   heading=_('Send admins email notifications of donation completions? (donor returning from gateway page)')),
+        FieldPanel('notify_admin_donation_revoked',
+                   heading=_('Send admins email notifications of revoked donations?')),
+        FieldPanel('notify_admin_monthly_renewal',
+                   heading=_('Send admins email notifications of recurring donation renewals?')),
+        FieldPanel('notify_admin_new_recurring',
+                   heading=_('Send admins email notifications of new recurring donations?')),
+        FieldPanel('notify_admin_recurring_adjusted',
+                   heading=_('Send admins email notifications of recurring donations with adjusted amounts?')),
+        FieldPanel('notify_admin_recurring_rescheduled',
+                   heading=_('Send admins email notifications of recurring donations with rescheduled billing dates?')),
+        FieldPanel('notify_admin_recurring_paused',
+                   heading=_('Send admins email notifications of recurring donations being paused?')),
+        FieldPanel('notify_admin_recurring_resumed',
+                   heading=_('Send admins email notifications of recurring donations being resumed?')),
+        FieldPanel('notify_admin_recurring_cancelled',
+                   heading=_('Send admins email notifications of recurring donations being cancelled?')),
+        FieldPanel('notify_admin_donation_error',
+                   heading=_('Send admins email notifications of erroneous donations?')),
     ]
 
-    social_login_enabled = models.BooleanField(default=True)
-    social_skip_signup = models.BooleanField(default=False)
+    social_login_enabled = models.BooleanField(null=True)
+    social_skip_signup = models.BooleanField(null=True)
     signup_footer_text = I18nRichTextField(blank=True)
     signup_general_panels = [
         FieldPanel('social_login_enabled',
@@ -169,24 +169,24 @@ class SiteSettings(BaseSetting, ClusterableModel):
         FieldPanel('signup_footer_text',
                    heading=_('Footer Text(Under Signup Form)')),
     ]
-    google_login_enabled = models.BooleanField(default=True)
+    google_login_enabled = models.BooleanField(null=True)
     signup_google_panels = [
         FieldPanel('google_login_enabled',
                    heading=_('Enable Google Login ? (Only if Social Login is enabled)')),
     ]
-    facebook_login_enabled = models.BooleanField(default=True)
+    facebook_login_enabled = models.BooleanField(null=True)
     signup_facebook_panels = [
         FieldPanel('facebook_login_enabled',
                    heading=_('Enable Facebook Login ? (Only if Social Login is enabled)')),
     ]
-    twitter_login_enabled = models.BooleanField(default=True)
+    twitter_login_enabled = models.BooleanField(null=True)
     signup_twitter_panels = [
         FieldPanel('twitter_login_enabled',
                    heading=_('Enable Twitter Login ? (Only if Social Login is enabled)')),
     ]
 
-    sandbox_mode = models.BooleanField(default=True)
-    currency = models.CharField(default='USD', max_length=10, choices=[(key, html.unescape(
+    sandbox_mode = models.BooleanField(null=True)
+    currency = models.CharField(default='None', max_length=10, choices=[(key, html.unescape(
         val['admin_label'])) for key, val in currency_dict.items()])
     donation_form = models.ForeignKey(
         'donations.DonationForm',
@@ -194,14 +194,14 @@ class SiteSettings(BaseSetting, ClusterableModel):
         on_delete=models.SET_NULL,
         related_name='+'
     )
-    limit_fiveactions_per_fivemins = models.BooleanField(default=True, help_text=_('Enable this will limit donor to only 5 subscription update-actions(edit/pause/resume) every 5 minutes'))
-    donations_soft_delete_mode = models.BooleanField(default=True, help_text=_('Enabling this will ensure Donations and Subscriptions will still exist in the database even after being deleted from wagtail admin'))
+    donation_updates_rate_limiter = models.BooleanField(null=True, help_text=_('Enable this will limit donor to only 5 subscription update-actions(edit/pause/resume) every 5 minutes'))
+    donations_soft_delete_mode = models.BooleanField(null=True, help_text=_('Enabling this will ensure Donations and Subscriptions will still exist in the database even after being deleted from wagtail admin'))
     donations_general_panels = [
         FieldPanel('sandbox_mode', heading=_('Sandbox Mode')),
         FieldPanel('currency', heading=_('Currency')),
         ModelChooserPanel('donation_form', heading=_(
             'Donation Form to be used')),
-        FieldPanel('limit_fiveactions_per_fivemins', heading=_("Frequency Limit on Donors' Subscription Update-Actions(edit/pause/resume)?")),
+        FieldPanel('donation_updates_rate_limiter', heading=_("Frequency Limit on Donors' Subscription Update-Actions(edit/pause/resume)?")),
         FieldPanel('donations_soft_delete_mode', heading=_("Soft Delete Mode(for Donations and Subscriptions only)")),
     ]
 
@@ -294,7 +294,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
         help_text=_("The Gateway name to be shown on the frontend website."))
     stripe_testing_webhook_secret = models.CharField(
         max_length=255, blank=True, help_text=_("The Secret for the Testing Webhook used by the server for payment verification"))
-    stripe_testing_product_id = models.CharField(max_length=255, blank=False, null=True, help_text=_(
+    stripe_testing_product_id = models.CharField(max_length=255, blank=True, null=True, help_text=_(
         "Testing Product ID accessible on your Stripe Dashboard"))
     stripe_testing_api_publishable_key = models.CharField(
         max_length=255, blank=True, help_text=_("The Testing API publishable key"))
@@ -302,7 +302,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
         max_length=255, blank=True, help_text=_("The Testing API secret key"))
     stripe_webhook_secret = models.CharField(
         max_length=255, blank=True, help_text=_("The Secret for the Live Webhook used by the server for payment verification"))
-    stripe_product_id = models.CharField(max_length=255, blank=False, null=True, help_text=_(
+    stripe_product_id = models.CharField(max_length=255, blank=True, null=True, help_text=_(
         "Product ID accessible on your Stripe Dashboard"))
     stripe_api_publishable_key = models.CharField(
         max_length=255, blank=True, help_text=_("The Live API publishable key"))
@@ -438,6 +438,11 @@ class SiteSettings(BaseSetting, ClusterableModel):
                           heading=_('ReCAPTCHA'), classname='others-recaptcha'),
         ], heading=_("Others")),
     ])
+
+    @property
+    def fields(self):
+        # the following list doesn't include relational fields like admin_emails
+        return [ f.name for f in self._meta.fields + self._meta.many_to_many ]
 
     class Meta:
         verbose_name = _('Site Setting')

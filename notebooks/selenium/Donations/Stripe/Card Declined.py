@@ -52,7 +52,7 @@ app.link('Donation Form').click()
 grabber.capture_screen('donation_form', 'Donation Form')
 
 # Cannot go to the signup page without setting a value into the custom amount or choosing a default from selector
-app.dropdown('id_donation_amount').select('USD $100')
+app.dropdown('id_donation_amount').select('HKD $100')
 app.input('id_email').fill(email)
 app.input('id_name').fill(name)
 app.dropdown('id_payment_gateway').select('Stripe')

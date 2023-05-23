@@ -20,6 +20,9 @@ from django.conf import global_settings
 
 import environ
 
+# load "NEWSTREAM" prefixed env vars for site_settings
+from .site_settings import *
+
 env = environ.Env(
     STRIPE_JS_URL=(str, 'https://js.stripe.com/v3/'),
     STRIPE_API_BASE=(str, ""),

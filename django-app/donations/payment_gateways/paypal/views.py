@@ -60,7 +60,7 @@ def create_paypal_transaction(request):
             # Create plan and subscription
             plan = createPlan(request.session, product['id'], donation)
             if plan['status'] == 'ACTIVE':
-                subscription = createSubscription(request.session, plan['id'], donation)
+                subscription = createSubscription(request, plan['id'], donation)
                 result['subscription_id'] = subscription['id']
                 for link in subscription['links']:
                     if link['rel'] == 'approve':
@@ -69,7 +69,7 @@ def create_paypal_transaction(request):
                 raise ValueError(_("Newly created PayPal plan is not active, status: %(status)s") % {'status': plan['status']})
         # else: one-time donation
         else:
-            response = create_paypal_order(request.session, donation)
+            response = create_paypal_order(request, donation)
             ppresult = response.result
             _debug('PayPal: Order Created Status: '+ppresult.status)
             # set approval_link attribute

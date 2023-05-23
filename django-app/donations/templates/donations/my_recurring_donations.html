@@ -58,7 +58,7 @@
                 </tr>
                 <tr>
                     <td width="120">{{ latest_instance|recurring_amount_with_currency }}</td>
-                    <td>{{ siteSettings|get_attr:latest_instance.gateway.frontend_label_attr_name }}</td>
+                    <td>{{ site_settings|get_attr:latest_instance.gateway.frontend_label_attr_name }}</td>
                     <td>&nbsp;</td>
                 <tr>
                     <td>{% trans 'Monthly' %}</td>
@@ -96,7 +96,7 @@
                 <td>{% trans 'Monthly' %}</td>
                 <td>{{ latest_instance.profile_id }}</td>
                 <td>{{ first_instance.subscribe_date|date:'j M Y' }}</td>
-                <td>{{ siteSettings|get_attr:latest_instance.gateway.frontend_label_attr_name }}</td>
+                <td>{{ site_settings|get_attr:latest_instance.gateway.frontend_label_attr_name }}</td>
                 <td class="recurring-status-td" data-id="{{ latest_instance.id }}">
                     {{ latest_instance.recurring_status|title }}</td>
                 <td>

@@ -44,8 +44,6 @@ env = environ.Env(
     EMAIL_USE_SSL=(bool, False),
     EMAIL_USE_TLS=(bool, False),
 
-    DEFAULT_FROM_EMAIL=(str, ''),
-
     INIT_LOCALSTRIPE=(bool, False),
 
     WAGTAIL_2FA_REQUIRED=(str, False),
@@ -83,9 +81,8 @@ if env('EMAIL_HOST'): EMAIL_HOST = env('EMAIL_HOST')
 if env('EMAIL_HOST_USER'): EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 if env('EMAIL_HOST_PASSWORD'): EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
-# added temporary to fix cloud run job error
-DEFAULT_ADMIN_EMAIL = DEFAULT_FROM_EMAIL
+# used by allauth
+DEFAULT_FROM_EMAIL = site_settings_envvars('NEWSTREAM_DEFAULT_FROM_EMAIL')
 
 # Serve static files from google cloud storage if it is configured, otherwise
 # will serve static files locally via uwsgi

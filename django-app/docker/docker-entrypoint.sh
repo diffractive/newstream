@@ -9,6 +9,7 @@ set -e
 : "${PY_AUTORELOAD:=0}"
 : "${WIPE_DB:=0}"
 : "${TEST_DATA:=0}"
+: "${RESET_NULLABLE_SITESETTINGS:=0}"
 
 init() {
     if [ "$WIPE_DB" -eq 1 ]; then
@@ -30,6 +31,11 @@ init() {
 
     if [ "$TEST_DATA" -eq 1 ]; then
         python manage.py test_data
+    fi
+
+    # temp fix for passing tests with the PR making sitesettings fields nullable: https://github.com/diffractive/newstream/pull/196
+    if [ "$RESET_NULLABLE_SITESETTINGS" -eq 1 ]; then
+        python manage.py reset_nullable_site_settings
     fi
 }
 

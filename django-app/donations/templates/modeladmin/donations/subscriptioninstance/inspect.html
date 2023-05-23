@@ -119,6 +119,12 @@
                         <dt>{{ fields.linked_user_deleted.label }}</dt>
                         <dd>{{ fields.linked_user_deleted.value }}</dd>
                     </div>
+                    {% if subscription.recurring_status == status_cancelled %}
+                    <div class="column-1-2">
+                        <dt>{{ fields.cancel_reason.label }}</dt>
+                        <dd>{{ fields.cancel_reason.value }}</dd>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endif %}
                 {% endblock %}

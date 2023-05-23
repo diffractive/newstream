@@ -269,6 +269,12 @@ class Subscription(models.Model):
 class SubscriptionInstance(ClusterableModel):
     """ This model corresponds to the actual Subscription object in the gateways
     """
+    class CancelReason(models.TextChoices):
+        BY_ADMIN = "by-admin", _("By admin")
+        BY_DONOR = "by-donor", _("By donor")
+        # under current settings, Stripe cancels any subscription having failed 3 payment retries
+        STRIPE_RETRIES_FAILED = "stripe-retries-failed", _("Stripe retries failed")
+
     RECURRING_STATUS_CHOICES = [
         (STATUS_ACTIVE, _(STATUS_ACTIVE.capitalize())),
         (STATUS_PROCESSING, _(STATUS_PROCESSING.capitalize())),
@@ -299,6 +305,12 @@ class SubscriptionInstance(ClusterableModel):
     currency = models.CharField(max_length=20)
     recurring_status = models.CharField(
         max_length=255, choices=RECURRING_STATUS_CHOICES, default=STATUS_INACTIVE, blank=True, null=True)
+    cancel_reason = models.CharField(
+        max_length=30,
+        choices=CancelReason.choices,
+        blank=True,
+        null=True
+    )
     subscribe_date = models.DateTimeField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -321,6 +333,7 @@ class SubscriptionInstance(ClusterableModel):
         FieldPanel('recurring_amount', heading=_('Recurring Amount')),
         FieldPanel('currency', heading=_('Currency')),
         FieldPanel('recurring_status', heading=_('Recurring Status')),
+        FieldPanel('cancel_reason', heading=_('Cancel Reason')),
         FieldPanel('subscribe_date', heading=_('Subscribe Date')),
         FieldPanel('linked_user_deleted', heading=_('Donor User Deleted?')),
     ]

@@ -70,6 +70,7 @@ test_subscriptions = [
         "currency": "HKD",
         "gateway": "paypal",
         "recurring_status": STATUS_CANCELLED,
+        "cancel_reason": SubscriptionInstance.CancelReason.BY_DONOR,
         "subscribe_date": datetime.strptime("2022-12-08", '%Y-%m-%d'),
         "donation_transaction_ids": [
             "9V798077EC622080D",
@@ -231,6 +232,7 @@ def load_test_donations():
             recurring_amount=item["recurring_amount"],
             currency=item["currency"],
             recurring_status=item["recurring_status"],
+            cancel_reason=item["cancel_reason"] if "cancel_reason" in item else None,
             subscribe_date=make_aware(item["subscribe_date"]),
             created_at=make_aware(item["subscribe_date"]),
             updated_at=make_aware(item["subscribe_date"])

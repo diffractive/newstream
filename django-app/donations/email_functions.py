@@ -12,6 +12,7 @@ from allauth.account.utils import send_email_confirmation
 
 from newstream.functions import get_site_settings_from_default_site, set_default_from_email
 from donations.functions import getDonationEmail
+from donations.models import SubscriptionInstance
 
 
 def textify(html):
@@ -209,7 +210,7 @@ def sendRecurringCancelledNotifToAdmins(subscription):
     mail_title = _("A Recurring Donation is cancelled")
     if siteSettings.admin_receive_cancel_recurring_emails:
         sendEmailNotificationsToAdmins(siteSettings, mail_title, render_to_string(
-            'donations/email_templates/recurring_cancelled_admin.html', context={'subscription': subscription, 'mail_title': mail_title}))
+            'donations/email_templates/recurring_cancelled_admin.html', context={'subscription': subscription, 'mail_title': mail_title, 'cancel_reasons': SubscriptionInstance.CancelReason}))
 
 
 def sendRecurringCancelRequestNotifToAdmins(subscription):
@@ -221,7 +222,7 @@ def sendRecurringCancelRequestNotifToAdmins(subscription):
 
 def sendRecurringCancelledNotifToDonor(subscription):
     mail_title = _("Your Recurring Donation is Cancelled")
-    sendEmailNotificationsToDonor(subscription.user.email, mail_title, render_to_string('donations/email_templates/recurring_cancelled_donor.html', context={'subscription': subscription, 'mail_title': mail_title}))
+    sendEmailNotificationsToDonor(subscription.user.email, mail_title, render_to_string('donations/email_templates/recurring_cancelled_donor.html', context={'subscription': subscription, 'mail_title': mail_title, 'cancel_reasons': SubscriptionInstance.CancelReason}))
 
 
 def sendAccountCreatedNotifToAdmins(user):

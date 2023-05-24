@@ -125,7 +125,20 @@ def get_site_settings_from_default_site():
     """
 
     site = get_default_site()
-    return SiteSettings.for_site(site)
+    instance = SiteSettings.for_site(site)
+
+    # get from environment variables if nothing is defined in the database
+    for field in instance.fields:
+        db_value = getattr(instance, field, None)
+        if isinstance(db_value, str) and (db_value == "" or db_value == "None") or db_value == None:
+            # map to the corresponding env var key
+            envkey = "NEWSTREAM_"+field.upper()
+            settings_value = getattr(settings, envkey, None)
+            # set attribute of SiteSettings instance using value from env var
+            if settings_value is not None:
+                setattr(instance, field, settings_value)
+    
+    return instance
 
 
 def trans_next_url(next_url, lang_code):

@@ -16,8 +16,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'mailhog'
 EMAIL_PORT = '1025'
 
-DEFAULT_FROM_EMAIL = 'newstream@diffractive.io'
-DEFAULT_ADMIN_EMAIL = 'admin@diffractive.io'
+# used by allauth
+DEFAULT_FROM_EMAIL = site_settings_envvars('NEWSTREAM_DEFAULT_FROM_EMAIL')
 
 DATABASES = {
     'default': {

@@ -25,9 +25,9 @@ User = get_user_model()
 
 def donate(request):
     try:
-        siteSettings = get_site_settings_from_default_site()
+        site_settings = get_site_settings_from_default_site()
         form_template = 'donations/donation_details_form.html'
-        form_blueprint = siteSettings.donation_form
+        form_blueprint = site_settings.donation_form
         if not form_blueprint:
             raise Exception(_('Donation Form not yet set.'))
         if request.method == 'POST':
@@ -61,7 +61,7 @@ def donate(request):
                     temp_donation.save()
                 else:
                     temp_donation = TempDonation(
-                        is_test=siteSettings.sandbox_mode,
+                        is_test=site_settings.sandbox_mode,
                         form=form_blueprint,
                         gateway=payment_gateway,
                         is_amount_custom=is_amount_custom,
@@ -118,7 +118,7 @@ def register_signin(request):
 
 def confirm_donation(request):
     try:
-        siteSettings = get_site_settings_from_default_site()
+        site_settings = get_site_settings_from_default_site()
         tmpd = TempDonation.objects.get(pk=request.session.get('temp_donation_id', None))
         paymentMethod = displayGateway(tmpd)
         isGatewayHostedBool = isGatewayHosted(tmpd.gateway)
@@ -409,8 +409,8 @@ def my_onetime_donations(request):
     # previously deleted records should still be hidden even soft-delete mode is turned off afterwards
     donations = Donation.objects.filter(
         user=request.user, is_recurring=False, deleted=False).order_by('-donation_date')
-    siteSettings = get_site_settings_from_default_site()
-    return render(request, 'donations/my_onetime_donations.html', {'donations': donations, 'siteSettings': siteSettings})
+    site_settings = get_site_settings_from_default_site()
+    return render(request, 'donations/my_onetime_donations.html', {'donations': donations, 'site_settings': site_settings})
 
 
 @login_required
@@ -418,8 +418,8 @@ def my_recurring_donations(request):
     # deleted=False should be valid whether soft-delete mode is on or off
     subscriptions = Subscription.objects.filter(
         user=request.user, deleted=False).order_by('-subscription_created_at')
-    siteSettings = get_site_settings_from_default_site()
-    return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'siteSettings': siteSettings})
+    site_settings = get_site_settings_from_default_site()
+    return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'site_settings': site_settings})
 
 
 @login_required
@@ -431,9 +431,9 @@ def my_renewals(request, uuid):
             # find donations under all SubscriptionInstances under the same Subscription
             renewals = Donation.objects.filter(
                 subscription__parent=subscription, deleted=False).order_by('-donation_date')
-            siteSettings = get_site_settings_from_default_site()
+            site_settings = get_site_settings_from_default_site()
             # subscription details should be fetched from the latest instance
-            return render(request, 'donations/my_renewals.html', {'subscription': subscription.latest_instance, 'renewals': renewals, 'siteSettings': siteSettings})
+            return render(request, 'donations/my_renewals.html', {'subscription': subscription.latest_instance, 'renewals': renewals, 'site_settings': site_settings})
         else:
             raise PermissionError(_('You are not authorized to view renewals of subscription %(id)d.') % {'id': id})
     except PermissionError as e:

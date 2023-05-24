@@ -62,7 +62,7 @@ app.link('Recurring Donations').click()
 grabber.capture_screen('subscriptions', 'Recurring donations')
 
 rows = app.table('my-donations-table').row_values()
-assert rows[0][0] == 'USD $100.00'
+assert rows[0][0] == 'HKD $100.00'
 assert rows[0][1] == 'Monthly'
 assert rows[0][2][0:4] == 'sub_'
 assert rows[0][4] == 'Stripe'

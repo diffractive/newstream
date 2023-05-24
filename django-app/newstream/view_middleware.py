@@ -20,8 +20,8 @@ class DisableSocialLoginMiddleware:
     def __call__(self, request):
         # Code to be executed for each request before
         # the view (and later middleware) are called.
-        siteSettings = get_site_settings_from_default_site()
-        if not siteSettings.social_login_enabled:
+        site_settings = get_site_settings_from_default_site()
+        if not site_settings.social_login_enabled:
             # return 404 for social login urls
             if request.path_info in self.sociallogin_urls:
                 # todo: render nicer 404 templates

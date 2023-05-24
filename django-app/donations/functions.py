@@ -45,7 +45,7 @@ def getDonationEmail(donation):
 
 def isUpdateSubsFrequencyLimitationPassed(gatewayManager):
     site_settings = get_site_settings_from_default_site()
-    if site_settings.limit_fiveactions_per_fivemins:
+    if site_settings.donation_updates_rate_limiter:
         # get count of the actions carried out by the same donor in the last 5 minutes
         nowdt = datetime.now(dt_timezone.utc)
         fiveminsbf = nowdt - timedelta(minutes=5)
@@ -155,8 +155,8 @@ def temp_donation_meta_to_donation_meta(tmpd_metas):
 
 def displayGateway(instance):
     ''' instance can be either TempDonation, Donation or SubscriptionInstance'''
-    siteSettings = get_site_settings_from_default_site()
-    return getattr(siteSettings, instance.gateway.frontend_label_attr_name, instance.gateway.title)
+    site_settings = get_site_settings_from_default_site()
+    return getattr(site_settings, instance.gateway.frontend_label_attr_name, instance.gateway.title)
 
 
 def displayAmountWithCurrency(currency_code, amount, trim_decimals=False):

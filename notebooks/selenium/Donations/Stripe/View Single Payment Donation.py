@@ -59,7 +59,7 @@ app.link("header-donations").click()
 grabber.capture_screen('single_donations', 'My donations page')
 
 rows = app.table('my-donations-table').row_values()
-assert rows[0][0] == 'USD $100.00'
+assert rows[0][0] == 'HKD $100.00'
 assert rows[0][1] == 'One-time'
 assert rows[0][2][0:3] == 'ch_'
 assert rows[0][4] == 'Stripe'

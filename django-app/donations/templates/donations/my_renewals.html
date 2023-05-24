@@ -36,7 +36,7 @@
                 </tr>
                 <tr>
                     <td width="120">{{ donation|amount_with_currency }}</td>
-                    <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
+                    <td>{{ site_settings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
                 <tr>
                     <td>{{ donation.donation_frequency }}</td>
                     <td>{{ donation.donation_date|date:'j M Y' }}</td>
@@ -68,7 +68,7 @@
                 <td>{{ donation.donation_frequency }}</td>
                 <td>{{ donation.transaction_id }}</td>
                 <td>{{ donation.donation_date|date:'j M Y' }}</td>
-                <td>{{ siteSettings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
+                <td>{{ site_settings|get_attr:donation.gateway.frontend_label_attr_name }}</td>
                 <td>{{ donation.payment_status|title }}</td>
             </tr>
             {% endfor %}

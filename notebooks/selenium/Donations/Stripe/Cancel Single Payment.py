@@ -45,7 +45,7 @@ grabber.capture_screen('home_page', 'Home')
 app.link('Donation Form').click()
 grabber.capture_screen('donation_form', 'Donation Form')
 
-app.dropdown('id_donation_amount').select('USD $100')
+app.dropdown('id_donation_amount').select('HKD $100')
 app.input('id_email').fill(email)
 app.input('id_name').fill(name)
 app.dropdown('id_payment_gateway').select('Stripe')

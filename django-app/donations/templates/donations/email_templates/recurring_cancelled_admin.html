@@ -8,11 +8,11 @@
 {% block content %}
 <p style="{{ 'parag'|email_css }}">{% trans 'Hi Admins,' %}</p>
 <p style="{{ 'parag'|email_css }}">
-    {% if subscription.cancel_reason == cancel_reason.BY_DONOR %}
+    {% if subscription.cancel_reason == cancel_reasons.BY_DONOR %}
     {% trans 'This email is to inform you that a recurring donation has been cancelled by a donor on your website:' %}
-    {% elif subscription.cancel_reason == cancel_reason.BY_ADMIN %}
+    {% elif subscription.cancel_reason == cancel_reasons.BY_ADMIN %}
     {% trans 'This email is to inform you that a recurring donation has been cancelled by an admin on your website:' %}
-    {% elif subscription.cancel_reason == cancel_reason.PAYMENTS_FAILED %}
+    {% elif subscription.cancel_reason == cancel_reasons.PAYMENTS_FAILED %}
     {% trans 'This email is to inform you that a recurring donation has been cancelled due to repeated failed payments on your website:' %}
     {% else %}
     {% trans 'This email is to inform you that a recurring donation has been cancelled on your website:' %}

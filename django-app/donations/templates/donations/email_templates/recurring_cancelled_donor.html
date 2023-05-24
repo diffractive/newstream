@@ -12,11 +12,11 @@
     {% trans "Thanks very much for your recent support." %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    {% if subscription.cancel_reason == cancel_reason.BY_DONOR %}
+    {% if subscription.cancel_reason == cancel_reasons.BY_DONOR %}
     {% blocktrans with short_org_name='short_org_name'|site_settings %}Your recurring donation to {{ short_org_name }} has been cancelled at your request - no further payments will be processed.{% endblocktrans %}
-    {% elif subscription.cancel_reason == cancel_reason.BY_ADMIN %}
-    {% blocktrans with short_org_name='short_org_name'|site_settings %}Your recurring donation to {{ short_org_name }} has been cancelled by {{ short_org_name }} - no further payments will be processed.{% endblocktrans %}
-    {% elif subscription.cancel_reason == cancel_reason.PAYMENTS_FAILED %}
+    {% elif subscription.cancel_reason == cancel_reasons.BY_ADMIN %}
+    {% blocktrans with short_org_name='short_org_name'|site_settings %}Your recurring donation to {{ short_org_name }} has been cancelled by us - no further payments will be processed.{% endblocktrans %}
+    {% elif subscription.cancel_reason == cancel_reasons.PAYMENTS_FAILED %}
     {% blocktrans with short_org_name='short_org_name'|site_settings %}Your recurring donation to {{ short_org_name }} has been cancelled due to repeated failed payments - no further payments will be processed.{% endblocktrans %}
     {% else %}
     {% blocktrans with short_org_name='short_org_name'|site_settings %}Your recurring donation to {{ short_org_name }} has been cancelled - no further payments will be processed.{% endblocktrans %}

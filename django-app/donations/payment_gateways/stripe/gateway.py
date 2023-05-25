@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
 
-from donations.models import (Donation, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE,
+from donations.models import (Donation, DonationPaymentMeta, SubscriptionPaymentMeta, SubscriptionInstance, STATUS_COMPLETE,
     STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PAYMENT_FAILED)
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
@@ -165,9 +165,27 @@ class Gateway_Stripe(PaymentGatewayManager):
                     self.donation.payment_status = STATUS_COMPLETE
                     self.donation.save()
 
-                    # send the new recurring notifs to admins and donor as subscription is just active
-                    sendNewRecurringNotifToAdmins(self.donation.subscription)
-                    sendNewRecurringNotifToDonor(self.donation.subscription)
+                    # Update card flow
+                    try:
+                        spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='update_card')
+
+                        # Adjust next paying date with trials
+                        old_sub_id = spmeta.field_value
+                        self.adjust_payment_cycle_with_trial(old_sub_id)
+
+                        # send notif emails to admins and donor as a previously failed payment has now succeeded
+                        sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
+                        sendReactivatedPaymentNotifToDonor(self.donation.subscription)
+
+                        messages.add_message(self.request, messages.SUCCESS, _(
+                            'Your payment is successful. Recurring donation is resumed active.'))
+
+                        spmeta.delete()
+                    # Not part of the card update flow so a normal new recurring payment
+                    except SubscriptionPaymentMeta.DoesNotExist:
+                        # send the new recurring notifs to admins and donor as subscription is just active
+                        sendNewRecurringNotifToAdmins(self.donation.subscription)
+                        sendNewRecurringNotifToDonor(self.donation.subscription)
 
                 elif self.donation.subscription.recurring_status == STATUS_PAYMENT_FAILED:
                     self.donation.subscription.recurring_status = STATUS_ACTIVE
@@ -197,9 +215,14 @@ class Gateway_Stripe(PaymentGatewayManager):
             self.donation.subscription.recurring_status = STATUS_CANCELLED
             self.donation.subscription.save()
 
-            # email notifications here because cancellation might occur manually at the stripe dashboard
-            sendRecurringCancelledNotifToAdmins(self.donation.subscription)
-            sendRecurringCancelledNotifToDonor(self.donation.subscription)
+            # Dont send an email in update_card process
+            try:
+                spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='update_card')
+                spmeta.delete()
+            except SubscriptionPaymentMeta.DoesNotExist:
+                # email notifications here because cancellation might occur manually at the stripe dashboard
+                sendRecurringCancelledNotifToAdmins(self.donation.subscription)
+                sendRecurringCancelledNotifToDonor(self.donation.subscription)
 
             return HttpResponse(status=200)
 
@@ -338,3 +361,22 @@ class Gateway_Stripe(PaymentGatewayManager):
                 }
         else:
             raise ValueError(_('SubscriptionInstance object returned from stripe does not have valid pause_collection value'))
+
+    def adjust_payment_cycle_with_trial(self, old_sub_id):
+        initStripeApiKey()
+
+        failed_sub = SubscriptionInstance.objects.get(id=old_sub_id)
+        fail_spmeta = SubscriptionPaymentMeta.objects.filter(
+            subscription=failed_sub, field_key='stripe_subscription_period').order_by("created_at").last()
+
+        # period is written in the format ts-ts, so we want to split the string and get the end period
+        trial_end = fail_spmeta.field_value.split('-')[1]
+
+        try:
+            stripe.Subscription.modify(
+                self.donation.subscription.profile_id,
+                trial_end=trial_end,
+                proration_behavior='none'
+            )
+        except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+            raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))

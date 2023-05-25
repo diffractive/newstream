@@ -2,7 +2,7 @@ from django.urls import path
 
 from donations import views
 from donations.payment_gateways._2c2p.views import verify_2c2p_response, return_from_2c2p
-from donations.payment_gateways.stripe.views import create_checkout_session, verify_stripe_response, return_from_stripe, cancel_from_stripe
+from donations.payment_gateways.stripe.views import create_checkout_session, verify_stripe_response, return_from_stripe, cancel_from_stripe, return_from_stripe_from_card_update
 from donations.payment_gateways.paypal.views import create_paypal_transaction, verify_paypal_response, capture_paypal_order, return_from_paypal, cancel_from_paypal
 from donations.payment_gateways.paypal_legacy.views import verify_paypal_legacy_response
 
@@ -20,6 +20,7 @@ urlpatterns = [
     path('create-stripe-session/', create_checkout_session, name='create-stripe-session'),
     path('verify-stripe-response/', verify_stripe_response, name='verify-stripe-response'),
     path('return-from-stripe/', return_from_stripe, name='return-from-stripe'),
+    path('return-from-stripe-card-update/', return_from_stripe_from_card_update, name='return-from-stripe-card'),
     path('cancel-from-stripe/', cancel_from_stripe, name='cancel-from-stripe'),
     path('create-paypal-transaction/', create_paypal_transaction, name='create-paypal-transaction'),
     path('return-from-paypal/', return_from_paypal, name='return-from-paypal'),

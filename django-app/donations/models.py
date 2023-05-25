@@ -260,10 +260,15 @@ class Subscription(models.Model):
 
     @property
     def latest_instance(self):
-        # return the latest instance
+        # return the latest "active" instance if there is one
+        # we don't want to display info of processing or cancelled subscriptions that were cancelled in
+        # the process of creating new instances to replace the older ones
         # mainly for displaying the current subscription info
         # e.g. amount, currency, profile_id, status
-        return self.subscription_instances.all().order_by("subscribe_date", "created_at").last()
+        instances = self.subscription_instances.exclude(recurring_status__in=[STATUS_CANCELLED, STATUS_PROCESSING])
+        if not len(instances):
+            instances = self.subscription_instances.all().order_by("subscribe_date", "created_at")
+        return instances.last()
 
 
 class SubscriptionInstance(ClusterableModel):

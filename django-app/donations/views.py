@@ -15,7 +15,7 @@ from django.core.exceptions import PermissionDenied
 from newstream.functions import _exception, uuid4_str, get_site_settings_from_default_site
 from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
-from donations.models import DonationPaymentMeta, Subscription, SubscriptionInstance, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
+from donations.models import DonationPaymentMeta, Subscription, SubscriptionInstance, SubscriptionPaymentMeta, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
 from donations.forms import DONATION_DETAILS_FIELDS, DonationDetailsForm
 from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, extract_temp_donation_meta, displayGateway, temp_donation_meta_to_donation_meta
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml, isGatewayHosted
@@ -403,7 +403,67 @@ def edit_recurring(request, id):
 
 @login_required
 def confirm_update_card_details(request, id):
-    subscription = get_object_or_404(SubscriptionInstance, id=id)
+    """
+    We cancel a subscription and start the process of creating a new subscription.
+    """
+    try:
+        subscription = get_object_or_404(SubscriptionInstance, id=id)
+        if subscription.user == request.user:
+            if request.method == 'POST':
+                # proceed with the rest of the payment procedures
+                # create processing donation
+                transaction_id = gen_transaction_id(gateway=subscription.gateway)
+                form = Donation.objects.filter(subscription=subscription).order_by('id').first().form
+                donation = Donation(
+                    is_test=subscription.is_test,
+                    transaction_id=transaction_id,
+                    user=request.user,
+                    form=form,
+                    gateway=subscription.gateway,
+                    is_recurring=True,
+                    donation_amount=subscription.recurring_amount,
+                    currency=subscription.currency,
+                    payment_status=STATUS_PROCESSING,
+                    donation_date=timezone.now(),
+                )
+
+                instance = SubscriptionInstance(
+                    is_test=subscription.is_test,
+                    profile_id=uuid4_str(),
+                    user=request.user,
+                    parent=subscription.parent,
+                    gateway=subscription.gateway,
+                    recurring_amount=subscription.recurring_amount,
+                    currency=subscription.currency,
+                    recurring_status=STATUS_PROCESSING,
+                    subscribe_date=timezone.now(),
+                    created_by=request.user
+                )
+                instance.save()
+
+                # Save update_card with the subscription id, so that we can fetch information from the failed payment
+                spmeta = SubscriptionPaymentMeta(
+                    subscription=instance, field_key='update_card', field_value=id)
+                spmeta.save()
+
+                # link subscription to the donation
+                donation.subscription = instance
+
+                donation.save()
+
+                # redirect to payment_gateway
+                gatewayManager = InitPaymentGateway(
+                    request, donation=donation)
+                return gatewayManager.redirect_to_gateway_url()
+        else:
+            raise PermissionError(_('You are not authorized to edit subscription %(id)d.') % {'id': id})
+    except PermissionError as e:
+        _exception(str(e))
+        messages.add_message(request, messages.ERROR, str(e))
+        return redirect('donations:my-recurring-donations')
+    except (ValueError, RuntimeError, Exception) as e:
+        _exception(str(e))
+        messages.add_message(request, messages.ERROR, str(e))
     return render(request, 'donations/update_payment_details.html', {'subscription': subscription})
 
 @login_required

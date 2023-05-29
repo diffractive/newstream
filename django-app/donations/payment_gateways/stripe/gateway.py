@@ -198,9 +198,12 @@ class Gateway_Stripe(PaymentGatewayManager):
             if self.donation.subscription.recurring_status != STATUS_CANCELLED:
                 try:
                     invoice = stripe.Invoice.retrieve(self.subscription_obj["latest_invoice"])
-                    # under current Stripe settings, Stripe cancels subscriptions which failed 3 payment retries,
-                    # thus including the first failed payment, there are 4 attempts in total
-                    if invoice.amount_paid == 0 and invoice.attempt_count == 4 and invoice.auto_advance == False:
+                    # on Stripe dashboard, admins can configure the number of retries for failed invoices (0-3 times) (doc link: https://stripe.com/docs/billing/subscriptions/overview#settings)
+                    # so we shouldn't use invoice.attempt_count = {fixed number} as a criteria for checking if cancelled reason is due to failed payments
+                    # since we know that when the invoice is still retrying, invoice.next_payment_attempt should be a timestamp
+                    # and if invoice is out of retries, invoice.next_payment_attempt should be null
+                    # so the criteria should consist of:
+                    if invoice.amount_paid == 0 and invoice.next_payment_attempt == None and invoice.auto_advance == False:
                         self.donation.subscription.cancel_reason = SubscriptionInstance.CancelReason.PAYMENTS_FAILED
                     # else case not handled here since this event could be triggered by donor/admin as well
                     # we already saved the reason on Newstream's side if it was cancelled by donor/admin

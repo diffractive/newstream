@@ -29,6 +29,7 @@ from functions import create_subscription
 from stripe_api import Stripe
 
 import secrets
+import time
 # -
 clear_all_emails()
 randstr = secrets.token_hex(6).upper()
@@ -105,7 +106,11 @@ rows = app.table('my-donations-table').row_values()
 assert rows[0][5] == 'Payment failed'
 
 # +
-# There should be four emails sent, rwo for admins two for the user
+# Used for testing
+# data['email']
+
+# +
+# There should be four emails sent, two for admins two for the user
 
 wait_for_email(email_count+3)
 emails = get_emails(0, 4)
@@ -131,20 +136,28 @@ email_count += 4
 # ## Fix payment method
 
 # Fix the payment method and create another payment
-stripe.update_to_working_card(sub_id)
-
+# stripe.update_to_working_card(sub_id)
 app.label('md2_dropdown-toggle-checkbox1').click()
-app.button('edit-recurring-donation-wide').click()
-app.label('Change Billing Cycle to Now').click()
-app.button('Update Recurring Donation').click()
-grabber.capture_screen('update_billing_cycle_again', 'Update billing cycle again')
+grabber.capture_screen('update_payment_method', 'Update payment method option')
 
-# Wait for popups to go down
-WebDriverWait(driver, 10).until(
-    EC.invisibility_of_element((By.XPATH, '//p[text()="Your recurring donation via Stripe is set to bill on today\'s date every month."]'))
-)
-app.link('Back to My Donations').click()
-grabber.capture_screen('successful_payment', 'Payment succeeded')
+app.button('update-payment-method-wide').click()
+grabber.capture_screen('confirm_update_payment_method', 'Confirm update details')
+
+app.button('Proceed to update card details').click()
+wait_element(driver, '//input[@id="cardNumber"]')
+grabber.capture_screen('payment_gateway', 'Payment gateway')
+
+app.input('cardNumber').fill(data['card_number'])
+app.input('cardExpiry').fill(data['card_expiry'])
+app.input('cardCvc').fill(data['cvc'])
+app.input('billingName').fill(data['name'])
+app.button('Pay').click()
+grabber.capture_screen('success_message', 'Payment renewed')
+
+# TEMP FIX: we need to wait for the status to be updated then refresh page
+time.sleep(2)
+app.go('en/donations/my-recurring-donations/')
+grabber.capture_screen('recurring_payments_refresh', 'Recurring payment refresh')
 
 rows = app.table('my-donations-table').row_values()
 assert rows[0][5] == 'Active'
@@ -155,22 +168,20 @@ grabber.capture_screen('all_renewals', 'All renewals')
 
 # +
 # There should be two emails sent, one for admins one for the user
-wait_for_email(email_count+3)
-emails = get_emails(0, 4)
-user_email_1 = 'Your Recurring Donation is Rescheduled'
-admin_email_1 = 'A Recurring Donation is Rescheduled'
-user_email_2 = 'Your Monthly Payment is Active again'
-admin_email_2 = 'A Recurring Donation has been reactivated'
+wait_for_email(email_count+1)
+emails = get_emails(0, 2)
+user_email = 'Your Monthly Payment is Active again'
+admin_email = 'A Recurring Donation has been reactivated'
 
 
 # Email order is not guaranteed
-email_titles = [admin_email_1, user_email_1, admin_email_2, user_email_2]
+email_titles = [admin_email, user_email]
 for email_content in emails:
     email_title = email_content['Content']['Headers']['Subject'][0]
     email_recipient = email_content['Content']['Headers']['To'][0]
 
     assert email_title in email_titles, f'Unexpected e-mail found: {email_title}'
-    if email_title in [user_email_1, user_email_2]:
+    if email_title == user_email:
         assert email_recipient == data['email'], \
             f"Unexpected e-mail recipient {email_recipient}, expected: {data['email']}"
     email_titles.remove(email_title)

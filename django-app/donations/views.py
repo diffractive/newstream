@@ -15,7 +15,7 @@ from django.core.exceptions import PermissionDenied
 from newstream.functions import _exception, uuid4_str, get_site_settings_from_default_site
 from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
-from donations.models import DonationPaymentMeta, Subscription, SubscriptionInstance, SubscriptionPaymentMeta, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED
+from donations.models import DonationPaymentMeta, Subscription, SubscriptionInstance, SubscriptionPaymentMeta, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED, STATUS_PAYMENT_FAILED
 from donations.forms import DONATION_DETAILS_FIELDS, DonationDetailsForm
 from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, extract_temp_donation_meta, displayGateway, temp_donation_meta_to_donation_meta
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml, isGatewayHosted
@@ -482,6 +482,20 @@ def my_recurring_donations(request):
     subscriptions = Subscription.objects.filter(
         user=request.user, deleted=False).order_by('-subscription_created_at')
     site_settings = get_site_settings_from_default_site()
+
+    # Add success mesasge if returning from updated-card flow
+    if request.session.get('updated-card'):
+        messages.add_message(request, messages.SUCCESS, _(
+                            'Your payment is successful. Recurring donation is resumed active.'))
+        del request.session['updated-card']
+
+    # Display error message if theres a payment failure
+    for sub in subscriptions:
+        if sub.latest_instance.recurring_status == STATUS_PAYMENT_FAILED:
+            messages.add_message(request, messages.ERROR, _(
+                'A recent payment of your recurring donation has failed. Please update the corresponding payment method.'
+            ))
+            break
     return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'site_settings': site_settings})
 
 

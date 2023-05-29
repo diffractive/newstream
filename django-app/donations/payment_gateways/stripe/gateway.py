@@ -177,9 +177,6 @@ class Gateway_Stripe(PaymentGatewayManager):
                         sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
                         sendReactivatedPaymentNotifToDonor(self.donation.subscription)
 
-                        messages.add_message(self.request, messages.SUCCESS, _(
-                            'Your payment is successful. Recurring donation is resumed active.'))
-
                         spmeta.delete()
                     # Not part of the card update flow so a normal new recurring payment
                     except SubscriptionPaymentMeta.DoesNotExist:

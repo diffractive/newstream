@@ -91,4 +91,26 @@ class Stripe:
         requests.post(self.api_url + f'payment_methods/{pm_id}', auth=self.auth, json={"customer": cus_id})
         requests.post(self.api_url + f'customers/{cus_id}', auth=self.auth, json={"invoice_settings": {'default_payment_method': pm_id}})
 
+    def new_invoice_on_subscription(self, sub_id):
+        """
+        Takes a subscription and pays the next invoice for the subscription
+        """
+        # We get subscription to get customer_id
+        sub = requests.get(self.api_url + f'subscriptions/{sub_id}', auth=self.auth).json()
+        cus_id = sub['customer']
+
+        # Create the next invoice on the subscription
+        inv = requests.post(self.api_url + f'invoices', auth=self.auth, json={"customer": cus_id, "subscription": sub_id}).json()
+        # Trigger payment of the invoice
+        inv = requests.post(self.api_url + f'invoices/{inv["id"]}/pay', auth=self.auth).json()
+
+        return inv
+
+    def retry_open_invoice(self, inv_id):
+        """
+        Takes a invoice id and retries payment of the open invoice
+        """
+        inv = requests.post(self.api_url + f'invoices/{inv_id}/retry', auth=self.auth).json()
+
+        return inv
 

@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
 
-from donations.models import (Donation, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE,
+from donations.models import (Donation, DonationPaymentMeta, SubscriptionInstance, SubscriptionPaymentMeta, STATUS_COMPLETE,
     STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PAYMENT_FAILED)
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings

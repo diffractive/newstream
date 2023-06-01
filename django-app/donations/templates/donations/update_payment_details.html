@@ -7,11 +7,11 @@
 
 {% block content %}
 
-<div class="flex-1 p-4 text-left font-semibold bg-primary-dark text-white">{% trans 'Update card details' %}</div>
+<div class="flex-1 p-6 text-left font-semibold bg-primary-dark text-white">{% trans 'Update card details' %}</div>
 
 {# Form Area #}
 <form method='POST' action='' class="action-form">
-    <div class="flex flex-row justify-center mb-4">
+    <div class="flex flex-row justify-center mb-4 container-tight w-full">
         <div class="donation-details-section w-full">
 
             {% csrf_token %}

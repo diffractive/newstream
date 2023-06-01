@@ -81,7 +81,8 @@ class Gateway_Stripe(PaymentGatewayManager):
 
         # Event: invoice.paid (for subscriptions)
         if self.event['type'] == EVENT_INVOICE_PAID and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):
-            if self.invoice.status == 'paid':
+            # We don't want to save invoices created by trials
+            if self.invoice.status == 'paid' and self.invoice.amount_paid > 0:
                 _debug("[stripe recurring] Invoice confirmed paid")
                 # check if subscription has one or more invoices to determine it's a first time or renewal payment
                 # self.subscription_obj here is the stripe subscription object

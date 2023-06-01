@@ -217,7 +217,25 @@ class Gateway_Stripe(PaymentGatewayManager):
         # Event: customer.subscription.deleted
         # self.donation is not initialized here, reason refer to Factory_Stripe.initGatewayByVerification
         if self.event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_DELETED and hasattr(self, 'subscription_obj'):
-            # update subscription recurring_status
+            # only check for the all retries failed scenario if subscription status isn't cancelled (can't simply match status with payment_failed because the live site hasn't been handling invoice.payment_failed events, which sets newstream subscription status to payment_failed)
+            # if subscription is cancelled by donor/admin, status has been set to cancelled already
+            if self.donation.subscription.recurring_status != STATUS_CANCELLED:
+                try:
+                    invoice = stripe.Invoice.retrieve(self.subscription_obj["latest_invoice"])
+                    # on Stripe dashboard, admins can configure the number of retries for failed invoices (0-3 times) (doc link: https://stripe.com/docs/billing/subscriptions/overview#settings)
+                    # so we shouldn't use invoice.attempt_count = {fixed number} as a criteria for checking if cancelled reason is due to failed payments
+                    # since we know that when the invoice is still retrying, invoice.next_payment_attempt should be a timestamp
+                    # and if invoice is out of retries, invoice.next_payment_attempt should be null
+                    # so the criteria should consist of:
+                    if invoice.amount_paid == 0 and invoice.next_payment_attempt == None and invoice.auto_advance == False:
+                        self.donation.subscription.cancel_reason = SubscriptionInstance.CancelReason.PAYMENTS_FAILED
+                    # else case not handled here since this event could be triggered by donor/admin as well
+                    # we already saved the reason on Newstream's side if it was cancelled by donor/admin
+                except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+                    raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
+            
+            # note that admins can also cancel subscriptions manually at the stripe dashboard
+            # set subscription recurring_status to cancelled
             self.donation.subscription.recurring_status = STATUS_CANCELLED
             self.donation.subscription.save()
 
@@ -227,7 +245,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
                 spmeta.delete()
             except SubscriptionPaymentMeta.DoesNotExist:
-                # email notifications here because cancellation might occur manually at the stripe dashboard
+                # send email notifications here for all other cancellation scenarios
                 sendRecurringCancelledNotifToAdmins(self.donation.subscription)
                 sendRecurringCancelledNotifToDonor(self.donation.subscription)
 
@@ -309,7 +327,7 @@ class Gateway_Stripe(PaymentGatewayManager):
             else:
                 raise RuntimeError(_('Cannot update stripe subscription. Stripe API returned none.'))
 
-    def cancel_recurring_payment(self):
+    def cancel_recurring_payment(self, reason=None):
         if not self.subscription:
             raise ValueError(_('SubscriptionInstance object is None. Cannot cancel recurring payment.'))
         initStripeApiKey()
@@ -322,6 +340,7 @@ class Gateway_Stripe(PaymentGatewayManager):
         if cancelled_subscription and cancelled_subscription.status == 'canceled':
             # update newstream model
             self.subscription.recurring_status = STATUS_CANCELLED
+            self.subscription.cancel_reason = reason
             self.subscription.save()
         else:
             raise RuntimeError(_('SubscriptionInstance object returned from stripe having status %(status)s instead of canceled') % {'status': cancelled_subscription.status})

@@ -52,6 +52,10 @@ class Input:
     def fill(self, value):
         self.element.send_keys(value)
 
+    # an input element could also be type="button"
+    def click(self):
+        self.element.click()
+
     def clear(self):
         self.element.clear()
 

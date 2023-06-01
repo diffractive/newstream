@@ -119,6 +119,12 @@
                         <dt>{{ fields.linked_user_deleted.label }}</dt>
                         <dd>{{ fields.linked_user_deleted.value }}</dd>
                     </div>
+                    {% if subscription.recurring_status == status_cancelled %}
+                    <div class="column-1-2">
+                        <dt>{{ fields.cancel_reason.label }}</dt>
+                        <dd>{{ fields.cancel_reason.value }}</dd>
+                    </div>
+                    {% endif %}
                 </div>
                 {% endif %}
                 {% endblock %}
@@ -178,7 +184,7 @@
                 <h2>{% trans 'Manually set subscription status' %}</h2>
                 <form action="{% url 'internal-set-subscription-status' %}" method="POST">
                     {% csrf_token %}
-                    <input type="hidden" name="id" value="{{fields.id.value}}">
+                    <input type="hidden" name="id" id="admin-manual-set-status" value="{{fields.id.value}}">
                     <p>Set Subscription status as:</p>
                     <div class="col3" style="padding-left: 0px;">
                         <div class="dropdown dropdown-button match-width">
@@ -202,7 +208,7 @@
                 <form action="{% url 'internal-toggle-subscription' %}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" name="id" value="{{fields.id.value}}">
-                    <input type="submit" class="button" value="{% if subscription.recurring_status == status_active %}{% trans 'Pause Subscription' %}{% else %}{% trans 'Resume Subscription' %}{% endif %}">
+                    <input type="submit" class="button" id="admin-toggle-sub" value="{% if subscription.recurring_status == status_active %}{% trans 'Pause Subscription' %}{% else %}{% trans 'Resume Subscription' %}{% endif %}">
                     <br>
                     <small class="caution-text">*This action communicates with the payment gateway*</small>
                 </form>
@@ -220,7 +226,7 @@
                 <form action="{% url 'internal-cancel-subscription' %}" method="POST">
                     {% csrf_token %}
                     <input type="hidden" name="id" value="{{fields.id.value}}">
-                    <input type="submit" class="button" value="{% trans 'Cancel Subscription' %}">
+                    <input type="submit" class="button" id="admin-cancel-sub" value="{% trans 'Cancel Subscription' %}">
                     <br>
                     <small class="caution-text">*This action communicates with the payment gateway*</small>
                 </form>

@@ -28,6 +28,8 @@ from components import Application
 from functions import create_subscription
 
 import secrets
+import time
+from stripe_api import Stripe
 # -
 
 clear_all_emails()
@@ -47,6 +49,7 @@ email_count = get_email_count()
 driver = get_webdriver('portal')
 grabber = ScreenGrabber(driver)
 app = Application(driver)
+stripe = Stripe()
 
 create_subscription(driver, app, data)
 # 4 emails are delivered
@@ -76,27 +79,32 @@ grabber.capture_screen('subscriptions', 'Recurring donations')
 
 rows = app.table('my-donations-table').row_values()
 assert rows[0][5] == 'Active'
+# Get subscription id and update payment method so that the payment fails
+sub_id = rows[0][2]
+stripe.update_to_failing_card(sub_id)
+invoice_response = stripe.new_invoice_on_subscription(sub_id)
+inv_id = invoice_response["id"]
 
-app.label('md2_dropdown-toggle-checkbox1').click()
-grabber.capture_screen('open_menu', 'Open subscription menu')
+# retry the max retry number for failed payments
+# depends on the number configured on localstripe via the env variable MAX_PAYMENT_FAILURE_RETRIES
+# if no env variable is provided, default is 3 times
+for i in range(3):
+    inv = stripe.retry_open_invoice(inv_id)
+    # give time for webhooks events to arrive before the customer.subscription.deleted webhook
+    time.sleep(1)
 
-app.button('cancel-recurring-donation-wide').click()
-grabber.capture_screen('cancel_subscription_popup', 'Cancel subscription popup')
-
-app.button('confirm-ok').click()
-wait_element(driver, '//h4[text()="Recurring donation cancelled!"]')
-grabber.capture_screen('cancel_subscription_popup_confirm', 'Cancel subscription popup confirm')
-
-app.button('confirm-ok').click()
+# wait for some more time for customer.subscription.deleted to have arrived
+time.sleep(2)
+app.go(url="donations/my-recurring-donations/")
 
 rows = app.table('my-donations-table').row_values()
 assert rows[0][5] == 'Cancelled'
-grabber.capture_screen('cancel_subscription', 'Subscription has been cancelled')
-
+grabber.capture_screen('cancelled_subscription', 'Subscription has been cancelled')
 
 # +
-# There should be two emails sent, one for admins one for the user
-wait_for_email(email_count+1)
+# There should be at least 8 emails sent (6 for the 1st payment failure and the 2 retries following, and 2 for the subscription cancelled)
+# Because the last pair of payment failed emails might not be seen if customer.subscription.deleted arrived first
+wait_for_email(email_count+7)
 emails = get_emails(0, 2)
 user_email = 'Your Recurring Donation is Cancelled'
 admin_email = 'A Recurring Donation is cancelled'
@@ -111,11 +119,11 @@ for email_content in emails:
     if email_title == user_email:
         assert email_recipient == data['email'], \
             f"Unexpected e-mail recipient {email_recipient}, expected: {data['email']}"
-        assert "has been cancelled at your request" in email_content['Content']['Body'], \
-            f"Content does not contain string 'has been cancelled at your request'."
+        assert "has been cancelled due to repeated failed payments" in email_content['Content']['Body'], \
+            f"Content does not contain string 'has been cancelled due to repeated failed payments'."
     if email_title == admin_email:
-        assert "has been cancelled by a donor" in email_content['Content']['Body'], \
-            f"Content does not contain string 'has been cancelled by a donor'."
+        assert "has been cancelled due to repeated failed payments" in email_content['Content']['Body'], \
+            f"Content does not contain string 'has been cancelled due to repeated failed payments'."
     email_titles.remove(email_title)
 # -
 

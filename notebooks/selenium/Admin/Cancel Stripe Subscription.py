@@ -42,6 +42,10 @@ data = {
     "card_expiry": '1133',
     "cvc": '123'
 }
+admin = {
+    "email": "newstream@test.local",
+    "password": "newstream"
+}
 email_count = get_email_count()
 
 driver = get_webdriver('portal')
@@ -54,47 +58,44 @@ wait_for_email(email_count + 3)
 email_count += 4
 grabber.capture_screen('thank_you', 'Donation created')
 
-subject = "Please Confirm Your Email Address"
-reg_str = "(?P<url>http://app.newstream.local:8000/en/accounts/confirm-email/[^/]*/)"
-url = get_link_by_email_subject_and_regex(subject, reg_str)
-# get_link_by_email_subject_and_regex deletes the email
-email_count -= 1
-driver.get(url)
-grabber.capture_screen('email_confirm', 'Confirm email')
-
-app.button('Confirm').click()
-grabber.capture_screen('email_confirmed', 'Email confirmed')
-
+# logout test user
 app.label('dropdown-toggle-checkbox').click()
-grabber.capture_screen('expanded_menu', 'Expanded menu')
+grabber.capture_screen('user_menu_expanded', 'Expanded user menu')
 
-app.link("header-donations").click()
-grabber.capture_screen('single_donations', 'My donations page')
+app.link("header-logout").click()
+grabber.capture_screen('logged_out', 'Logged out')
 
-app.link('Recurring Donations').click()
-grabber.capture_screen('subscriptions', 'Recurring donations')
+# login into backend
+app.go(url="admin")
+app.input('id_username').fill(admin["email"])
+app.input('id_password').fill(admin["password"])
+grabber.capture_screen('filled_login_form', 'Filled Login Form')
 
-rows = app.table('my-donations-table').row_values()
-assert rows[0][5] == 'Active'
+app.button('button button-longrunning').click()
+grabber.capture_screen('logged_in', 'Logged in')
 
-app.label('md2_dropdown-toggle-checkbox1').click()
-grabber.capture_screen('open_menu', 'Open subscription menu')
+# go to the first subscriptions detail page
+app.go(url="admin/donations/subscriptioninstance/")
+top_sub = driver.find_element(By.XPATH, f'//table[contains(@class, "listing")]/tbody/tr')
+sub_id = top_sub.get_attribute('data-object-pk')
+app.go(url="admin/donations/subscriptioninstance/inspect/%s/" % sub_id)
+grabber.capture_screen('subscription_details', 'Subscription Details page')
 
-app.button('cancel-recurring-donation-wide').click()
-grabber.capture_screen('cancel_subscription_popup', 'Cancel subscription popup')
+# go to actions tab
+app.link("#tab-actions").click()
+WebDriverWait(driver, 10).until(
+    EC.visibility_of(app.input("admin-cancel-sub").element)
+)
+grabber.capture_screen('actions_tab', 'Actions Tab')
 
-app.button('confirm-ok').click()
-wait_element(driver, '//h4[text()="Recurring donation cancelled!"]')
-grabber.capture_screen('cancel_subscription_popup_confirm', 'Cancel subscription popup confirm')
+# cancel the subscription
+app.input("admin-cancel-sub").click()
+# Wait for popup to be visible
+WebDriverWait(driver, 10).until(
+    EC.visibility_of(driver.find_element(By.XPATH, "//li[text()[contains(.,'Subscription %s status is cancelled.')]]" % sub_id))
+)
+grabber.capture_screen('subscription_cancelled', 'Subscription Cancelled')
 
-app.button('confirm-ok').click()
-
-rows = app.table('my-donations-table').row_values()
-assert rows[0][5] == 'Cancelled'
-grabber.capture_screen('cancel_subscription', 'Subscription has been cancelled')
-
-
-# +
 # There should be two emails sent, one for admins one for the user
 wait_for_email(email_count+1)
 emails = get_emails(0, 2)
@@ -111,13 +112,12 @@ for email_content in emails:
     if email_title == user_email:
         assert email_recipient == data['email'], \
             f"Unexpected e-mail recipient {email_recipient}, expected: {data['email']}"
-        assert "has been cancelled at your request" in email_content['Content']['Body'], \
-            f"Content does not contain string 'has been cancelled at your request'."
+        assert "has been cancelled by us" in email_content['Content']['Body'], \
+            f"Content does not contain string 'has been cancelled by us'."
     if email_title == admin_email:
-        assert "has been cancelled by a donor" in email_content['Content']['Body'], \
-            f"Content does not contain string 'has been cancelled by a donor'."
+        assert "has been cancelled by an admin" in email_content['Content']['Body'], \
+            f"Content does not contain string 'has been cancelled by an admin'."
     email_titles.remove(email_title)
-# -
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
 

@@ -64,6 +64,8 @@ services:
 
   localstripe:
     image: adrienverge/localstripe:latest
+    environment:
+      MAX_PAYMENT_FAILURE_RETRIES: 3
     ports:
       - 8420:8420
     networks:

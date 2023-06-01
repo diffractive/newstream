@@ -81,17 +81,18 @@ class Gateway_Stripe(PaymentGatewayManager):
 
         # Event: invoice.paid (for subscriptions)
         if self.event['type'] == EVENT_INVOICE_PAID and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):
-            # We don't want to save invoices created by trials
+            # We don't want to save trial invoices as new renewals
             if self.invoice.status == 'paid' and self.invoice.amount_paid > 0:
                 _debug("[stripe recurring] Invoice confirmed paid")
                 # check if subscription has one or more invoices to determine it's a first time or renewal payment
                 # self.subscription_obj here is the stripe subscription object
                 try:
-                    invoices = stripe.Invoice.list(subscription=self.subscription_obj.id)
+                    # do not include trial invoice here
+                    invoices = [inv for inv in stripe.Invoice.list(subscription=self.subscription_obj.id) if inv.amount_paid > 0]
                 except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
                     raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
                 # _debug("Stripe: Subscription {} has {} invoices.".format(self.subscription_obj.id, len(invoices['data'])))
-                if len(invoices['data']) == 1:
+                if len(invoices) == 1:
                     _debug("[stripe recurring] First time subscription")
                     # save charge id as donation.transaction_id
                     self.donation.transaction_id = self.invoice.charge
@@ -102,7 +103,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                     dpmeta = DonationPaymentMeta(
                         donation=self.donation, field_key='stripe_invoice_number', field_value=self.invoice.number)
                     dpmeta.save()
-                elif len(invoices['data']) > 1:
+                elif len(invoices) > 1:
                     _debug("[stripe recurring] About to add renewal donation")
                     # create a new donation record + then send donation receipt to user
                     # self.donation is the first donation made for a subscription
@@ -136,7 +137,9 @@ class Gateway_Stripe(PaymentGatewayManager):
                 spmeta.save()
 
                 return HttpResponse(status=200)
-
+            elif self.invoice.status == 'paid' and self.invoice.amount_paid == 0:
+                # just skip trial invoices
+                return HttpResponse(status=200)
         # Event: invoice.payment_failed
         if self.event['type'] == EVENT_INVOICE_PAYMENT_FAILED and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):
             # We don't want to update processing failures or cancelled subscriptions
@@ -202,6 +205,11 @@ class Gateway_Stripe(PaymentGatewayManager):
                     self.donation.subscription.save()
 
                 # price changes events should goes through the if-else block and returns 200 right here
+                return HttpResponse(status=200)
+            elif self.subscription_obj['status'] == 'trialing':
+                # trial period is for us to adjust the new subscription instance
+                # to the same billing date as the old instance, no need to update
+                # the Newstream subscription object status to trialing for now
                 return HttpResponse(status=200)
             else:
                 return HttpResponse(status=400)

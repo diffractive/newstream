@@ -249,6 +249,7 @@ def cancelled(request):
         donation.save()
         if donation.subscription:
             donation.subscription.recurring_status = STATUS_CANCELLED
+            donation.subscription.cancel_reason = SubscriptionInstance.CancelReason.DECLINED_CHECKOUT
             donation.subscription.save()
         # logs user in
         if donation.user:
@@ -303,7 +304,7 @@ def cancel_recurring(request):
             if subscription_instance.user == request.user:
                 gatewayManager = InitPaymentGateway(
                     request, subscription=subscription_instance)
-                gatewayManager.cancel_recurring_payment()
+                gatewayManager.cancel_recurring_payment(reason=SubscriptionInstance.CancelReason.BY_DONOR)
                 # add to the update actions log
                 addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL)
                 return JsonResponse({'status': 'success', 'button-text': str(_('View all renewals')), 'recurring-status': str(_(STATUS_CANCELLED.capitalize())), 'button-href': reverse('donations:my-renewals', kwargs={'uuid': subscription_instance.parent.uuid})})

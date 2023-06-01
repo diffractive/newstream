@@ -109,6 +109,8 @@ class Stripe:
     def retry_open_invoice(self, inv_id):
         """
         Takes a invoice id and retries payment of the open invoice
+        This is a custom-made endpoint for localstripe for testing convenience,
+        which doesn't exist on real Stripe
         """
         inv = requests.post(self.api_url + f'invoices/{inv_id}/retry', auth=self.auth).json()
 

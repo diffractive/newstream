@@ -104,7 +104,7 @@ grabber.capture_screen('cancelled_subscription', 'Subscription has been cancelle
 # +
 # There should be at least 8 emails sent (6 for the 1st payment failure and the 2 retries following, and 2 for the subscription cancelled)
 # Because the last pair of payment failed emails might not be seen if customer.subscription.deleted arrived first
-wait_for_email(email_count+1)
+wait_for_email(email_count+7)
 emails = get_emails(0, 2)
 user_email = 'Your Recurring Donation is Cancelled'
 admin_email = 'A Recurring Donation is cancelled'

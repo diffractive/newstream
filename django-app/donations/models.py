@@ -265,7 +265,7 @@ class Subscription(models.Model):
         # the process of creating new instances to replace the older ones
         # mainly for displaying the current subscription info
         # e.g. amount, currency, profile_id, status
-        instances = self.subscription_instances.exclude(recurring_status__in=[STATUS_CANCELLED, STATUS_PROCESSING])
+        instances = self.subscription_instances.exclude(recurring_status__in=[STATUS_CANCELLED, STATUS_PROCESSING]).order_by("subscribe_date", "created_at")
         if not len(instances):
             instances = self.subscription_instances.all().order_by("subscribe_date", "created_at")
         return instances.last()

@@ -112,10 +112,10 @@ def create_checkout_session(request):
         # Update card flow
         if donation.is_recurring:
             try:
-                # If we have the update_card metadata we want to change the redirect url
-                SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='update_card')
+                # If we have the old_instance_id metadata we want to change the redirect url
+                SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='old_instance_id')
 
-                success_url = request.build_absolute_uri(reverse('donations:return-from-stripe-card'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'
+                success_url = request.build_absolute_uri(reverse('donations:return-from-stripe-card-update'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'
                 session_kwargs['success_url'] = success_url
             except SubscriptionPaymentMeta.DoesNotExist:
                 pass
@@ -288,9 +288,9 @@ def return_from_stripe_from_card_update(request):
                 parent = gatewayManager.donation.subscription.parent
                 instance = SubscriptionInstance.objects.get(parent=parent, recurring_status=STATUS_PAYMENT_FAILED)
 
-                # Save update_card with the subscription id so that we don't send emails
+                # Save old_instance_id with the subscription id so that we don't send emails
                 spmeta = SubscriptionPaymentMeta(
-                    subscription=instance, field_key='update_card', field_value=instance.id)
+                    subscription=instance, field_key='old_instance_id', field_value=instance.id)
                 spmeta.save()
 
                 old_gateway = Factory_Stripe.initGateway(request, None, instance)

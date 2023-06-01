@@ -167,7 +167,7 @@ class Gateway_Stripe(PaymentGatewayManager):
 
                     # Update card flow
                     try:
-                        spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='update_card')
+                        spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
 
                         # Adjust next paying date with trials
                         old_sub_id = spmeta.field_value
@@ -212,9 +212,10 @@ class Gateway_Stripe(PaymentGatewayManager):
             self.donation.subscription.recurring_status = STATUS_CANCELLED
             self.donation.subscription.save()
 
-            # Dont send an email in update_card process
+            # Dont send an email in update card process
             try:
-                spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='update_card')
+                # This value only exists in the update card process
+                spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
                 spmeta.delete()
             except SubscriptionPaymentMeta.DoesNotExist:
                 # email notifications here because cancellation might occur manually at the stripe dashboard

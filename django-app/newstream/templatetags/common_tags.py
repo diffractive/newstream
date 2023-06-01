@@ -5,7 +5,7 @@ from django.utils.safestring import mark_safe
 
 from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
 from newstream.functions import get_site_name, get_site_url, printvars, get_site_settings_from_default_site
-from donations.models import STATUS_ACTIVE, STATUS_CANCELLED, STATUS_PAYMENT_FAILED, STATUS_PAUSED
+from donations.models import STATUS_ACTIVE, STATUS_CANCELLED, STATUS_PAYMENT_FAILED, STATUS_PAUSED, STATUS_PROCESSING
 
 register = template.Library()
 
@@ -188,6 +188,8 @@ def status_icon(status):
         return 'paused-icon'
     elif status == STATUS_PAYMENT_FAILED:
         return 'payment-failed-icon'
+    elif status == STATUS_PROCESSING:
+        return 'processing-icon'
     else:
         return 'cancelled-icon'
 

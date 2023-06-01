@@ -590,6 +590,10 @@ span.payment-failed-icon {
     @extend .svg-status-icon;
     background-image: url("../svg/payment-failed.svg")
 }
+span.processing-icon {
+    @extend .svg-status-icon;
+    background-image: url("../svg/processing.svg")
+}
 span.cancelled-icon {
     @extend .svg-status-icon;
     background-image: url("../svg/cancelled.svg")

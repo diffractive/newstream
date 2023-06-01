@@ -441,9 +441,9 @@ def confirm_update_card_details(request, id):
                 )
                 instance.save()
 
-                # Save update_card with the subscription id, so that we can fetch information from the failed payment
+                # Save old_instance_id with the subscription id, so that we can fetch information from the failed payment
                 spmeta = SubscriptionPaymentMeta(
-                    subscription=instance, field_key='update_card', field_value=id)
+                    subscription=instance, field_key='old_instance_id', field_value=id)
                 spmeta.save()
 
                 # link subscription to the donation
@@ -483,7 +483,7 @@ def my_recurring_donations(request):
         user=request.user, deleted=False).order_by('-subscription_created_at')
     site_settings = get_site_settings_from_default_site()
 
-    # Add success mesasge if returning from updated-card flow
+    # Add success mesasge if returning from updated card flow
     if request.session.get('updated-card'):
         messages.add_message(request, messages.SUCCESS, _(
                             'Your payment is successful. Recurring donation is resumed active.'))

@@ -2,7 +2,7 @@
 
 /* Top Navigation Bar */
 //When sidenav is open:
-//a. Create a transparent overlay over the content 
+//a. Create a transparent overlay over the content
 .sidenav-active .cover {
     background-color: rgba(0,0,0,0.3);
     position: fixed;
@@ -33,7 +33,7 @@
     .menu-item-wrapper {
         @apply py-4 px-6;
         position: relative;
-        
+
         .menu-item {
             @apply text-black;
             font-family: 'Barlow';
@@ -65,7 +65,7 @@
     padding-right: 30px;
     height: 30px;
     top: -2px;
-    span { 
+    span {
         transition: all 0.25s ease-in-out 0s;
         cursor: pointer;
         border-radius: 1px;
@@ -95,7 +95,7 @@
     padding-right: 30px;
     height: 30px;
     top: -2px;
-    span { 
+    span {
         transition: all 0.25s ease-in-out 0s;
         cursor: pointer;
         border-radius: 1px;
@@ -163,7 +163,7 @@
         }
         .menu-item-wrapper {
             position: relative;
-            
+
             &:hover {
                 > .submenu {
                     opacity: 1;
@@ -350,11 +350,11 @@ span.multilang-icon {
 /* General dropdown menu popup */
 .dropdown-div-wrapper {
     position: relative;
-    
+
     input[type=checkbox] {
         position: absolute;
         opacity: 0;
-        
+
         &:checked + label ~ .dropdown-menu-popup {
             display: block;
         }
@@ -422,12 +422,14 @@ span.multilang-icon {
         text-align: left;
     }
     tbody {
+        tr {
+            @apply bg-primary-light;
+        }
         td {
             padding: 1.5rem 1rem;
             margin-bottom: 1rem;
             border: 0;
-            @apply bg-primary-light;
-            
+
             &:first-child {
                 border-top-left-radius: 0.5rem;
                 border-bottom-left-radius: 0.5rem;

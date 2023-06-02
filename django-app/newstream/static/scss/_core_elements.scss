@@ -569,3 +569,70 @@ span.no-icon {
         margin-bottom: 1.5rem;
     }
 }
+
+.svg-status-icon {
+    width: 24px;
+    height: 24px;
+    display: inline-block;
+    position: absolute;
+    background-size: contain;
+}
+
+span.active-icon {
+    @extend .svg-status-icon;
+    background-image: url("../svg/active.svg")
+}
+span.paused-icon {
+    @extend .svg-status-icon;
+    background-image: url("../svg/paused.svg")
+}
+span.payment-failed-icon {
+    @extend .svg-status-icon;
+    background-image: url("../svg/payment-failed.svg")
+}
+span.processing-icon {
+    @extend .svg-status-icon;
+    background-image: url("../svg/processing.svg")
+}
+span.cancelled-icon {
+    @extend .svg-status-icon;
+    background-image: url("../svg/cancelled.svg")
+}
+
+span.status-text {
+    padding-left: 28px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.subscription-title {
+    @apply text-primary-dark;
+    font-size: 16px;
+}
+
+.subscription-subtitle {
+    color: #0C385C;
+    font-size: 12px;
+}
+
+.info-box {
+    display: flex;
+    padding: 1rem;
+    background: #D8EBFF;
+    border-radius: 10px;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+
+    span.info-icon {
+        width: 24px;
+        height: 24px;
+        display: inline-block;
+        position: absolute;
+        background-size: contain;
+        background-image: url("../svg/info.svg")
+    }
+
+    .info-text {
+        margin-left: 2rem;
+    }
+}

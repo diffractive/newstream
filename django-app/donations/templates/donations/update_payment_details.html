@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% load static common_tags wagtailcore_tags i18n %}
+
+{% block title %}{% trans 'Update card details' %}{% endblock %}
+
+{% block body_class %}newstream-update-card-page{% endblock %}
+
+{% block content %}
+
+<div class="flex-1 p-6 text-left font-semibold bg-primary-dark text-white">{% trans 'Update card details' %}</div>
+
+{# Form Area #}
+<form method='POST' action='' class="action-form">
+    <div class="flex flex-row justify-center mb-4 container-tight w-full">
+        <div class="donation-details-section w-full">
+
+            {% csrf_token %}
+            <h2 class="mb-4">{% trans 'Confirm update card details for the following subscription?' %}</h2>
+
+            <div class="confirm-donation-wrapper p-4 sm:p-8 border-2 rounded border-gray-200">
+                <p class="field-label">{% trans 'Donor' %}</p>
+                <p class="field-value text-primary font-bold mb-4">{{ request.user.display_fullname }}</p>
+                <p class="field-label">{% trans 'Donation frequency' %}</p>
+                {# TODO: this shouldn't be hardcoded #}
+                <p class="field-value text-primary font-bold mb-4">{% trans "Monthly" %}</p>
+                <p class="field-label">{% trans 'Donation amount' %}</p>
+                <p class="field-value text-primary font-bold mb-4">{{ subscription|recurring_amount_with_currency }}</p>
+            </div>
+
+            <div class="info-box">
+                <span class="info-icon mt-1"></span>
+                <div class="info-text">{% blocktrans %}Please note the system will guide you to create a new subscription and then your old failing subscription will be cancelled automatically.{% endblocktrans %}</div>
+            </div>
+
+            <div class="ns-wide-btn-group">
+                <div class="btn-unit" id="confirm-btn-unit">
+                    <button class="ns-wide-btn right-arrow-btn need-white-loading-btn"
+                        type="submit" name="submit-choice" value="confirm-submit">{% trans 'Proceed to update card details' %}<span class="icon"></span></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock content %}

@@ -3,24 +3,43 @@ $primary-color: #1076e4;
 $primary-light-color: #e9f3ff;
 $primary-dark-color: #06233c;
 $border-grey-color: #E8EBED;
+$warning-color: #E41010;
+$warning-light-color: #FFBDBD;
+$gray-color: #525252;
+$gray-light-color: #F3F3F3;
 
 .bg-primary {
-    background-color: $primary-color;
+    background-color: $primary-color !important;
 }
 .bg-primary-light {
-    background-color: $primary-light-color;
+    background-color: $primary-light-color !important;
 }
 .bg-primary-dark {
-    background-color: $primary-dark-color;
+    background-color: $primary-dark-color !important;
+}
+.bg-warning {
+    background-color: $warning-color !important;
+}
+.bg-warning-light {
+    background-color: $warning-light-color !important;
+}
+.bg-gray-light {
+    background-color: $gray-light-color !important;
 }
 .text-primary {
-    color: $primary-color;
+    color: $primary-color !important;
 }
 .text-primary-light {
-    color: $primary-light-color;
+    color: $primary-light-color !important;
 }
 .text-primary-dark {
-    color: $primary-dark-color;
+    color: $primary-dark-color !important;
+}
+.text-warning {
+    color: $warning-color !important;
+}
+.text-gray {
+    color: $gray-color !important;
 }
 
 // sidenav cover width

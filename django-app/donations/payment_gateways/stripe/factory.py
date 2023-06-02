@@ -125,12 +125,14 @@ class Factory_Stripe(PaymentGatewayFactory):
                 subscription_obj = stripe.Subscription.retrieve(subscription_id)
                 if 'donation_id' in subscription_obj.metadata:
                     # newstream-created subscription
-                    donation_id = subscription_obj.metadata['donation_id']
+                    # use select_for_update() to prevent race condition with customer.subscription.updated event
+                    donation = Donation.objects.select_for_update().get(pk=subscription_obj.metadata['donation_id'])
+                    can_skip_donation_id = True
                 else:
                     # givewp subscription
                     try:
                         subscription = SubscriptionInstance.objects.get(profile_id=subscription_id)
-                        donation = Donation.objects.filter(subscription=subscription).order_by('id').first()
+                        donation = Donation.objects.select_for_update().filter(subscription=subscription).order_by('id').first()
                         can_skip_donation_id = True
                         if not donation:
                             raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
@@ -174,7 +176,9 @@ class Factory_Stripe(PaymentGatewayFactory):
             if subscription_obj:
                 if 'donation_id' in subscription_obj.metadata:
                     # newstream-created subscription
-                    donation_id = subscription_obj.metadata['donation_id']
+                    # use select_for_update() to prevent race condition with invoice.paid event
+                    donation = Donation.objects.select_for_update().get(pk=subscription_obj.metadata['donation_id'])
+                    can_skip_donation_id = True
                 else:
                     # givewp subscription
                     subscription_id = subscription_obj.id

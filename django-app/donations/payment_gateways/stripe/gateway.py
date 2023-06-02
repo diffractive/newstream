@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
 
-from donations.models import (Donation, DonationPaymentMeta, SubscriptionInstance, SubscriptionPaymentMeta, STATUS_COMPLETE,
+from donations.models import (Donation, DonationPaymentMeta, SubscriptionPaymentMeta, SubscriptionInstance, STATUS_COMPLETE,
     STATUS_ACTIVE, STATUS_PROCESSING, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PAYMENT_FAILED)
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getStripeSettings
@@ -81,16 +81,18 @@ class Gateway_Stripe(PaymentGatewayManager):
 
         # Event: invoice.paid (for subscriptions)
         if self.event['type'] == EVENT_INVOICE_PAID and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):
-            if self.invoice.status == 'paid':
+            # We don't want to save trial invoices as new renewals
+            if self.invoice.status == 'paid' and self.invoice.amount_paid > 0:
                 _debug("[stripe recurring] Invoice confirmed paid")
                 # check if subscription has one or more invoices to determine it's a first time or renewal payment
                 # self.subscription_obj here is the stripe subscription object
                 try:
-                    invoices = stripe.Invoice.list(subscription=self.subscription_obj.id)
+                    # do not include trial invoice here
+                    invoices = [inv for inv in stripe.Invoice.list(subscription=self.subscription_obj.id) if inv.amount_paid > 0]
                 except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
                     raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
                 # _debug("Stripe: Subscription {} has {} invoices.".format(self.subscription_obj.id, len(invoices['data'])))
-                if len(invoices['data']) == 1:
+                if len(invoices) == 1:
                     _debug("[stripe recurring] First time subscription")
                     # save charge id as donation.transaction_id
                     self.donation.transaction_id = self.invoice.charge
@@ -101,7 +103,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                     dpmeta = DonationPaymentMeta(
                         donation=self.donation, field_key='stripe_invoice_number', field_value=self.invoice.number)
                     dpmeta.save()
-                elif len(invoices['data']) > 1:
+                elif len(invoices) > 1:
                     _debug("[stripe recurring] About to add renewal donation")
                     # create a new donation record + then send donation receipt to user
                     # self.donation is the first donation made for a subscription
@@ -135,7 +137,9 @@ class Gateway_Stripe(PaymentGatewayManager):
                 spmeta.save()
 
                 return HttpResponse(status=200)
-
+            elif self.invoice.status == 'paid' and self.invoice.amount_paid == 0:
+                # just skip trial invoices
+                return HttpResponse(status=200)
         # Event: invoice.payment_failed
         if self.event['type'] == EVENT_INVOICE_PAYMENT_FAILED and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):
             # We don't want to update processing failures or cancelled subscriptions
@@ -165,9 +169,24 @@ class Gateway_Stripe(PaymentGatewayManager):
                     self.donation.payment_status = STATUS_COMPLETE
                     self.donation.save()
 
-                    # send the new recurring notifs to admins and donor as subscription is just active
-                    sendNewRecurringNotifToAdmins(self.donation.subscription)
-                    sendNewRecurringNotifToDonor(self.donation.subscription)
+                    # Update card flow
+                    try:
+                        spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
+
+                        # Adjust next paying date with trials
+                        old_sub_id = spmeta.field_value
+                        self.adjust_payment_cycle_with_trial(old_sub_id)
+
+                        # send notif emails to admins and donor as a previously failed payment has now succeeded
+                        sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
+                        sendReactivatedPaymentNotifToDonor(self.donation.subscription)
+
+                        spmeta.delete()
+                    # Not part of the card update flow so a normal new recurring payment
+                    except SubscriptionPaymentMeta.DoesNotExist:
+                        # send the new recurring notifs to admins and donor as subscription is just active
+                        sendNewRecurringNotifToAdmins(self.donation.subscription)
+                        sendNewRecurringNotifToDonor(self.donation.subscription)
 
                 elif self.donation.subscription.recurring_status == STATUS_PAYMENT_FAILED:
                     self.donation.subscription.recurring_status = STATUS_ACTIVE
@@ -186,6 +205,11 @@ class Gateway_Stripe(PaymentGatewayManager):
                     self.donation.subscription.save()
 
                 # price changes events should goes through the if-else block and returns 200 right here
+                return HttpResponse(status=200)
+            elif self.subscription_obj['status'] == 'trialing':
+                # trial period is for us to adjust the new subscription instance
+                # to the same billing date as the old instance, no need to update
+                # the Newstream subscription object status to trialing for now
                 return HttpResponse(status=200)
             else:
                 return HttpResponse(status=400)
@@ -215,9 +239,15 @@ class Gateway_Stripe(PaymentGatewayManager):
             self.donation.subscription.recurring_status = STATUS_CANCELLED
             self.donation.subscription.save()
 
-            # send email notifications here for all cancellation scenarios
-            sendRecurringCancelledNotifToAdmins(self.donation.subscription)
-            sendRecurringCancelledNotifToDonor(self.donation.subscription)
+            # Dont send an email in update card process
+            try:
+                # This value only exists in the update card process
+                spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
+                spmeta.delete()
+            except SubscriptionPaymentMeta.DoesNotExist:
+                # send email notifications here for all other cancellation scenarios
+                sendRecurringCancelledNotifToAdmins(self.donation.subscription)
+                sendRecurringCancelledNotifToDonor(self.donation.subscription)
 
             return HttpResponse(status=200)
 
@@ -357,3 +387,22 @@ class Gateway_Stripe(PaymentGatewayManager):
                 }
         else:
             raise ValueError(_('SubscriptionInstance object returned from stripe does not have valid pause_collection value'))
+
+    def adjust_payment_cycle_with_trial(self, old_sub_id):
+        initStripeApiKey()
+
+        failed_sub = SubscriptionInstance.objects.get(id=old_sub_id)
+        fail_spmeta = SubscriptionPaymentMeta.objects.filter(
+            subscription=failed_sub, field_key='stripe_subscription_period').order_by("created_at").last()
+
+        # period is written in the format ts-ts, so we want to split the string and get the end period
+        trial_end = fail_spmeta.field_value.split('-')[1]
+
+        try:
+            stripe.Subscription.modify(
+                self.donation.subscription.profile_id,
+                trial_end=trial_end,
+                proration_behavior='none'
+            )
+        except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+            raise RuntimeError("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))

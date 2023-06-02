@@ -8,7 +8,7 @@ from wagtail.contrib.modeladmin.helpers import ButtonHelper
 
 from newstream.functions import get_site_settings_from_default_site
 from site_settings.models import GATEWAY_OFFLINE, GATEWAY_PAYPAL_LEGACY
-from donations.models import Donation, Subscription, SubscriptionInstance, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING, STATUS_INACTIVE
+from donations.models import Donation, Subscription, SubscriptionInstance, DonationForm, DonationMeta, DonationPaymentMeta, SubscriptionPaymentMeta, STATUS_COMPLETE, STATUS_REFUNDED, STATUS_REVOKED, STATUS_FAILED, STATUS_ACTIVE, STATUS_PAUSED, STATUS_CANCELLED, STATUS_PROCESSING, STATUS_INACTIVE, STATUS_PAYMENT_FAILED
 from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
 from donations.payment_gateways import isGatewayEditSubSupported, isGatewayToggleSubSupported, isGatewayCancelSubSupported
 
@@ -138,6 +138,7 @@ class SubscriptionInspectView(InspectView):
             'status_cancelled': STATUS_CANCELLED,
             'status_processing': STATUS_PROCESSING,
             'status_inactive': STATUS_INACTIVE,
+            'status_payment_failed': STATUS_PAYMENT_FAILED,
             'gateway_editsub_supported': isGatewayEditSubSupported(self.instance.gateway),
             'gateway_togglesub_supported': isGatewayToggleSubSupported(self.instance.gateway) and self.instance.gateway.title not in toggle_exclusion,
             'gateway_cancelsub_supported': isGatewayCancelSubSupported(self.instance.gateway) and self.instance.gateway.title not in cancel_exclusion,

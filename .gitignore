@@ -33,6 +33,7 @@ client/node_modules
 *.mo
 
 ### NEWSTREAM
+/django-app/node_modules/
 /django-app/newstream/settings/dev.py
 /django-app/static/
 /static/

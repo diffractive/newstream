@@ -2,7 +2,7 @@ import pycurl
 import certifi
 from io import BytesIO
 
-from newstream.functions import _debug
+from newstream.functions import _debug, _exception
 
 
 def curlPaypalIPN(url, headers, post_data=''):
@@ -28,7 +28,8 @@ def curlPaypalIPN(url, headers, post_data=''):
     # We have to know the encoding in order to print it to a text file
     # such as standard output.
     if status_code >= 300:
-        raise RuntimeError("curlPaypalipN request unsuccessful. Status Code: {}, Full body: {}".format(status_code, body.decode('utf-8')))
+        _exception("curlPaypalipN request unsuccessful. Status Code: {}, Full body: {}".format(status_code, body.decode('utf-8')))
+        raise RuntimeError(_("There has been an error connecting with Paypal"))
     # print("Curl to PayPal status code: {}({})".format(status_code, type(status_code)))
     # Here we deserialize the json into a python object
     # _debug('Success! curlPaypalIPN body: {}'.format(body.decode('utf-8')))

@@ -46,7 +46,7 @@ def _error(msg):
 
 
 def _exception(msg):
-    logger.exception(msg)
+    logger.exception(msg, exc_info=True)
 
 
 def object_to_json(json_data):
@@ -137,7 +137,7 @@ def get_site_settings_from_default_site():
             # set attribute of SiteSettings instance using value from env var
             if settings_value is not None:
                 setattr(instance, field, settings_value)
-    
+
     return instance
 
 

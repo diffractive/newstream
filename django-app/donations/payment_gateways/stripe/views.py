@@ -116,7 +116,7 @@ def create_checkout_session(request):
                 SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='old_instance_id')
 
                 success_url = request.build_absolute_uri(reverse('donations:return-from-stripe-card-update'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'
-                cancel_url = request.build_absolute_uri(reverse('donations:cancel-from-stripe-from-card-update'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'
+                cancel_url = request.build_absolute_uri(reverse('donations:cancel-from-stripe-card-update'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'
                 session_kwargs['success_url'] = success_url
                 session_kwargs['cancel_url'] = cancel_url
             except SubscriptionPaymentMeta.DoesNotExist:
@@ -266,7 +266,7 @@ def cancel_from_stripe(request):
     return redirect('donations:cancelled')
 
 @login_required
-def cancel_from_stripe_from_card_update(request):
+def cancel_from_stripe_card_update(request):
     """ This endpoint is submitted as the cancel_url when creating the Stripe session at create_checkout_session(request)
         for situations in which we update the user's subscription in order to update the fix failed payments.
         We would like to delete donations and subscriptions created from this
@@ -303,7 +303,7 @@ def cancel_from_stripe_from_card_update(request):
     return redirect('donations:my-recurring-donations')
 
 @login_required
-def return_from_stripe_from_card_update(request):
+def return_from_stripe_card_update(request):
     """ This endpoint is submitted as the success_url when creating the Stripe session at create_checkout_session(request)
         for situations in which we update the user's subscription in order to update the fix failed payments.
         We would also want to cancel the failed payment

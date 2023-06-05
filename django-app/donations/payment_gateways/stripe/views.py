@@ -116,7 +116,9 @@ def create_checkout_session(request):
                 SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='old_instance_id')
 
                 success_url = request.build_absolute_uri(reverse('donations:return-from-stripe-card-update'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'
+                cancel_url = request.build_absolute_uri(reverse('donations:cancel-from-stripe-card-update'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'
                 session_kwargs['success_url'] = success_url
+                session_kwargs['cancel_url'] = cancel_url
             except SubscriptionPaymentMeta.DoesNotExist:
                 pass
 
@@ -264,7 +266,44 @@ def cancel_from_stripe(request):
     return redirect('donations:cancelled')
 
 @login_required
-def return_from_stripe_from_card_update(request):
+def cancel_from_stripe_card_update(request):
+    """ This endpoint is submitted as the cancel_url when creating the Stripe session at create_checkout_session(request)
+        for situations in which we update the user's subscription in order to update the fix failed payments.
+        We would like to delete donations and subscriptions created from this
+        This url should receive a single GET param: 'stripe_session_id'
+        In Factory_Stripe.initGatewayByReturn(request), we save the stripe_session_id into the donationPaymentMeta data upon a successful request;
+        exception will be raised if the endpoint is reached but a previous meta value is found,
+        this is done to prevent this endpoint being called unlimitedly, which would set the payment status as Cancelled each time
+
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
+    try:
+        gatewayManager = Factory_Stripe.initGatewayByReturn(request)
+        request.session['return-donation-id'] = gatewayManager.donation.id
+
+        donation = Donation.objects.get(
+            pk=request.session['return-donation-id'])
+        sub_instance = donation.subscription
+        donation.delete()
+        sub_instance.delete()
+    except ValueError as e:
+        _exception(str(e))
+        request.session['error-title'] = str(_("ValueError"))
+        request.session['error-message'] = str(e)
+    except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
+        _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
+        request.session['error-title'] = type(e).__name__
+        request.session['error-message'] = e.user_message
+    except Exception as e:
+        _exception(str(e))
+        request.session['error-title'] = str(_("Unknown Error"))
+        request.session['error-message'] = str(_(
+            "Results returned from gateway is invalid."))
+    return redirect('donations:my-recurring-donations')
+
+@login_required
+def return_from_stripe_card_update(request):
     """ This endpoint is submitted as the success_url when creating the Stripe session at create_checkout_session(request)
         for situations in which we update the user's subscription in order to update the fix failed payments.
         We would also want to cancel the failed payment

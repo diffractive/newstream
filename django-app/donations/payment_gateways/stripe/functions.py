@@ -10,6 +10,8 @@ def initStripeApiKey():
     stripeSettings = getStripeSettings()
     stripe.api_key = stripeSettings.secret_key
     stripe.api_base = settings.STRIPE_API_BASE or stripe.api_base
+    if settings.STRIPE_API_VERSION:
+        stripe.api_version = settings.STRIPE_API_VERSION
     # see Network errors: https://stripe.com/docs/error-handling#network-errors
     stripe.max_network_retries = 2
 

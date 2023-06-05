@@ -26,6 +26,7 @@ from .site_settings import *
 env = environ.Env(
     STRIPE_JS_URL=(str, 'https://js.stripe.com/v3/'),
     STRIPE_API_BASE=(str, ""),
+    STRIPE_API_VERSION=(str, ""),
     INIT_LOCALSTRIPE=(bool, False),
 
     DATADOG_APPID=(str, None),
@@ -357,6 +358,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 STRIPE_JS_URL = env('STRIPE_JS_URL')
 STRIPE_API_BASE = env('STRIPE_API_BASE')
+STRIPE_API_VERSION = env('STRIPE_API_VERSION')
 INIT_LOCALSTRIPE = env('INIT_LOCALSTRIPE')
 
 ################################################

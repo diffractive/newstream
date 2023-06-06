@@ -247,8 +247,8 @@ def cancel_from_stripe(request):
 
         if gatewayManager.session:
             if gatewayManager.session.mode == 'payment':
-                stripe.PaymentIntent.cancel(
-                    gatewayManager.session.payment_intent)
+                # payment intent will also be cancelled by Stripe after we manually expire the checkout session
+                stripe.checkout.Session.expire(gatewayManager.session.id)
             # for subscription mode, payment_intent is not yet created, so no need to cancel
     except ValueError as e:
         _exception(str(e))

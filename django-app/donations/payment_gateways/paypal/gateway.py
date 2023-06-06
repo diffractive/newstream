@@ -7,8 +7,12 @@ from django.utils.translation import gettext_lazy as _
 from paypalcheckoutsdk.core import PayPalHttpClient
 
 from newstream.functions import _debug, round_half_up
-from donations.models import STATUS_PROCESSING, STATUS_FAILED, STATUS_ACTIVE, STATUS_CANCELLED, STATUS_COMPLETE, STATUS_PAUSED, Donation, SubscriptionInstance, SubscriptionPaymentMeta, DonationPaymentMeta
-from donations.email_functions import sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendNewRecurringNotifToAdmins, sendNewRecurringNotifToDonor, sendRecurringAdjustedNotifToAdmins, sendRecurringAdjustedNotifToDonor, sendRenewalReceiptToDonor, sendRenewalNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor, sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins
+from donations.models import STATUS_PROCESSING, STATUS_FAILED, STATUS_ACTIVE, STATUS_CANCELLED, STATUS_COMPLETE, STATUS_PAUSED, STATUS_PAYMENT_FAILED, Donation, SubscriptionInstance, SubscriptionPaymentMeta, DonationPaymentMeta
+from donations.email_functions import (sendDonationReceiptToDonor, sendDonationNotifToAdmins, sendNewRecurringNotifToAdmins,
+    sendNewRecurringNotifToDonor, sendRecurringAdjustedNotifToAdmins, sendRecurringAdjustedNotifToDonor, sendRenewalReceiptToDonor,
+    sendRenewalNotifToAdmins, sendRecurringPausedNotifToDonor, sendRecurringPausedNotifToAdmins, sendRecurringResumedNotifToDonor,
+    sendRecurringResumedNotifToAdmins, sendRecurringCancelledNotifToDonor, sendRecurringCancelledNotifToAdmins,
+    sendFailedPaymentNotifToAdmins, sendFailedPaymentNotifToDonor, sendReactivatedPaymentNotifToAdmins, sendReactivatedPaymentNotifToDonor)
 from donations.functions import gen_transaction_id
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getPayPalSettings
@@ -34,7 +38,7 @@ class Gateway_Paypal(PaymentGatewayManager):
 
         return render(self.request, 'donations/redirection_paypal.html', {'client_id': self.settings.client_id, 'currency': self.donation.currency})
 
-    
+
     def process_webhook_response(self):
         # Event: EVENT_PAYMENT_CAPTURE_COMPLETED (This alone comes after the onetime donation is captured)
         if self.event_type == EVENT_PAYMENT_CAPTURE_COMPLETED:
@@ -46,7 +50,7 @@ class Gateway_Paypal(PaymentGatewayManager):
             if self.donation.payment_status != STATUS_COMPLETE:
                 self.donation.payment_status = STATUS_COMPLETE
                 self.donation.save()
-            
+
             # send email notifs
             sendDonationReceiptToDonor(self.donation)
             sendDonationNotifToAdmins(self.donation)
@@ -71,7 +75,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                 return HttpResponse(status=200)
             else:
                 raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_ACTIVATED but subscription status is %(status)s") % {'status': self.subscription_obj['status']})
-        
+
         # Event: EVENT_BILLING_SUBSCRIPTION_UPDATED
         if self.event_type == EVENT_BILLING_SUBSCRIPTION_UPDATED and hasattr(self, 'subscription_obj'):
             if self.subscription_obj['status'] == 'SUSPENDED' or self.subscription_obj['status'] == 'ACTIVE':
@@ -114,6 +118,15 @@ class Gateway_Paypal(PaymentGatewayManager):
                     # save new donation as a record of renewal donation
                     donation.save()
 
+                    # Update subscription status if it has previously failed
+                    if self.donation.subscription.recurring_status == STATUS_PAYMENT_FAILED:
+                        self.donation.subscription.recurring_status = STATUS_ACTIVE
+                        self.donation.subscription.save()
+
+                        # send notif emails to admins and donor as a previously failed payment has now succeeded
+                        sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
+                        sendReactivatedPaymentNotifToDonor(self.donation.subscription)
+
                     # email notifications
                     # disabling renewal emails for the moment
                     # sendRenewalReceiptToDonor(donation)
@@ -123,7 +136,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                     self.donation.payment_status = STATUS_COMPLETE
                     self.donation.transaction_id = self.payload['id']
                     self.donation.save()
-                    
+
                     # save DonationPaymentMeta as proof of first time subscription payment
                     dpmeta = DonationPaymentMeta(donation=self.donation, field_key='paypal_first_cycle', field_value='completed')
                     dpmeta.save()
@@ -131,6 +144,20 @@ class Gateway_Paypal(PaymentGatewayManager):
                 return HttpResponse(status=200)
             else:
                raise ValueError(_("EVENT_PAYMENT_SALE_COMPLETED but payment state is %(state)s") % {'state': self.payload['state']})
+
+        # Event: EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED
+        if self.event_type == EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED and hasattr(self, 'subscription_obj'):
+            # We don't want to update processing failures or cancelled subscriptions
+            if self.subscription_obj['status'] == 'ACTIVE':
+
+                subscription = SubscriptionInstance.objects.get(profile_id=self.subscription_obj['id'])
+                subscription.recurring_status = STATUS_PAYMENT_FAILED
+                subscription.save()
+
+                # Semd email notifying user and admin of issue
+                sendFailedPaymentNotifToAdmins(subscription)
+                sendFailedPaymentNotifToDonor(subscription)
+
 
         # Event: EVENT_BILLING_SUBSCRIPTION_CANCELLED
         if self.event_type == EVENT_BILLING_SUBSCRIPTION_CANCELLED and hasattr(self, 'subscription_obj'):
@@ -174,7 +201,7 @@ class Gateway_Paypal(PaymentGatewayManager):
         # update newstream model
         self.subscription.recurring_status = STATUS_CANCELLED
         self.subscription.save()
-        
+
 
     def toggle_recurring_payment(self):
         # no need to handle webhook events for activate/suspend actions(as they are too slow, donor might have already toggled twice before the first webhook arrives)

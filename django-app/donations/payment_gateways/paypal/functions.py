@@ -12,7 +12,7 @@ from paypalhttp import HttpError
 from donations.models import STATUS_FAILED
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.email_functions import sendDonationErrorNotifToAdmins
-from newstream.functions import get_site_name, uuid4_str, _debug, printvars
+from newstream.functions import get_site_name, uuid4_str, _debug, printvars, _exception
 
 def common_headers(paypal_token):
     return ['Content-Type: application/json', 'Authorization: Bearer %s' % (paypal_token), 'PayPal-Request-Id: %s' % (uuid4_str())]
@@ -46,7 +46,8 @@ def curlPaypal(url, headers, userpwd='', post_data='', verb='GET'):
         _debug('curlPaypal returns 204')
         return {}
     if status_code >= 300:
-        raise RuntimeError("curlPaypal request unsuccessful. Status Code: {}, Full body: {}".format(status_code, body.decode('utf-8')))
+        _exception("curlPaypal request unsuccessful. Status Code: {}, Full body: {}".format(status_code, body.decode('utf-8')))
+        raise RuntimeError(_("There has been an error connecting with Paypal"))
     # print("Curl to PayPal status code: {}({})".format(status_code, type(status_code)))
     # Here we deserialize the json into a python object
     return json.loads(body.decode('utf-8'))
@@ -187,7 +188,7 @@ def getSubscriptionDetails(session, subscription_id):
     paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}'.format(subscription_id)
     if paypalSettings.sandbox_mode and session.get('negtest_getSubscriptionDetails', None):
-       api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}'.format(session.get('negtest_getSubscriptionDetails')) 
+       api_url = paypalSettings.api_url+'/v1/billing/subscriptions/{}'.format(session.get('negtest_getSubscriptionDetails'))
     return curlPaypal(api_url, common_headers(session['paypal_token']))
 
 

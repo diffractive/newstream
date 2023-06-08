@@ -2,6 +2,7 @@ import re
 import os
 from django import template
 from django.utils.safestring import mark_safe
+from django.conf import settings
 
 from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
 from newstream.functions import get_site_name, get_site_url, printvars, get_site_settings_from_default_site
@@ -219,3 +220,9 @@ def status_text(status):
         return 'Payment failed'
     else:
         return status.capitalize()
+
+@register.filter(name='get_field_env_var')
+def get_field_env_var(field):
+    # map to the corresponding env var key
+    envkey = "NEWSTREAM_"+field.strip().upper()
+    return getattr(settings, envkey, None)

@@ -246,10 +246,9 @@ def cancel_from_stripe(request):
         request.session['return-donation-id'] = gatewayManager.donation.id
 
         if gatewayManager.session:
-            if gatewayManager.session.mode == 'payment':
-                # payment intent will also be cancelled by Stripe after we manually expire the checkout session
-                stripe.checkout.Session.expire(gatewayManager.session.id)
-            # for subscription mode, payment_intent is not yet created, so no need to cancel
+            # expire the checkout session for either one-off or recurring donations
+            # payment intent for one-off donations will also be cancelled by Stripe after we manually expire the checkout session
+            stripe.checkout.Session.expire(gatewayManager.session.id)
     except ValueError as e:
         _exception(str(e))
         request.session['error-title'] = str(_("ValueError"))

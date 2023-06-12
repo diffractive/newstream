@@ -17,8 +17,8 @@
         {% include "wagtailadmin/edit_handlers/inline_panel_child.html" %}
     {% endfor %}
 </ul>
-{% if self.relation_name|get_field_env_var != None %}
-    <p class="sys-default"><strong>System default value:</strong> {{ self.relation_name|get_field_env_var }}</p>
+{% if self.relation_name|get_sys_default_value != None %}
+    <p class="sys-default"><strong>System default value:</strong> {{ self.relation_name|get_sys_default_value }}</p>
 {% endif %}
 
 <script type="text/django-form-template" id="id_{{ self.formset.prefix }}-EMPTY_FORM_TEMPLATE">

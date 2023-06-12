@@ -15,8 +15,8 @@
         {% if show_help_text|default_if_none:True and field.help_text %}
             <p class="help">{{ field.help_text }}</p>
         {% endif %}
-        {% if field.name|get_field_env_var != None %}
-            <p class="sys-default"><strong>System default value:</strong> {{ field.name|get_field_env_var }}</p>
+        {% if field.name|get_sys_default_value != None %}
+            <p class="sys-default"><strong>System default value:</strong> {{ field.name|get_sys_default_value }}</p>
         {% endif %}
 
         {% if field|has_unrendered_errors %}

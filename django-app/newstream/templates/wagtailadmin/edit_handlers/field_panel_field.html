@@ -22,8 +22,8 @@
                     {# This span only used on rare occasions by certain types of input #}
                     <span></span>
                 </div>
-                {% if field.name|get_field_env_var != None %}
-                    <p class="sys-default"><strong>System default value:</strong> {{ field.name|get_field_env_var }}</p>
+                {% if field.name|get_sys_default_value != None %}
+                    <p class="sys-default"><strong>System default value:</strong> {{ field.name|get_sys_default_value }}</p>
                 {% endif %}
             </div>
         </div>

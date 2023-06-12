@@ -1,0 +1,48 @@
+{% load wagtailadmin_tags common_tags i18n %}
+<!-- original template source: https://github.com/wagtail/wagtail/blob/v2.13/wagtail/admin/templates/wagtailadmin/edit_handlers/field_panel_field.html -->
+<!-- customizing this template to move help_text to the side and use the space below the input for displaying env var values -->
+<div class="field {{ field|fieldtype }} {{ field|widgettype }} {{ field_classes }}" {% if include_contentpath|default_if_none:True %}data-contentpath="{{ field.name }}"{% endif %}>
+    {% if show_label|default_if_none:True %}{{ field.label_tag }}{% endif %}
+    <div class="field-content object">
+        <div class="object-layout">
+            {% if show_help_text|default_if_none:True and field.help_text %}
+            <div class="object-layout_small-part">
+                <div class="object-help help">
+                    {% icon name="help" class_name="default" %}
+                    {{ field.help_text }}
+                </div>
+            </div>
+            {% endif %}
+            <div class="object-layout_big-part">
+                <div class="input {{ input_classes }} ">
+                    {% block form_field %}
+                        {{ field|render_with_errors }}
+                    {% endblock %}
+        
+                    {# This span only used on rare occasions by certain types of input #}
+                    <span></span>
+                </div>
+                {% if field.name|get_sys_default_value != None %}
+                    <p class="sys-default"><strong>System default value:</strong> {{ field.name|get_sys_default_value }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if field|has_unrendered_errors %}
+            <p class="error-message">
+                {% for error in field.errors %}
+                    <span>{{ error|escape }}</span>
+                {% endfor %}
+            </p>
+        {% endif %}
+    </div>
+
+    {% if show_add_comment_button %}
+        <div class="field-comment-control">
+            <button type="button" data-component="add-comment-button" data-comment-add class="u-hidden" aria-label="{% trans 'Add comment' %}">
+                <svg class="icon icon-comment-add initial icon-default" aria-hidden="true" focusable="false"><use href="#icon-comment-add"></use></svg>
+                <svg class="icon icon-comment-add initial icon-reversed" aria-hidden="true" focusable="false"><use href="#icon-comment-add-reversed"></use></svg>
+            </button>
+        </div>
+    {% endif %}
+</div>

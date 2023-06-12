@@ -2,6 +2,7 @@ import re
 import os
 from django import template
 from django.utils.safestring import mark_safe
+from django.conf import settings
 
 from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
 from newstream.functions import get_site_name, get_site_url, printvars, get_site_settings_from_default_site
@@ -219,3 +220,15 @@ def status_text(status):
         return 'Payment failed'
     else:
         return status.capitalize()
+
+@register.filter(name='get_sys_default_value')
+def get_sys_default_value(field):
+    """ This tag is used to display the defined env var for certain site settings fields
+    """
+    # map to the corresponding env var key
+    envkey = "NEWSTREAM_"+field.strip().upper()
+    envval = getattr(settings, envkey, None)
+    if envkey.startswith("NEWSTREAM_STRIPE") or envkey.startswith("NEWSTREAM_PAYPAL"):
+        # mask credentials
+        envval = envval[0:10] + "*****"
+    return envval

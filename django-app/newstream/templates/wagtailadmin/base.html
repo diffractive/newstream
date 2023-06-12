@@ -1,0 +1,68 @@
+{% extends "wagtailadmin/base.html" %}
+<!-- original template source: https://github.com/wagtail/wagtail/blob/v2.13/wagtail/admin/templates/wagtailadmin/base.html -->
+<!-- we only add custom css to the original base template of wagtail admin -->
+{% block extra_css %}
+<style>
+    .sys-default {
+        color: #4d4d4d;
+        font-size: .85em;
+        font-weight: 400;
+        margin: 0.5em 0 0;
+        clear: both;
+    }
+    /**
+     * For field_panel_field.html
+     */
+    @media screen and (min-width: 50em) {
+        .field-content.object {
+            padding-right: 20px;
+        }
+        .field-content.object .object-layout_small-part {
+            flex: 2 0 0%;
+        }
+    }
+    .field-content.object .object-help {
+        top: 0px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+    }
+    .field label {
+        padding-top: 0.4em;
+    }
+
+    /**
+     * For top_tabbed_interface.html
+     */
+    .tab-nav li.active a {
+        background-color: #e6e6e6;
+    }
+    .tab-content section.active {
+        background-color: #e6e6e6;
+    }
+    .tab-content .tab-nav a {
+        background-color: #189370;
+        border-color: #157b57;
+        font-size: 1.1em;
+        padding: .5em 30px;
+    }
+    .tab-content .tab-nav a:hover {
+        border-color: #00585a;
+    }
+    .tab-content .tab-nav.merged {
+        background-color: #e6e6e6;
+    }
+    .tab-content .tab-nav li.active a {
+        background-color: white;
+    }
+    .tab-content section.active .tab-content section.active {
+        background-color: white;
+    }
+    .top-tabbed-content .locale-picker {
+        background-color: #e6e6e6;
+        margin-top: 0;
+        margin-bottom: 0;
+        padding-top: 1.5em;
+        padding-bottom: 0.5em;
+    }
+</style>
+{% endblock %}

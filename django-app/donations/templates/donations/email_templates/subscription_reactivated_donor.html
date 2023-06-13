@@ -12,7 +12,7 @@
     {% blocktrans with donation_amount=subscription|recurring_amount_with_currency %}Your previously failed <strong>{{ donation_amount }} recurring payment on Stripe</strong> has become <strong>Active</strong> again.{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with gateway=subscription.gateway%}{{gateway}} is once again able to charge the card registered in your recurring payment.{% endblocktrans %}
+    {% blocktrans with gateway=subscription.gateway %}{{gateway}} is once again able to charge the card registered in your recurring payment.{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
     {% blocktrans with donations_full_url=donations_url|site_rel_url %}If you wish to view and manage your recurring payments, please click <a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">this link</a>. {% endblocktrans %}

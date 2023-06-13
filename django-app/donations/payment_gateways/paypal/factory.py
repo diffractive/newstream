@@ -51,7 +51,7 @@ class Factory_Paypal(PaymentGatewayFactory):
             subscription = None
             subscription_obj = None
             kwargs = {}
-            expected_events = [EVENT_PAYMENT_CAPTURE_COMPLETED, EVENT_BILLING_SUBSCRIPTION_ACTIVATED, EVENT_BILLING_SUBSCRIPTION_UPDATED, EVENT_PAYMENT_SALE_COMPLETED, EVENT_BILLING_SUBSCRIPTION_CANCELLED]
+            expected_events = [EVENT_PAYMENT_CAPTURE_COMPLETED, EVENT_BILLING_SUBSCRIPTION_ACTIVATED, EVENT_BILLING_SUBSCRIPTION_UPDATED, EVENT_PAYMENT_SALE_COMPLETED, EVENT_BILLING_SUBSCRIPTION_CANCELLED, EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED]
 
             # one-time donation payment captured
             if json_data['event_type'] == EVENT_PAYMENT_CAPTURE_COMPLETED:
@@ -84,6 +84,14 @@ class Factory_Paypal(PaymentGatewayFactory):
                     donation_id = subscription_obj['custom_id']
                 else:
                     raise ValueError(_('Missing custom_id(donation_id) in curlPaypal-returned subscription_obj'))
+
+            # subscription payment failed
+            if json_data['event_type'] == EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED:
+                subscription_obj = json_data['resource']
+                if 'custom_id' in json_data['resource']:
+                    donation_id = json_data['resource']['custom_id']
+                else:
+                    raise ValueError(_('Missing custom_id(donation_id) in json_data.resource'))
 
             # subscription cancelled
             if json_data['event_type'] == EVENT_BILLING_SUBSCRIPTION_CANCELLED:
@@ -139,7 +147,7 @@ class Factory_Paypal(PaymentGatewayFactory):
                 raise ValueError(_("Missing donation_id in purchase_units custom_id attribute"))
         else:
             raise ValueError(_("Missing token from PayPal request"))
-        
+
         try:
             donation = Donation.objects.get(pk=donation_id)
 

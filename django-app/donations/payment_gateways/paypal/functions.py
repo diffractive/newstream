@@ -106,6 +106,14 @@ def createPlan(session, product_id, donation):
     checkAccessTokenExpiry(session)
     paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/plans'
+
+    # see https://developer.paypal.com/docs/api/subscriptions/v1/#plans_create for frequency interval units
+    recurring_donation_frequency = session.pop("recurring_donation_frequency", "monthly")
+    if recurring_donation_frequency == "daily":
+        interval_unit = "DAY"
+    else:
+        interval_unit = "MONTH"
+
     plan_dict = {
         "product_id": product_id,
         "name": "Newstream Donation Plan for %s" % (donation.user.display_fullname()),
@@ -114,7 +122,7 @@ def createPlan(session, product_id, donation):
         "billing_cycles": [
             {
                 "frequency": {
-                    "interval_unit": "MONTH",
+                    "interval_unit": interval_unit,
                     "interval_count": 1
                 },
                 "tenure_type": "REGULAR",

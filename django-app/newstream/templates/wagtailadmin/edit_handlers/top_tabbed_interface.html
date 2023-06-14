@@ -15,7 +15,7 @@
 </script>
 
 {% load wagtailadmin_tags %}
-<div class="tab-nav merged">
+<div class="tab-nav top-tab-nav merged">
     <ul data-tab-nav role="tablist" data-current-tab="{{ self.children.0.heading|cautious_slugify }}">
         {% for child in self.children %}
         <li class="{{ child.classes|join:" " }} {% if forloop.first %}active{% endif %}" role="tab"

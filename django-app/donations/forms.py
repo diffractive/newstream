@@ -56,6 +56,14 @@ class DonationDetailsForm(forms.Form):
         else:
             self.fields["donation_frequency"].initial = 'onetime'
 
+        # add daily option if enabled in dev mode
+        if self.site_settings.allow_daily_subscription:
+            self.fields["donation_frequency"] = forms.ChoiceField(choices=[
+                ('monthly', _('Monthly')),
+                ('daily', _('Daily')),
+                ('onetime', _('One-time')),
+            ], label=_("Donation frequency"))
+
         # construct payment gateway field
         gateways = form.allowed_gateways.all()
         self.fields["payment_gateway"] = forms.ChoiceField(

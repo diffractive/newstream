@@ -52,7 +52,7 @@ def donate(request):
                     temp_donation = TempDonation.objects.get(pk=request.session.get('temp_donation_id'))
                     temp_donation.gateway = payment_gateway
                     temp_donation.is_amount_custom = is_amount_custom
-                    temp_donation.is_recurring = True if form.cleaned_data['donation_frequency'] == 'monthly' else False
+                    temp_donation.is_recurring = True if form.cleaned_data['donation_frequency'] != 'onetime' else False
                     temp_donation.donation_amount = donation_amount
                     temp_donation.currency = form.cleaned_data['currency']
                     temp_donation.temp_metas = temp_donation_metas
@@ -65,7 +65,7 @@ def donate(request):
                         form=form_blueprint,
                         gateway=payment_gateway,
                         is_amount_custom=is_amount_custom,
-                        is_recurring=True if form.cleaned_data['donation_frequency'] == 'monthly' else False,
+                        is_recurring=True if form.cleaned_data['donation_frequency'] != 'onetime' else False,
                         donation_amount=donation_amount,
                         currency=form.cleaned_data['currency'],
                         status=STATUS_PENDING,
@@ -75,6 +75,11 @@ def donate(request):
                     )
                     temp_donation.save()
                     request.session['temp_donation_id'] = temp_donation.id
+
+                # save donation frequency into session if it's a recurring donation
+                # used to decide subscription frequency later in gateway code
+                if temp_donation.is_recurring:
+                    request.session["recurring_donation_frequency"] = form.cleaned_data['donation_frequency']
 
                 # determine path based on submit-choice
                 if request.POST.get('submit-choice', '') == 'guest-submit' or request.POST.get('submit-choice', '') == 'loggedin-submit':
@@ -175,6 +180,12 @@ def confirm_donation(request):
                     instance.save()
                     # link subscription to the donation
                     donation.subscription = instance
+
+                    # for ease of distinguishment from wagtail ui
+                    if request.session.get("recurring_donation_frequency", None) == "daily":
+                        smeta = SubscriptionPaymentMeta(
+                            subscription=instance, field_key='is_daily_subscription', field_value="Yes")
+                        smeta.save()
 
                 donation.save()
                 request.session.pop('temp_donation_id')

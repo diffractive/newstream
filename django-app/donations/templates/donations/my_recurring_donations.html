@@ -67,7 +67,7 @@
                     <td class="subscription-title font-semibold">{{ site_settings|get_attr:latest_instance.gateway.frontend_label_attr_name }}</td>
                     <td>&nbsp;</td>
                 <tr>
-                    <td class="subscription-subtitle pb-4">{% trans 'Monthly' %}</td>
+                    <td class="subscription-subtitle pb-4">{{ latest_instance.recurring_frequency|capfirst }}</td>
                     <td class="subscription-subtitle pb-4">{{ first_instance.subscribe_date|date:'j M Y' }}</td>
                     <td>&nbsp;</td>
                 </tr>
@@ -109,7 +109,7 @@
             {% with first_instance=subscription.first_instance latest_instance=subscription.latest_instance %}
             <tr class="{{latest_instance.recurring_status|status_bg_color}}">
                 <td>{{ latest_instance|recurring_amount_with_currency }}</td>
-                <td>{% trans 'Monthly' %}</td>
+                <td>{{ latest_instance.recurring_frequency|capfirst }}</td>
                 <td>{{ latest_instance.profile_id }}</td>
                 <td>{{ first_instance.subscribe_date|date:'j M Y' }}</td>
                 <td>{{ site_settings|get_attr:latest_instance.gateway.frontend_label_attr_name }}</td>

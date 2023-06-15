@@ -16,7 +16,7 @@
         <h4 class="mb-2 text-white">{% trans 'Recurring Donation identifier:' %} {{ subscription.profile_id }}</h4>
         <h4 class="mb-2 text-white">{% trans 'Recurring Donation start date:' %}
             {{ subscription.subscribe_date|date:'j M Y' }}</h4>
-        <h4 class="mb-2 text-white">{% trans 'Recurring Donation interval:' %} {% trans 'Monthly' %}</h4>
+        <h4 class="mb-2 text-white">{% trans 'Recurring Donation interval:' %} {{ subscription.recurring_frequency|capfirst }}</h4>
         <h4 class="mb-4 text-white">{% trans 'Recurring Donation status:' %} <span
                 class="font-bold {{subscription.recurring_status|recurring_status_color}}">{{subscription.recurring_status|title}}</span>
         </h4>

@@ -36,6 +36,9 @@ STATUS_PAYMENT_FAILED = 'payment_failed'
 STATUS_PENDING = 'pending'
 STATUS_PROCESSED = 'processed'
 
+# Subscription Frequencies
+FREQ_MONTHLY = 'monthly'
+FREQ_DAILY = 'daily'
 
 class DonationMetaField(I18nAbstractFormField):
     form = ParentalKey('DonationForm', on_delete=models.CASCADE,
@@ -292,6 +295,10 @@ class SubscriptionInstance(ClusterableModel):
         (STATUS_INACTIVE, _(STATUS_INACTIVE.capitalize())),
         (STATUS_PAYMENT_FAILED, _(STATUS_PAYMENT_FAILED.capitalize())),
     ]
+    RECURRING_FREQUENCY_CHOICES = [
+        (FREQ_MONTHLY, _(FREQ_MONTHLY.capitalize())),
+        (FREQ_DAILY, _(FREQ_DAILY.capitalize())),
+    ]
     user = models.ForeignKey(
         'newstream_user.User',
         on_delete=models.SET_NULL,
@@ -314,6 +321,8 @@ class SubscriptionInstance(ClusterableModel):
     currency = models.CharField(max_length=20)
     recurring_status = models.CharField(
         max_length=255, choices=RECURRING_STATUS_CHOICES, default=STATUS_INACTIVE, blank=True, null=True)
+    recurring_frequency = models.CharField(
+        max_length=20, choices=RECURRING_FREQUENCY_CHOICES, default=FREQ_MONTHLY, blank=True, null=True)
     cancel_reason = models.CharField(
         max_length=30,
         choices=CancelReason.choices,
@@ -485,7 +494,10 @@ class Donation(ClusterableModel):
 
     @property
     def donation_frequency(self):
-        return 'Monthly' if self.is_recurring else 'One-time'
+        if self.is_recurring:
+            return self.subscription.recurring_frequency.capitalize()
+        else:
+            return 'One-time'
 
     @donation_frequency.setter
     def donation_frequency(self, val):
@@ -508,6 +520,10 @@ class TempDonation(ClusterableModel):
         (STATUS_PENDING, _(STATUS_PENDING.capitalize())),
         (STATUS_PROCESSED, _(STATUS_PROCESSED.capitalize())),
     ]
+    RECURRING_FREQUENCY_CHOICES = [
+        (FREQ_MONTHLY, _(FREQ_MONTHLY.capitalize())),
+        (FREQ_DAILY, _(FREQ_DAILY.capitalize())),
+    ]
     form = models.ForeignKey(
         'DonationForm',
         on_delete=models.SET_NULL,
@@ -523,6 +539,8 @@ class TempDonation(ClusterableModel):
     is_amount_custom = models.BooleanField(default=False)
     donation_amount = models.DecimalField(max_digits=20, decimal_places=2)
     is_recurring = models.BooleanField(default=False)
+    recurring_frequency = models.CharField(
+        max_length=20, choices=RECURRING_FREQUENCY_CHOICES, blank=True, null=True)
     currency = models.CharField(max_length=20)
     guest_email = models.EmailField(blank=True)
     guest_name = models.CharField(blank=True, max_length=255)
@@ -542,7 +560,10 @@ class TempDonation(ClusterableModel):
 
     @property
     def donation_frequency(self):
-        return 'Monthly' if self.is_recurring else 'One-time'
+        if self.is_recurring:
+            return self.recurring_frequency.capitalize()
+        else:
+            return 'One-time'
 
     @donation_frequency.setter
     def donation_frequency(self, val):

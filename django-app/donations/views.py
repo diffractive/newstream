@@ -15,7 +15,7 @@ from django.core.exceptions import PermissionDenied
 from newstream.functions import _exception, uuid4_str, get_site_settings_from_default_site
 from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
 from newstream_user.models import SUBS_ACTION_UPDATE, SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL
-from donations.models import DonationPaymentMeta, Subscription, SubscriptionInstance, SubscriptionPaymentMeta, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED, STATUS_PAYMENT_FAILED
+from donations.models import DonationPaymentMeta, Subscription, SubscriptionInstance, SubscriptionPaymentMeta, Donation, TempDonation, STATUS_REVOKED, STATUS_CANCELLED, STATUS_PAUSED, STATUS_PROCESSING, STATUS_PENDING, STATUS_PROCESSED, STATUS_PAYMENT_FAILED, FREQ_MONTHLY
 from donations.forms import DONATION_DETAILS_FIELDS, DonationDetailsForm
 from donations.functions import isUpdateSubsFrequencyLimitationPassed, addUpdateSubsActionLog, gen_transaction_id, extract_temp_donation_meta, displayGateway, temp_donation_meta_to_donation_meta
 from donations.payment_gateways import InitPaymentGateway, InitEditRecurringPaymentForm, getEditRecurringPaymentHtml, isGatewayHosted
@@ -53,6 +53,7 @@ def donate(request):
                     temp_donation.gateway = payment_gateway
                     temp_donation.is_amount_custom = is_amount_custom
                     temp_donation.is_recurring = True if form.cleaned_data['donation_frequency'] != 'onetime' else False
+                    temp_donation.recurring_frequency = form.cleaned_data['donation_frequency'] if form.cleaned_data['donation_frequency'] != 'onetime' else None
                     temp_donation.donation_amount = donation_amount
                     temp_donation.currency = form.cleaned_data['currency']
                     temp_donation.temp_metas = temp_donation_metas
@@ -66,6 +67,7 @@ def donate(request):
                         gateway=payment_gateway,
                         is_amount_custom=is_amount_custom,
                         is_recurring=True if form.cleaned_data['donation_frequency'] != 'onetime' else False,
+                        recurring_frequency=form.cleaned_data['donation_frequency'] if form.cleaned_data['donation_frequency'] != 'onetime' else None,
                         donation_amount=donation_amount,
                         currency=form.cleaned_data['currency'],
                         status=STATUS_PENDING,
@@ -75,11 +77,6 @@ def donate(request):
                     )
                     temp_donation.save()
                     request.session['temp_donation_id'] = temp_donation.id
-
-                # save donation frequency into session if it's a recurring donation
-                # used to decide subscription frequency later in gateway code
-                if temp_donation.is_recurring:
-                    request.session["recurring_donation_frequency"] = form.cleaned_data['donation_frequency']
 
                 # determine path based on submit-choice
                 if request.POST.get('submit-choice', '') == 'guest-submit' or request.POST.get('submit-choice', '') == 'loggedin-submit':
@@ -174,18 +171,13 @@ def confirm_donation(request):
                         recurring_amount=tmpd.donation_amount,
                         currency=tmpd.currency,
                         recurring_status=STATUS_PROCESSING,
+                        recurring_frequency=tmpd.recurring_frequency,
                         subscribe_date=timezone.now(),
                         created_by=request.user
                     )
                     instance.save()
                     # link subscription to the donation
                     donation.subscription = instance
-
-                    # for ease of distinguishment from wagtail ui
-                    if request.session.get("recurring_donation_frequency", None) == "daily":
-                        smeta = SubscriptionPaymentMeta(
-                            subscription=instance, field_key='is_daily_subscription', field_value="Yes")
-                        smeta.save()
 
                 donation.save()
                 request.session.pop('temp_donation_id')

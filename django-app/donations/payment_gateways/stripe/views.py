@@ -10,7 +10,7 @@ from django.db import transaction
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import uuid4_str, reverse_with_site_url, _exception, _debug, object_to_json
-from donations.models import Donation, DonationPaymentMeta, SubscriptionPaymentMeta, SubscriptionInstance, STATUS_PAYMENT_FAILED
+from donations.models import Donation, DonationPaymentMeta, SubscriptionPaymentMeta, SubscriptionInstance, STATUS_PAYMENT_FAILED, FREQ_DAILY
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.stripe.functions import initStripeApiKey, formatDonationAmount
 from donations.payment_gateways.stripe.factory import Factory_Stripe
@@ -81,8 +81,7 @@ def create_checkout_session(request):
         }
 
         # see https://stripe.com/docs/api/subscriptions/create#create_subscription-items-price_data-recurring-interval for frequency interval units
-        recurring_donation_frequency = request.session.pop("recurring_donation_frequency", "monthly")
-        if recurring_donation_frequency == "daily":
+        if donation.subscription.recurring_frequency == FREQ_DAILY:
             interval_unit = "day"
         else:
             interval_unit = "month"

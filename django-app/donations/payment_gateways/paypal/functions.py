@@ -9,7 +9,7 @@ from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersCaptureRequest, OrdersCreateRequest
 from paypalhttp import HttpError
 
-from donations.models import STATUS_FAILED
+from donations.models import STATUS_FAILED, FREQ_DAILY
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.email_functions import sendDonationErrorNotifToAdmins
 from newstream.functions import get_site_name, uuid4_str, _debug, printvars, _exception
@@ -108,8 +108,7 @@ def createPlan(session, product_id, donation):
     api_url = paypalSettings.api_url+'/v1/billing/plans'
 
     # see https://developer.paypal.com/docs/api/subscriptions/v1/#plans_create for frequency interval units
-    recurring_donation_frequency = session.pop("recurring_donation_frequency", "monthly")
-    if recurring_donation_frequency == "daily":
+    if donation.subscription.recurring_frequency == FREQ_DAILY:
         interval_unit = "DAY"
     else:
         interval_unit = "MONTH"

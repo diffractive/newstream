@@ -3,6 +3,9 @@ version: "3.8"
 services:
 
   database:
+    volumes:
+      - ./initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+      - ./schema.sql:/schema.sql
     ports:
       - "127.0.0.1:5432:5432"
 
@@ -57,6 +60,7 @@ services:
     environment:
       STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
       STRIPE_SECRET_KEY: 'sk_TEST_SECRET_KEY'
+      PAYPAL_API_BASE: 'http://localpaypal.newstream.local:8410'
     volumes:
       - '../selenium-tests/test_scripts:/home/jupyter/notebooks/test_scripts'
       - '../selenium-tests/output:/home/jupyter/notebooks/output'

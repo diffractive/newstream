@@ -15,7 +15,7 @@ steps:
     waitFor: ['-']
 
   - id: "build-django-image"
-    name: "gcr.io/kaniko-project/executor:v1.6.0"
+    name: "gcr.io/kaniko-project/executor:v1.10.0"
     args: [
         "--destination", "asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:${COMMIT_SHA}",
         "--destination", "asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:latest",
@@ -27,7 +27,7 @@ steps:
     waitFor: ['-']
 
   - id: "build-selenium-image"
-    name: "gcr.io/kaniko-project/executor:v1.6.0"
+    name: "gcr.io/kaniko-project/executor:v1.10.0"
     args: [
       "--destination", "asia.gcr.io/${PROJECT_ID}/${_SELENIUM_SERVICE_NAME}:${COMMIT_SHA}",
       "--destination", "asia.gcr.io/${PROJECT_ID}/${_SELENIUM_SERVICE_NAME}:latest",
@@ -39,7 +39,7 @@ steps:
     waitFor: ['-']
 
   - id: "build-localstripe-image"
-    name: "gcr.io/kaniko-project/executor:v1.6.0"
+    name: "gcr.io/kaniko-project/executor:v1.10.0"
     args: [
       "--destination", "asia.gcr.io/${PROJECT_ID}/${_LOCALSTRIPE_SERVICE_NAME}:${COMMIT_SHA}",
       "--destination", "asia.gcr.io/${PROJECT_ID}/${_LOCALSTRIPE_SERVICE_NAME}:latest",
@@ -112,7 +112,7 @@ steps:
     - |
         echo "Images uploaded to https://storage.cloud.google.com/${PROJECT_ID}_cloudbuild/output/main/test_output.html"
     waitFor: [selenium-tests]
-  
+
   # Check that all tests passed successfully
   - id: check-test-status
     name: 'gcr.io/cloud-builders/docker:20.10.14'

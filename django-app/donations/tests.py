@@ -8,7 +8,7 @@ from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
 from django.utils.timezone import make_aware
-from donations.models import Subscription, STATUS_ACTIVE
+from donations.models import Subscription, SubscriptionInstance, STATUS_ACTIVE
 from site_settings.models import PaymentGateway
 
 
@@ -73,8 +73,15 @@ class MockStripeResponses(TestCase):
             "stripe": gateways[2]
         }
 
-        self.subscription = Subscription(
+        parent = Subscription(
+            user=self.user,
+            created_by=self.user,
+        )
+        parent.save()
+
+        self.subscription = SubscriptionInstance(
             profile_id=TEST_SUBSCRIPTION["profile_id"],
+            parent=parent,
             user=self.user,
             gateway=gateway_map[TEST_SUBSCRIPTION["gateway"]],
             recurring_amount=TEST_SUBSCRIPTION["recurring_amount"],
@@ -98,7 +105,7 @@ class MockStripeResponses(TestCase):
             res = self.client.post(reverse('donations:toggle-recurring'), data=data, content_type='application/json').json()
             if error['type'] == "stripe":
                 self.assertEqual(res['reason'],
-                    'Stripe API Error(InvalidRequestError): Status(None), Code(403), Param(), Message(Test Error)')
+                    'There has been an error connecting with Stripe: Test Error')
             else:
                 self.assertEqual(res['reason'], 'Test Error')
             self.assertEqual(res['status'], 'failure')
@@ -112,7 +119,7 @@ class MockStripeResponses(TestCase):
             res = self.client.post(reverse('donations:cancel-recurring'), data=data, content_type='application/json').json()
             if error['type'] == "stripe":
                 self.assertEqual(res['reason'],
-                    'Stripe API Error(InvalidRequestError): Status(None), Code(403), Param(), Message(Test Error)')
+                    'There has been an error connecting with Stripe: Test Error')
             else:
                 self.assertEqual(res['reason'], 'Test Error')
             self.assertEqual(res['status'], 'failure')
@@ -137,7 +144,7 @@ class MockStripeResponses(TestCase):
             self.assertEqual(len(messages), 1)
             if error['type'] == "stripe":
                 self.assertEqual(messages[0].message,
-                    'Stripe API Error(InvalidRequestError): Status(None), Code(403), Param(), Message(Test Error)')
+                    'There has been an error connecting with Stripe: Test Error')
             else:
                 self.assertEqual(messages[0].message, 'Test Error')
 
@@ -153,7 +160,7 @@ class MockStripeResponses(TestCase):
             messages = list(get_messages(res.wsgi_request))
             if error['type'] == "stripe":
                 self.assertEqual(messages[0].message,
-                    'Stripe API Error(InvalidRequestError): Status(None), Code(403), Param(), Message(Test Error)')
+                    'There has been an error connecting with Stripe: Test Error')
             else:
                 self.assertEqual(messages[0].message, 'Test Error')
 
@@ -170,6 +177,6 @@ class MockStripeResponses(TestCase):
             self.assertEqual(len(messages), 1)
             if error['type'] == "stripe":
                 self.assertEqual(messages[0].message,
-                    'Stripe API Error(InvalidRequestError): Status(None), Code(403), Param(), Message(Test Error)')
+                    'There has been an error connecting with Stripe: Test Error')
             else:
                 self.assertEqual(messages[0].message, 'Test Error')

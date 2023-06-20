@@ -73,6 +73,21 @@ services:
         aliases:
           - localstripe.newstream.local
 
+  localpaypal:
+    image: diffractive/localpaypal:latest
+    environment:
+      DATABASE_NAME: localpaypal
+      DATABASE_USER: localpaypal
+      DATABASE_PASSWORD: localpaypal
+      DATABASE_HOST: database
+      DATABASE_PORT: 5432
+    ports:
+      - 8410:8410
+    networks:
+      newstream:
+        aliases:
+          - localpaypal.newstream.local
+
   mailhog:
     image: mailhog/mailhog
     logging:
@@ -117,6 +132,7 @@ services:
       - app
       - selenium
       - localstripe
+      - localpaypal
     profiles:
       - selenium
 

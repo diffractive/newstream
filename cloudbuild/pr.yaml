@@ -37,17 +37,6 @@ steps:
     ]
     waitFor: ['-']
 
-  - id: "build-localstripe-image"
-    name: "gcr.io/kaniko-project/executor:v1.10.0"
-    args: [
-      "--destination", "asia.gcr.io/${PROJECT_ID}/${_LOCALSTRIPE_SERVICE_NAME}:pr-${_PR_NUMBER}",
-      "--cache=true",
-      "--cache-ttl=336h0m0s", # 2 weeks (default)
-      "--context=localstripe",
-      "--build-arg", "BASE_IMAGE=asia.gcr.io/${PROJECT_ID}/localstripe:latest"
-    ]
-    waitFor: ['-']
-
   # Pull the images. It seems more efficient to do this separately. At least, this means
   # we can start pulling the image for each, prior to both builds completing
   - id: docker-pull-django
@@ -69,7 +58,14 @@ steps:
     args: [
         'pull', 'asia.gcr.io/${PROJECT_ID}/${_LOCALSTRIPE_SERVICE_NAME}:pr-${_PR_NUMBER}',
     ]
-    waitFor: [build-localstripe-image]
+    waitFor: ['-']
+
+  - id: docker-pull-localpaypal
+    name: 'gcr.io/cloud-builders/docker:20.10.14'
+    args: [
+        'pull', 'asia.gcr.io/${PROJECT_ID}/${_LOCALPAYPAL_SERVICE_NAME}:pr-${_PR_NUMBER}',
+    ]
+    waitFor: ['-']
 
   # Start containers to run automated tests
   - id: start-docker-compose
@@ -79,7 +75,7 @@ steps:
       - 'PROJECT_ID=$PROJECT_ID'
       - 'IMAGE_TAG=pr-${_PR_NUMBER}'
       - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
-    waitFor: [docker-pull-django, docker-pull-selenium, docker-pull-localstripe]
+    waitFor: [docker-pull-django, docker-pull-selenium, docker-pull-localstripe, docker-pull-localpaypal]
 
   # Run selenium tests
   - id: selenium-tests
@@ -135,6 +131,7 @@ substitutions:
   _BACKEND_SERVICE_NAME: newstream
   _SELENIUM_SERVICE_NAME: newstream-tests
   _LOCALSTRIPE_SERVICE_NAME: localstripe
+  _LOCALPAYPAL_SERVICE_NAME: localpaypal
 
 # We use a higher spec machine for performance, particularly for the selenium tests
 options:

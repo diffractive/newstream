@@ -1,16 +1,20 @@
 from types import SimpleNamespace
 import stripe
 import requests
+import json
 from unittest.mock import patch
 from datetime import datetime
 from django.urls import reverse
 from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from django.contrib.messages import get_messages
-from django.utils.timezone import make_aware
-from donations.models import Subscription, SubscriptionInstance, STATUS_ACTIVE
+from django.utils.timezone import make_aware, now
+from django.conf import settings
+from donations.models import Donation, Subscription, SubscriptionInstance, STATUS_ACTIVE, STATUS_COMPLETE, STATUS_PAYMENT_FAILED
 from site_settings.models import PaymentGateway
 
+
+PAYPAL_WEBHOOK_URL = 'http://app.newstream.local:8000/en/donations/verify-paypal-response/'
 
 User = get_user_model()
 
@@ -21,11 +25,20 @@ TEST_USER = {
     "last_name": "Donor"
 }
 
-TEST_SUBSCRIPTION = {
+TEST_STRIPE_SUBSCRIPTION = {
     "profile_id": "sub_1Mxo8cTTD2mrB42B414bD7LS",
     "recurring_amount": 250,
     "currency": "HKD",
     "gateway": "stripe",
+    "recurring_status": STATUS_ACTIVE,
+    "subscribe_date": datetime.strptime("2023-02-05", '%Y-%m-%d'),
+}
+
+TEST_PAYPAL_SUBSCRIPTION = {
+    "profile_id": "I-CHKSDMCHNA",
+    "recurring_amount": 250,
+    "currency": "HKD",
+    "gateway": "paypal",
     "recurring_status": STATUS_ACTIVE,
     "subscribe_date": datetime.strptime("2023-02-05", '%Y-%m-%d'),
 }
@@ -80,14 +93,14 @@ class MockStripeResponses(TestCase):
         parent.save()
 
         self.subscription = SubscriptionInstance(
-            profile_id=TEST_SUBSCRIPTION["profile_id"],
-            parent=parent,
+            profile_id=TEST_STRIPE_SUBSCRIPTION["profile_id"],
             user=self.user,
-            gateway=gateway_map[TEST_SUBSCRIPTION["gateway"]],
-            recurring_amount=TEST_SUBSCRIPTION["recurring_amount"],
-            currency=TEST_SUBSCRIPTION["currency"],
-            recurring_status=TEST_SUBSCRIPTION["recurring_status"],
-            subscribe_date=make_aware(TEST_SUBSCRIPTION["subscribe_date"])
+            parent=parent,
+            gateway=gateway_map[TEST_STRIPE_SUBSCRIPTION["gateway"]],
+            recurring_amount=TEST_STRIPE_SUBSCRIPTION["recurring_amount"],
+            currency=TEST_STRIPE_SUBSCRIPTION["currency"],
+            recurring_status=TEST_STRIPE_SUBSCRIPTION["recurring_status"],
+            subscribe_date=make_aware(TEST_STRIPE_SUBSCRIPTION["subscribe_date"])
         )
         self.subscription.save()
 
@@ -180,3 +193,141 @@ class MockStripeResponses(TestCase):
                     'There has been an error connecting with Stripe: Test Error')
             else:
                 self.assertEqual(messages[0].message, 'Test Error')
+
+class MockPaypalResponses(TestCase):
+    """
+    These tests will mock a stripe response to see how the code handles mocked responses
+    """
+    def setUp(self):
+        """
+        Create a user and a subscription to be manipulated. Also login to perform authed api functions
+        """
+
+        # Create test user
+        self.user = User.objects.create_user(email=TEST_USER['email'], password=TEST_USER['password'])
+        self.user.first_name = TEST_USER['first_name']
+        self.user.last_name = TEST_USER['last_name']
+        self.user.save()
+
+        gateways = PaymentGateway.objects.all().order_by("list_order")
+        gateway_map = {
+            "paypal": gateways[1],
+            "stripe": gateways[2]
+        }
+
+        parent = Subscription(
+            user=self.user,
+            created_by=self.user,
+        )
+        parent.save()
+
+        self.subscription = SubscriptionInstance(
+            profile_id=TEST_PAYPAL_SUBSCRIPTION["profile_id"],
+            parent=parent,
+            user=self.user,
+            gateway=gateway_map[TEST_PAYPAL_SUBSCRIPTION["gateway"]],
+            recurring_amount=TEST_PAYPAL_SUBSCRIPTION["recurring_amount"],
+            currency=TEST_PAYPAL_SUBSCRIPTION["currency"],
+            recurring_status=TEST_PAYPAL_SUBSCRIPTION["recurring_status"],
+            subscribe_date=make_aware(TEST_PAYPAL_SUBSCRIPTION["subscribe_date"])
+        )
+        self.subscription.save()
+
+        self.donation = Donation(
+            transaction_id='test_id',
+            user=self.user,
+            gateway=gateway_map[TEST_PAYPAL_SUBSCRIPTION["gateway"]],
+            is_recurring=True,
+            donation_amount=10,
+            currency='HKD',
+            payment_status=STATUS_COMPLETE,
+            subscription=self.subscription,
+            donation_date=now()
+        )
+        self.donation.save()
+
+        # We have 2 donations to simulate the webhook coming from the new donation
+        self.donation2 = Donation(
+            transaction_id='test_id_2',
+            user=self.user,
+            gateway=gateway_map[TEST_PAYPAL_SUBSCRIPTION["gateway"]],
+            is_recurring=True,
+            donation_amount=10,
+            currency='HKD',
+            payment_status=STATUS_COMPLETE,
+            subscription=self.subscription,
+            donation_date=now()
+        )
+        self.donation2.save()
+
+        self.client = Client(SERVER_NAME=TEST_DOMAIN_NAME)
+        # logins user
+        self.client.login(**TEST_USER_CREDS)
+
+        settings.NEWSTREAM_ADMIN_EMAILS = 'admin@diffractive.io'
+
+    @patch('paypalrestsdk.notifications.WebhookEvent.verify')
+    def test_fail_payment(self, verify_mock):
+        verify_mock.return_value = True
+
+        headers = {
+            "HTTP_Paypal-Transmission-Id": "test",
+            "HTTP_Paypal-Transmission-Time": "test",
+            "HTTP_Paypal-Transmission-Sig": "test",
+            "HTTP_Paypal-Cert-Url": "test",
+            "HTTP_PayPal-Auth-Algo": "test",
+        }
+        # We only use these fields from the webhook response
+        json_data = {
+            "event_type": "BILLING.SUBSCRIPTION.PAYMENT.FAILED",
+            "resource": {
+                "custom_id": self.donation.id,
+                "id": self.subscription.profile_id,
+                "status": "ACTIVE"
+            }
+        }
+        self.client.post(PAYPAL_WEBHOOK_URL, json.dumps(json_data), content_type="application/json", follow=True, **headers)
+
+        sub = SubscriptionInstance.objects.get(profile_id=self.subscription.profile_id)
+
+        self.assertEqual(sub.recurring_status, STATUS_PAYMENT_FAILED)
+
+    @patch('donations.payment_gateways.paypal.factory.getSubscriptionDetails')
+    @patch('paypalrestsdk.notifications.WebhookEvent.verify')
+    def test_reinstate_subscription(self, verify_mock, details_mock):
+        verify_mock.return_value = True
+        details_mock.return_value = {
+            "custom_id": self.donation2.id,
+            "id": self.subscription.profile_id,
+            "status": "ACTIVE"
+        }
+
+        sub = SubscriptionInstance.objects.get(profile_id=self.subscription.profile_id)
+        sub.recurring_status = STATUS_PAYMENT_FAILED
+        sub.save()
+
+        headers = {
+            "HTTP_Paypal-Transmission-Id": "test",
+            "HTTP_Paypal-Transmission-Time": "test",
+            "HTTP_Paypal-Transmission-Sig": "test",
+            "HTTP_Paypal-Cert-Url": "test",
+            "HTTP_PayPal-Auth-Algo": "test",
+        }
+        # We only use these fields from the webhook response
+        json_data = {
+            "event_type": 'PAYMENT.SALE.COMPLETED',
+            "resource": {
+                'state': 'completed',
+                "billing_agreement_id": self.subscription.profile_id,
+                "id": self.subscription.profile_id,
+                "custom_id": self.donation2.id,
+                'amount': {
+                    "total": 10,
+                    "currency": "HKD",
+                }
+            }
+        }
+        self.client.post(PAYPAL_WEBHOOK_URL, json.dumps(json_data), content_type="application/json", follow=True, **headers)
+
+        sub = SubscriptionInstance.objects.get(profile_id=self.subscription.profile_id)
+        self.assertEqual(sub.recurring_status, STATUS_ACTIVE)

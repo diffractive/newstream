@@ -27,7 +27,7 @@ DONATION_DETAILS_FIELDS = [
 class DonationDetailsForm(forms.Form):
     donation_frequency = forms.ChoiceField(choices=[
         (FREQ_MONTHLY, _(FREQ_MONTHLY.capitalize())),
-        (FREQ_DAILY, _(FREQ_DAILY.capitalize())),
+        ('onetime', _('One-time')),
     ], label=_("Donation frequency"))
     currency = forms.CharField(widget=forms.HiddenInput())
     email = forms.EmailField(required=False, widget=forms.TextInput(attrs={'placeholder': _('Enter your email address')}), label=_("Email"))

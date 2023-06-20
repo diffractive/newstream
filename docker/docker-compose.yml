@@ -132,6 +132,7 @@ services:
       - app
       - selenium
       - localstripe
+      - localpaypal
     profiles:
       - selenium
 

@@ -37,28 +37,6 @@ steps:
     ]
     waitFor: ['-']
 
-  - id: "build-localstripe-image"
-    name: "gcr.io/kaniko-project/executor:v1.10.0"
-    args: [
-      "--destination", "asia.gcr.io/${PROJECT_ID}/${_LOCALSTRIPE_SERVICE_NAME}:pr-${_PR_NUMBER}",
-      "--cache=true",
-      "--cache-ttl=336h0m0s", # 2 weeks (default)
-      "--context=localstripe",
-      "--build-arg", "BASE_IMAGE=asia.gcr.io/${PROJECT_ID}/localstripe:latest"
-    ]
-    waitFor: ['-']
-
-  - id: "build-localpaypal-image"
-    name: "gcr.io/kaniko-project/executor:v1.10.0"
-    args: [
-      "--destination", "asia.gcr.io/${PROJECT_ID}/${_LOCALPAYPAL_SERVICE_NAME}:pr-${_PR_NUMBER}",
-      "--cache=true",
-      "--cache-ttl=336h0m0s", # 2 weeks (default)
-      "--context=localpaypal",
-      "--build-arg", "BASE_IMAGE=asia.gcr.io/${PROJECT_ID}/localpaypal:latest"
-    ]
-    waitFor: ['-']
-
   # Pull the images. It seems more efficient to do this separately. At least, this means
   # we can start pulling the image for each, prior to both builds completing
   - id: docker-pull-django
@@ -80,14 +58,14 @@ steps:
     args: [
         'pull', 'asia.gcr.io/${PROJECT_ID}/${_LOCALSTRIPE_SERVICE_NAME}:pr-${_PR_NUMBER}',
     ]
-    waitFor: [build-localstripe-image]
+    waitFor: ['-']
 
   - id: docker-pull-localpaypal
     name: 'gcr.io/cloud-builders/docker:20.10.14'
     args: [
         'pull', 'asia.gcr.io/${PROJECT_ID}/${_LOCALPAYPAL_SERVICE_NAME}:pr-${_PR_NUMBER}',
     ]
-    waitFor: [build-localpaypal-image]
+    waitFor: ['-']
 
   # Start containers to run automated tests
   - id: start-docker-compose

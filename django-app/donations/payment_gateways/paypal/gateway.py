@@ -158,6 +158,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                 sendFailedPaymentNotifToAdmins(subscription)
                 sendFailedPaymentNotifToDonor(subscription)
 
+            return HttpResponse(status=200)
 
         # Event: EVENT_BILLING_SUBSCRIPTION_CANCELLED
         if self.event_type == EVENT_BILLING_SUBSCRIPTION_CANCELLED and hasattr(self, 'subscription_obj'):

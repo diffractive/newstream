@@ -50,12 +50,6 @@ class DonationDetailsForm(forms.Form):
         self.site_settings = get_site_settings_from_default_site()
         self.fields["currency"].initial = self.site_settings.currency
 
-        # set default donation frequency
-        if form.isDefaultMonthly():
-            self.fields["donation_frequency"].initial = 'monthly'
-        else:
-            self.fields["donation_frequency"].initial = 'onetime'
-
         # add daily option if enabled in dev mode
         if self.site_settings.allow_daily_subscription:
             self.fields["donation_frequency"] = forms.ChoiceField(choices=[
@@ -63,6 +57,12 @@ class DonationDetailsForm(forms.Form):
                 (FREQ_DAILY, _(FREQ_DAILY.capitalize())),
                 ('onetime', _('One-time')),
             ], label=_("Donation frequency"))
+
+        # set default donation frequency
+        if form.isDefaultMonthly():
+            self.fields["donation_frequency"].initial = 'monthly'
+        else:
+            self.fields["donation_frequency"].initial = 'onetime'
 
         # construct payment gateway field
         gateways = form.allowed_gateways.all()

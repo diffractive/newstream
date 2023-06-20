@@ -20,6 +20,6 @@ import requests
 
 # -
 # should just return a list of users saved on the localpaypal database
-requests.get(os.getenv('PAYPAL_API_BASE')).json()
-
+req = requests.get(os.getenv('PAYPAL_API_BASE'))
+assert req.status_code == 200
 

@@ -80,13 +80,13 @@ def create_checkout_session(request):
             'product': product.id
         }
 
-        # see https://stripe.com/docs/api/subscriptions/create#create_subscription-items-price_data-recurring-interval for frequency interval units
-        if donation.subscription.recurring_frequency == FREQ_DAILY:
-            interval_unit = "day"
-        else:
-            interval_unit = "month"
 
         if donation.is_recurring:
+            # see https://stripe.com/docs/api/subscriptions/create#create_subscription-items-price_data-recurring-interval for frequency interval units
+            if donation.subscription.recurring_frequency == FREQ_DAILY:
+                interval_unit = "day"
+            else:
+                interval_unit = "month"
             adhoc_price['recurring'] = {
                 'interval': interval_unit,
                 'interval_count': 1

@@ -6,6 +6,11 @@ networks:
       name: cloudbuild
 
 services:
+  database:
+    volumes:
+      - ./initdb.sh:/docker-entrypoint-initdb.d/initdb.sh
+      - ./schema.sql:/schema.sql
+
   app_init:
     environment:
       STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'

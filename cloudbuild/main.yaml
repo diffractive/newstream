@@ -57,14 +57,14 @@ steps:
   - id: docker-pull-localstripe
     name: 'gcr.io/cloud-builders/docker:20.10.14'
     args: [
-        'pull', 'asia.gcr.io/${PROJECT_ID}/${_LOCALSTRIPE_SERVICE_NAME}:${COMMIT_SHA}',
+        'pull', 'asia.gcr.io/${PROJECT_ID}/${_LOCALSTRIPE_SERVICE_NAME}:latest',
     ]
     waitFor: ['-']
 
   - id: docker-pull-localpaypal
     name: 'gcr.io/cloud-builders/docker:20.10.14'
     args: [
-        'pull', 'asia.gcr.io/${PROJECT_ID}/${_LOCALPAYPAL_SERVICE_NAME}:${COMMIT_SHA}',
+        'pull', 'asia.gcr.io/${PROJECT_ID}/${_LOCALPAYPAL_SERVICE_NAME}:latest',
     ]
     waitFor: ['-']
 

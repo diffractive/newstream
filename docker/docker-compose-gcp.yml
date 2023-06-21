@@ -56,10 +56,10 @@ services:
     image: "${IMAGE_PREFIX}newstream:${IMAGE_TAG}"
 
   localstripe:
-    image: "${IMAGE_PREFIX}localstripe:${IMAGE_TAG}"
+    image: "${IMAGE_PREFIX}localstripe:latest"
 
   localpaypal:
-    image: "${IMAGE_PREFIX}localpaypal:${IMAGE_TAG}"
+    image: "${IMAGE_PREFIX}localpaypal:latest"
 
   selenium_tests:
     image: "${IMAGE_PREFIX}newstream-tests:${IMAGE_TAG}"

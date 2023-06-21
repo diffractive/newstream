@@ -9,7 +9,7 @@ from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersCaptureRequest, OrdersCreateRequest
 from paypalhttp import HttpError
 
-from donations.models import STATUS_FAILED
+from donations.models import STATUS_FAILED, FREQ_DAILY
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.email_functions import sendDonationErrorNotifToAdmins
 from newstream.functions import get_site_name, uuid4_str, _debug, printvars, _exception
@@ -106,6 +106,13 @@ def createPlan(session, product_id, donation):
     checkAccessTokenExpiry(session)
     paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/plans'
+
+    # see https://developer.paypal.com/docs/api/subscriptions/v1/#plans_create for frequency interval units
+    if donation.subscription.recurring_frequency == FREQ_DAILY:
+        interval_unit = "DAY"
+    else:
+        interval_unit = "MONTH"
+
     plan_dict = {
         "product_id": product_id,
         "name": "Newstream Donation Plan for %s" % (donation.user.display_fullname()),
@@ -114,7 +121,7 @@ def createPlan(session, product_id, donation):
         "billing_cycles": [
             {
                 "frequency": {
-                    "interval_unit": "MONTH",
+                    "interval_unit": interval_unit,
                     "interval_count": 1
                 },
                 "tenure_type": "REGULAR",

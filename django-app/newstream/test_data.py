@@ -136,6 +136,9 @@ def load_settings():
     # set footer link
     site_settings.privacy_policy_link = "https://github.com/diffractive/newstream"
 
+    # enable daily subscriptions
+    site_settings.allow_daily_subscription = True
+    
     site_settings.save()
 
     print("Loaded settings √")

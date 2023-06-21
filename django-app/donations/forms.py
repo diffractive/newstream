@@ -8,7 +8,7 @@ from wagtail.contrib.forms.forms import FormBuilder
 
 from newstream.functions import get_site_settings_from_default_site
 from donations.functions import getCurrencyDictAt, displayAmountWithCurrency
-from donations.models import TempDonation
+from donations.models import TempDonation, FREQ_DAILY, FREQ_MONTHLY
 User = get_user_model()
 
 
@@ -26,7 +26,7 @@ DONATION_DETAILS_FIELDS = [
 
 class DonationDetailsForm(forms.Form):
     donation_frequency = forms.ChoiceField(choices=[
-        ('monthly', _('Monthly')),
+        (FREQ_MONTHLY, _(FREQ_MONTHLY.capitalize())),
         ('onetime', _('One-time')),
     ], label=_("Donation frequency"))
     currency = forms.CharField(widget=forms.HiddenInput())
@@ -49,6 +49,14 @@ class DonationDetailsForm(forms.Form):
         self.footer_html = str(form.donation_footer_text)
         self.site_settings = get_site_settings_from_default_site()
         self.fields["currency"].initial = self.site_settings.currency
+
+        # add daily option if enabled in dev mode
+        if self.site_settings.allow_daily_subscription:
+            self.fields["donation_frequency"] = forms.ChoiceField(choices=[
+                (FREQ_MONTHLY, _(FREQ_MONTHLY.capitalize())),
+                (FREQ_DAILY, _(FREQ_DAILY.capitalize())),
+                ('onetime', _('One-time')),
+            ], label=_("Donation frequency"))
 
         # set default donation frequency
         if form.isDefaultMonthly():

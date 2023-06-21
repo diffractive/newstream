@@ -2,6 +2,7 @@ import html
 import functools
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 
 from i18nfield.fields import I18nCharField
 from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList, RichTextField
@@ -396,7 +397,12 @@ class SiteSettings(BaseSetting, ClusterableModel):
         FieldPanel('recaptcha_private_key', heading=_('ReCAPTCHA private key')),
     ]
 
-    edit_handler = TopTabbedInterface([
+    allow_daily_subscription = models.BooleanField(default=False, help_text=_('Enabling this adds "Daily" as a donation frequency option for recurring donations'))
+    debug_panels = [
+        FieldPanel('allow_daily_subscription', heading=_('Allow Daily Subscriptions')),
+    ]
+
+    tabs_config = [
         SubTabbedInterface([
             SubObjectList(email_general_panels, classname='email-general',
                           heading=_('General')),
@@ -437,7 +443,15 @@ class SiteSettings(BaseSetting, ClusterableModel):
             SubObjectList(others_recaptcha_panels,
                           heading=_('ReCAPTCHA'), classname='others-recaptcha'),
         ], heading=_("Others")),
-    ])
+    ]
+
+    if settings.DEBUG:
+        tabs_config.append(SubTabbedInterface([
+            SubObjectList(debug_panels,
+                        heading=_('Donation Settings'), classname='debug-donation-settings'),
+        ], heading=_("Debug")))
+
+    edit_handler = TopTabbedInterface(tabs_config)
 
     @property
     def fields(self):

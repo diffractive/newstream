@@ -63,7 +63,11 @@ case "$1" in
     echo "Backend starting"
     run_django
     ;;
+  run_tests)
+    cd /app && DJANGO_SETTINGS_MODULE=newstream.settings.docker PYTHONPATH=. python -m pytest --junitxml=/tmp/${SHORT_SHA}_test_log.xml --ignore=jupyter
+    cat /tmp/${SHORT_SHA}_test_log.xml
+    ;;
   *)
-    echo "Please choose a command to run (init|run|init_and_run|run_tests|bash)"
+    echo "Please choose a command to run (init|run|init_and_run|run_tests)"
     ;;
 esac

@@ -71,6 +71,12 @@ steps:
     ]
     waitFor: [build-localstripe-image]
 
+  # Run unit tests
+  - id: unit-tests-django
+    name: "asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:pr-${_PR_NUMBER}"
+    args: ["run_tests"]
+    waitFor: [docker-pull-django, docker-pull-selenium, docker-pull-localstripe]
+
   # Start containers to run automated tests
   - id: start-docker-compose
     name: 'gcr.io/cloud-builders/docker:20.10.14'

@@ -24,6 +24,7 @@ services:
       DATABASE_PASSWORD: newstream
       DJANGO_SUPERUSER_EMAIL: newstream@test.local
       DJANGO_SUPERUSER_PASSWORD: newstream
+      DJANGO_SETTINGS_MODULE: newstream.settings.docker
     image: diffractive/newstream:latest
     build:
       context: .
@@ -48,6 +49,7 @@ services:
       DATABASE_PASSWORD: newstream
       DJANGO_SUPERUSER_EMAIL: newstream@test.local
       DJANGO_SUPERUSER_PASSWORD: newstream
+      DJANGO_SETTINGS_MODULE: newstream.settings.docker
     image: diffractive/newstream:latest
     links:
       - database:database

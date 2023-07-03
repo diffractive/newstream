@@ -34,7 +34,6 @@ client/node_modules
 
 ### NEWSTREAM
 /django-app/node_modules/
-/django-app/newstream/settings/dev.py
 /django-app/static/
 /static/
 

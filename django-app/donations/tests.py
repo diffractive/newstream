@@ -2,6 +2,7 @@ from types import SimpleNamespace
 import stripe
 import requests
 import json
+import pytest
 from unittest.mock import patch
 from datetime import datetime
 from django.urls import reverse
@@ -65,6 +66,7 @@ TEST_DOMAIN_NAME = "newstream.hongkongfp.com"
 TEST_USER_CREDS = {'username':TEST_USER['email'], 'password':TEST_USER['password']}
 
 # Create your tests here.
+@pytest.mark.django_db
 class MockStripeResponses(TestCase):
     """
     These tests will mock a stripe response to see how the code handles mocked responses
@@ -194,6 +196,7 @@ class MockStripeResponses(TestCase):
             else:
                 self.assertEqual(messages[0].message, 'Test Error')
 
+@pytest.mark.django_db
 class MockPaypalResponses(TestCase):
     """
     These tests will mock a stripe response to see how the code handles mocked responses

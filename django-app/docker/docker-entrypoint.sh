@@ -64,7 +64,7 @@ case "$1" in
     run_django
     ;;
   run_tests)
-    cd /app && DJANGO_SETTINGS_MODULE=newstream.settings.docker PYTHONPATH=. python -m pytest --junitxml=/tmp/${SHORT_SHA}_test_log.xml --ignore=jupyter
+    cd /app && DJANGO_SETTINGS_MODULE=newstream.settings.dev PYTHONPATH=. python -m pytest --junitxml=/tmp/${SHORT_SHA}_test_log.xml --ignore=jupyter
     cat /tmp/${SHORT_SHA}_test_log.xml
     ;;
   *)

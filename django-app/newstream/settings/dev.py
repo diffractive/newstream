@@ -4,6 +4,9 @@ ALLOWED_HOSTS = [
     "*"
 ]
 
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(PROJECT_DIR)
+
 SECRET_KEY = os.environ.get("SECERT_KEY", "dummykey")
 DEBUG = True
 

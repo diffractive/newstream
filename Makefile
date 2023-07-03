@@ -20,7 +20,7 @@ run-selenium:
 down:
 	docker-compose -f docker/docker-compose.yml down --remove-orphans
 
-unit-tests-django:
+unit-tests:
 	docker run --rm --mount type=bind,source=`pwd`/django-app,target=/donations --tty diffractive/newstream:latest run_tests
 
 selenium:

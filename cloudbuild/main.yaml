@@ -75,7 +75,7 @@ steps:
 
   # Run unit tests
   - id: unit-tests-django
-    name: "asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:pr-${_PR_NUMBER}"
+    name: "asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:${COMMIT_SHA}"
     args: ["run_tests"]
     waitFor: [docker-pull-django, docker-pull-selenium, docker-pull-localstripe]
 

@@ -3,7 +3,7 @@ from django.conf import settings
 from django.forms.widgets import CheckboxSelectMultiple
 from django.utils.translation import gettext_lazy as _
 
-from wagtail.admin.edit_handlers import FieldPanel, InlinePanel, RichTextField
+from wagtail.admin.panels import FieldPanel
 from i18nfield.fields import I18nCharField, I18nTextField
 from wagtail.contrib.forms.models import AbstractFormField
 

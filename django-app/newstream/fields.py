@@ -17,7 +17,7 @@ class I18nRichTextField(I18nFieldMixin, models.TextField):
     """
     A RichTextField which takes internationalized data by extending the I18nFieldMixin and using the I18nRichText widget.
 
-    The original wagtail.core.fields.RichTextField is actually editor agnostic, 
+    The original wagtail.fields.RichTextField is actually editor agnostic, 
     such that you can pass in a different editor for each use of RichTextField in your models.
     But due to the complexity of integrating such agnosticity with the I18nWidget,
     for now I simply use wagtail's default RichText editor widget - DraftailRichTextArea,

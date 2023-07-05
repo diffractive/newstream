@@ -5,10 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
 from i18nfield.fields import I18nCharField
-from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList, RichTextField
-from wagtail.images.edit_handlers import ImageChooserPanel
-from wagtailmodelchooser.edit_handlers import ModelChooserPanel
-from wagtail.contrib.settings.models import BaseSetting, register_setting
+from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList
+from wagtail.contrib.settings.models import BaseSiteSetting, register_setting
 from wagtail.contrib.forms.models import AbstractFormField
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -103,7 +101,7 @@ class UserMetaField(I18nAbstractFormField):
 
 
 @register_setting
-class SiteSettings(BaseSetting, ClusterableModel):
+class SiteSettings(BaseSiteSetting, ClusterableModel):
     default_from_email = models.EmailField()
     default_from_name = I18nCharField(
         max_length=255,
@@ -200,7 +198,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     donations_general_panels = [
         FieldPanel('sandbox_mode', heading=_('Sandbox Mode')),
         FieldPanel('currency', heading=_('Currency')),
-        ModelChooserPanel('donation_form', heading=_(
+        FieldPanel('donation_form', heading=_(
             'Donation Form to be used')),
         FieldPanel('donation_updates_rate_limiter', heading=_("Frequency Limit on Donors' Subscription Update-Actions(edit/pause/resume)?")),
         FieldPanel('donations_soft_delete_mode', heading=_("Soft Delete Mode(for Donations and Subscriptions only)")),
@@ -377,8 +375,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
         null=True, help_text=_("The short form of the organisation that will be used as a signature in e-mails"))
 
     appearance_general_panels = [
-        ImageChooserPanel('brand_logo', heading=('Brand Logo')),
-        ImageChooserPanel('site_icon', heading=('Site Icon')),
+        FieldPanel('brand_logo', heading=('Brand Logo')),
+        FieldPanel('site_icon', heading=('Site Icon')),
         FieldPanel('full_org_name', heading=_('Full Organisation Name')),
         FieldPanel('short_org_name', heading=_('Short Organisation Name')),
     ]

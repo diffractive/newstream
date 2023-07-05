@@ -1,8 +1,8 @@
-from wagtail.admin.edit_handlers import EditHandler
+from wagtail.admin.panels import Panel
 from django.utils.html import format_html
 
 
-class ReadOnlyPanel(EditHandler):
+class ReadOnlyPanel(Panel):
     def __init__(self, attr, *args, **kwargs):
         self.attr = attr
         super().__init__(*args, **kwargs)

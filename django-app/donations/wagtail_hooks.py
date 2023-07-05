@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
 from django.contrib.auth import get_user_model
 
-from wagtail.core import hooks
+from wagtail import hooks
 
 from newstream.functions import _exception, getUserTimezone
 from newstream_user.models import SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL, SUBS_ACTION_MANUAL, DONATION_ACTION_MANUAL

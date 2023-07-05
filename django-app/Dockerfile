@@ -1,4 +1,4 @@
-FROM python:3.7-slim AS build-image
+FROM python:3.8-slim AS build-image
 LABEL maintainer="support@diffractive.io"
 
 # Dockerfile parameters

@@ -86,16 +86,16 @@ class MockStripeResponses(TestCase):
             "stripe": gateways[2]
         }
 
-        subscription = Subscription(
+        parent = Subscription(
             user=self.user,
             created_by=self.user,
         )
-        subscription.save()
+        parent.save()
 
         self.subscription = SubscriptionInstance(
             profile_id=TEST_STRIPE_SUBSCRIPTION["profile_id"],
             user=self.user,
-            parent=subscription,
+            parent=parent,
             gateway=gateway_map[TEST_STRIPE_SUBSCRIPTION["gateway"]],
             recurring_amount=TEST_STRIPE_SUBSCRIPTION["recurring_amount"],
             currency=TEST_STRIPE_SUBSCRIPTION["currency"],
@@ -215,15 +215,15 @@ class MockPaypalResponses(TestCase):
             "stripe": gateways[2]
         }
 
-        subscription = Subscription(
+        parent = Subscription(
             user=self.user,
             created_by=self.user,
         )
-        subscription.save()
+        parent.save()
 
         self.subscription = SubscriptionInstance(
             profile_id=TEST_PAYPAL_SUBSCRIPTION["profile_id"],
-            parent=subscription,
+            parent=parent,
             user=self.user,
             gateway=gateway_map[TEST_PAYPAL_SUBSCRIPTION["gateway"]],
             recurring_amount=TEST_PAYPAL_SUBSCRIPTION["recurring_amount"],

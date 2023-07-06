@@ -132,7 +132,7 @@ class TodayStatisticsPanel:
         dt_now = datetime.now(tz)
         today = dt_now.date()
         midnight = tz.localize(datetime.combine(today, time(0, 0)), is_dst=None)
-        utc_dt = midnight.astimezone(utc) 
+        utc_dt = midnight.astimezone(utc)
         today_donations = Donation.objects.filter(donation_date__gte=utc_dt, payment_status=STATUS_COMPLETE, deleted=False).count()
         today_subscriptions = SubscriptionInstance.objects.filter(subscribe_date__gte=utc_dt, recurring_status=STATUS_ACTIVE, deleted=False).count()
         today_donors = User.objects.filter(date_joined__gte=utc_dt, is_staff=False).count()
@@ -171,7 +171,7 @@ class TotalStatisticsPanel:
             'subscriptions_subtext': str(_("All Subscriptions"))
         })
 
-@hooks.register('construct_homepage_panels')
-def add_statistics_panel(request, panels):
-    panels.append(TodayStatisticsPanel(request))
-    panels.append(TotalStatisticsPanel())
+# @hooks.register('construct_homepage_panels')
+# def add_statistics_panel(request, panels):
+    # panels.append(TodayStatisticsPanel(request))
+    # panels.append(TotalStatisticsPanel())

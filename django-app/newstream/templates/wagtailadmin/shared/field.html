@@ -6,7 +6,7 @@
     <div class="field-content">
         <div class="input {{ input_classes }} ">
             {% block form_field %}
-                {{ field|render_with_errors }}
+                {{ field }}
             {% endblock %}
 
             {# This span only used on rare occasions by certain types of input #}
@@ -19,13 +19,13 @@
             <p class="sys-default"><strong>System default value:</strong> {{ field.name|get_sys_default_value }}</p>
         {% endif %}
 
-        {% if field|has_unrendered_errors %}
+        {% comment %} {% if field|has_unrendered_errors %}
             <p class="error-message">
                 {% for error in field.errors %}
                     <span>{{ error|escape }}</span>
                 {% endfor %}
             </p>
-        {% endif %}
+        {% endif %} {% endcomment %}
     </div>
 
     {% if show_add_comment_button %}

@@ -16,9 +16,9 @@
             <div class="object-layout_big-part">
                 <div class="input {{ input_classes }} ">
                     {% block form_field %}
-                        {{ field|render_with_errors }}
+                        {{ field }}
                     {% endblock %}
-        
+
                     {# This span only used on rare occasions by certain types of input #}
                     <span></span>
                 </div>
@@ -28,13 +28,13 @@
             </div>
         </div>
 
-        {% if field|has_unrendered_errors %}
+        {% comment %} {% if field|has_unrendered_errors %}
             <p class="error-message">
                 {% for error in field.errors %}
                     <span>{{ error|escape }}</span>
                 {% endfor %}
             </p>
-        {% endif %}
+        {% endif %} {% endcomment %}
     </div>
 
     {% if show_add_comment_button %}

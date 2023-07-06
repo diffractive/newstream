@@ -181,15 +181,15 @@ def getSuperUserTimezone():
     su = User.objects.get(is_superuser=1)
     if not su:
         raiseObjectNone(_('Superuser not found'))
-    if su.wagtail_userprofile.get_current_time_zone():
+    if hasattr(su, "wagtail_userprofile"):
         return su.wagtail_userprofile.get_current_time_zone()
-    return 'UTC'
+    return settings.TIME_ZONE
 
 
 def getUserTimezone(user):
-    if user.wagtail_userprofile.get_current_time_zone():
+    if hasattr(user, "wagtail_userprofile"):
         return user.wagtail_userprofile.get_current_time_zone()
-    return 'UTC'
+    return settings.TIME_ZONE
 
 def getAdminTodayDate(format):
     tz = timezone(getSuperUserTimezone())

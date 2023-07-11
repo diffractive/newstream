@@ -40,6 +40,14 @@ class Factory_Paypal(PaymentGatewayFactory):
         cert_url = request.headers['Paypal-Cert-Url']
         # PayPal-Auth-Algo in webhook payload header
         auth_algo = request.headers['PayPal-Auth-Algo']
+        
+        # printing out the essential headers
+        _debug("Transmission ID: "+transmission_id)
+        _debug("Transmission Time: "+timestamp)
+        _debug("Webhook ID: "+webhook_id)
+        _debug("Transmission Signature: "+actual_signature)
+        _debug("Cert Url: "+cert_url)
+        _debug("Auth Algo: "+auth_algo)
 
         response = WebhookEvent.verify(
             transmission_id, timestamp, webhook_id, event_body, cert_url, actual_signature, auth_algo)

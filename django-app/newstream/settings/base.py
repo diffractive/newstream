@@ -61,6 +61,10 @@ ACCOUNT_EMAIL_SUBJECT_PREFIX = None # for removing site prefix in password reset
 ACCOUNT_SIGNUP_FORM_CLASS = 'newstream.forms_signup.BaseSignupForm'
 ACCOUNT_LOGOUT_ON_GET = True
 SOCIALACCOUNT_ADAPTER = 'newstream.forms.NewstreamSAAdapter'
+# a rate limit that allows for one confirmation mail to be sent per the specified cooldown period (in seconds).
+# with current allauth implementation, it would only silently fail if user sends confirmation email again within cooldown period,
+# so better have this stay at 0 as it always have been
+ACCOUNT_EMAIL_CONFIRMATION_COOLDOWN = 0
 
 DEFAULT_FROM_EMAIL = 'donations@domain.example'
 

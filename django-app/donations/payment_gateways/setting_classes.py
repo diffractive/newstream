@@ -1,5 +1,5 @@
 from paypalcheckoutsdk.core import SandboxEnvironment, LiveEnvironment
-
+from django.conf import settings
 from newstream.functions import get_site_settings_from_default_site
 
 
@@ -54,10 +54,10 @@ def getPayPalSettings():
     site_settings = get_site_settings_from_default_site()
     if (site_settings.sandbox_mode):
         environment = SandboxEnvironment(client_id=site_settings.paypal_sandbox_api_client_id, client_secret=site_settings.paypal_sandbox_api_secret_key)
-        api_url = 'https://api-m.sandbox.paypal.com'
+        api_url = settings.PAYPAL_API_BASE or 'https://api-m.sandbox.paypal.com'
         return SettingsPayPal(site_settings.sandbox_mode, site_settings.paypal_sandbox_api_product_id, site_settings.paypal_sandbox_api_client_id, site_settings.paypal_sandbox_api_secret_key, site_settings.paypal_sandbox_api_webhook_id, environment, api_url)
     environment = LiveEnvironment(client_id=site_settings.paypal_api_client_id, client_secret=site_settings.paypal_api_secret_key)
-    api_url = 'https://api-m.paypal.com'
+    api_url = settings.PAYPAL_API_BASE or 'https://api-m.paypal.com'
     return SettingsPayPal(site_settings.sandbox_mode, site_settings.paypal_api_product_id, site_settings.paypal_api_client_id, site_settings.paypal_api_secret_key, site_settings.paypal_api_webhook_id, environment, api_url)
 
 

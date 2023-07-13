@@ -29,6 +29,8 @@ env = environ.Env(
     STRIPE_API_VERSION=(str, ""),
     INIT_LOCALSTRIPE=(bool, False),
 
+    PAYPAL_API_BASE=(str, ""),
+
     DATADOG_APPID=(str, None),
     DATADOG_TOKEN=(str, None),
     DATADOG_ENV=(str, None),
@@ -363,6 +365,12 @@ STRIPE_JS_URL = env('STRIPE_JS_URL')
 STRIPE_API_BASE = env('STRIPE_API_BASE')
 STRIPE_API_VERSION = env('STRIPE_API_VERSION')
 INIT_LOCALSTRIPE = env('INIT_LOCALSTRIPE')
+
+#########################################################################################
+#
+# PayPal settings
+#
+PAYPAL_API_BASE = env('PAYPAL_API_BASE')
 
 ################################################
 #

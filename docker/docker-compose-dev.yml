@@ -14,6 +14,7 @@ services:
       STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
       STRIPE_JS_URL: 'http://localstripe.newstream.local:8420/js.stripe.com/v3/'
       INIT_LOCALSTRIPE: 1
+      PAYPAL_API_BASE: 'http://localpaypal.newstream.local:8410'
       RESET_NULLABLE_SITESETTINGS: 1
       NEWSTREAM_DEFAULT_FROM_EMAIL: 'newstream@diffractive.io'
       NEWSTREAM_ADMIN_EMAILS: 'admin@diffractive.io'
@@ -24,6 +25,7 @@ services:
     environment:
       STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
       STRIPE_JS_URL: 'http://localstripe.newstream.local:8420/js.stripe.com/v3/'
+      PAYPAL_API_BASE: 'http://localpaypal.newstream.local:8410'
       TEST_DATA: 1
       DEBUG: 1
       PY_AUTORELOAD: 1

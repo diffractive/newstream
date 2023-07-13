@@ -111,6 +111,8 @@ def load_test_data(init=True):
     if settings.INIT_LOCALSTRIPE:
         load_localstripe_webhooks()
         load_localstripe_create_product()
+    if settings.PAYPAL_API_BASE:
+        load_localpaypal_settings()
 
 def reset_test_data():
     remove_test_data()
@@ -306,3 +308,11 @@ def load_localstripe_webhooks():
     requests.post(settings.STRIPE_API_BASE + '/_config/webhooks/newstream', json=post_data)
 
     print("Localstripe webhooks registered √")
+
+def load_localpaypal_settings():
+    site_settings = SiteSettings.objects.get(pk=1)
+    # match paypal_sandbox_api_product_id with the created test product in localpaypal database
+    site_settings.paypal_sandbox_api_product_id = "PROD-TESTINGID"
+    site_settings.save()
+
+    print("Localpaypal settings saved √")

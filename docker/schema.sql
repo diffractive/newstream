@@ -93,3 +93,6 @@ CREATE TABLE "oauth_token" (
     token_type VARCHAR(50) NOT NULL,
     create_time TIMESTAMP NOT NULL default current_timestamp
 );
+
+-- initial data
+INSERT INTO "product" ("id", "name", "description", "type", "category", "update_time") VALUES ('PROD-TESTINGID', 'Newstream Donations', 'Newstream Donations(Paypal)', 'SERVICE', 'BOOKS_PERIODICALS_AND_NEWSPAPERS', current_timestamp);

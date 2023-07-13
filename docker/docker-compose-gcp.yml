@@ -16,6 +16,7 @@ services:
       STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
       STRIPE_JS_URL: 'http://localstripe.newstream.local:8420/js.stripe.com/v3/'
       INIT_LOCALSTRIPE: 1
+      PAYPAL_API_BASE: 'http://localpaypal.newstream.local:8410'
       RESET_NULLABLE_SITESETTINGS: 1
       NEWSTREAM_DEFAULT_FROM_EMAIL: 'newstream@diffractive.io'
       NEWSTREAM_ADMIN_EMAILS: 'admin@diffractive.io'

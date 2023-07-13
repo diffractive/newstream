@@ -24,6 +24,7 @@ services:
     environment:
       STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'
       STRIPE_JS_URL: 'http://localstripe.newstream.local:8420/js.stripe.com/v3/'
+      PAYPAL_API_BASE: 'http://localpaypal.newstream.local:8410'
       TEST_DATA: 1
       DEBUG: 1
       PY_AUTORELOAD: 1

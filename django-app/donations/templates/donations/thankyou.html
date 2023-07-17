@@ -30,20 +30,20 @@
     {% endif %}
     <div class="{% if reminders_html %}w-full lg:px-24{% else %}donation-info-box{% endif %} info-spacing-css p-4 lg:p-8 border-2 rounded border-gray-200">
         <p class="field-label">{% trans 'Donor' %}</p>
-        <p class="field-value text-primary font-bold">{{ donation|display_donor }}</p>
+        <p id="donor" class="field-value text-primary font-bold">{{ donation|display_donor }}</p>
         <p class="field-label">{% if is_tmp_transaction_id %}{% trans 'Temporary Transaction ID' %}{% else %}{% trans 'Transaction ID' %}{% endif %}</p>
-        <p class="field-value text-primary font-bold" style="word-break: break-all;">{{ donation.transaction_id }}</p>
+        <p id="transaction_id" class="field-value text-primary font-bold" style="word-break: break-all;">{{ donation.transaction_id }}</p>
         <p class="field-label">{% trans 'Donation frequency' %}</p>
-        <p class="field-value text-primary font-bold">{{ donation.donation_frequency }}</p>
+        <p id="frequency" class="field-value text-primary font-bold">{{ donation.donation_frequency }}</p>
         <p class="field-label">{% trans 'Payment method' %}</p>
-        <p class="field-value text-primary font-bold">{{ paymentMethod }}</p>
+        <p id="payment_method" class="field-value text-primary font-bold">{{ paymentMethod }}</p>
         <p class="field-label">{% trans 'Donation amount' %}</p>
-        <p class="field-value text-primary font-bold">{{ donation|amount_with_currency }}</p>
+        <p id="amount" class="field-value text-primary font-bold">{{ donation|amount_with_currency }}</p>
         <p class="field-label">{% trans 'Payment status' %}</p>
-        <p class="field-value text-primary font-bold">{{ donation.payment_status|title }}</p>
+        <p id="payment_status" class="field-value text-primary font-bold">{{ donation.payment_status|title }}</p>
         {% if donation.is_recurring %}
         <p class="field-label">{% trans 'Recurring donation status' %}</p>
-        <p class="field-value text-primary font-bold">{% if donation.subscription %}{{ donation.subscription.recurring_status|title }}{% else %}{% trans 'Processing' %}{% endif %}</p>
+        <p id="recurring_status" class="field-value text-primary font-bold">{% if donation.subscription %}{{ donation.subscription.recurring_status|title }}{% else %}{% trans 'Processing' %}{% endif %}</p>
         {% endif %}
     </div>
     <br>

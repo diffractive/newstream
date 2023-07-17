@@ -124,10 +124,15 @@ app.input('primary-btn').click()
 wait_element(driver, '//h1[text()="Thank you!"]')
 grabber.capture_screen('thank_you', 'Thank you screen')
 
+# Assert subscription is active:
+assert driver.find_element(By.ID, 'payment_status').text == "Complete"
+assert driver.find_element(By.ID, 'recurring_status').text == "Active"
+
 # +
 # TODO: implement email checking after webhooks at localpaypal are implemented
 # There should be two emails sent, one for admins one for the user
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")
+# -
 
 

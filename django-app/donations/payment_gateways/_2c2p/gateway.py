@@ -60,7 +60,7 @@ class Gateway_2C2P(PaymentGatewayManager):
         return self.base_testmode_paymentaction_url()
 
     def redirect_to_gateway_url(self):
-        """ 
+        """
         Overriding parent implementation as 2C2P has to receive a form post from client browser.
         See docs https://developer.2c2p.com/docs/payment-requestresponse-parameters on recurring parameters behavior
         """
@@ -115,7 +115,7 @@ class Gateway_2C2P(PaymentGatewayManager):
         data['hash_value'] = hmac.new(
             bytes(self.settings.secret_key, 'utf-8'),
             bytes(params, 'utf-8'), hashlib.sha256).hexdigest()
-            
+
         return render(self.request, 'donations/redirection_2c2p_form.html', {'action': self.base_gateway_redirect_url(), 'data': data})
 
     def process_webhook_response(self):
@@ -193,7 +193,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             )
             _debug('Save renewal Donation:'+self.data['order_id'])
             donation.save()
-            
+
             # email notifications
             if donation.payment_status == STATUS_REVOKED:
                 sendDonationRevokedToDonor(donation)
@@ -212,7 +212,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             raise ValueError(_('SubscriptionInstance object is None. Cannot update recurring payment.'))
         # init the params to the php-bridge script call
         script_path = os.path.dirname(os.path.realpath(__file__)) + '/php-bridge/payment_action.php'
-        command_list = ['php', script_path, 
+        command_list = ['php', script_path,
             '--api_url', self.base_paymentaction_url(),
             '--version', RPP_API_VERSION,
             '--mid', self.settings.merchant_id,
@@ -222,7 +222,7 @@ class Gateway_2C2P(PaymentGatewayManager):
             '--status=Y',
             '--amount='+format_payment_amount(form_data['recurring_amount'], self.subscription.currency)
         ]
-        inquire_command_list = ['php', script_path, 
+        inquire_command_list = ['php', script_path,
             '--api_url', self.base_paymentaction_url(),
             '--version', RPP_API_VERSION,
             '--mid', self.settings.merchant_id,
@@ -276,12 +276,12 @@ class Gateway_2C2P(PaymentGatewayManager):
             messages.add_message(self.request, messages.INFO, _("Nothing is updated."))
 
 
-    def cancel_recurring_payment(self):
+    def cancel_recurring_payment(self, reason=None):
         if not self.subscription:
             raise ValueError(_('SubscriptionInstance object is None. Cannot cancel recurring payment.'))
         # init the params to the php-bridge script call
         script_path = os.path.dirname(os.path.realpath(__file__)) + '/php-bridge/payment_action.php'
-        command_list = ['php', script_path, 
+        command_list = ['php', script_path,
             '--api_url', self.base_paymentaction_url(),
             '--version', RPP_API_VERSION,
             '--mid', self.settings.merchant_id,
@@ -298,6 +298,7 @@ class Gateway_2C2P(PaymentGatewayManager):
         if xmlResp.find('respCode') != None and xmlResp.find('respCode').text == '00':
             # update newstream model
             self.subscription.recurring_status = STATUS_CANCELLED
+            self.subscription.cancel_reason = reason
             self.subscription.save()
             # email notifications
             sendRecurringCancelledNotifToAdmins(self.subscription)

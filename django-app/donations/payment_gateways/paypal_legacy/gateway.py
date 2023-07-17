@@ -111,7 +111,7 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
             transaction_id_dpm = DonationPaymentMeta(donation=renewal, field_key='_give_payment_transaction_id', field_value=self.request.POST.get('txn_id', ''))
             transaction_id_dpm.save()
             # skip out the renew method from givewp as we don't do that here
-                
+
             return HttpResponse(status=200)
         elif self.request.POST.get('txn_type', None) == 'subscr_cancel':
             self.donation.subscription.recurring_status = STATUS_CANCELLED
@@ -129,12 +129,13 @@ class Gateway_Paypal_Legacy(PaymentGatewayManager):
 
     def update_recurring_payment(self, form_data):
         pass
-        
-    def cancel_recurring_payment(self):
+
+    def cancel_recurring_payment(self, reason=None):
         if not self.subscription:
             raise ValueError(_('SubscriptionInstance object is None. Cannot cancel recurring payment.'))
         # update newstream model
         self.subscription.recurring_status = STATUS_PROCESSING
+        self.subscription.cancel_reason = reason
         self.subscription.save()
 
         # add to the update actions log

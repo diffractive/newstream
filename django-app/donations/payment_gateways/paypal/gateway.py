@@ -195,12 +195,13 @@ class Gateway_Paypal(PaymentGatewayManager):
                 'Your recurring donation amount via PayPal is updated successfully.'))
 
 
-    def cancel_recurring_payment(self):
+    def cancel_recurring_payment(self, reason=None):
         if not self.subscription:
             raise ValueError(_('SubscriptionInstance object is None. Cannot cancel recurring payment.'))
         cancelSubscription(self.request.session, self.subscription.profile_id)
         # update newstream model
         self.subscription.recurring_status = STATUS_CANCELLED
+        self.subscription.cancel_reason = reason
         self.subscription.save()
 
 

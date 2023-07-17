@@ -1,5 +1,6 @@
 import json
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersGetRequest
 from paypalrestsdk.notifications import WebhookEvent
@@ -41,8 +42,12 @@ class Factory_Paypal(PaymentGatewayFactory):
         # PayPal-Auth-Algo in webhook payload header
         auth_algo = request.headers['PayPal-Auth-Algo']
 
-        response = WebhookEvent.verify(
-            transmission_id, timestamp, webhook_id, event_body, cert_url, actual_signature, auth_algo)
+        # Ignore webhook verification if using localpaypal
+        if settings.PAYPAL_API_BASE:
+            response = True,
+        else:
+            response = WebhookEvent.verify(
+                transmission_id, timestamp, webhook_id, event_body, cert_url, actual_signature, auth_algo)
         if not response:
             _debug('Webhook verification result: '+str(response))
 

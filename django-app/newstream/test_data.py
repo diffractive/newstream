@@ -12,6 +12,11 @@ from donations.payment_gateways.stripe.constants import (EVENT_CHECKOUT_SESSION_
     EVENT_PAYMENT_INTENT_SUCCEEDED, EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID,
     EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED,
     EVENT_INVOICE_PAYMENT_FAILED)
+from donations.payment_gateways.paypal.constants import (EVENT_PAYMENT_SALE_COMPLETED,
+    EVENT_PAYMENT_CAPTURE_COMPLETED, EVENT_BILLING_SUBSCRIPTION_ACTIVATED,
+    EVENT_BILLING_SUBSCRIPTION_CANCELLED, EVENT_BILLING_SUBSCRIPTION_UPDATED,
+    EVENT_BILLING_SUBSCRIPTION_SUSPENDED, EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED,
+    EVENT_BILLING_PLAN_PRICING_CHANGE_ACTIVATED)
 import requests
 
 User = get_user_model()
@@ -113,6 +118,7 @@ def load_test_data(init=True):
         load_localstripe_create_product()
     if settings.PAYPAL_API_BASE:
         load_localpaypal_settings()
+        load_localpaypal_webhooks()
 
 def reset_test_data():
     remove_test_data()
@@ -140,7 +146,7 @@ def load_settings():
 
     # enable daily subscriptions
     site_settings.allow_daily_subscription = True
-    
+
     site_settings.save()
 
     print("Loaded settings √")
@@ -316,3 +322,22 @@ def load_localpaypal_settings():
     site_settings.save()
 
     print("Localpaypal settings saved √")
+
+def load_localpaypal_webhooks():
+    post_data = {
+        "url": 'http://app.newstream.local:8000/en/donations/verify-paypal-response/',
+        "event_types": [
+            EVENT_PAYMENT_SALE_COMPLETED,
+            EVENT_PAYMENT_CAPTURE_COMPLETED,
+            EVENT_BILLING_SUBSCRIPTION_ACTIVATED,
+            EVENT_BILLING_SUBSCRIPTION_CANCELLED,
+            EVENT_BILLING_SUBSCRIPTION_UPDATED,
+            EVENT_BILLING_SUBSCRIPTION_SUSPENDED,
+            EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED,
+            EVENT_BILLING_PLAN_PRICING_CHANGE_ACTIVATED,
+        ]
+    }
+
+    requests.post(settings.PAYPAL_API_BASE + '/config/webhooks', json=post_data)
+
+    print("Localpaypal webhooks registered √")

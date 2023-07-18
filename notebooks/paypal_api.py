@@ -26,4 +26,4 @@ class PayPal:
         payment_result is either "success" | "failure"
         """
         # We get subscription to get customer_id
-        _ = requests.post(self.api_url + f'/advance-subscription/{sub_id}', json={"payment_result": payment_result})
+        _ = requests.post(self.api_url + f'/advance-subscription-cycle/{sub_id}', json={"payment_result": payment_result})

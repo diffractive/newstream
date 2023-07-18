@@ -9,7 +9,7 @@ from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersCaptureRequest, OrdersCreateRequest
 from paypalhttp import HttpError
 
-from donations.models import STATUS_FAILED, FREQ_DAILY
+from donations.models import STATUS_FAILED, FREQ_DAILY, SubscriptionPaymentMeta
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.email_functions import sendDonationErrorNotifToAdmins
 from newstream.functions import get_site_name, uuid4_str, _debug, printvars, _exception
@@ -161,6 +161,15 @@ def createSubscription(request, plan_id, donation):
     checkAccessTokenExpiry(request.session)
     paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/subscriptions'
+    return_url = request.build_absolute_uri(reverse('donations:return-from-paypal'))
+    cancel_url = request.build_absolute_uri(reverse('donations:cancel-from-paypal'))
+    try:
+        # If we have the old_instance_id metadata we want to change the redirect url
+        SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='old_instance_id')
+        return_url = request.build_absolute_uri(reverse('donations:return-from-paypal-card-update'))
+        cancel_url = request.build_absolute_uri(reverse('donations:cancel-from-paypal-card-update'))
+    except SubscriptionPaymentMeta.DoesNotExist:
+        pass
     subscription_dict = {
         "plan_id": plan_id,
         "quantity": "1",
@@ -180,8 +189,8 @@ def createSubscription(request, plan_id, donation):
                 "payer_selected": "PAYPAL",
                 "payee_preferred": "IMMEDIATE_PAYMENT_REQUIRED"
             },
-            "return_url": request.build_absolute_uri(reverse('donations:return-from-paypal')),
-            "cancel_url": request.build_absolute_uri(reverse('donations:cancel-from-paypal'))
+            "return_url": return_url,
+            "cancel_url": cancel_url
         },
         "custom_id": str(donation.id)
     }

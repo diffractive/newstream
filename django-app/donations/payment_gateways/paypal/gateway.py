@@ -166,9 +166,15 @@ class Gateway_Paypal(PaymentGatewayManager):
                 self.donation.subscription.recurring_status = STATUS_CANCELLED
                 self.donation.subscription.save()
 
-                # email notifications
-                sendRecurringCancelledNotifToAdmins(self.donation.subscription)
-                sendRecurringCancelledNotifToDonor(self.donation.subscription)
+                # Dont send an email in update card process
+                try:
+                    # This value only exists in the update card process
+                    spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
+                    spmeta.delete()
+                except SubscriptionPaymentMeta.DoesNotExist:
+                    # send email notifications here for all other cancellation scenarios
+                    sendRecurringCancelledNotifToAdmins(self.donation.subscription)
+                    sendRecurringCancelledNotifToDonor(self.donation.subscription)
 
                 return HttpResponse(status=200)
             else:

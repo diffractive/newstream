@@ -8,7 +8,7 @@ from paypalhttp import HttpError
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import object_to_json, _debug, _exception
-from donations.models import Donation, STATUS_COMPLETE, STATUS_FAILED
+from donations.models import Donation, STATUS_COMPLETE, STATUS_FAILED, STATUS_PAYMENT_FAILED, SubscriptionInstance, SubscriptionPaymentMeta
 from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.payment_gateways import Factory_Paypal
@@ -18,14 +18,14 @@ from donations.payment_gateways.paypal.functions import create_paypal_order, cap
 def create_paypal_transaction(request):
     """ When the user reaches last step after confirming the donation,
         user is redirected via gatewayManager.redirect_to_gateway_url(), which renders redirection_paypal.html
-        
+
         This function calls to PayPal Api to create a PayPal subscription object or PayPal order(one-time donation),
         then this function returns the approval_link to frontend js and to redirect to PayPal's checkout page
 
         Sample (JSON) request: {
             'csrfmiddlewaretoken': 'LZSpOsb364pn9R3gEPXdw2nN3dBEi7RWtMCBeaCse2QawCFIndu93fD3yv9wy0ij'
         }
-        
+
         @todo: revise error handling, avoid catching all exceptions at the end
     """
 
@@ -118,7 +118,7 @@ def verify_paypal_response(request):
 
         For more info on how to build this webhook endpoint, refer to PayPal documentation:
         https://developer.paypal.com/docs/subscriptions/integrate/
-        
+
         @todo: revise error handling, avoid catching all exceptions at the end
     """
 
@@ -221,3 +221,87 @@ def cancel_from_paypal(request):
         request.session['error-message'] = str(error)
         _exception(str(error))
     return redirect('donations:cancelled')
+
+
+def return_from_paypal_card_update(request):
+    """ This endpoint is submitted as the return_url in the updating the payment flow.
+        This url should receive GET params: 'token' and 'subscription_id'(only recurring payments); 'ba_token' is not used
+        In Factory_PayPal.initGatewayByReturn(request), we save the subscription_id/token into the donationPaymentMeta data upon a successful request;
+        exception will be raised if the endpoint is reached but a previous meta value is found,
+        this is done to prevent this endpoint being called unlimitedly
+
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+    try:
+        gatewayManager = Factory_Paypal.initGatewayByReturn(request)
+        if gatewayManager.donation.is_recurring:
+            gatewayManager.donation.subscription.profile_id = request.GET.get('subscription_id')
+            gatewayManager.donation.subscription.save()
+            try:
+                # We want to cancel the payment failed subscriptioninstance under this subscription
+                # now that we have an active one
+                parent = gatewayManager.donation.subscription.parent
+                instance = SubscriptionInstance.objects.get(parent=parent, recurring_status=STATUS_PAYMENT_FAILED)
+
+                # Save old_instance_id with the subscription id so that we don't send emails
+                spmeta = SubscriptionPaymentMeta(
+                    subscription=instance, field_key='old_instance_id', field_value=instance.id)
+                spmeta.save()
+
+                old_gateway = Factory_Paypal.initGateway(request, None, instance)
+                old_gateway.cancel_recurring_payment()
+            except SubscriptionPaymentMeta.DoesNotExist:
+                pass
+        request.session['updated-card'] = 'True'
+        request.session['return-donation-id'] = gatewayManager.donation.id
+    except IOError as error:
+        request.session['error-title'] = str(_("IOError"))
+        request.session['error-message'] = str(error)
+        _exception(str(error))
+    except ValueError as error:
+        request.session['error-title'] = str(_("ValueError"))
+        request.session['error-message'] = str(error)
+        _exception(str(error))
+    except Exception as error:
+        request.session['error-title'] = str(_("Exception"))
+        request.session['error-message'] = str(error)
+        _exception(str(error))
+    return redirect('donations:my-recurring-donations')
+
+
+@csrf_exempt
+def cancel_from_paypal_card_update(request):
+    """ This endpoint is submitted as the cancel_url in the updating the payment details flow for the PayPal
+        SubscriptionInstance/Order at create_paypal_transaction(request)
+        This url should receive GET params: 'token' and 'subscription_id'(only recurring payments); 'ba_token' is not used
+        In Factory_PayPal.initGatewayByReturn(request), we save the subscription_id/token into the donationPaymentMeta data upon a successful request;
+        exception will be raised if the endpoint is reached but a previous meta value is found,
+        this is done to prevent this endpoint being called unlimitedly, which would set the payment status as Cancelled each time
+
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+
+    try:
+        gatewayManager = Factory_Paypal.initGatewayByReturn(request)
+        request.session['return-donation-id'] = gatewayManager.donation.id
+
+        # Remove newly created donation and subscription
+        donation = Donation.objects.get(
+            pk=request.session['return-donation-id'])
+        sub_instance = donation.subscription
+        donation.delete()
+        sub_instance.delete()
+    except IOError as error:
+        request.session['error-title'] = str(_("IOError"))
+        request.session['error-message'] = str(error)
+        _exception(str(error))
+    except ValueError as error:
+        request.session['error-title'] = str(_("ValueError"))
+        request.session['error-message'] = str(error)
+        _exception(str(error))
+    except Exception as error:
+        request.session['error-title'] = str(_("Exception"))
+        request.session['error-message'] = str(error)
+        _exception(str(error))
+    return redirect('donations:my-recurring-donations')
+

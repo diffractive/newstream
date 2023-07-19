@@ -89,5 +89,15 @@ paypal.simulate_next_payment_cycle(sub_id, "failure")
 app.go('en/donations/my-recurring-donations/')
 rows = app.table('my-donations-table').row_values()
 assert rows[0][5] == 'Payment failed'
+<<<<<<< HEAD:notebooks/selenium/Donations/PayPal/Test Subscription Renewals.py
+=======
+grabber.capture_screen('payment_failed', 'Failed payment subscriptions')
+
+paypal.simulate_next_payment_cycle(sub_id, "success")
+app.go('en/donations/my-recurring-donations/')
+rows = app.table('my-donations-table').row_values()
+assert rows[0][5] == 'Active'
+grabber.capture_screen('successful_payment', 'Subscription is now successful again')
+>>>>>>> main:notebooks/selenium/Donations/PayPal/Failed Subscription Reactivated by itself.py
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")

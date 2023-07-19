@@ -68,9 +68,21 @@ class Gateway_Paypal(PaymentGatewayManager):
                     self.donation.subscription.recurring_status = STATUS_ACTIVE
                     self.donation.subscription.save()
 
-                    # send the new recurring notifs to admins and donor as subscription is just active
-                    sendNewRecurringNotifToAdmins(self.donation.subscription)
-                    sendNewRecurringNotifToDonor(self.donation.subscription)
+                    # Update card flow
+                    try:
+                        spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
+
+                        # send notif emails to admins and donor as a previously failed payment has now succeeded
+                        sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
+                        sendReactivatedPaymentNotifToDonor(self.donation.subscription)
+
+                        spmeta.delete()
+                    # Not part of the card update flow so a normal new recurring payment
+                    except SubscriptionPaymentMeta.DoesNotExist:
+
+                        # send the new recurring notifs to admins and donor as subscription is just active
+                        sendNewRecurringNotifToAdmins(self.donation.subscription)
+                        sendNewRecurringNotifToDonor(self.donation.subscription)
 
                 return HttpResponse(status=200)
             else:
@@ -204,11 +216,11 @@ class Gateway_Paypal(PaymentGatewayManager):
     def cancel_recurring_payment(self, reason=None):
         if not self.subscription:
             raise ValueError(_('SubscriptionInstance object is None. Cannot cancel recurring payment.'))
-        cancelSubscription(self.request.session, self.subscription.profile_id)
         # update newstream model
         self.subscription.recurring_status = STATUS_CANCELLED
         self.subscription.cancel_reason = reason
         self.subscription.save()
+        cancelSubscription(self.request.session, self.subscription.profile_id)
 
 
     def toggle_recurring_payment(self):

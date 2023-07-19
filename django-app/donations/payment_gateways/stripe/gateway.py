@@ -170,9 +170,9 @@ class Gateway_Stripe(PaymentGatewayManager):
                     self.donation.payment_status = STATUS_COMPLETE
                     self.donation.save()
 
-                    # Update card flow, will include the new_instance_id metadata
+                    # Update card flow, will include the old_instance_id metadata
                     try:
-                        spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='new_instance_id')
+                        spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
 
                         # Adjust next paying date with trials
                         old_sub_id = spmeta.field_value

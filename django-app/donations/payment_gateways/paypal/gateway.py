@@ -68,9 +68,9 @@ class Gateway_Paypal(PaymentGatewayManager):
                     self.donation.subscription.recurring_status = STATUS_ACTIVE
                     self.donation.subscription.save()
 
-                    # Update card flow, will include the new_instance_id metadata
+                    # Update card flow, will include the old_instance_id metadata
                     try:
-                        spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='new_instance_id')
+                        spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
 
                         # send notif emails to admins and donor as a previously failed payment has now succeeded
                         sendReactivatedPaymentNotifToAdmins(self.donation.subscription)

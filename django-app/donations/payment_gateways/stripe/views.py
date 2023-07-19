@@ -119,8 +119,8 @@ def create_checkout_session(request):
         # Update card flow
         if donation.is_recurring:
             try:
-                # If we have the new_instance_id metadata we want to change the redirect url
-                SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='new_instance_id')
+                # If we have the old_instance_id metadata we want to change the redirect url
+                SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='old_instance_id')
 
                 success_url = request.build_absolute_uri(reverse('donations:return-from-stripe-card-update'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'
                 cancel_url = request.build_absolute_uri(reverse('donations:cancel-from-stripe-card-update'))+'?stripe_session_id={CHECKOUT_SESSION_ID}'

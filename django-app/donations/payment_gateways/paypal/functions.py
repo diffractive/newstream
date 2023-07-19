@@ -142,9 +142,9 @@ def createPlan(session, product_id, donation):
     }
     # Adjust subscription_dict for update payment flow
     try:
-        # If we have the old_instance_id metadata we want to add a setup fee because we will
+        # If we have the new_instance_id metadata we want to add a setup fee because we will
         # set the start of the subcription to the following month
-        SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='old_instance_id')
+        SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='new_instance_id')
         plan_dict['payment_preferences']['setup_fee'] = {
             'currency_code': donation.currency,
             'value': str(donation.donation_amount)
@@ -200,8 +200,8 @@ def createSubscription(request, plan_id, donation):
     }
     # Adjust subscription_dict for update payment floww
     try:
-        # If we have the old_instance_id metadata we want to change the redirect urls and also change the starting time
-        spmeta = SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='old_instance_id')
+        # If we have the new_instance_id metadata we want to change the redirect urls and also change the starting time
+        spmeta = SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='new_instance_id')
 
         sub = SubscriptionInstance.objects.get(id=spmeta.field_value)
         sub_obj = getSubscriptionDetails(request.session, sub.profile_id)

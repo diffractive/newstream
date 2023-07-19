@@ -68,14 +68,15 @@ class Gateway_Paypal(PaymentGatewayManager):
                     self.donation.subscription.recurring_status = STATUS_ACTIVE
                     self.donation.subscription.save()
 
-                    # Update card flow
+                    # Update card flow, will include the new_instance_id metadata
                     try:
-                        spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
+                        spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='new_instance_id')
 
                         # send notif emails to admins and donor as a previously failed payment has now succeeded
                         sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
                         sendReactivatedPaymentNotifToDonor(self.donation.subscription)
 
+                        # We want to remove the update card flow flag, so we delete the metadata
                         spmeta.delete()
                     # Not part of the card update flow so a normal new recurring payment
                     except SubscriptionPaymentMeta.DoesNotExist:
@@ -180,8 +181,8 @@ class Gateway_Paypal(PaymentGatewayManager):
 
                 # Dont send an email in update card process
                 try:
-                    # This value only exists in the update card process
-                    spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
+                    # This value only exists for subscriptions that are part of the update card process
+                    spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='awaiting_cancelation')
                     spmeta.delete()
                 except SubscriptionPaymentMeta.DoesNotExist:
                     # send email notifications here for all other cancellation scenarios

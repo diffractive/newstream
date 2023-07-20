@@ -9,7 +9,7 @@ from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersCaptureRequest, OrdersCreateRequest
 from paypalhttp import HttpError
 
-from donations.models import STATUS_FAILED, FREQ_DAILY
+from donations.models import STATUS_FAILED, FREQ_DAILY, SubscriptionPaymentMeta, SubscriptionInstance
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.email_functions import sendDonationErrorNotifToAdmins
 from newstream.functions import get_site_name, uuid4_str, _debug, printvars, _exception
@@ -140,6 +140,17 @@ def createPlan(session, product_id, donation):
             "payment_failure_threshold": 3
         }
     }
+    # Adjust subscription_dict for update payment flow
+    try:
+        # If we have the old_instance_id metadata we want to add a setup fee because we will
+        # set the start of the subcription to the following month
+        SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='old_instance_id')
+        plan_dict['payment_preferences']['setup_fee'] = {
+            'currency_code': donation.currency,
+            'value': str(donation.donation_amount)
+        }
+    except SubscriptionPaymentMeta.DoesNotExist:
+        pass
     if paypalSettings.sandbox_mode and session.get('negtest_createPlan', None):
         plan_dict['name'] = session.get('negtest_createPlan')
     return curlPaypal(api_url, common_headers(session['paypal_token']), post_data=json.dumps(plan_dict))
@@ -161,6 +172,8 @@ def createSubscription(request, plan_id, donation):
     checkAccessTokenExpiry(request.session)
     paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/billing/subscriptions'
+    return_url = request.build_absolute_uri(reverse('donations:return-from-paypal'))
+    cancel_url = request.build_absolute_uri(reverse('donations:cancel-from-paypal'))
     subscription_dict = {
         "plan_id": plan_id,
         "quantity": "1",
@@ -180,11 +193,23 @@ def createSubscription(request, plan_id, donation):
                 "payer_selected": "PAYPAL",
                 "payee_preferred": "IMMEDIATE_PAYMENT_REQUIRED"
             },
-            "return_url": request.build_absolute_uri(reverse('donations:return-from-paypal')),
-            "cancel_url": request.build_absolute_uri(reverse('donations:cancel-from-paypal'))
+            "return_url": return_url,
+            "cancel_url": cancel_url
         },
         "custom_id": str(donation.id)
     }
+    # Adjust subscription_dict for update payment floww
+    try:
+        # If we have the old_instance_id metadata we want to change the redirect urls and also change the starting time
+        spmeta = SubscriptionPaymentMeta.objects.get(subscription=donation.subscription, field_key='old_instance_id')
+
+        sub = SubscriptionInstance.objects.get(id=spmeta.field_value)
+        sub_obj = getSubscriptionDetails(request.session, sub.profile_id)
+        subscription_dict['start_time'] = sub_obj['billing_info']['next_billing_time']
+        subscription_dict['application_context']['return_url'] = request.build_absolute_uri(reverse('donations:return-from-paypal-card-update'))
+        subscription_dict['application_context']['cancel_url'] = request.build_absolute_uri(reverse('donations:cancel-from-paypal-card-update'))
+    except SubscriptionPaymentMeta.DoesNotExist:
+        pass
     if paypalSettings.sandbox_mode and request.session.get('negtest_createSubscription', None):
         subscription_dict['plan_id'] = request.session.get('negtest_createSubscription')
     return curlPaypal(api_url, common_headers(request.session['paypal_token']), post_data=json.dumps(subscription_dict))

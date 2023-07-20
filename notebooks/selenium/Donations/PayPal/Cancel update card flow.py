@@ -32,6 +32,7 @@ import secrets
 # -
 
 clear_all_emails()
+cancel_url = '/en/donations/cancel-from-paypal-card-update/'
 randstr = secrets.token_hex(6).upper()
 data = {
     "email": f'test_user{randstr}@newstream.com',
@@ -67,23 +68,10 @@ grabber.capture_screen('email_confirm', 'Confirm email')
 app.button('Confirm').click()
 grabber.capture_screen('email_confirmed', 'Email confirmed')
 
-# Get subscription id and advance subscription to next successful payment cycle
+# Get subscription id and simulate a failed payment
 app.go('en/donations/my-recurring-donations/')
 rows = app.table('my-donations-table').row_values()
 sub_id = rows[0][2]
-paypal.simulate_next_payment_cycle(sub_id, "success")
-
-# Check renewal records
-app.label('md2_dropdown-toggle-checkbox1').click()
-grabber.capture_screen('open_menu', 'Open subscription menu')
-
-rows = app.table('my-donations-table').rows()
-# We need this data_id to fetch the right buttons
-data_id = rows[0][5].get_attribute('data-id')
-app.button('view-recurring-donation-wide', data_id).click()
-grabber.capture_screen('view_renewals', 'Renewals page')
-
-# advance subscription to next failing payment cycle
 paypal.simulate_next_payment_cycle(sub_id, "failure")
 
 # +
@@ -105,39 +93,26 @@ for email_content in emails:
         assert email_recipient == data['email'], \
             f"Unexpected e-mail recipient {email_recipient}, expected: {data['email']}"
     email_titles.remove(email_title)
-email_count += 2
 # -
 
 app.go('en/donations/my-recurring-donations/')
+grabber.capture_screen('view_renewals', 'Renewals page')
+
+# Fix the payment method and create another payment
+app.label('md2_dropdown-toggle-checkbox1').click()
+grabber.capture_screen('update_payment_method', 'Update payment method option')
+
+app.button('update-payment-method-wide').click()
+grabber.capture_screen('confirm_update_payment_method', 'Confirm update details')
+
+app.button('Proceed to update card details').click()
+wait_element(driver, '//input[@id="username"]')
+grabber.capture_screen('paypal_renew_payment', 'Update payment details on paypal')
+
+app.link(cancel_url).click()
+grabber.capture_screen('cancel_update', 'Getting back to my renewals')
+
 rows = app.table('my-donations-table').row_values()
 assert rows[0][5] == 'Payment failed'
-grabber.capture_screen('payment_failed', 'Failed payment subscriptions')
-
-paypal.simulate_next_payment_cycle(sub_id, "success")
-app.go('en/donations/my-recurring-donations/')
-rows = app.table('my-donations-table').row_values()
-assert rows[0][5] == 'Active'
-grabber.capture_screen('successful_payment', 'Subscription is now successful again')
-
-# +
-# There should be two emails sent, one for admins one for the user
-wait_for_email(email_count+1)
-emails = get_emails(0, 2)
-user_email = 'Your Monthly Payment is Active again'
-admin_email = 'A Recurring Donation has been reactivated'
-
-
-# Email order is not guaranteed
-email_titles = [admin_email, user_email]
-for email_content in emails:
-    email_title = email_content['Content']['Headers']['Subject'][0]
-    email_recipient = email_content['Content']['Headers']['To'][0]
-
-    assert email_title in email_titles, f'Unexpected e-mail found: {email_title}'
-    if email_title == user_email:
-        assert email_recipient == data['email'], \
-            f"Unexpected e-mail recipient {email_recipient}, expected: {data['email']}"
-    email_titles.remove(email_title)
-# -
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")

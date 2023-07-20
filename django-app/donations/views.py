@@ -445,7 +445,8 @@ def confirm_update_card_details(request, id):
                 )
                 instance.save()
 
-                # Save old_instance_id with the subscription id, so that we can fetch information from the failed payment
+                # Save old_instance_id with the subscription id, so that it can be used as a flag that this instance is a part
+                # of the upgrade payment details flow, but it also allows us to quickly get the subscription info where necessary
                 spmeta = SubscriptionPaymentMeta(
                     subscription=instance, field_key='old_instance_id', field_value=id)
                 spmeta.save()

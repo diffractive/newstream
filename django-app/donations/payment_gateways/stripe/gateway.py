@@ -170,7 +170,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                     self.donation.payment_status = STATUS_COMPLETE
                     self.donation.save()
 
-                    # Update card flow
+                    # Update card flow, will include the old_instance_id metadata
                     try:
                         spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
 
@@ -182,6 +182,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                         sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
                         sendReactivatedPaymentNotifToDonor(self.donation.subscription)
 
+                        # We want to remove the update card flow flag, so we delete the metadata
                         spmeta.delete()
                     # Not part of the card update flow so a normal new recurring payment
                     except SubscriptionPaymentMeta.DoesNotExist:
@@ -244,7 +245,7 @@ class Gateway_Stripe(PaymentGatewayManager):
             # Dont send an email in update card process
             try:
                 # This value only exists in the update card process
-                spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='old_instance_id')
+                spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='awaiting_cancelation')
                 spmeta.delete()
             except SubscriptionPaymentMeta.DoesNotExist:
                 # send email notifications here for all other cancellation scenarios

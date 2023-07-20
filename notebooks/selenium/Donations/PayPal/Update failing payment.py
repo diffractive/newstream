@@ -67,23 +67,10 @@ grabber.capture_screen('email_confirm', 'Confirm email')
 app.button('Confirm').click()
 grabber.capture_screen('email_confirmed', 'Email confirmed')
 
-# Get subscription id and advance subscription to next successful payment cycle
+# Get subscription id and simulate a failed payment
 app.go('en/donations/my-recurring-donations/')
 rows = app.table('my-donations-table').row_values()
 sub_id = rows[0][2]
-paypal.simulate_next_payment_cycle(sub_id, "success")
-
-# Check renewal records
-app.label('md2_dropdown-toggle-checkbox1').click()
-grabber.capture_screen('open_menu', 'Open subscription menu')
-
-rows = app.table('my-donations-table').rows()
-# We need this data_id to fetch the right buttons
-data_id = rows[0][5].get_attribute('data-id')
-app.button('view-recurring-donation-wide', data_id).click()
-grabber.capture_screen('view_renewals', 'Renewals page')
-
-# advance subscription to next failing payment cycle
 paypal.simulate_next_payment_cycle(sub_id, "failure")
 
 # +
@@ -109,15 +96,39 @@ email_count += 2
 # -
 
 app.go('en/donations/my-recurring-donations/')
-rows = app.table('my-donations-table').row_values()
-assert rows[0][5] == 'Payment failed'
-grabber.capture_screen('payment_failed', 'Failed payment subscriptions')
+grabber.capture_screen('view_renewals', 'Renewals page')
 
-paypal.simulate_next_payment_cycle(sub_id, "success")
+# Fix the payment method and create another payment
+app.label('md2_dropdown-toggle-checkbox1').click()
+grabber.capture_screen('update_payment_method', 'Update payment method option')
+
+app.button('update-payment-method-wide').click()
+grabber.capture_screen('confirm_update_payment_method', 'Confirm update details')
+
+app.button('Proceed to update card details').click()
+wait_element(driver, '//input[@id="username"]')
+grabber.capture_screen('paypal_renew_payment', 'Update payment details on paypal')
+
+app.link('secondary-btn').click()
+wait_element(driver, '//input[@id="card_number"]')
+app.input('card_number').fill(data['card_number'])
+app.input('card_expiry').fill(data['card_expiry'])
+app.input('cvc').fill(data['cvc'])
+app.input('primary-btn').click()
+
+wait_element(driver, '//input[@value="agree & subscribe"]')
+app.input('primary-btn').click()
+grabber.capture_screen('success_message', 'Payment renewed')
+
 app.go('en/donations/my-recurring-donations/')
+grabber.capture_screen('recurring_payments_refresh', 'Recurring payment refresh')
+
 rows = app.table('my-donations-table').row_values()
 assert rows[0][5] == 'Active'
-grabber.capture_screen('successful_payment', 'Subscription is now successful again')
+
+app.label('md2_dropdown-toggle-checkbox1').click()
+app.button('view-recurring-donation-wide').click()
+grabber.capture_screen('all_renewals', 'All renewals')
 
 # +
 # There should be two emails sent, one for admins one for the user

@@ -243,11 +243,6 @@ def return_from_paypal_card_update(request):
                 parent = gatewayManager.donation.subscription.parent
                 instance = SubscriptionInstance.objects.get(parent=parent, recurring_status=STATUS_PAYMENT_FAILED)
 
-                # Save this flag for old subscription instance so that we don't send emails when we cancel the subscription
-                spmeta = SubscriptionPaymentMeta(
-                    subscription=instance, field_key='awaiting_cancelation', field_value=True)
-                spmeta.save()
-
                 old_gateway = Factory_Paypal.initGateway(request, None, instance)
                 old_gateway.cancel_recurring_payment()
             except SubscriptionPaymentMeta.DoesNotExist:

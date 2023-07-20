@@ -451,6 +451,15 @@ def confirm_update_card_details(request, id):
                     subscription=instance, field_key='old_instance_id', field_value=id)
                 spmeta.save()
 
+                # Save payment failed id so that it can be cancelled once a new subscription is created.
+                try:
+                    SubscriptionPaymentMeta.objects.get(subscription=subscription, field_key='awaiting_cancelation')
+                except:
+                    spmeta_2 = SubscriptionPaymentMeta(
+                        subscription=subscription, field_key='awaiting_cancelation', field_value=True
+                    )
+                    spmeta_2.save()
+
                 # link subscription to the donation
                 donation.subscription = instance
 

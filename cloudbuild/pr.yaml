@@ -73,16 +73,6 @@ steps:
     args: ["run_tests"]
     waitFor: [docker-pull-django, docker-pull-selenium, docker-pull-localstripe]
 
-  # Start containers to run automated tests
-  - id: start-docker-compose
-    name: 'gcr.io/cloud-builders/docker:20.10.14'
-    args: ['compose', '-f', 'docker/docker-compose.yml', '-f', 'docker/docker-compose-gcp.yml', 'up', '-d']
-    env:
-      - 'PROJECT_ID=$PROJECT_ID'
-      - 'IMAGE_TAG=pr-${_PR_NUMBER}'
-      - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
-    waitFor: [docker-pull-django, docker-pull-selenium, docker-pull-localstripe, docker-pull-localpaypal]
-
   # Run selenium tests
   - id: selenium-tests
     name: 'gcr.io/cloud-builders/docker:20.10.14'
@@ -93,7 +83,7 @@ steps:
       - 'PROJECT_ID=$PROJECT_ID'
       - 'IMAGE_TAG=pr-${_PR_NUMBER}'
       - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
-    waitFor: [start-docker-compose]
+    waitFor: [docker-pull-django, docker-pull-selenium, docker-pull-localstripe, docker-pull-localpaypal]
 
   - id: upload-selenium-output
     name: "gcr.io/cloud-builders/gsutil"

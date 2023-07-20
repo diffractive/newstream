@@ -191,7 +191,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                     # send email notifications here for all other cancellation scenarios
                     sendRecurringCancelledNotifToAdmins(self.donation.subscription)
                     sendRecurringCancelledNotifToDonor(self.donation.subscription)
-                print("\\\\\\\\\\\\\\\\\\\\\\\ ")
+                print("///////////////////////")
                 return HttpResponse(status=200)
             else:
                raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_CANCELLED but subscription status is %(status)s") % {'status': self.subscription_obj['status']})

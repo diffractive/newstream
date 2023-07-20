@@ -104,6 +104,18 @@ steps:
     ]
     waitFor: [selenium-tests]
 
+  # show docker logs
+  - id: docker-compose-logs
+    name: 'gcr.io/cloud-builders/docker:20.10.14'
+    args: ['logs', '-t', '-f', 'docker-app-1']
+    env:
+      - 'PROJECT_ID=$PROJECT_ID'
+      - 'IMAGE_TAG=pr-${_PR_NUMBER}'
+      - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
+      - 'BACKEND_IMAGE_NAME=${_BACKEND_SERVICE_NAME}'
+      - 'SELENIUM_IMAGE_NAME=${_SELENIUM_SERVICE_NAME}'
+    waitFor: [selenium-tests]
+
   - id: print-selenium-url
     name: 'ubuntu'
     entrypoint: 'bash'

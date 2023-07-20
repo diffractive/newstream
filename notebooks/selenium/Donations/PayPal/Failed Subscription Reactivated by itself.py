@@ -86,6 +86,28 @@ grabber.capture_screen('view_renewals', 'Renewals page')
 # advance subscription to next failing payment cycle
 paypal.simulate_next_payment_cycle(sub_id, "failure")
 
+# +
+# There should be two emails sent, one for admins one for the user
+wait_for_email(email_count+1)
+emails = get_emails(0, 2)
+user_email = 'Your Monthly Payment was Unsuccessful'
+admin_email = 'A Recurring Donation has failed'
+
+
+# Email order is not guaranteed
+email_titles = [admin_email, user_email]
+for email_content in emails:
+    email_title = email_content['Content']['Headers']['Subject'][0]
+    email_recipient = email_content['Content']['Headers']['To'][0]
+
+    assert email_title in email_titles, f'Unexpected e-mail found: {email_title}'
+    if email_title == user_email:
+        assert email_recipient == data['email'], \
+            f"Unexpected e-mail recipient {email_recipient}, expected: {data['email']}"
+    email_titles.remove(email_title)
+email_count += 2
+# -
+
 app.go('en/donations/my-recurring-donations/')
 rows = app.table('my-donations-table').row_values()
 assert rows[0][5] == 'Payment failed'
@@ -96,5 +118,26 @@ app.go('en/donations/my-recurring-donations/')
 rows = app.table('my-donations-table').row_values()
 assert rows[0][5] == 'Active'
 grabber.capture_screen('successful_payment', 'Subscription is now successful again')
+
+# +
+# There should be two emails sent, one for admins one for the user
+wait_for_email(email_count+1)
+emails = get_emails(0, 2)
+user_email = 'Your Monthly Payment is Active again'
+admin_email = 'A Recurring Donation has been reactivated'
+
+
+# Email order is not guaranteed
+email_titles = [admin_email, user_email]
+for email_content in emails:
+    email_title = email_content['Content']['Headers']['Subject'][0]
+    email_recipient = email_content['Content']['Headers']['To'][0]
+
+    assert email_title in email_titles, f'Unexpected e-mail found: {email_title}'
+    if email_title == user_email:
+        assert email_recipient == data['email'], \
+            f"Unexpected e-mail recipient {email_recipient}, expected: {data['email']}"
+    email_titles.remove(email_title)
+# -
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")

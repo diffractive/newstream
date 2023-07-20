@@ -179,8 +179,6 @@ class Gateway_Paypal(PaymentGatewayManager):
                 self.donation.subscription.recurring_status = STATUS_CANCELLED
                 self.donation.subscription.save()
 
-                print("///////////////////////")
-                print("EVENT_BILLING_SUBSCRIPTION_CANCELLED received, sub profile id: %s" % self.donation.subscription.profile_id)
                 # Dont send an email in update card process
                 try:
                     # This value only exists for subscriptions that are part of the update card process
@@ -191,7 +189,6 @@ class Gateway_Paypal(PaymentGatewayManager):
                     # send email notifications here for all other cancellation scenarios
                     sendRecurringCancelledNotifToAdmins(self.donation.subscription)
                     sendRecurringCancelledNotifToDonor(self.donation.subscription)
-                print("///////////////////////")
                 return HttpResponse(status=200)
             else:
                raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_CANCELLED but subscription status is %(status)s") % {'status': self.subscription_obj['status']})

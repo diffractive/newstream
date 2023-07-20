@@ -9,7 +9,7 @@
 <p style="{{ 'parag'|email_css }}">{% trans "Hi" %} {{ subscription.user.display_fullname }},</p>
 {% url 'donations:my-recurring-donations' as donations_url %}
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with donation_amount=subscription|recurring_amount_with_currency %}Your previously failed <strong>{{ donation_amount }} recurring payment on Stripe</strong> has become <strong>Active</strong> again.{% endblocktrans %}
+    {% blocktrans with gateway=subscription.gateway donation_amount=subscription|recurring_amount_with_currency %}Your previously failed <strong>{{ donation_amount }} recurring payment on {{ gateway }}</strong> has become <strong>Active</strong> again.{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
     {% blocktrans with gateway=subscription.gateway %}{{gateway}} is once again able to charge the card registered in your recurring payment.{% endblocktrans %}

@@ -80,7 +80,7 @@ CREATE TABLE "checkout_session" (
 
 CREATE TABLE "webhook" (
     id VARCHAR(50) PRIMARY KEY,
-    url TEXT NOT NULL,
+    url TEXT NOT NULL UNIQUE,
     event_types JSON NOT NULL,
     create_time TIMESTAMP NOT NULL default current_timestamp,
     update_time TIMESTAMP NOT NULL

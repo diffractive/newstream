@@ -100,13 +100,14 @@ app.label('dropdown-toggle-checkbox').click()
 app.link('header-logout').click()
 grabber.capture_screen('logged_out', 'Logged out')
 
+app.link("header-sign-in").click()
 app.input('id_login').fill(data['email'])
 app.input('id_password').fill(data['password'])
 app.button('Login').click()
-grabber.capture_screen('failing_payment_notif', 'Notifications about failing payment')
+grabber.capture_screen('failing_payment_notif', 'Logged in, see notifications about failing payment')
 
 app.button('cta-update-card').click()
-grabber.capture_screen('confirm_update_payment_method_1', 'Update card details via notifications')
+grabber.capture_screen('confirm_update_payment_method_1', 'Update card details via notifications CTA')
 
 # test updating card on the recurring donations page
 app.go('en/donations/my-recurring-donations/')

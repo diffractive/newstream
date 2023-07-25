@@ -3,6 +3,8 @@ $primary-color: #1076e4;
 $primary-light-color: #e9f3ff;
 $primary-dark-color: #06233c;
 $border-grey-color: #E8EBED;
+$caution-color: #ec7603;
+$caution-light-color: #fef8f2;
 $warning-color: #E41010;
 $warning-light-color: #FFBDBD;
 $gray-color: #525252;
@@ -26,6 +28,12 @@ $gray-light-color: #F3F3F3;
 .bg-gray-light {
     background-color: $gray-light-color !important;
 }
+.bg-caution {
+    background-color: $caution-color !important;
+}
+.bg-caution-light {
+    background-color: $caution-light-color !important;
+}
 .text-primary {
     color: $primary-color !important;
 }
@@ -37,6 +45,9 @@ $gray-light-color: #F3F3F3;
 }
 .text-warning {
     color: $warning-color !important;
+}
+.text-caution {
+    color: $caution-color !important;
 }
 .text-gray {
     color: $gray-color !important;

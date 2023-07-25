@@ -6,7 +6,7 @@ from django.conf import settings
 
 from donations.functions import displayDonationAmountWithCurrency, displayRecurringAmountWithCurrency
 from newstream.functions import get_site_name, get_site_url, printvars, get_site_settings_from_default_site
-from donations.models import STATUS_ACTIVE, STATUS_CANCELLED, STATUS_PAYMENT_FAILED, STATUS_PAUSED, STATUS_PROCESSING
+from donations.models import STATUS_ACTIVE, STATUS_CANCELLED, STATUS_PAYMENT_FAILED, STATUS_PAUSED, STATUS_PROCESSING, SubscriptionInstance
 
 register = template.Library()
 
@@ -182,7 +182,8 @@ def display_donor(donation):
 
 
 @register.filter(name="status_icon")
-def status_icon(status):
+def status_icon(instance):
+    status = instance.recurring_status
     if status == STATUS_ACTIVE:
         return 'active-icon'
     elif status == STATUS_PAUSED:
@@ -191,25 +192,33 @@ def status_icon(status):
         return 'payment-failed-icon'
     elif status == STATUS_PROCESSING:
         return 'processing-icon'
+    elif instance.cancel_reason == SubscriptionInstance.CancelReason.PAYMENTS_FAILED:
+        return 'cancelled-warning-icon'
     else:
         return 'cancelled-icon'
 
 
 @register.filter(name="status_bg_color")
-def status_bg_color(status):
+def status_bg_color(instance):
+    status = instance.recurring_status
     if status == STATUS_ACTIVE:
         return 'bg-primary-light'
     elif status == STATUS_PAYMENT_FAILED:
+        return 'bg-caution-light'
+    elif instance.cancel_reason == SubscriptionInstance.CancelReason.PAYMENTS_FAILED:
         return 'bg-warning-light'
     else:
         return 'bg-gray-light'
 
 
 @register.filter(name="status_text_color")
-def status_text_color(status):
+def status_text_color(instance):
+    status = instance.recurring_status
     if status == STATUS_ACTIVE:
         return 'text-primary'
     elif status == STATUS_PAYMENT_FAILED:
+        return 'text-caution'
+    elif instance.cancel_reason == SubscriptionInstance.CancelReason.PAYMENTS_FAILED:
         return 'text-warning'
     else:
         return 'text-gray'

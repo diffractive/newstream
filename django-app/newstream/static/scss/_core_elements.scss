@@ -598,6 +598,10 @@ span.cancelled-icon {
     @extend .svg-status-icon;
     background-image: url("../svg/cancelled.svg")
 }
+span.cancelled-warning-icon {
+    @extend .svg-status-icon;
+    background-image: url("../svg/cancelled-warning.svg")
+}
 
 span.status-text {
     padding-left: 28px;

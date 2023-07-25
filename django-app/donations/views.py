@@ -494,14 +494,24 @@ def my_recurring_donations(request):
                             'Your payment is successful. Recurring donation is resumed active.'))
         del request.session['updated-card']
 
-    # Display error message if theres a payment failure
+    # Display error message for payment failure cases
+    error = None
     for sub in subscriptions:
-        if sub.latest_instance.recurring_status == STATUS_PAYMENT_FAILED:
-            messages.add_message(request, messages.ERROR, _(
-                'A recent payment of your recurring donation has failed. Please update the corresponding payment method.'
-            ))
+        if (sub.latest_instance.recurring_status == STATUS_CANCELLED and
+            sub.latest_instance.cancel_reason == SubscriptionInstance.CancelReason.PAYMENTS_FAILED):
+            error = {
+                "level": messages.ERROR,
+                "message": _("Your recurring donation has been cancelled due to multiple failed payments. Please create a new recurring donation.")
+            }
             break
-    return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'site_settings': site_settings})
+        if sub.latest_instance.recurring_status == STATUS_PAYMENT_FAILED:
+            error = {
+                "level": messages.WARNING,
+                "message": _('A recent payment of your recurring donation has failed. Please update the corresponding payment method.')
+            }
+    if error:
+        messages.add_message(request, error['level'], error['message'])
+    return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'site_settings': site_settings, 'cancel_reasons': SubscriptionInstance.CancelReason})
 
 
 @login_required

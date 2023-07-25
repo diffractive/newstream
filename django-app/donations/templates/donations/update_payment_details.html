@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static common_tags wagtailcore_tags i18n %}
+{% load static common_tags donation_tags wagtailcore_tags i18n %}
 
 {% block title %}{% trans 'Update card details' %}{% endblock %}
 
@@ -21,10 +21,11 @@
                 <p class="field-label">{% trans 'Donor' %}</p>
                 <p class="field-value text-primary font-bold mb-4">{{ request.user.display_fullname }}</p>
                 <p class="field-label">{% trans 'Donation frequency' %}</p>
-                {# TODO: this shouldn't be hardcoded #}
-                <p class="field-value text-primary font-bold mb-4">{% trans "Monthly" %}</p>
+                <p class="field-value text-primary font-bold mb-4">{{ subscription.recurring_frequency|capfirst }}</p>
                 <p class="field-label">{% trans 'Donation amount' %}</p>
                 <p class="field-value text-primary font-bold mb-4">{{ subscription|recurring_amount_with_currency }}</p>
+                <p class="field-label">{% trans 'Payment gateway' %}</p>
+                <p class="field-value text-primary font-bold mb-4">{{ subscription|display_gateway }}</p>
             </div>
 
             <div class="info-box">

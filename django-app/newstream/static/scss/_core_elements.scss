@@ -132,8 +132,19 @@ a {
 /* Messages */
 .messages {
     transition: opacity 1s;
-    & > div:not(:last-child) {
-        margin-bottom: 1rem;
+    /* possible to have some static and some disappearing messages together */
+    & > div:not(.hidden) + div:not(.hidden) {
+        margin-top: 1rem;
+    }
+    .message {
+        transition: opacity 1s;
+    }
+    .max-width-500 {
+        max-width: 500px;
+    }
+    .ns-wide-btn {
+        border-radius: 5px;
+        margin-bottom: 0px;
     }
 }
 

@@ -53,18 +53,17 @@ for (let wrapper of document.getElementsByClassName("dropdown-toggle-label")) {
 // Hide the messages after 3 seconds
 (() => {
     setTimeout(() => {
-        for (let msg of document.getElementsByClassName('messages')) {
+        for (let msg of document.querySelectorAll('.message:not(.static-notif)')) {
             msg.classList.add('opacity-0');
         }
     }, 3000);
     setTimeout(() => {
-        let msgwrapper = document.getElementById('messages-wrapper');
-        if (msgwrapper) {
-            msgwrapper.classList.add('out-of-sight');
+        for (let msg of document.querySelectorAll('.message:not(.static-notif)')) {
+            msg.classList.add('out-of-sight');
         }
     }, 4000); // invisible transition is 1s
     setTimeout(() => {
-        for (let msg of document.getElementsByClassName('messages')) {
+        for (let msg of document.querySelectorAll('.message:not(.static-notif)')) {
             msg.classList.add('hidden');
         }
     }, 4000); // invisible transition is 1s

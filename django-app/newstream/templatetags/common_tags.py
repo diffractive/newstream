@@ -97,15 +97,15 @@ def returnEmailInlineCss(element):
 @register.filter(name='alert_class')
 def getAlertClass(tags):
     if 'debug' in tags or 'info' in tags:
-        return "bg-blue-100 border-l-4 border-blue-500 text-blue-700 p4"
+        return "bg-blue-100 border-l-4 border-blue-500"
     elif 'success' in tags:
-        return "bg-green-100 border-l-4 border-green-500 text-green-700 p4"
+        return "bg-green-100 border-l-4 border-green-500"
     elif 'warning' in tags:
-        return "bg-orange-100 border-l-4 border-orange-500 text-orange-700 p4"
+        return "bg-orange-100 border-l-4 border-orange-500"
     elif 'error' in tags:
-        return "bg-red-100 border-l-4 border-red-500 text-red-700 p4"
+        return "bg-red-100 border-l-4 border-red-500"
     else:
-        return "bg-blue-100 border-l-4 border-blue-500 text-blue-700 p4"
+        return "bg-blue-100 border-l-4 border-blue-500"
 
 
 @register.filter(name='next_path_filter')
@@ -200,7 +200,7 @@ def status_bg_color(status):
     if status == STATUS_ACTIVE:
         return 'bg-primary-light'
     elif status == STATUS_PAYMENT_FAILED:
-        return 'bg-warning-light'
+        return 'bg-error-light'
     else:
         return 'bg-gray-light'
 

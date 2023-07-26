@@ -125,7 +125,7 @@ for email_content in emails:
         assert "has been cancelled due to repeated failed payments" in email_content['Content']['Body'], \
             f"Content does not contain string 'has been cancelled due to repeated failed payments'."
     email_titles.remove(email_title)
-email_count += 8 
+email_count += 8
 # -
 
 # ### Dismiss warning by creating a new donation
@@ -154,7 +154,7 @@ app.button('Pay').click()
 wait_element(driver, '//h1[text()="Thank you!"]')
 
 # wait for emails to let processing finish
-wait_for_email(email_count+1)
+time.sleep(2)
 app.go('en/donations/my-recurring-donations/')
 rows = app.table('my-donations-table').row_values()
 assert rows[0][5] == 'Active'

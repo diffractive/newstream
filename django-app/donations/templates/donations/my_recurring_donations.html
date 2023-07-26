@@ -44,8 +44,8 @@
                                         <button class="update-payment-method button-link" data-id="{{ latest_instance.id }}"
                                             data-href="{% url 'donations:confirm-update-card-details' latest_instance.id %}">{% trans 'Update payment method' %}</button>
                                     {% elif latest_instance.recurring_status == 'cancelled' and latest_instance.cancel_reason == cancel_reasons.PAYMENTS_FAILED %}
-                                        <button class="create-new-donation button-link" data-id="{{ latest_instance.id }}"
-                                            data-href="{% url 'donations:donate' %}">{% trans 'Create new donation' %}</button>
+                                        <button class="make-new-donation button-link" data-id="{{ latest_instance.id }}"
+                                            data-href="{% url 'donations:donate' %}">{% trans 'Make new donation' %}</button>
                                     {% else %}
                                         <button class="toggle-recurring-donation need-black-loading-btn adhoc-right-pad"
                                             data-id="{{ latest_instance.id }}" {% if latest_instance.isRecurringCancelled or latest_instance.isRecurringProcessing or not support_togglesub %}disabled{% endif %}>
@@ -86,14 +86,14 @@
                             {{ latest_instance.recurring_status|status_text }}
                         </span>
                         {% if latest_instance.recurring_status == 'payment_failed' %}
-                            <button class="ns-wide-btn right-arrow-btn need-white-loading-btn bg-caution update-payment-method button-link"
+                            <button class="ns-wide-btn right-arrow-btn need-white-loading-btn bg-warning update-payment-method button-link"
                                 data-id="{{ latest_instance.id }}" data-href="{% url 'donations:confirm-update-card-details' latest_instance.id %}">
                                 {% trans 'Update payment method' %}<span class="icon"></span>
                             </button>
                         {% elif latest_instance.recurring_status == 'cancelled' and latest_instance.cancel_reason == cancel_reasons.PAYMENTS_FAILED %}
-                            <button class="ns-wide-btn right-arrow-btn need-white-loading-btn bg-warning create-new-donation button-link"
+                            <button class="ns-wide-btn right-arrow-btn need-white-loading-btn bg-danger make-new-donation button-link"
                                 data-id="{{ latest_instance.id }}" data-href="{% url 'donations:donate'%}">
-                                {% trans 'Create new donation' %}<span class="icon"></span>
+                                {% trans 'Make new donation' %}<span class="icon"></span>
                             </button>
                         {% endif %}
                     </td>
@@ -152,8 +152,8 @@
                                     <button class="update-payment-method update-payment-method-wide button-link" data-id="{{ latest_instance.id }}"
                                         data-href="{% url 'donations:confirm-update-card-details' latest_instance.id %}">{% trans 'Update payment method' %}</button>
                                 {% elif latest_instance.recurring_status == 'cancelled' and latest_instance.cancel_reason == cancel_reasons.PAYMENTS_FAILED %}
-                                    <button class="create-new-donation create-new-donation-wide button-link" data-id="{{ latest_instance.id }}"
-                                        data-href="{% url 'donations:donate' %}">{% trans 'Create new donation' %}</button>
+                                    <button class="make-new-donation make-new-donation-wide button-link" data-id="{{ latest_instance.id }}"
+                                        data-href="{% url 'donations:donate' %}">{% trans 'Make new donation' %}</button>
                                 {% else %}
                                     <button class="toggle-recurring-donation toggle-recurring-donation-wide need-black-loading-btn adhoc-right-pad"
                                     data-id="{{ latest_instance.id }}" {% if latest_instance.isRecurringCancelled or latest_instance.isRecurringProcessing or not support_togglesub %}disabled{% endif %}><span

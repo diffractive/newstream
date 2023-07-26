@@ -133,8 +133,8 @@ email_count += 8
 app.label('md2_dropdown-toggle-checkbox1').click()
 grabber.capture_screen('open_menu', 'Open subscription menu')
 
-app.button('create-new-donation-wide').click()
-grabber.capture_screen('donation_page', 'Create new donation')
+app.button('make-new-donation-wide').click()
+grabber.capture_screen('donation_page', 'Make new donation')
 
 app.dropdown('id_donation_amount').select('HKD $100')
 app.dropdown('id_donation_frequency').select('Monthly')

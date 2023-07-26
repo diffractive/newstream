@@ -320,7 +320,6 @@
                             removeLoadingState(wrapper);
                             threeDotsNormal(subscription_id);
                             if (data['status'] == 'success') {
-                                nsAlert(data['success-message']);
                                 for (let dismissBtn of document.querySelectorAll(`button.dismiss-notification[data-id='${subscription_id}']`)) {
                                     dismissBtn.disabled = true;
                                 }

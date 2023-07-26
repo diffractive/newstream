@@ -78,7 +78,7 @@
                             {{ latest_instance.recurring_status|status_text }}
                         </span>
                         {% if latest_instance.recurring_status == 'payment_failed' %}
-                            <button class="ns-wide-btn right-arrow-btn need-white-loading-btn bg-warning update-payment-method"
+                            <button class="ns-wide-btn right-arrow-btn need-white-loading-btn bg-error update-payment-method"
                                 data-id="{{ latest_instance.id }}" data-href="{% url 'donations:confirm-update-card-details' latest_instance.id %}">
                                 {% trans 'Update payment method' %}<span class="icon"></span>
                             </button>

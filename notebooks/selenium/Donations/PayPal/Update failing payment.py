@@ -95,15 +95,30 @@ for email_content in emails:
 email_count += 2
 # -
 
+# relogin to test seeing the notifications and CTA about failing payment
+app.label('dropdown-toggle-checkbox').click()
+app.link('header-logout').click()
+grabber.capture_screen('logged_out', 'Logged out')
+
+app.link("header-sign-in").click()
+app.input('id_login').fill(data['email'])
+app.input('id_password').fill(data['password'])
+app.button('Login').click()
+grabber.capture_screen('failing_payment_notif', 'Logged in, see notifications about failing payment')
+
+app.button('cta-update-card').click()
+grabber.capture_screen('confirm_update_payment_method_1', 'Update card details via notifications CTA')
+
+# test updating card on the recurring donations page
 app.go('en/donations/my-recurring-donations/')
-grabber.capture_screen('view_renewals', 'Renewals page')
+grabber.capture_screen('recurring_donations', 'Recurring Donations page')
 
 # Fix the payment method and create another payment
 app.label('md2_dropdown-toggle-checkbox1').click()
 grabber.capture_screen('update_payment_method', 'Update payment method option')
 
 app.button('update-payment-method-wide').click()
-grabber.capture_screen('confirm_update_payment_method', 'Confirm update details')
+grabber.capture_screen('confirm_update_payment_method_2', 'Update card details via recurring donations page')
 
 app.button('Proceed to update card details').click()
 wait_element(driver, '//input[@id="username"]')

@@ -11,6 +11,7 @@ from django.db import transaction
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import uuid4_str, reverse_with_site_url, _exception, _debug, object_to_json
 from donations.models import Donation, DonationPaymentMeta, SubscriptionPaymentMeta, SubscriptionInstance, STATUS_PAYMENT_FAILED, FREQ_DAILY
+from donations.functions import removeSubscriptionWarnings
 from donations.payment_gateways.setting_classes import getStripeSettings
 from donations.payment_gateways.stripe.functions import initStripeApiKey, formatDonationAmount
 from donations.payment_gateways.stripe.factory import Factory_Stripe
@@ -221,6 +222,10 @@ def return_from_stripe(request):
     try:
         gatewayManager = Factory_Stripe.initGatewayByReturn(request)
         request.session['return-donation-id'] = gatewayManager.donation.id
+
+        if gatewayManager.donation.is_recurring:
+            # Resolve any existing subscriptions
+            removeSubscriptionWarnings(request.user)
     except ValueError as e:
         _exception(str(e))
         request.session['error-title'] = str(_("ValueError"))
@@ -342,6 +347,9 @@ def return_from_stripe_card_update(request):
                 old_gateway.cancel_recurring_payment()
             except SubscriptionPaymentMeta.DoesNotExist:
                 pass
+
+            # Resolve any existing subscriptions
+            removeSubscriptionWarnings(request.user)
         request.session['updated-card'] = 'True'
         request.session['return-donation-id'] = gatewayManager.donation.id
     except ValueError as e:

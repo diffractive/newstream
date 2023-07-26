@@ -281,6 +281,34 @@ def revoked(request):
         return render(request, 'donations/revoked.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'paymentMethod': paymentMethod, 'donation': donation})
     return render(request, 'donations/revoked.html', {'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
+@login_required
+def dismiss_warning(request):
+    """ This is called when the user has a cancelled subscription that has been cancelled due to payment failures. While in this state,
+        subscriptions will continuously show error warnings to the user. This function will let the user dismiss these warnings for a
+        given subscription
+
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+    try:
+        if request.method == 'POST':
+            json_data = json.loads(request.body)
+            if 'subscription_id' not in json_data:
+                print("No subscription_id in JSON body", flush=True)
+                return HttpResponse(status=400)
+            subscription_id = int(json_data['subscription_id'])
+            subscription_instance = get_object_or_404(SubscriptionInstance, id=subscription_id)
+            if subscription_instance.user == request.user:
+                subscription_instance.cancel_reason = SubscriptionInstance.CancelReason.PAYMENTS_FAILED_RESOLVED
+                subscription_instance.save()
+                return JsonResponse({'status': 'success', "success-message": _("Warnings for this recurring donation has been dismissed")})
+            else:
+                raise PermissionError(_('You are not authorized to cancel subscription %(id)d.') % {'id': subscription_id})
+        else:
+            return HttpResponse(400)
+    except (ValueError, PermissionError, RuntimeError, Exception) as e:
+        _exception(str(e))
+        return JsonResponse({'status': 'failure', 'reason': str(e)})
+
 
 @login_required
 def cancel_recurring(request):
@@ -494,14 +522,24 @@ def my_recurring_donations(request):
                             'Your payment is successful. Recurring donation is resumed active.'))
         del request.session['updated-card']
 
-    # Display error message if theres a payment failure
+    # Display error message for payment failure cases
+    error = None
     for sub in subscriptions:
-        if sub.latest_instance.recurring_status == STATUS_PAYMENT_FAILED:
-            messages.add_message(request, messages.ERROR, _(
-                'A recent payment of your recurring donation has failed. Please update the corresponding payment method.'
-            ))
+        if (sub.latest_instance.recurring_status == STATUS_CANCELLED and
+            sub.latest_instance.cancel_reason == SubscriptionInstance.CancelReason.PAYMENTS_FAILED):
+            error = {
+                "level": messages.ERROR,
+                "message": _("Your recurring donation has been cancelled due to multiple failed payments. Please create a new recurring donation.")
+            }
             break
-    return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'site_settings': site_settings})
+        if sub.latest_instance.recurring_status == STATUS_PAYMENT_FAILED:
+            error = {
+                "level": messages.WARNING,
+                "message": _('A recent payment of your recurring donation has failed. Please update the corresponding payment method.')
+            }
+    if error:
+        messages.add_message(request, error['level'], error['message'])
+    return render(request, 'donations/my_recurring_donations.html', {'subscriptions': subscriptions, 'site_settings': site_settings, 'cancel_reasons': SubscriptionInstance.CancelReason})
 
 
 @login_required

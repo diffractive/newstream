@@ -5,8 +5,8 @@ $primary-dark-color: #06233c;
 $border-grey-color: #E8EBED;
 $warning-color: #EC7601;
 $warning-light-color: #FEF8F2;
-$error-color: #E41010;
-$error-light-color: #FFBDBD;
+$danger-color: #E41010;
+$danger-light-color: #FFBDBD;
 $gray-color: #525252;
 $gray-light-color: #F3F3F3;
 
@@ -25,11 +25,11 @@ $gray-light-color: #F3F3F3;
 .bg-warning-light {
     background-color: $warning-light-color !important;
 }
-.bg-error {
-    background-color: $error-color !important;
+.bg-danger {
+    background-color: $danger-color !important;
 }
-.bg-error-light {
-    background-color: $error-light-color !important;
+.bg-danger-light {
+    background-color: $danger-light-color !important;
 }
 .bg-gray-light {
     background-color: $gray-light-color !important;
@@ -43,8 +43,11 @@ $gray-light-color: #F3F3F3;
 .text-primary-dark {
     color: $primary-dark-color !important;
 }
+.text-danger {
+    color: $danger-color !important;
+}
 .text-warning {
-    color: $error-color !important;
+    color: $warning-color !important;
 }
 .text-gray {
     color: $gray-color !important;

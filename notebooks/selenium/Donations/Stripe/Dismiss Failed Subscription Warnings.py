@@ -125,39 +125,22 @@ for email_content in emails:
         assert "has been cancelled due to repeated failed payments" in email_content['Content']['Body'], \
             f"Content does not contain string 'has been cancelled due to repeated failed payments'."
     email_titles.remove(email_title)
-email_count += 8
 # -
 
-# ### Dismiss warning by creating a new donation
+# ### Dismiss warning by using the dismiss button
 
 app.label('md2_dropdown-toggle-checkbox1').click()
 grabber.capture_screen('open_menu', 'Open subscription menu')
 
-app.button('make-new-donation-wide').click()
-grabber.capture_screen('donation_page', 'Make new donation')
+app.button('dismiss-notification-wide').click()
+grabber.capture_screen('dismiss_popup', 'Dismiss donation')
 
-app.dropdown('id_donation_amount').select('HKD $100')
-app.dropdown('id_donation_frequency').select('Monthly')
-app.dropdown('id_payment_gateway').select('Stripe')
+app.button('confirm-ok').click()
+grabber.capture_screen("dismiss_successful", "Successfully dismissed")
 
-app.button('Continue').click()
-
-app.button('Confirm Donation').click()
-
-wait_element(driver, '//input[@id="cardNumber"]')
-
-app.input('cardNumber').fill(data['card_number'])
-app.input('cardExpiry').fill(data['card_expiry'])
-app.input('cardCvc').fill(data['cvc'])
-app.input('billingName').fill(data['name'])
-app.button('Pay').click()
-wait_element(driver, '//h1[text()="Thank you!"]')
-
-# wait for emails to let processing finish
-time.sleep(2)
-app.go('en/donations/my-recurring-donations/')
+wait_element(driver, '//div[contains(@class, bg-gray-light)]')
 rows = app.table('my-donations-table').row_values()
-assert rows[0][5] == 'Active'
+assert rows[0][5] == 'Cancelled'
 grabber.capture_screen("resolved_failed_donation", "Cancelled donation doesn't have warning anymore")
 
 gallery(zip(grabber.screens.values(), grabber.captions.values()), row_height="300px")

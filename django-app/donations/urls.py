@@ -15,6 +15,7 @@ urlpatterns = [
     path('edit-recurring/<int:id>/', views.edit_recurring, name='edit-recurring'),
     path('toggle-recurring/', views.toggle_recurring, name='toggle-recurring'),
     path('cancel-recurring/', views.cancel_recurring, name='cancel-recurring'),
+    path('dismiss-warning/', views.dismiss_warning, name='dismiss-warning' ),
     # path('verify-2c2p-response/', verify_2c2p_response, name='verify-2c2p-response'),
     # path('return-from-2c2p/', return_from_2c2p, name='return-from-2c2p'),
     path('create-stripe-session/', create_checkout_session, name='create-stripe-session'),

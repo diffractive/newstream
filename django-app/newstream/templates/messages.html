@@ -7,11 +7,11 @@
         <div class="message max-width-500 p-4 {% if message.tags %}{{ message.tags|alert_class }}{% endif %} {{ message.extra_tags }}">
             <p class="font-bold lg:text-center m-0">{{ message }}</p>
             {% if "cta-manage-donations" in message.extra_tags %}
-            <button class="ns-wide-btn right-arrow-btn bg-error" type="button" id="cta-manage-donations" onclick="location.href='{% url "donations:my-recurring-donations" %}'">
+            <button class="ns-wide-btn right-arrow-btn bg-danger" type="button" id="cta-manage-donations" onclick="location.href='{% url "donations:my-recurring-donations" %}'">
                 {% trans 'Manage recurring donations' %}<span class="icon"></span>
             </button>
             {% elif "cta-new-donation" in message.extra_tags %}
-            <button class="ns-wide-btn right-arrow-btn bg-error" type="button" id="cta-new-donation" onclick="location.href='{% url "donations:donate" %}'">
+            <button class="ns-wide-btn right-arrow-btn bg-danger" type="button" id="cta-new-donation" onclick="location.href='{% url "donations:donate" %}'">
                 {% trans 'Make new donation' %}<span class="icon"></span>
             </button>
             {% elif "cta-update-card" in message.extra_tags %}

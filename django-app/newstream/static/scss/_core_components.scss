@@ -441,9 +441,17 @@ span.multilang-icon {
         }
     }
 }
+
+/* My Recurring Donations */
 .payment-recurring-options-div {
     button:disabled {
         color: #dddddd;
+    }
+}
+.recurring-status-td {
+    .ns-wide-btn {
+        border-radius: 5px;
+        margin-bottom: 0px;
     }
 }
 

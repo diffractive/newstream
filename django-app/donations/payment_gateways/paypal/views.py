@@ -9,6 +9,7 @@ from paypalhttp import HttpError
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import object_to_json, _debug, _exception
 from donations.models import Donation, STATUS_COMPLETE, STATUS_FAILED, STATUS_PAYMENT_FAILED, SubscriptionInstance, SubscriptionPaymentMeta
+from donations.functions import removeSubscriptionWarnings
 from donations.email_functions import sendDonationNotifToAdmins, sendDonationReceiptToDonor
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.payment_gateways import Factory_Paypal
@@ -176,6 +177,9 @@ def return_from_paypal(request):
             # save the subscription_id as profile_id
             gatewayManager.donation.subscription.profile_id = request.GET.get('subscription_id')
             gatewayManager.donation.subscription.save()
+
+            # Resolve any existing subscriptions
+            removeSubscriptionWarnings(request.user)
     except IOError as error:
         request.session['error-title'] = str(_("IOError"))
         request.session['error-message'] = str(error)
@@ -252,6 +256,9 @@ def return_from_paypal_card_update(request):
                 old_gateway.cancel_recurring_payment()
             except SubscriptionPaymentMeta.DoesNotExist:
                 pass
+
+            # Resolve any existing subscriptions
+            removeSubscriptionWarnings(request.user)
         request.session['updated-card'] = 'True'
         request.session['return-donation-id'] = gatewayManager.donation.id
     except IOError as error:

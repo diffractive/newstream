@@ -286,6 +286,8 @@ class SubscriptionInstance(ClusterableModel):
         BY_DONOR = "by-donor", _("By donor")
         # under current settings, Stripe cancels any subscription having failed 3 payment retries
         PAYMENTS_FAILED = "payments-failed", _("Payments failed")
+        # same as above, but does not display errors to the user
+        PAYMENTS_FAILED_RESOLVED = "payments-failed-resolved", _("Payments failed resolved")
 
     RECURRING_STATUS_CHOICES = [
         (STATUS_ACTIVE, _(STATUS_ACTIVE.capitalize())),

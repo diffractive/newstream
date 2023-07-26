@@ -17,7 +17,7 @@ from donations.functions import gen_transaction_id
 from donations.payment_gateways.gateway_manager import PaymentGatewayManager
 from donations.payment_gateways.setting_classes import getPayPalSettings
 from donations.payment_gateways.paypal.constants import *
-from donations.payment_gateways.paypal.functions import activateSubscription, suspendSubscription, updateSubscription, cancelSubscription, getSubscriptionDetails
+from donations.payment_gateways.paypal.functions import activateSubscription, suspendSubscription, updateSubscription, cancelSubscription, getSubscriptionDetails, getPlanDetails
 
 
 class Gateway_Paypal(PaymentGatewayManager):
@@ -192,6 +192,24 @@ class Gateway_Paypal(PaymentGatewayManager):
                 return HttpResponse(status=200)
             else:
                raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_CANCELLED but subscription status is %(status)s") % {'status': self.subscription_obj['status']})
+
+        # Event: EVENT_BILLING_SUBSCRIPTION_SUSPENDED
+        if self.event_type == EVENT_BILLING_SUBSCRIPTION_SUSPENDED and hasattr(self, 'subscription_obj'):
+            if self.subscription_obj['status'] == 'SUSPENDED':
+                self.donation.subscription.recurring_status = STATUS_CANCELLED
+
+                plan = getPlanDetails(self.request.session, self.subscription_obj['plan_id'])
+                if self.subscription_obj["billing_info"]["failed_payments_count"] >= plan['payment_preferences']['payment_failure_threshold']:
+                    self.donation.subscription.cancel_reason = SubscriptionInstance.CancelReason.PAYMENTS_FAILED
+
+                self.donation.subscription.save()
+
+                sendRecurringCancelledNotifToAdmins(self.donation.subscription)
+                sendRecurringCancelledNotifToDonor(self.donation.subscription)
+
+            else:
+               raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_SUSPENDED but subscription status is %(status)s") % {'status': self.subscription_obj['status']})
+
 
         # return 400 for all other events
         return HttpResponse(status=400)

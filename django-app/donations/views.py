@@ -281,6 +281,34 @@ def revoked(request):
         return render(request, 'donations/revoked.html', {'isValid': True, 'isFirstTime': donation.is_user_first_donation, 'paymentMethod': paymentMethod, 'donation': donation})
     return render(request, 'donations/revoked.html', {'isValid': False, 'error_message': _('No Payment Data is received.'), 'error_title': _("Unknown Error")})
 
+@login_required
+def dismiss_warning(request):
+    """ This is called when the user has a cancelled subscription that has been cancelled due to payment failures. While in this state,
+        subscriptions will continuously show error warnings to the user. This function will let the user dismiss these warnings for a
+        given subscription
+
+        @todo: revise error handling, avoid catching all exceptions at the end
+    """
+    try:
+        if request.method == 'POST':
+            json_data = json.loads(request.body)
+            if 'subscription_id' not in json_data:
+                print("No subscription_id in JSON body", flush=True)
+                return HttpResponse(status=400)
+            subscription_id = int(json_data['subscription_id'])
+            subscription_instance = get_object_or_404(SubscriptionInstance, id=subscription_id)
+            if subscription_instance.user == request.user:
+                subscription_instance.cancel_reason = SubscriptionInstance.CancelReason.PAYMENTS_FAILED_RESOLVED
+                subscription_instance.save()
+                return JsonResponse({'status': 'success', "success-message": _("Warnings for this recurring donation has been dismissed")})
+            else:
+                raise PermissionError(_('You are not authorized to cancel subscription %(id)d.') % {'id': subscription_id})
+        else:
+            return HttpResponse(400)
+    except (ValueError, PermissionError, RuntimeError, Exception) as e:
+        _exception(str(e))
+        return JsonResponse({'status': 'failure', 'reason': str(e)})
+
 
 @login_required
 def cancel_recurring(request):

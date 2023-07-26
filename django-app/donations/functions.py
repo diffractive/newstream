@@ -8,7 +8,7 @@ from django.utils.translation import gettext_lazy as _
 
 from .includes.currency_dictionary import currency_dict
 from newstream.functions import getSuperUserTimezone, _debug, get_site_settings_from_default_site
-from donations.models import DonationMeta, TempDonationMeta
+from donations.models import DonationMeta, TempDonationMeta, SubscriptionInstance, STATUS_CANCELLED
 from newstream_user.models import UserSubscriptionUpdatesLog, UserDonationUpdatesLog
 
 
@@ -123,7 +123,7 @@ def getRecurringDateNextMonth(date_format):
 def extract_temp_donation_meta(post_dict):
     """
     This function returns a list of TempDonationMeta objects initialized with the key/value pairs extracted from request.POST
-    
+
     There are two types of donationmeta keys we're expecting: donationmeta_key_name and donationmetalist_key_name
     donationmeta_key_name has a single value such as from a text input or radio input,
     donationmetalist_key_name has a list of values such as from a checkbox/dropdown allowing more than one selections
@@ -171,3 +171,10 @@ def displayDonationAmountWithCurrency(donation):
 
 def displayRecurringAmountWithCurrency(subscription):
     return displayAmountWithCurrency(subscription.currency, subscription.recurring_amount)
+
+def removeSubscriptionWarnings(user):
+    """ Resolve all existing cancelled donations that have failed due to payment failure to prevent warnings from appearing"""
+    for instance in SubscriptionInstance.objects.filter(
+        user=user, recurring_status=STATUS_CANCELLED, cancel_reason=SubscriptionInstance.CancelReason.PAYMENTS_FAILED):
+        instance.cancel_reason = SubscriptionInstance.CancelReason.PAYMENTS_FAILED_RESOLVED
+        instance.save()

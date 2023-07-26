@@ -54,7 +54,7 @@
                                         </button>
                                     {% endif %}
                                     {% if latest_instance.recurring_status == 'cancelled' and latest_instance.cancel_reason == cancel_reasons.PAYMENTS_FAILED %}
-                                        <button class="dimiss-notification need-black-loading-btn adhoc-right-pad"
+                                        <button class="dismiss-notification need-black-loading-btn adhoc-right-pad"
                                             data-id="{{ latest_instance.id }}">{% trans 'Dismiss warnings' %}</button>
                                     {% else %}
                                         <button class="cancel-recurring-donation need-black-loading-btn adhoc-right-pad"
@@ -161,7 +161,7 @@
                                         class="icon"></span></button>
                                 {% endif %}
                                 {% if latest_instance.recurring_status == 'cancelled' and latest_instance.cancel_reason == cancel_reasons.PAYMENTS_FAILED %}
-                                    <button class="dimiss-notification need-black-loading-btn adhoc-right-pad"
+                                    <button class="dismiss-notification dismiss-notification-wide need-black-loading-btn adhoc-right-pad"
                                         data-id="{{ latest_instance.id }}">{% trans 'Dismiss warnings' %}</button>
                                 {% else %}
                                     <button class="cancel-recurring-donation cancel-recurring-donation-wide need-black-loading-btn adhoc-right-pad"
@@ -294,6 +294,37 @@
                                 for (let statusTd of document.querySelectorAll(`td.recurring-status-td[data-id='${subscription_id}'] > span.status-text`)) {
                                     statusTd.innerText = data['recurring-status'];
                                 }
+                            } else {
+                                nsAlert(data['reason']);
+                            }
+                        });
+                    },
+                    cancel: function() {
+                        removeLoadingState(wrapper);
+                        threeDotsNormal(subscription_id);
+                    }
+                });
+                toggleBox.show();
+            });
+        }
+        for (let wrapper of document.getElementsByClassName("dismiss-notification")) {
+            wrapper.addEventListener("click", function (event) {
+                let subscription_id = wrapper.getAttribute('data-id');
+                threeDotsLoading(subscription_id);
+                var toggleBox = new ConfirmBox( {
+                    boxid: 'confirm-toggle-box',
+                    header_text: 'Dismiss warnings for this recurring donation?',
+                    ok: function() {
+                        postData('{% url "donations:dismiss-warning" %}', { subscription_id: subscription_id, csrfmiddlewaretoken: getCookie('csrftoken') })
+                        .then(data => {
+                            removeLoadingState(wrapper);
+                            threeDotsNormal(subscription_id);
+                            if (data['status'] == 'success') {
+                                nsAlert(data['success-message']);
+                                for (let dismissBtn of document.querySelectorAll(`button.dismiss-notification[data-id='${subscription_id}']`)) {
+                                    dismissBtn.disabled = true;
+                                }
+                                window.location.reload()
                             } else {
                                 nsAlert(data['reason']);
                             }

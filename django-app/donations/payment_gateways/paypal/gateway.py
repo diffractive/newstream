@@ -194,22 +194,23 @@ class Gateway_Paypal(PaymentGatewayManager):
                raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_CANCELLED but subscription status is %(status)s") % {'status': self.subscription_obj['status']})
 
         # Event: EVENT_BILLING_SUBSCRIPTION_SUSPENDED
+        # note that this event is also triggered when user pause the recurring donation, but we don't further process this event for the pause scenario since it's already been handled in toggle_recurring_payment()
         if self.event_type == EVENT_BILLING_SUBSCRIPTION_SUSPENDED and hasattr(self, 'subscription_obj'):
             if self.subscription_obj['status'] == 'SUSPENDED':
-                self.donation.subscription.recurring_status = STATUS_CANCELLED
-
                 plan = getPlanDetails(self.request.session, self.subscription_obj['plan_id'])
-                if self.subscription_obj["billing_info"]["failed_payments_count"] >= plan['payment_preferences']['payment_failure_threshold']:
+                
+                if int(self.subscription_obj["billing_info"]["failed_payments_count"]) >= int(plan['payment_preferences']['payment_failure_threshold']):
+                    print("Marking PayPal Subscription {sub_id} as cancelled since failed_payments_count({failed_payments_count}) reached payment_failure_threshold of {payment_failure_threshold}".format(sub_id=self.subscription_obj["id"], failed_payments_count=self.subscription_obj["billing_info"]["failed_payments_count"], payment_failure_threshold=plan['payment_preferences']['payment_failure_threshold']))
+                    self.donation.subscription.recurring_status = STATUS_CANCELLED
                     self.donation.subscription.cancel_reason = SubscriptionInstance.CancelReason.PAYMENTS_FAILED
+                    self.donation.subscription.save()
 
-                self.donation.subscription.save()
-
-                sendRecurringCancelledNotifToAdmins(self.donation.subscription)
-                sendRecurringCancelledNotifToDonor(self.donation.subscription)
-
+                    sendRecurringCancelledNotifToAdmins(self.donation.subscription)
+                    sendRecurringCancelledNotifToDonor(self.donation.subscription)
+                
+                return HttpResponse(status=200)
             else:
                raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_SUSPENDED but subscription status is %(status)s") % {'status': self.subscription_obj['status']})
-
 
         # return 400 for all other events
         return HttpResponse(status=400)

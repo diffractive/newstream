@@ -82,8 +82,6 @@ assert rows[0][5] == 'Active'
 # Get subscription id and update payment method so that the payment fails
 sub_id = rows[0][2]
 
-sub_id
-
 # retry the max retry number for failed payments
 # depends on the number configured by the plans we set that to be 3 when we create a plan in newstream
 for i in range(3):

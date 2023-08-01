@@ -155,6 +155,13 @@ def createPlan(session, product_id, donation):
         plan_dict['name'] = session.get('negtest_createPlan')
     return curlPaypal(api_url, common_headers(session['paypal_token']), post_data=json.dumps(plan_dict))
 
+def getPlanDetails(session, plan_id):
+    checkAccessTokenExpiry(session)
+    paypalSettings = getPayPalSettings()
+    api_url = paypalSettings.api_url+'/v1/billing/plans/{}'.format(plan_id)
+    if paypalSettings.sandbox_mode and session.get('negtest_getPlanDetails', None):
+       api_url = paypalSettings.api_url+'/v1/billing/plans/{}'.format(session.get('negtest_getPlanDetails'))
+    return curlPaypal(api_url, common_headers(session['paypal_token']))
 
 def getUserGivenName(user):
     if user.first_name:

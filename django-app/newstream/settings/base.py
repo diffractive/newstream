@@ -30,6 +30,7 @@ env = environ.Env(
     INIT_LOCALSTRIPE=(bool, False),
 
     PAYPAL_API_BASE=(str, ""),
+    PAYPAL_PAYMENT_FAILURE_THRESHOLD=(int, None),
 
     DATADOG_APPID=(str, None),
     DATADOG_TOKEN=(str, None),
@@ -371,6 +372,9 @@ INIT_LOCALSTRIPE = env('INIT_LOCALSTRIPE')
 # PayPal settings
 #
 PAYPAL_API_BASE = env('PAYPAL_API_BASE')
+# tweaking payment_failure_threshold when creating plans,
+# mainly for testing on dev/staging
+PAYPAL_PAYMENT_FAILURE_THRESHOLD = env('PAYPAL_PAYMENT_FAILURE_THRESHOLD')
 
 ################################################
 #

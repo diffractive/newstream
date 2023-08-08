@@ -467,6 +467,7 @@ def confirm_update_card_details(request, id):
                     gateway=subscription.gateway,
                     recurring_amount=subscription.recurring_amount,
                     currency=subscription.currency,
+                    recurring_frequency=subscription.recurring_frequency,
                     recurring_status=STATUS_PROCESSING,
                     subscribe_date=timezone.now(),
                     created_by=request.user

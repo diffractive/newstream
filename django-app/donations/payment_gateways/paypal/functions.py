@@ -5,6 +5,7 @@ import certifi
 from io import BytesIO
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
+from django.conf import settings
 from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersCaptureRequest, OrdersCreateRequest
 from paypalhttp import HttpError
@@ -137,7 +138,7 @@ def createPlan(session, product_id, donation):
         ],
         "payment_preferences": {
             "auto_bill_outstanding": 'true',
-            "payment_failure_threshold": 3
+            "payment_failure_threshold": settings.PAYPAL_PAYMENT_FAILURE_THRESHOLD
         }
     }
     # Adjust subscription_dict for update payment flow

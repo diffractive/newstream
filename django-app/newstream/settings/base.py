@@ -30,7 +30,7 @@ env = environ.Env(
     INIT_LOCALSTRIPE=(bool, False),
 
     PAYPAL_API_BASE=(str, ""),
-    PAYPAL_PAYMENT_FAILURE_THRESHOLD=(int, None),
+    PAYPAL_PAYMENT_FAILURE_THRESHOLD=(int, 3),
 
     DATADOG_APPID=(str, None),
     DATADOG_TOKEN=(str, None),

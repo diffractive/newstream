@@ -518,8 +518,10 @@ def my_recurring_donations(request):
 
     # Add success mesasge if returning from updated card flow
     if request.session.get('updated-card'):
+        # mention delay on status change so donors won't get confused on the PayPal flow
+        # (they would see "Processing" instead of "Active" when they are back on Newstream's page)
         messages.add_message(request, messages.SUCCESS, _(
-                            'Your payment is successful. Recurring donation is resumed active.'))
+                            'Your payment is successful. Your recurring donation will be resumed active within a few minutes.'))
         del request.session['updated-card']
 
     # Display error message for payment failure cases

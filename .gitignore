@@ -16,6 +16,7 @@ npm-debug.log*
 /.cache/
 /.pytest_cache/
 /media/
+*.ipynb
 
 ### JetBrains
 .idea/
@@ -42,3 +43,6 @@ newstream/settings/dev.py
 newstream/settings/production.py
 /static/
 newstream.db
+
+### TEMPORARY
+django-app/

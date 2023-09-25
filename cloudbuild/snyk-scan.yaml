@@ -21,7 +21,7 @@ steps:
     args:
       - '-c'
       - |
-        snyk test --docker --severity-threshold=medium asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:${COMMIT_SHA}
+        snyk test --docker --severity-threshold=medium asia.gcr.io/${PROJECT_ID}/newstream:${COMMIT_SHA}
         echo $? > /workspace/exit-backend-image.txt
     waitFor:
       - '-'
@@ -53,9 +53,6 @@ steps:
       exit $EXIT_CODE
 
 timeout: 600s
-
-substitutions:
-  _BACKEND_SERVICE_NAME: newstream
 
 options:
   secretEnv:

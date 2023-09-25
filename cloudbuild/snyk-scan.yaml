@@ -1,0 +1,68 @@
+#######################################################
+#
+# Run snyk on the project docker images
+#
+# Note that this runs on the images built by the other cloudbuild files
+# but doesn't actually build them itself. This is intended to be used in
+# two ways:
+#
+# * Run against 'latest' on a schedule - every monday
+# * Run against 'pr-<pr_number>' when testing snyk remediations - ad-hoc
+#
+# Note that this script requires access to the SNYK_TOKEN secret on the
+# infra account.
+#
+#
+
+steps:
+
+  - id: scan-backend-image
+    name: "snyk/snyk:docker"
+    args:
+      - '-c'
+      - |
+        snyk test --docker --severity-threshold=medium asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:${COMMIT_SHA}
+        echo $? > /workspace/exit-backend-image.txt
+    waitFor:
+      - '-'
+    entrypoint: sh
+
+  - id: check-status
+    name: bash
+    waitFor:
+      - scan-backend-image
+    script: |
+      #!/usr/bin/env bash
+      EXIT_CODE=0
+
+      check_exit_status() {
+        local _EXIT_CODE
+        _EXIT_CODE=$(cat "$2")
+        if [ "$_EXIT_CODE" != "0" ]; then
+          echo "$1 scan failed ($_EXIT_CODE)"
+          EXIT_CODE=1
+        fi
+      }
+
+      check_exit_status 'Backend image' /workspace/exit-backend-image.txt
+
+      if [ $EXIT_CODE == 0 ]; then
+        echo "All checks passed"
+      fi
+
+      exit $EXIT_CODE
+
+timeout: 600s
+
+substitutions:
+  _BACKEND_SERVICE_NAME: newstream
+
+options:
+  secretEnv:
+    - SNYK_TOKEN
+
+availableSecrets:
+  secretManager:
+    - versionName: 'projects/${PROJECT_ID}/secrets/snyk-token/versions/latest'
+      env: SNYK_TOKEN
+

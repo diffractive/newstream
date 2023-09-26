@@ -24,4 +24,11 @@ ignore:
           said this vulnerability can't be reached through recommended workflows
         expires: 2023-12-06T03:41:02.060Z
         created: 2023-07-07T03:41:02.078Z
+  SNYK-DEBIAN12-GLIBC-5894115:
+    - '*':
+        reason: >
+          Error coming from base python image, currently can't upgrade python version
+          and this is the safest base image of python 3.9 slim.
+        expires: 2023-12-06T03:41:02.060Z
+        created: 2023-09-26T03:41:02.078Z
 patch:

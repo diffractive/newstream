@@ -16,27 +16,12 @@
 
 steps:
 
-  - id: 'branch name'
-    waitFor:
-      - '-'
-    name: 'alpine'
-    entrypoint: 'sh'
-    args:
-      - '-c'
-      - |
-          echo "***********************"
-          echo "Project ID: $PROJECT_ID"
-          echo "***********************"
-          echo "***********************"
-          echo "Commit_SHA: $COMMIT_SHA"
-          echo "***********************"
-
   - id: scan-backend-image
     name: "snyk/snyk:docker"
     args:
       - '-c'
       - |
-        snyk test --docker --severity-threshold=medium asia.gcr.io/${PROJECT_ID}/newstream:${COMMIT_SHA}
+        snyk test --docker --severity-threshold=medium --policy-path=.snyk asia.gcr.io/${PROJECT_ID}/newstream:${COMMIT_SHA}
         echo $? > /workspace/exit-backend-image.txt
     waitFor:
       - '-'

@@ -1,5 +1,6 @@
 # Snyk (https://snyk.io) policy file, patches or ignores known vulnerabilities.
 version: v1.25.0
+
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 ignore:
   SNYK-PYTHON-WAGTAIL-5406453:
@@ -23,4 +24,4 @@ ignore:
           said this vulnerability can't be reached through recommended workflows
         expires: 2023-12-06T03:41:02.060Z
         created: 2023-07-07T03:41:02.078Z
-patch: {}
+patch:

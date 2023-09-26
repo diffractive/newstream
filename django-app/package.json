@@ -17,7 +17,7 @@
   },
   "homepage": "https://github.com/diffractive/newstream#readme",
   "dependencies": {
-    "tailwindcss": "^1.9.6"
+    "tailwindcss": "^2.2.0"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.14",

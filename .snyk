@@ -17,6 +17,11 @@ ignore:
           functions
         expires: 2023-12-06T03:08:49.457Z
         created: 2023-07-07T03:08:49.469Z
+  SNYK-PYTHON-PILLOW-5918878:
+    - '*':
+        reason >-
+          Can't be upgraded without upgrading wagtail. Also can be ignored because
+          only admins have access to the vulnerable functions
   SNYK-PYTHON-SETUPTOOLS-3180412:
     - '*':
         reason: >

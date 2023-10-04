@@ -16,9 +16,6 @@
     "url": "https://github.com/diffractive/newstream/issues"
   },
   "homepage": "https://github.com/diffractive/newstream#readme",
-  "dependencies": {
-    "tailwindcss": "^1.9.6"
-  },
   "devDependencies": {
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.27",
@@ -28,6 +25,7 @@
     "gulp-rename": "^2.0.0",
     "gulp-sass": "^5.1.0",
     "node-sass": "^8.0.0",
+    "tailwindcss": "^1.9.6",
     "through2": "^4.0.2"
   }
 }

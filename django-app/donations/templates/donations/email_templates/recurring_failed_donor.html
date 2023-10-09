@@ -8,6 +8,7 @@
 {% block content %}
 <p style="{{ 'parag'|email_css }}">{% trans "Hi" %} {{ subscription.user.display_fullname }},</p>
 {% url 'donations:my-recurring-donations' as donations_url %}
+{% url "donations:confirm-update-card-details" subscription.id as update_payment_method_url %}
 <p style="{{ 'parag'|email_css }}">
     {% blocktrans with donation_amount=subscription|recurring_amount_with_currency %}Your recent <strong>{{ donation_amount }}</strong> recurring payment was <strong>unsuccessful</strong>{% endblocktrans %}
 </p>
@@ -15,7 +16,7 @@
     {% blocktrans with gateway=subscription.gateway %}{{gateway}} was unable to charge your account using your current existing payment method. Please update your payment information to complete your donation{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
-    {% blocktrans with donations_full_url=donations_url|site_rel_url%}<a href="{{donations_full_url}}" target="_blank" rel="noopener noreferrer">Update payment method</a>{% endblocktrans %}
+    {% blocktrans with update_payment_method_full_url=update_payment_method_url|site_rel_url%}<a href="{{update_payment_method_full_url}}" target="_blank" rel="noopener noreferrer">Update payment method</a>{% endblocktrans %}
 </p>
 <p style="{{ 'parag'|email_css }}">
     {% blocktrans with org_contact_email='org_contact_email'|site_settings %}Please contact us at <a href="mailto:{{ org_contact_email }}">{{ org_contact_email }}</a> for any enquiries.{% endblocktrans %}

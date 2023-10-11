@@ -78,8 +78,8 @@ msgid "ONE-OFF DONATION STATUS UPDATED"
 msgstr ""
 
 #: email_functions.py:107
-#: templates/donations/email_templates/subscription_status_change.html:5
-#: templates/donations/email_templates/subscription_status_change.html:9
+#: templates/donations/email_templates/recurring_status_change.html:5
+#: templates/donations/email_templates/recurring_status_change.html:9
 msgid "RECURRING DONATION STATUS UPDATED"
 msgstr ""
 
@@ -254,7 +254,7 @@ msgstr ""
 #: templates/donations/email_templates/recurring_resumed_admin.html:27
 #: templates/donations/email_templates/recurring_resumed_donor.html:35
 #: templates/donations/email_templates/renewal_receipt.html:35
-#: templates/donations/email_templates/subscription_status_change.html:22
+#: templates/donations/email_templates/recurring_status_change.html:22
 #: templates/donations/revoked.html:28 templates/donations/thankyou.html:38
 msgid "Payment method"
 msgstr "付款方法"
@@ -408,12 +408,12 @@ msgid "Is Test Subscription?"
 msgstr ""
 
 #: models.py:264
-#: templates/donations/email_templates/subscription_status_change.html:18
+#: templates/donations/email_templates/recurring_status_change.html:18
 msgid "Profile ID"
 msgstr ""
 
 #: models.py:265
-#: templates/donations/email_templates/subscription_status_change.html:26
+#: templates/donations/email_templates/recurring_status_change.html:26
 msgid "Recurring Amount"
 msgstr ""
 
@@ -1245,7 +1245,7 @@ msgstr ""
 #: templates/donations/email_templates/recurring_resumed_admin.html:39
 #: templates/donations/email_templates/recurring_resumed_donor.html:47
 #: templates/donations/email_templates/renewal_receipt.html:53
-#: templates/donations/email_templates/subscription_status_change.html:34
+#: templates/donations/email_templates/recurring_status_change.html:34
 msgid "Thank you,"
 msgstr ""
 
@@ -1266,7 +1266,7 @@ msgstr ""
 #: templates/donations/email_templates/recurring_rescheduled_donor.html:10
 #: templates/donations/email_templates/recurring_resumed_donor.html:10
 #: templates/donations/email_templates/renewal_receipt.html:10
-#: templates/donations/email_templates/subscription_status_change.html:10
+#: templates/donations/email_templates/recurring_status_change.html:10
 msgid "Dear"
 msgstr ""
 
@@ -2407,7 +2407,7 @@ msgstr ""
 #: templates/donations/email_templates/recurring_paused_donor.html:24
 #: templates/donations/email_templates/recurring_rescheduled_donor.html:24
 #: templates/donations/email_templates/recurring_resumed_donor.html:24
-#: templates/donations/email_templates/subscription_status_change.html:15
+#: templates/donations/email_templates/recurring_status_change.html:15
 msgid "Details of your recurring donation:"
 msgstr ""
 
@@ -2528,7 +2528,7 @@ msgid ""
 "any further enquiries."
 msgstr ""
 
-#: templates/donations/email_templates/subscription_status_change.html:13
+#: templates/donations/email_templates/recurring_status_change.html:13
 #, python-format
 msgid ""
 "Sign into our support page (click \"forgot password?\" if you have trouble "
@@ -2536,7 +2536,7 @@ msgid ""
 "\"noopener noreferrer\">view your updated recurring donation</a>."
 msgstr ""
 
-#: templates/donations/email_templates/subscription_status_change.html:30
+#: templates/donations/email_templates/recurring_status_change.html:30
 #: templates/donations/my_onetime_donations.html:51
 #: templates/donations/my_recurring_donations.html:84
 #: templates/donations/my_renewals.html:60

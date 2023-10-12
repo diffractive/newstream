@@ -24,7 +24,7 @@ ignore:
           only admins have access to the vulnerable functions
         expires: 2023-12-06T03:41:02.060Z
         created: 2023-07-28T03:41:02.078Z
-  SNYK-DEBIAN12-GLIBC-5894115:
+  SNYK-DEBIAN12-NGHTTP2-5953379:
     - '*':
         reason: >
           Error coming from Debian and libcurl-gnutls-dev and no current fixes exist

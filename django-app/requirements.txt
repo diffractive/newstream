@@ -2,11 +2,11 @@ anyascii==0.1.7
 asgiref==3.3.4
 beautifulsoup4==4.8.2
 certifi==2023.7.22
-cffi==1.14.5
+cffi==1.16.0
 chardet==4.0.0
 cryptography==41.0.4
 defusedxml==0.7.1
-Django==3.2.21
+Django==3.2.22
 django-allauth==0.54.0
 django-allauth-2fa==0.8
 django-cogwheels==0.3
@@ -43,9 +43,9 @@ paypalrestsdk==1.13.1
 phpbridge==0.0.3
 Pillow==9.4.0
 protobuf==3.18.3
-psycopg2-binary==2.9.2
+psycopg2-binary==2.9.9
 pycparser==2.20
-pycurl==7.43.0.6
+pycurl==7.45.2
 PyJWT==2.4.0
 pyOpenSSL==23.2.0
 pytest==6.2.4
@@ -64,7 +64,7 @@ stripe==2.62.0
 tablib==3.0.0
 telepath==0.1.1
 typing-extensions==3.10.0.0
-urllib3==1.26.5
+urllib3==1.26.17
 wagtail==2.16
 wagtail-2fa==1.4.2
 wagtail-autocomplete==0.6.2

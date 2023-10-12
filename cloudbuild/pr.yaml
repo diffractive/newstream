@@ -19,6 +19,7 @@ steps:
     name: "gcr.io/kaniko-project/executor:v1.10.0"
     args: [
         "--destination", "asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:pr-${_PR_NUMBER}",
+        "--destination", "asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:${COMMIT_SHA}",
         "--cache=true",
         "--cache-ttl=336h0m0s", # 2 weeks (default)
         "--context=django-app",

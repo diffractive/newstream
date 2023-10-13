@@ -3,7 +3,7 @@
 build: build-django build-tests
 
 build-django:
-	cd django-app && docker build . -t diffractive/newstream:latest
+	cd django-app && docker build . --build-arg DEV_MODE=1 -t diffractive/newstream:latest
 
 build-tests:
 	cd selenium-tests && make build

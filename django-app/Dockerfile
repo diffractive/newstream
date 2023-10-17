@@ -31,8 +31,8 @@ RUN set -ex \
         /var/tmp/* \
         /usr/share/man \
         /usr/share/doc \
-        /usr/share/java \
         /usr/share/doc-base
+
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
@@ -50,19 +50,15 @@ ARG DEV_MODE=0
 RUN if [ "$DEV_MODE" = "0" ] ; then \
     pip install --no-cache-dir --upgrade pip && \
     CFLAGS='-Os -g0 -Wl,--strip-all' pip install --no-cache-dir --compile -r /tmp/requirements.txt  && \
-    CFLAGS='-Os -g0 -Wl,--strip-all' pip install --no-cache-dir --compile -r /tmp/requirements-docker.txt && \
-    rm -rf /tmp/* ; \
+    CFLAGS='-Os -g0 -Wl,--strip-all' pip install --no-cache-dir --compile -r /tmp/requirements-docker.txt ;  \
     else \
     pip install --upgrade pip && \
     pip install -r /tmp/requirements.txt  && \
-    pip install -r /tmp/requirements-docker.txt && \
+    pip install -r /tmp/requirements-docker.txt ;  \
+    fi; \
     rm -rf /tmp/* ; \
-    fi
-
-# clean file
-RUN find /opt/venv/ -type d -name __pycache__ -exec rm -r -v {} + > /dev/null
-# Remove requirements file to avoid it being picked up by snyk
-RUN find /opt/venv/ -type f -name requirements.txt -exec rm -v {} + > /dev/null
+    find /opt/venv/ -type d -name __pycache__ -exec rm -r -v {} + > /dev/null; \
+    find /opt/venv/ -type f -name requirements.txt -exec rm -v {} + > /dev/null;
 
 # Gunicorn will listen on this port
 EXPOSE 8000

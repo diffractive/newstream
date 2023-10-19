@@ -19,6 +19,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import global_settings
 
 import environ
+from google.oauth2 import service_account
 
 # load "NEWSTREAM" prefixed env vars for site_settings
 from .site_settings import *
@@ -35,7 +36,12 @@ env = environ.Env(
     DATADOG_APPID=(str, None),
     DATADOG_TOKEN=(str, None),
     DATADOG_ENV=(str, None),
-    DATADOG_SERVICE=(str, None)
+    DATADOG_SERVICE=(str, None),
+
+    GS_FAKE_CREDENTIALS=(bool, False),
+    GS_BUCKET_NAME=(str, 'newstream-test-bucket'),
+    GS_STORAGE_ENDPOINT=(str, ""),
+    GS_CUSTOM_ENDPOINT=(str, ""),
 )
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -131,6 +137,8 @@ INSTALLED_APPS = [
 
     'django_otp',
     'django_otp.plugins.otp_totp',
+
+    'storages',
 
     # newstream apps
     'pages',
@@ -300,6 +308,36 @@ STATIC_URL = '/static/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
+################################################
+#
+# Google Cloud Storage
+
+GS_BUCKET_NAME = env('GS_BUCKET_NAME')
+
+# Direct media file serving from the backend
+# 
+# We should be using signed urls and serving media files from the GCS bucket directly
+# This isn't working well at the moment though, because the generate_signed_url method
+# is horrendously slow. See https://github.com/googleapis/google-cloud-python/issues/3696
+# 
+# We've resorted to serving the files directly from the backend
+
+# Our custom class which prevents use of signed urls
+DEFAULT_FILE_STORAGE = 'newstream.storage.NewstreamCloudStorage'
+
+# Custom endpoint is just served from the local serivce
+if env('GS_CUSTOM_ENDPOINT'):
+    GS_CUSTOM_ENDPOINT=env('GS_CUSTOM_ENDPOINT')
+
+if env('GS_FAKE_CREDENTIALS'):
+    GS_CREDENTIALS = service_account.Credentials.from_service_account_file(
+        os.path.abspath(os.path.join(BASE_DIR, 'newstream/fake-gcs-credentials.json'))
+    )
+
+# Internal variable for our own use, not supported by storages
+GS_STORAGE_ENDPOINT=env('GS_STORAGE_ENDPOINT')
+
+################################################
 
 # Wagtail settings
 # todo: might need to be dynamically set by admin?

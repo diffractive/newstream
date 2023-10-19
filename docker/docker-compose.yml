@@ -24,6 +24,10 @@ services:
       DATABASE_PASSWORD: newstream
       DJANGO_SUPERUSER_EMAIL: newstream@test.local
       DJANGO_SUPERUSER_PASSWORD: newstream
+      GS_FAKE_CREDENTIALS: 1
+      GS_BUCKET_NAME: newstream-test-bucket
+      GS_STORAGE_ENDPOINT: https://storage:4443
+      GS_CUSTOM_ENDPOINT: /gcsmedia
     image: diffractive/newstream:latest
     build:
       context: .
@@ -33,6 +37,7 @@ services:
     depends_on:
       - database
       - mailhog
+      - storage
     command: init
     networks:
       newstream:
@@ -48,6 +53,10 @@ services:
       DATABASE_PASSWORD: newstream
       DJANGO_SUPERUSER_EMAIL: newstream@test.local
       DJANGO_SUPERUSER_PASSWORD: newstream
+      GS_FAKE_CREDENTIALS: 1
+      GS_BUCKET_NAME: newstream-test-bucket
+      GS_STORAGE_ENDPOINT: https://storage:4443
+      GS_CUSTOM_ENDPOINT: /gcsmedia
     image: diffractive/newstream:latest
     links:
       - database:database
@@ -87,6 +96,18 @@ services:
       newstream:
         aliases:
           - localpaypal.newstream.local
+
+  storage:
+    image: fsouza/fake-gcs-server
+    ports:
+      - 4443:4443 # API
+    networks:
+      newstream:
+        aliases:
+          - storage.newstream.local
+    volumes:
+      - '../data:/data'
+    command: -public-host storage.newstream.local
 
   mailhog:
     image: mailhog/mailhog

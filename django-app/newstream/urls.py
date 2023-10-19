@@ -13,6 +13,7 @@ from wagtailautocomplete.urls.admin import urlpatterns as autocomplete_admin_url
 
 from django.urls import path
 import newstream.views as user_views
+from . import gcsmedia
 
 urlpatterns = [
     path('django-admin/', admin.site.urls),
@@ -20,6 +21,8 @@ urlpatterns = [
     path('admin/autocomplete/', include(autocomplete_admin_urls)),
     path('admin/', include(wagtailadmin_urls)),
     path('maintenance/', user_views.maintenance, name='maintenance'),
+    # Media Server
+    url('gcsmedia/(?P<path>\S+)', gcsmedia.gcsmedia, name='gcsmedia')
 ]
 
 urlpatterns += i18n_patterns(

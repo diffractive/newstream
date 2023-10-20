@@ -1,6 +1,6 @@
-# 
+#
 # Django settings file for gcloud
-# 
+#
 # This file has some custom env variables for google cloud. Please read the docs for
 # details on these env variables and how to configure the system to run on google cloud.
 #
@@ -40,7 +40,7 @@ env = environ.Env(
     EMAIL_HOST=(str, ''),
     EMAIL_PORT=(int, 25),
     EMAIL_HOST_USER=(str, ''),
-    EMAIL_HOST_PASSWORD=(str, ''), 
+    EMAIL_HOST_PASSWORD=(str, ''),
     EMAIL_USE_SSL=(bool, False),
     EMAIL_USE_TLS=(bool, False),
 
@@ -102,54 +102,6 @@ WAGTAIL_2FA_OTP_TOTP_NAME=env('WAGTAIL_2FA_OTP_TOTP_NAME')
 
 # localstripe
 INIT_LOCALSTRIPE = env('INIT_LOCALSTRIPE')
-
-# Log evenrything to the console. Google cloud expects logging to the console
-# and will capture and display these in the logs panel
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    # how the logs are formatted
-    'formatters': {
-        'verbose': {
-            'format': '[{levelname}] {asctime} [{module}] {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-        "json": {
-            "()": CustomJsonFormatter,
-            "format": "",
-        },
-    },
-    # where the logs should be sent to
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'stream': sys.stdout
-        },
-        'console-json': {
-            'class': 'logging.StreamHandler',
-            'stream': sys.stdout,
-            'formatter': 'json',
-        },
-    },
-    # parent logger
-    'root': {
-        'handlers': ['console-json'],
-        'level': 'INFO',
-    },
-    # children loggers
-    'loggers': {
-        'newstream': {
-            'handlers': ['console-json'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-    },
-}
-
 
 try:
     from .local import *

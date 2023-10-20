@@ -36,6 +36,9 @@ RUN set -ex \
 RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
+ARG APP_VERSION
+RUN echo "APP_VERSION=$APP_VERSION" > .env
+
 WORKDIR /app/
 ADD . /app/
 

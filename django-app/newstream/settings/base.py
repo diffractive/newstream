@@ -17,6 +17,7 @@ import django
 import django.conf.locale
 from django.utils.translation import gettext_lazy as _
 from django.conf import global_settings
+from newstream.logging_utils import CustomJsonFormatter
 
 import environ
 from google.oauth2 import service_account
@@ -25,6 +26,7 @@ from google.oauth2 import service_account
 from .site_settings import *
 
 env = environ.Env(
+    LOG_FORMAT_JSON=(bool, True),
     STRIPE_JS_URL=(str, 'https://js.stripe.com/v3/'),
     STRIPE_API_BASE=(str, ""),
     STRIPE_API_VERSION=(str, ""),
@@ -42,6 +44,8 @@ env = environ.Env(
     GS_BUCKET_NAME=(str, 'newstream-test-bucket'),
     GS_STORAGE_ENDPOINT=(str, ""),
     GS_CUSTOM_ENDPOINT=(str, ""),
+
+    APP_VERSION=(str, None),
 )
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -164,6 +168,8 @@ MIDDLEWARE = [
     'newstream.view_middleware.DisableSocialLoginMiddleware',
 
     'wagtail_2fa.middleware.VerifyUserMiddleware',
+    'middleware.NewstreamCurrentRequestUserMiddleware',
+    'middleware.RequestLoggerMiddleware',
 ]
 
 ROOT_URLCONF = 'newstream.urls'
@@ -218,41 +224,43 @@ AUTH_PASSWORD_VALIDATORS = [
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 
+LOG_FORMAT_JSON = env('LOG_FORMAT_JSON')
+
+# Log evenrything to the console. Google cloud expects logging to the console
+# and will capture and display these in the logs panel
+
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
-        'verbose': {
-            'format': '[{levelname}] {asctime} [{module}] {message}',
-            'style': '{',
-        },
-        'simple': {
+        'human': {
             'format': '{levelname} {message}',
             'style': '{',
+        },
+        "json": {
+            "()": CustomJsonFormatter,
+            "format": "",
         },
     },
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'stream': sys.stdout
-        },
-        'file': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs', 'ns-debug.log'),
-            'formatter': 'verbose'
+            'stream': sys.stdout,
+            "formatter": 'json' if env('LOG_FORMAT_JSON') else 'human',
         },
     },
     'root': {
         'handlers': ['console'],
-        'level': 'WARNING',
+        'level': 'INFO',
     },
     'loggers': {
-        'newstream': {
-            'handlers': ['file', 'console'],
-            'level': 'DEBUG',
+        'newstream.request': {
+            'handlers': ['console'],
             'propagate': False,
         },
+        'newstream': {
+            'handlers': ['console']
+        }
     },
 }
 
@@ -315,11 +323,11 @@ MEDIA_URL = '/media/'
 GS_BUCKET_NAME = env('GS_BUCKET_NAME')
 
 # Direct media file serving from the backend
-# 
+#
 # We should be using signed urls and serving media files from the GCS bucket directly
 # This isn't working well at the moment though, because the generate_signed_url method
 # is horrendously slow. See https://github.com/googleapis/google-cloud-python/issues/3696
-# 
+#
 # We've resorted to serving the files directly from the backend
 
 # Our custom class which prevents use of signed urls
@@ -419,6 +427,7 @@ PAYPAL_PAYMENT_FAILURE_THRESHOLD = env('PAYPAL_PAYMENT_FAILURE_THRESHOLD')
 # Datadog
 #
 
+APP_VERSION = env('APP_VERSION')
 DATADOG_APPID = env('DATADOG_APPID')
 DATADOG_TOKEN = env('DATADOG_TOKEN')
 DATADOG_ENV = env('DATADOG_ENV')
@@ -427,5 +436,6 @@ DATADOG_SERVICE = env('DATADOG_SERVICE')
 
 SETTINGS_EXPORT = [
     'STRIPE_JS_URL',
-    'DATADOG_APPID', 'DATADOG_TOKEN', 'DATADOG_ENV', 'DATADOG_SERVICE'
+    'DATADOG_APPID', 'DATADOG_TOKEN', 'DATADOG_ENV', 'DATADOG_SERVICE',
+    'APP_VERSION'
 ]

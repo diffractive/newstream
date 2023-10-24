@@ -134,12 +134,15 @@ def load_settings():
     site_settings.default_from_name = 'Admin'
 
     # set default admin_emails list
-    admin_emails = settings.NEWSTREAM_ADMIN_EMAILS.split(',')
-    for admin_email in admin_emails:
-        site_settings.admin_emails.add(AdminEmails(
-            title="Admin",
-            email=admin_email,
-        ))
+    if settings.NEWSTREAM_ADMIN_EMAILS is not None:
+        admin_emails = settings.NEWSTREAM_ADMIN_EMAILS.split(',')
+        for admin_email in admin_emails:
+            if AdminEmails.objects.filter(email=admin_email).exists():
+                continue
+            site_settings.admin_emails.add(AdminEmails(
+                title="Admin",
+                email=admin_email,
+            ))
 
     # set footer link
     site_settings.privacy_policy_link = "https://github.com/diffractive/newstream"

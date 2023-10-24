@@ -134,12 +134,15 @@ def load_settings():
     site_settings.default_from_name = 'Admin'
 
     # set default admin_emails list
-    admin_emails = settings.NEWSTREAM_ADMIN_EMAILS.split(',')
-    for admin_email in admin_emails:
-        site_settings.admin_emails.add(AdminEmails(
-            title="Admin",
-            email=admin_email,
-        ))
+    if settings.NEWSTREAM_ADMIN_EMAILS is not None:
+        admin_emails = settings.NEWSTREAM_ADMIN_EMAILS.split(',')
+        for admin_email in admin_emails:
+            if AdminEmails.objects.filter(email=admin_email).exists():
+                continue
+            site_settings.admin_emails.add(AdminEmails(
+                title="Admin",
+                email=admin_email,
+            ))
 
     # set footer link
     site_settings.privacy_policy_link = "https://github.com/diffractive/newstream"
@@ -287,13 +290,17 @@ def remove_test_donations():
 
 def load_localstripe_create_product():
     auth = requests.auth.HTTPBasicAuth(localstripe_settings["test_secret_key"], '')
-    post_data = {
-        "name": "Newstream Product",
-        "id": localstripe_settings["test_product_id"]
-    }
-    requests.post(settings.STRIPE_API_BASE + '/v1/products', auth=auth, json=post_data)
+    res = requests.get(settings.STRIPE_API_BASE + '/v1/products/{}'.format(localstripe_settings["test_product_id"]), auth=auth)
+    if res.status_code == 200:
+        print("Localstripe product exists √")
+    else:
+        post_data = {
+            "name": "Newstream Product",
+            "id": localstripe_settings["test_product_id"]
+        }
+        requests.post(settings.STRIPE_API_BASE + '/v1/products', auth=auth, json=post_data)
 
-    print("Localstripe product created √")
+        print("Localstripe product created √")
 
 
 def load_localstripe_webhooks():
@@ -311,6 +318,7 @@ def load_localstripe_webhooks():
         ]
     }
 
+    # There's no list webhooks api atm, but inspecting localstripe code, no duplicate webhooks will be created with the same id("newstream")
     requests.post(settings.STRIPE_API_BASE + '/_config/webhooks/newstream', json=post_data)
 
     print("Localstripe webhooks registered √")
@@ -338,6 +346,7 @@ def load_localpaypal_webhooks():
         ]
     }
 
+    # TODO: currently throws a duplicate key violation error from localpaypal if webhook already exist
     requests.post(settings.PAYPAL_API_BASE + '/config/webhooks', json=post_data)
 
     print("Localpaypal webhooks registered √")

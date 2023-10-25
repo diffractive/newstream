@@ -44,8 +44,6 @@ env = environ.Env(
     GS_BUCKET_NAME=(str, 'newstream-test-bucket'),
     GS_STORAGE_ENDPOINT=(str, ""),
     GS_CUSTOM_ENDPOINT=(str, ""),
-
-    APP_VERSION=(str, None),
 )
 
 PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -427,7 +425,6 @@ PAYPAL_PAYMENT_FAILURE_THRESHOLD = env('PAYPAL_PAYMENT_FAILURE_THRESHOLD')
 # Datadog
 #
 
-APP_VERSION = env('APP_VERSION')
 DATADOG_APPID = env('DATADOG_APPID')
 DATADOG_TOKEN = env('DATADOG_TOKEN')
 DATADOG_ENV = env('DATADOG_ENV')
@@ -437,5 +434,4 @@ DATADOG_SERVICE = env('DATADOG_SERVICE')
 SETTINGS_EXPORT = [
     'STRIPE_JS_URL',
     'DATADOG_APPID', 'DATADOG_TOKEN', 'DATADOG_ENV', 'DATADOG_SERVICE',
-    'APP_VERSION'
 ]

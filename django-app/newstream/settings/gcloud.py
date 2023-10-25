@@ -15,7 +15,7 @@ import environ
 
 from newstream.logging_utils import CustomJsonFormatter
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 env_file = os.path.join(BASE_DIR, ".env")
 
 # Load the env from os.environ and define known variables
@@ -48,6 +48,8 @@ env = environ.Env(
 
     WAGTAIL_2FA_REQUIRED=(str, False),
     WAGTAIL_2FA_OTP_TOTP_NAME=(str, "Newstream"),
+
+    APP_VERSION=(str, None),
 )
 
 # If a .env file exists, read from the .env file
@@ -57,6 +59,8 @@ if os.path.isfile(env_file):
 DEBUG = env('DEBUG')
 
 SECRET_KEY = env("SECRET_KEY")
+
+APP_VERSION = env("APP_VERSION")
 
 DATABASES = {
     'default': {

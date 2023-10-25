@@ -1,6 +1,6 @@
-# 
+#
 # Django settings file for gcloud
-# 
+#
 # This file has some custom env variables for google cloud. Please read the docs for
 # details on these env variables and how to configure the system to run on google cloud.
 #
@@ -15,7 +15,7 @@ import environ
 
 from newstream.logging_utils import CustomJsonFormatter
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 env_file = os.path.join(BASE_DIR, ".env")
 
 # Load the env from os.environ and define known variables
@@ -40,7 +40,7 @@ env = environ.Env(
     EMAIL_HOST=(str, ''),
     EMAIL_PORT=(int, 25),
     EMAIL_HOST_USER=(str, ''),
-    EMAIL_HOST_PASSWORD=(str, ''), 
+    EMAIL_HOST_PASSWORD=(str, ''),
     EMAIL_USE_SSL=(bool, False),
     EMAIL_USE_TLS=(bool, False),
 
@@ -48,6 +48,8 @@ env = environ.Env(
 
     WAGTAIL_2FA_REQUIRED=(str, False),
     WAGTAIL_2FA_OTP_TOTP_NAME=(str, "Newstream"),
+
+    APP_VERSION=(str, None),
 )
 
 # If a .env file exists, read from the .env file
@@ -57,6 +59,8 @@ if os.path.isfile(env_file):
 DEBUG = env('DEBUG')
 
 SECRET_KEY = env("SECRET_KEY")
+
+APP_VERSION = env("APP_VERSION")
 
 DATABASES = {
     'default': {
@@ -103,53 +107,9 @@ WAGTAIL_2FA_OTP_TOTP_NAME=env('WAGTAIL_2FA_OTP_TOTP_NAME')
 # localstripe
 INIT_LOCALSTRIPE = env('INIT_LOCALSTRIPE')
 
-# Log evenrything to the console. Google cloud expects logging to the console
-# and will capture and display these in the logs panel
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    # how the logs are formatted
-    'formatters': {
-        'verbose': {
-            'format': '[{levelname}] {asctime} [{module}] {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
-            'style': '{',
-        },
-        "json": {
-            "()": CustomJsonFormatter,
-            "format": "",
-        },
-    },
-    # where the logs should be sent to
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'stream': sys.stdout
-        },
-        'console-json': {
-            'class': 'logging.StreamHandler',
-            'stream': sys.stdout,
-            'formatter': 'json',
-        },
-    },
-    # parent logger
-    'root': {
-        'handlers': ['console-json'],
-        'level': 'INFO',
-    },
-    # children loggers
-    'loggers': {
-        'newstream': {
-            'handlers': ['console-json'],
-            'level': 'DEBUG',
-            'propagate': False,
-        },
-    },
-}
-
+SETTINGS_EXPORT += [
+    'APP_VERSION',
+]
 
 try:
     from .local import *

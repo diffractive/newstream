@@ -55,6 +55,7 @@ services:
       NEWSTREAM_STRIPE_TESTING_API_SECRET_KEY: 'sk_TEST_SECRET_KEY'
       NEWSTREAM_FULL_ORG_NAME: 'Diffractive Limited'
       NEWSTREAM_SHORT_ORG_NAME: 'Diffractive'
+      LOG_FORMAT_JSON: 0
     volumes:
       - '../django-app:/app'
 

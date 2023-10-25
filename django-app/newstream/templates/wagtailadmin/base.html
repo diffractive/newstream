@@ -1,6 +1,9 @@
 {% extends "wagtailadmin/base.html" %}
 <!-- original template source: https://github.com/wagtail/wagtail/blob/v2.13/wagtail/admin/templates/wagtailadmin/base.html -->
 <!-- we only add custom css to the original base template of wagtail admin -->
+{% block extra_js %}
+{% include "common/datadog.html" %}
+{% endblock %}
 {% block extra_css %}
 <style>
     .sys-default {

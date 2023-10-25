@@ -39,6 +39,9 @@ ENV PATH="/opt/venv/bin:$PATH"
 WORKDIR /app/
 ADD . /app/
 
+ARG APP_VERSION
+RUN echo "APP_VERSION=$APP_VERSION" > .env
+
 # Requirements files
 # The requirements.txt file is requriements for newstream
 # The requirements-docker.txt is additional requirements to run ths sytem via docker (ie: gunicorn)

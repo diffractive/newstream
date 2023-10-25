@@ -5,7 +5,7 @@
         n=o.getElementsByTagName(u)[0];n.parentNode.insertBefore(d,n)
     })(window,document,'script','https://www.datadoghq-browser-agent.com/datadog-rum-v4.js','DD_RUM')
   </script>
-  
+
   {% if settings.DATADOG_APPID and settings.DATADOG_TOKEN %}
   <script>
     DD_RUM.onReady(function() {
@@ -15,24 +15,34 @@
         site: 'datadoghq.eu',
         env: '{{ settings.DATADOG_ENV }}',
         service: '{{ settings.DATADOG_SERVICE }}',
-        // version: '{{ APP_VERSION }}',
+        version: '{{ settings.APP_VERSION }}',
         sampleRate: 100,
         trackInteractions: true,
         trackResources: true,
         trackLongTasks: true,
         actionNameAttribute: 'data-action',
       });
+      {% if user.is_authenticated and user.is_staff %}
+        DD_RUM.setUser({
+          id: '{{ user.id }}',
+          email: '{{ user.email }}',
+        })
+      {% elif user.is_authenticated %}
+        DD_RUM.setUser({
+          id: '{{ user.id }}',
+        })
+      {% endif %}
     })
   </script>
   {% else %}
   <script>
     DD_RUM.onReady(function() {
       console.info("Datadog actions will be logged to console")
-  
+
       let __dd_actions;
-  
+
       __dd_actions = __dd_actions || []
-  
+
       DD_RUM.init({
         clientToken: '_',
         applicationId: '_',
@@ -41,7 +51,7 @@
         beforeSend: (event) => {
           const {type, action, view, context} = event;
           let message;
-  
+
           switch (type) {
             case 'action': {
               __dd_actions.push({
@@ -50,7 +60,7 @@
                 name: action.target.name
               })
               message = `[${action.type}] ${action.target.name}`
-  
+
               if (Object.keys(context).length) {
                 console.log(message, context)
               } else {
@@ -72,9 +82,9 @@
                 break;
             }
           }
-  
+
           if (type !== 'view') return false;
-  
+
           // Turning off perisisting datadog RUM logs as it'll spam storage
           // Instead, opt-in to this just for Selenium.
           // sessionStorage.setItem("__dd_actions", JSON.stringify(__dd_actions))

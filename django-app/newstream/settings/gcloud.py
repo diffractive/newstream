@@ -107,6 +107,10 @@ WAGTAIL_2FA_OTP_TOTP_NAME=env('WAGTAIL_2FA_OTP_TOTP_NAME')
 # localstripe
 INIT_LOCALSTRIPE = env('INIT_LOCALSTRIPE')
 
+SETTINGS_EXPORT += [
+    'APP_VERSION',
+]
+
 try:
     from .local import *
 except ImportError:

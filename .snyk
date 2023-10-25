@@ -31,5 +31,10 @@ ignore:
           for this version of Debian. This can be ignored for now as it's only a DOS issue.
         expires: 2023-12-06T03:41:02.060Z
         created: 2023-10-12T03:41:02.078Z
+  SNYK-DEBIAN12-ZLIB-6008963:
+    - '*':
+        reason: No fix available. We don't seem to be impacted by this.
+        expires: 2023-10-28T00:00:00.000Z
+        created: 2023-10-25T19:27:37.731Z
 
 patch:

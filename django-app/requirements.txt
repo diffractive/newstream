@@ -65,7 +65,7 @@ stripe==2.62.0
 tablib==3.0.0
 telepath==0.1.1
 typing-extensions==3.10.0.0
-urllib3==1.26.17
+urllib3==1.26.18
 wagtail==2.16
 wagtail-2fa==1.4.2
 wagtail-autocomplete==0.6.2

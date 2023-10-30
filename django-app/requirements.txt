@@ -73,6 +73,7 @@ wagtail-autocomplete==0.6.2
 wagtail-metadata==3.4.0
 wagtail-modelchooser==2.3.3
 webencodings==0.5.1
+whitenoise==6.2.0
 Willow==1.4
 xlrd==2.0.1
 XlsxWriter==1.4.3

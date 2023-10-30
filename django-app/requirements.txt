@@ -4,7 +4,7 @@ beautifulsoup4==4.8.2
 certifi==2023.7.22
 cffi==1.16.0
 chardet==4.0.0
-cryptography==41.0.4
+cryptography==41.0.5
 defusedxml==0.7.1
 Django==3.2.22
 django-allauth==0.54.0

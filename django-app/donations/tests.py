@@ -120,7 +120,7 @@ class MockStripeResponses(TestCase):
             res = self.client.post(reverse('donations:toggle-recurring'), data=data, content_type='application/json').json()
             if error['type'] == "stripe":
                 self.assertEqual(res['reason'],
-                    'There has been an error connecting with Stripe: Test Error')
+                    'There has been an error connecting with Stripe: Test Error, subscription id: {}'.format(self.subscription.profile_id))
             else:
                 self.assertEqual(res['reason'], 'Test Error')
             self.assertEqual(res['status'], 'failure')
@@ -134,7 +134,7 @@ class MockStripeResponses(TestCase):
             res = self.client.post(reverse('donations:cancel-recurring'), data=data, content_type='application/json').json()
             if error['type'] == "stripe":
                 self.assertEqual(res['reason'],
-                    'There has been an error connecting with Stripe: Test Error')
+                    'There has been an error connecting with Stripe: Test Error, subscription id: {}'.format(self.subscription.profile_id))
             else:
                 self.assertEqual(res['reason'], 'Test Error')
             self.assertEqual(res['status'], 'failure')
@@ -159,7 +159,7 @@ class MockStripeResponses(TestCase):
             self.assertEqual(len(messages), 1)
             if error['type'] == "stripe":
                 self.assertEqual(messages[0].message,
-                    'There has been an error connecting with Stripe: Test Error')
+                    'There has been an error connecting with Stripe: Test Error, subscription id: {}'.format(self.subscription.profile_id))
             else:
                 self.assertEqual(messages[0].message, 'Test Error')
 
@@ -175,7 +175,7 @@ class MockStripeResponses(TestCase):
             messages = list(get_messages(res.wsgi_request))
             if error['type'] == "stripe":
                 self.assertEqual(messages[0].message,
-                    'There has been an error connecting with Stripe: Test Error')
+                    'There has been an error connecting with Stripe: Test Error, subscription id: {}'.format(self.subscription.profile_id))
             else:
                 self.assertEqual(messages[0].message, 'Test Error')
 
@@ -192,7 +192,7 @@ class MockStripeResponses(TestCase):
             self.assertEqual(len(messages), 1)
             if error['type'] == "stripe":
                 self.assertEqual(messages[0].message,
-                    'There has been an error connecting with Stripe: Test Error')
+                    'There has been an error connecting with Stripe: Test Error, subscription id: {}'.format(self.subscription.profile_id))
             else:
                 self.assertEqual(messages[0].message, 'Test Error')
 

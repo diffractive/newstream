@@ -49,7 +49,7 @@ class Factory_Paypal(PaymentGatewayFactory):
             response = WebhookEvent.verify(
                 transmission_id, timestamp, webhook_id, event_body, cert_url, actual_signature, auth_algo)
         if not response:
-            _debug('Webhook verification result: '+str(response))
+            raise ValueError("PayPal Webhook verification failed. Webhook verification result: "+str(response))
 
         if response:
             donation_id = None
@@ -63,7 +63,7 @@ class Factory_Paypal(PaymentGatewayFactory):
                 if 'custom_id' in json_data['resource']:
                     donation_id = json_data['resource']['custom_id']
                 else:
-                    raise ValueError(_('Missing custom_id(donation_id) in json_data.resource'))
+                    raise ValueError('Missing custom_id(donation_id) in json_data.resource, resource id: {}'.format(json_data['resource']['id']))
 
             # subscription activated
             if json_data['event_type'] == EVENT_BILLING_SUBSCRIPTION_ACTIVATED:
@@ -71,7 +71,7 @@ class Factory_Paypal(PaymentGatewayFactory):
                 if 'custom_id' in json_data['resource']:
                     donation_id = json_data['resource']['custom_id']
                 else:
-                    raise ValueError(_('Missing custom_id(donation_id) in json_data.resource'))
+                    raise ValueError('Missing custom_id(donation_id) in json_data.resource, subscription id: {}'.format(json_data['resource']['id']))
 
             # subscription updated
             if json_data['event_type'] == EVENT_BILLING_SUBSCRIPTION_UPDATED:
@@ -79,7 +79,7 @@ class Factory_Paypal(PaymentGatewayFactory):
                 if 'custom_id' in json_data['resource']:
                     donation_id = json_data['resource']['custom_id']
                 else:
-                    raise ValueError(_('Missing custom_id(donation_id) in json_data.resource'))
+                    raise ValueError('Missing custom_id(donation_id) in json_data.resource, subscription id: {}'.format(json_data['resource']['id']))
 
             # subscription payment sale completed
             if json_data['event_type'] == EVENT_PAYMENT_SALE_COMPLETED:
@@ -88,7 +88,7 @@ class Factory_Paypal(PaymentGatewayFactory):
                 if 'custom_id' in subscription_obj:
                     donation_id = subscription_obj['custom_id']
                 else:
-                    raise ValueError(_('Missing custom_id(donation_id) in curlPaypal-returned subscription_obj'))
+                    raise ValueError('Missing custom_id(donation_id) in curlPaypal-returned subscription_obj, subscription id: {}'.format(subscription_obj['id']))
 
             # subscription payment failed
             if json_data['event_type'] == EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED:
@@ -96,7 +96,7 @@ class Factory_Paypal(PaymentGatewayFactory):
                 if 'custom_id' in json_data['resource']:
                     donation_id = json_data['resource']['custom_id']
                 else:
-                    raise ValueError(_('Missing custom_id(donation_id) in json_data.resource'))
+                    raise ValueError('Missing custom_id(donation_id) in json_data.resource, subscription id: {}'.format(json_data['resource']['id']))
 
             # subscription cancelled
             if json_data['event_type'] == EVENT_BILLING_SUBSCRIPTION_CANCELLED:
@@ -104,7 +104,7 @@ class Factory_Paypal(PaymentGatewayFactory):
                 if 'custom_id' in json_data['resource']:
                     donation_id = json_data['resource']['custom_id']
                 else:
-                    raise ValueError(_('Missing custom_id(donation_id) in json_data.resource'))
+                    raise ValueError('Missing custom_id(donation_id) in json_data.resource, subscription id: {}'.format(json_data['resource']['id']))
 
             # subscription suspended
             if json_data['event_type'] == EVENT_BILLING_SUBSCRIPTION_SUSPENDED:
@@ -112,7 +112,7 @@ class Factory_Paypal(PaymentGatewayFactory):
                 if 'custom_id' in json_data['resource']:
                     donation_id = json_data['resource']['custom_id']
                 else:
-                    raise ValueError(_('Missing custom_id(donation_id) in json_data.resource'))
+                    raise ValueError('Missing custom_id(donation_id) in json_data.resource, subscription id: {}'.format(json_data['resource']['id']))
 
             if json_data['event_type'] in expected_events and not donation_id:
                 raise ValueError(_("Missing donation_id after processing events from paypal"))
@@ -126,8 +126,6 @@ class Factory_Paypal(PaymentGatewayFactory):
                 return Factory_Paypal.initGateway(request, donation, subscription, **kwargs)
             except Donation.DoesNotExist:
                 raise ValueError(_("Donation object not found by id: ")+str(donation_id))
-        else:
-            raise ValueError(_("PayPal Webhook verification failed."))
 
     @staticmethod
     def initGatewayByReturn(request):

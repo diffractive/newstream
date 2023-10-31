@@ -91,7 +91,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                     invoices = [inv for inv in stripe.Invoice.list(subscription=self.subscription_obj.id) if inv.amount_paid > 0]
                 except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
                     _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
-                    raise RuntimeError(_("There has been an error connecting with Stripe: {}".format(e.user_message)))
+                    raise RuntimeError("There has been an error connecting with Stripe: {}, invoice id: {}".format(e.user_message, self.invoice.id))
                 # _debug("Stripe: Subscription {} has {} invoices.".format(self.subscription_obj.id, len(invoices['data'])))
                 if len(invoices) == 1:
                     _debug("[stripe recurring] First time subscription")
@@ -235,7 +235,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                     # we already saved the reason on Newstream's side if it was cancelled by donor/admin
                 except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
                     _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
-                    raise RuntimeError(_("There has been an error connecting with Stripe: {}".format(e.user_message)))
+                    raise RuntimeError("There has been an error connecting with Stripe: {}, subscription id: {}".format(e.user_message, self.subscription_obj.id))
 
             # note that admins can also cancel subscriptions manually at the stripe dashboard
             # set subscription recurring_status to cancelled
@@ -282,7 +282,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 )
             except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
                 _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
-                raise RuntimeError(_("There has been an error connecting with Stripe: {}".format(e.user_message)))
+                raise RuntimeError("There has been an error connecting with Stripe: {}, subscription id: {}".format(e.user_message, self.subscription.profile_id))
             if len(stripeRes['data']) == 1:
                 subItemId = stripeRes['data'][0].id
                 # call stripe api to update SubscriptionItem
@@ -295,7 +295,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                     )
                 except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
                     _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
-                    raise RuntimeError(_("There has been an error connecting with Stripe: {}".format(e.user_message)))
+                    raise RuntimeError("There has been an error connecting with Stripe: {}, subscription id: {}".format(e.user_message, self.subscription.profile_id))
                 # update newstream model
                 if updateRes:
                     self.subscription.recurring_amount = formatDonationAmountFromGateway(updateRes['price']['unit_amount_decimal'], self.subscription.currency)
@@ -308,9 +308,9 @@ class Gateway_Stripe(PaymentGatewayManager):
                     messages.add_message(self.request, messages.SUCCESS, _(
                         'Your recurring donation amount at Stripe is updated successfully.'))
                 else:
-                    raise RuntimeError(_('Cannot update stripe subscription. Stripe API returned none.'))
+                    raise RuntimeError('Cannot update stripe subscription. Stripe API returned none. Subscription id: {}'.format(self.subscription.profile_id))
             else:
-                raise RuntimeError(_('Cannot update stripe subscription. SubscriptionItem more or less than 1.'))
+                raise RuntimeError('Cannot update stripe subscription. SubscriptionItem more or less than 1. Subscription id: {}'.format(self.subscription.profile_id))
 
         # update billing_cycle_anchor if user checked yes
         if form_data['billing_cycle_now']:
@@ -322,7 +322,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 )
             except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
                 _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
-                raise RuntimeError(_("There has been an error connecting with Stripe: {}".format(e.user_message)))
+                raise RuntimeError("There has been an error connecting with Stripe: {}, subscription id: {}".format(e.user_message, self.subscription.profile_id))
             if updateRes:
                 # email notifications
                 sendRecurringRescheduledNotifToAdmins(self.subscription)
@@ -331,7 +331,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 messages.add_message(self.request, messages.SUCCESS, _(
                     'Your recurring donation via Stripe is set to bill on today\'s date every month.'))
             else:
-                raise RuntimeError(_('Cannot update stripe subscription. Stripe API returned none.'))
+                raise RuntimeError('Cannot update stripe subscription. Stripe API returned none. Subscription id: {}'.format(self.subscription.profile_id))
 
     def cancel_recurring_payment(self, reason=None):
         if not self.subscription:
@@ -343,14 +343,14 @@ class Gateway_Stripe(PaymentGatewayManager):
                 self.subscription.profile_id)
         except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
             _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
-            raise RuntimeError(_("There has been an error connecting with Stripe: {}".format(e.user_message)))
+            raise RuntimeError("There has been an error connecting with Stripe: {}, subscription id: {}".format(e.user_message, self.subscription.profile_id))
         if cancelled_subscription and cancelled_subscription.status == 'canceled':
             # update newstream model
             self.subscription.recurring_status = STATUS_CANCELLED
             self.subscription.cancel_reason = reason
             self.subscription.save()
         else:
-            raise RuntimeError(_('SubscriptionInstance object returned from stripe having status %(status)s instead of canceled') % {'status': cancelled_subscription.status})
+            raise RuntimeError(_('SubscriptionInstance object returned from stripe having status %(status)s instead of canceled, subscription id: %(id)s') % {'status': cancelled_subscription.status, 'id': self.subscription.profile_id})
 
     def toggle_recurring_payment(self):
         initStripeApiKey()
@@ -361,13 +361,13 @@ class Gateway_Stripe(PaymentGatewayManager):
         elif self.subscription.recurring_status == STATUS_ACTIVE:
             toggle_obj = {"behavior": "mark_uncollectible"}
         else:
-            raise ValueError(_('SubscriptionInstance object is neither Active or Paused'))
+            raise ValueError('SubscriptionInstance object is neither Active or Paused, subscription id: {}'.format(self.subscription.profile_id))
         try:
             updated_subscription = stripe.Subscription.modify(
                 self.subscription.profile_id, pause_collection=toggle_obj)
         except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
             _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
-            raise RuntimeError(_("There has been an error connecting with Stripe: {}".format(e.user_message)))
+            raise RuntimeError("There has been an error connecting with Stripe: {}, subscription id: {}".format(e.user_message, self.subscription.profile_id))
         if updated_subscription:
             if toggle_obj and updated_subscription['pause_collection']['behavior'] == 'mark_uncollectible':
                 # update newstream model
@@ -394,7 +394,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                     'success-message': str(_('Your recurring donation via Stripe is resumed.'))
                 }
         else:
-            raise ValueError(_('SubscriptionInstance object returned from stripe does not have valid pause_collection value'))
+            raise ValueError('SubscriptionInstance object returned from stripe does not have valid pause_collection value, subscription id: {}'.format(self.subscription.profile_id))
 
     def adjust_payment_cycle_with_trial(self, old_sub_id):
         initStripeApiKey()
@@ -414,4 +414,4 @@ class Gateway_Stripe(PaymentGatewayManager):
             )
         except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
             _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
-            raise RuntimeError(_("There has been an error connecting with Stripe: {}".format(e.user_message)))
+            raise RuntimeError("There has been an error connecting with Stripe: {}, subscription id: {}".format(e.user_message, self.donation.subscription.profile_id))

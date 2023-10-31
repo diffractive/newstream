@@ -87,7 +87,7 @@ class Gateway_Paypal(PaymentGatewayManager):
 
                 return HttpResponse(status=200)
             else:
-                raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_ACTIVATED but subscription status is %(status)s") % {'status': self.subscription_obj['status']})
+                raise ValueError("EVENT_BILLING_SUBSCRIPTION_ACTIVATED but subscription status is %(status)s, subscription id: %(id)s" % {'status': self.subscription_obj['status'], 'id': self.subscription_obj['id']})
 
         # Event: EVENT_BILLING_SUBSCRIPTION_UPDATED
         if self.event_type == EVENT_BILLING_SUBSCRIPTION_UPDATED and hasattr(self, 'subscription_obj'):
@@ -100,7 +100,7 @@ class Gateway_Paypal(PaymentGatewayManager):
 
                 return HttpResponse(status=200)
             else:
-                raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_UPDATED but subscription status is %(status)s") % {'status': self.subscription_obj['status']})
+                raise ValueError("EVENT_BILLING_SUBSCRIPTION_UPDATED but subscription status is %(status)s, subscription id: %(id)s" % {'status': self.subscription_obj['status'], 'id': self.subscription_obj['id']})
 
         # Event: EVENT_PAYMENT_SALE_COMPLETED
         if self.event_type == EVENT_PAYMENT_SALE_COMPLETED and hasattr(self, 'subscription_obj'):
@@ -114,7 +114,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                     # this is already a renewal payment
                     # self.donation is the first donation associated with the subscription
                     if not self.donation.subscription:
-                        raise ValueError(_("Missing subscription linkage/object for donation %(id)s") % {'id': self.donation.id})
+                        raise ValueError("Missing subscription linkage/object for donation %(id)s, subscription id: %(sub_id)s" % {'id': self.donation.id, 'sub_id': self.subscription_obj['id']})
                     donation = Donation(
                         is_test=self.donation.is_test,
                         subscription=self.donation.subscription,
@@ -156,7 +156,7 @@ class Gateway_Paypal(PaymentGatewayManager):
 
                 return HttpResponse(status=200)
             else:
-               raise ValueError(_("EVENT_PAYMENT_SALE_COMPLETED but payment state is %(state)s") % {'state': self.payload['state']})
+               raise ValueError("EVENT_PAYMENT_SALE_COMPLETED but payment state is %(state)s, subscription id: %(id)s" % {'state': self.payload['state'], 'id': self.subscription_obj['id']})
 
         # Event: EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED
         if self.event_type == EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED and hasattr(self, 'subscription_obj'):
@@ -185,13 +185,13 @@ class Gateway_Paypal(PaymentGatewayManager):
                     spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='awaiting_cancelation')
                     spmeta.delete()
                 except SubscriptionPaymentMeta.DoesNotExist:
-                    print("No spmeta linked to %s is found" % self.donation.subscription.profile_id)
+                    print("No spmeta linked to subscription id '%s' is found" % self.donation.subscription.profile_id)
                     # send email notifications here for all other cancellation scenarios
                     sendRecurringCancelledNotifToAdmins(self.donation.subscription)
                     sendRecurringCancelledNotifToDonor(self.donation.subscription)
                 return HttpResponse(status=200)
             else:
-               raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_CANCELLED but subscription status is %(status)s") % {'status': self.subscription_obj['status']})
+               raise ValueError("EVENT_BILLING_SUBSCRIPTION_CANCELLED but subscription status is %(status)s, subscription id: %(id)s" % {'status': self.subscription_obj['status'], 'id': self.subscription_obj['id']})
 
         # Event: EVENT_BILLING_SUBSCRIPTION_SUSPENDED
         # note that this event is also triggered when user pause the recurring donation, but we don't further process this event for the pause scenario since it's already been handled in toggle_recurring_payment()
@@ -210,7 +210,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                 
                 return HttpResponse(status=200)
             else:
-               raise ValueError(_("EVENT_BILLING_SUBSCRIPTION_SUSPENDED but subscription status is %(status)s") % {'status': self.subscription_obj['status']})
+               raise ValueError("EVENT_BILLING_SUBSCRIPTION_SUSPENDED but subscription status is %(status)s, subscription id: %(id)s" % {'status': self.subscription_obj['status'], 'id': self.subscription_obj['id']})
 
         # return 400 for all other events
         return HttpResponse(status=400)
@@ -275,7 +275,7 @@ class Gateway_Paypal(PaymentGatewayManager):
             return {
                 'button-text': str(_('Resume Recurring Donation')),
                 'recurring-status': STATUS_PAUSED,
-                'success-message': str(_('Your recurring donation via PayPal  is paused.'))
+                'success-message': str(_('Your recurring donation via PayPal is paused.'))
             }
         else:
-            raise ValueError(_('SubscriptionInstance object is neither Active or Paused'))
+            raise ValueError('SubscriptionInstance object is neither Active or Paused, subscription id: {}'.format(self.subscription.profile_id))

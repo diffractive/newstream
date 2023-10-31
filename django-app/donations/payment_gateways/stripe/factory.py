@@ -62,14 +62,14 @@ class Factory_Stripe(PaymentGatewayFactory):
                     if 'donation_id' in payment_intent.metadata:
                         donation_id = payment_intent.metadata['donation_id']
                     else:
-                        raise ValueError(_('Missing donation_id in payment_intent.metadata'))
+                        raise ValueError('Missing donation_id in payment_intent.metadata, payment_intent id: {}'.format(payment_intent.id))
                 elif session.mode == 'subscription' and session.subscription:
                     subscription_obj = stripe.Subscription.retrieve(
                         session.subscription)
                     if 'donation_id' in subscription_obj.metadata:
                         donation_id = subscription_obj.metadata['donation_id']
                     else:
-                        raise ValueError(_('Missing donation_id in subscription_obj.metadata'))
+                        raise ValueError(_('Missing donation_id in subscription_obj.metadata, subscription id: {}'.format(subscription_obj.id)))
 
         # Intercept the payment_intent.succeeded event
         if event['type'] == EVENT_PAYMENT_INTENT_SUCCEEDED:
@@ -83,7 +83,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                     can_skip_donation_id = True
                 except Donation.DoesNotExist:
                     # should be renewal payments since only one-time payments have saved stripe_payment_intent_id
-                    raise WebhookNotProcessedError(_('Payment Intent Id not found in DonationPaymentMeta:') + payment_intent.id)
+                    raise WebhookNotProcessedError('Payment Intent Id not found in DonationPaymentMeta, payment intent id: {}'.format(payment_intent.id))
 
         # Intercept the invoice created event for subscriptions(a must for instant invoice finalization)
         # if it's givewp subscription -> no donation_id in metadata is set -> query subscription from profile_id -> then get first donation as parent donation
@@ -247,7 +247,7 @@ class Factory_Stripe(PaymentGatewayFactory):
         if 'donation_id' in session.metadata:
             donation_id = session.metadata['donation_id']
         else:
-            raise ValueError(_("Missing donation_id in session.metadata"))
+            raise ValueError("Missing donation_id in session.metadata, session id: {}".format(session.id))
 
         try:
             donation = Donation.objects.get(pk=donation_id)

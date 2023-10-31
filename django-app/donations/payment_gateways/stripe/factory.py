@@ -1,4 +1,6 @@
 import stripe
+import logging
+logger = logging.getLogger('newstream')
 from django.utils.translation import gettext_lazy as _
 
 from newstream.classes import WebhookNotProcessedError
@@ -49,7 +51,7 @@ class Factory_Stripe(PaymentGatewayFactory):
         # for events not being processed
         if event['type'] not in expected_events:
             raise WebhookNotProcessedError(_("Stripe Event not expected for processing at the moment"))
-        _debug("[stripe recurring] Incoming Event type:"+event['type'])
+        logger.info("[Stripe Webhook] Incoming Event type: "+event['type'])
 
         # Intercept the checkout.session.completed event
         if event['type'] == EVENT_CHECKOUT_SESSION_COMPLETED:

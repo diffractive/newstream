@@ -1,4 +1,6 @@
 import json
+import logging
+logger = logging.getLogger('newstream')
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from paypalcheckoutsdk.core import PayPalHttpClient
@@ -27,7 +29,7 @@ class Factory_Paypal(PaymentGatewayFactory):
         # The payload body sent in the webhook event
         event_body = request.body.decode()
         json_data = json.loads(request.body)
-        _debug('Event Type: '+json_data['event_type'])
+        logger.info('[PayPal Webhook] Incoming Event type: '+json_data['event_type'])
         # printvars(request.headers)
         # Paypal-Transmission-Id in webhook payload header
         transmission_id = request.headers['Paypal-Transmission-Id']
@@ -125,7 +127,7 @@ class Factory_Paypal(PaymentGatewayFactory):
                 kwargs['subscription_obj'] = subscription_obj
                 return Factory_Paypal.initGateway(request, donation, subscription, **kwargs)
             except Donation.DoesNotExist:
-                raise ValueError(_("Donation object not found by id: ")+str(donation_id))
+                raise ValueError("Donation object not found by id: {}, subscription id: {}".format(str(donation_id), subscription_obj['id']))
 
     @staticmethod
     def initGatewayByReturn(request):

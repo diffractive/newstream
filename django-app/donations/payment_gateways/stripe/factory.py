@@ -247,7 +247,7 @@ class Factory_Stripe(PaymentGatewayFactory):
         if 'donation_id' in session.metadata:
             donation_id = session.metadata['donation_id']
         else:
-            raise ValueError("Missing donation_id in session.metadata, session id: {}".format(session.id)))
+            raise ValueError("Missing donation_id in session.metadata, session id: {}".format(session.id))
 
         try:
             donation = Donation.objects.get(pk=donation_id)

@@ -41,7 +41,6 @@ oauthlib==3.1.0
 openpyxl==3.0.7
 paypal-checkout-serversdk==1.0.1
 paypalhttp==1.0.0
-paypalrestsdk==1.13.1
 phpbridge==0.0.3
 Pillow==9.4.0
 protobuf==3.18.3

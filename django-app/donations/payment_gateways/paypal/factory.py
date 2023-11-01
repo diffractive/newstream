@@ -29,6 +29,8 @@ class Factory_Paypal(PaymentGatewayFactory):
         event_body = request.body.decode()
         json_data = json.loads(request.body)
         logger.info('[PayPal Webhook] Incoming Event type: '+json_data['event_type'])
+        if settings.DEBUG:
+            logger.info(request.body)
         # printvars(request.headers)
         # Paypal-Transmission-Id in webhook payload header
         transmission_id = request.headers['Paypal-Transmission-Id']

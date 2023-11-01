@@ -54,7 +54,7 @@ class Factory_Paypal(PaymentGatewayFactory):
                 "transmission_sig": actual_signature,
                 "transmission_time": timestamp,
                 "webhook_id": webhook_id,
-                "webhook_event": event_body,
+                "webhook_event": json_data,
             }
             response = verifyWebhook(request.session, webhook_data)
         if response.get('verification_status') != "SUCCESS":

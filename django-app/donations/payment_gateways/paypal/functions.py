@@ -57,6 +57,7 @@ def verifyWebhook(session, webhook_data):
     checkAccessTokenExpiry(session)
     paypalSettings = getPayPalSettings()
     api_url = paypalSettings.api_url+'/v1/notifications/verify-webhook-signature'
+    print(json.dumps(webhook_data))
     return curlPaypal(api_url, common_headers(session['paypal_token']), post_data=json.dumps(webhook_data))
 
 

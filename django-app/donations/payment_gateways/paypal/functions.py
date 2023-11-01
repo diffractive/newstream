@@ -53,6 +53,12 @@ def curlPaypal(url, headers, userpwd='', post_data='', verb='GET'):
     # Here we deserialize the json into a python object
     return json.loads(body.decode('utf-8'))
 
+def verifyWebhook(session, webhook_data):
+    checkAccessTokenExpiry(session)
+    paypalSettings = getPayPalSettings()
+    api_url = paypalSettings.api_url+'/v1/notifications/verify-webhook-signature'
+    return curlPaypal(api_url, common_headers(session['paypal_token']), post_data=json.dumps(webhook_data))
+
 
 def saveNewAccessToken(session, token_url, client_id, secret_key):
     json_data = curlPaypal(token_url, ['Accept: application/json', 'Accept-Language: en_US'], userpwd='%s:%s' % (client_id, secret_key), post_data='grant_type=client_credentials')

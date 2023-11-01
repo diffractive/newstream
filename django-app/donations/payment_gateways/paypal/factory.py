@@ -5,7 +5,6 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 from paypalcheckoutsdk.core import PayPalHttpClient
 from paypalcheckoutsdk.orders import OrdersGetRequest
-from paypalrestsdk.notifications import WebhookEvent
 
 from newstream.classes import WebhookNotProcessedError
 from newstream.functions import _debug
@@ -14,7 +13,7 @@ from donations.payment_gateways.gateway_factory import PaymentGatewayFactory
 from donations.payment_gateways.paypal.gateway import Gateway_Paypal
 from donations.payment_gateways.paypal.constants import *
 from donations.payment_gateways.setting_classes import getPayPalSettings
-from donations.payment_gateways.paypal.functions import getSubscriptionDetails
+from donations.payment_gateways.paypal.functions import getSubscriptionDetails, verifyWebhook
 
 
 class Factory_Paypal(PaymentGatewayFactory):
@@ -46,12 +45,20 @@ class Factory_Paypal(PaymentGatewayFactory):
 
         # Ignore webhook verification if using localpaypal
         if settings.PAYPAL_API_BASE:
-            response = True,
+            response = { "verification_status": "SUCCESS" }
         else:
-            response = WebhookEvent.verify(
-                transmission_id, timestamp, webhook_id, event_body, cert_url, actual_signature, auth_algo)
-        if not response:
-            raise ValueError("PayPal Webhook verification failed. Webhook verification result: "+str(response))
+            webhook_data = {
+                "auth_algo": auth_algo,
+                "cert_url": cert_url,
+                "transmission_id": transmission_id,
+                "transmission_sig": actual_signature,
+                "transmission_time": timestamp,
+                "webhook_id": webhook_id,
+                "webhook_event": json_data,
+            }
+            response = verifyWebhook(request.session, webhook_data)
+        if response.get('verification_status') != "SUCCESS":
+            raise ValueError("PayPal Webhook verification failed, resource id: {}".format(json_data['resource']['id']))
 
         if response:
             donation_id = None

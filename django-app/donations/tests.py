@@ -269,9 +269,9 @@ class MockPaypalResponses(TestCase):
 
         settings.NEWSTREAM_ADMIN_EMAILS = 'admin@diffractive.io'
 
-    @patch('paypalrestsdk.notifications.WebhookEvent.verify')
+    @patch('donations.payment_gateways.paypal.factory.verifyWebhook')
     def test_fail_payment(self, verify_mock):
-        verify_mock.return_value = True
+        verify_mock.return_value = { "verification_status": "SUCCESS" }
 
         headers = {
             "HTTP_Paypal-Transmission-Id": "test",
@@ -296,9 +296,9 @@ class MockPaypalResponses(TestCase):
         self.assertEqual(sub.recurring_status, STATUS_PAYMENT_FAILED)
 
     @patch('donations.payment_gateways.paypal.factory.getSubscriptionDetails')
-    @patch('paypalrestsdk.notifications.WebhookEvent.verify')
+    @patch('donations.payment_gateways.paypal.factory.verifyWebhook')
     def test_reinstate_subscription(self, verify_mock, details_mock):
-        verify_mock.return_value = True
+        verify_mock.return_value = { "verification_status": "SUCCESS" }
         details_mock.return_value = {
             "custom_id": self.donation2.id,
             "id": self.subscription.profile_id,

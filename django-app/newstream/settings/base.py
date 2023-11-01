@@ -31,9 +31,13 @@ env = environ.Env(
     STRIPE_API_BASE=(str, ""),
     STRIPE_API_VERSION=(str, ""),
     INIT_LOCALSTRIPE=(bool, False),
+    # comma separated list of resource ids to be ignored from webhooks
+    STRIPE_WEBHOOK_IGNORABLE_RESOURCES=(str, ''),
 
     PAYPAL_API_BASE=(str, ""),
     PAYPAL_PAYMENT_FAILURE_THRESHOLD=(int, 3),
+    # comma separated list of resource ids to be ignored from webhooks
+    PAYPAL_WEBHOOK_IGNORABLE_RESOURCES=(str, ''),
 
     DATADOG_APPID=(str, None),
     DATADOG_TOKEN=(str, None),
@@ -260,7 +264,8 @@ LOGGING = {
             'propagate': False,
         },
         'newstream': {
-            'handlers': ['console']
+            'handlers': ['console'],
+            'propagate': False,
         }
     },
 }
@@ -413,15 +418,18 @@ STRIPE_JS_URL = env('STRIPE_JS_URL')
 STRIPE_API_BASE = env('STRIPE_API_BASE')
 STRIPE_API_VERSION = env('STRIPE_API_VERSION')
 INIT_LOCALSTRIPE = env('INIT_LOCALSTRIPE')
+STRIPE_WEBHOOK_IGNORABLE_RESOURCES=env('STRIPE_WEBHOOK_IGNORABLE_RESOURCES')
 
 #########################################################################################
 #
 # PayPal settings
 #
+
 PAYPAL_API_BASE = env('PAYPAL_API_BASE')
 # tweaking payment_failure_threshold when creating plans,
 # mainly for testing on dev/staging
 PAYPAL_PAYMENT_FAILURE_THRESHOLD = env('PAYPAL_PAYMENT_FAILURE_THRESHOLD')
+PAYPAL_WEBHOOK_IGNORABLE_RESOURCES=env('PAYPAL_WEBHOOK_IGNORABLE_RESOURCES')
 
 ################################################
 #

@@ -188,16 +188,18 @@ def verify_stripe_response(request):
         return gatewayManager.process_webhook_response()
     except WebhookNotProcessedError as error:
         # beware: this exception should be reserved for the incoming but not processed webhook events, or events processed but data not needed further action
-        _debug(str(error))
+        logger.info(str(error))
         # return 200 for attaining a higher rate of successful response rate at Stripe backend
-        return HttpResponse(status=200)
+        return HttpResponse(status=200, reason=str(error))
     except (WebhookMissingDonationIdError, SubscriptionNotExistError) as error:
         if error.subscription_id in settings.STRIPE_WEBHOOK_IGNORABLE_RESOURCES.split(','):
-            logger.info("{}, but subscription id: {} is in list of STRIPE_WEBHOOK_IGNORABLE_RESOURCES".format(error.message, error.subscription_id))
-            return HttpResponse(status=200)
+            log = "{}, but subscription id: {} is in list of STRIPE_WEBHOOK_IGNORABLE_RESOURCES".format(error.message, error.subscription_id)
+            logger.info(log)
+            return HttpResponse(status=200, reason=log)
         else:
-            logger.exception("{}, subscription id: {}".format(error.message, error.subscription_id), exc_info=True)
-            return HttpResponse(status=500)
+            log = "{}, subscription id: {}".format(error.message, error.subscription_id)
+            logger.exception(log, exc_info=True)
+            return HttpResponse(status=500, reason=log)
     except ValueError as e:
         # Might be invalid payload from initGatewayByVerification
         # or missing donation_id/subscription_id or donation object not found

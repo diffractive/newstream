@@ -138,14 +138,16 @@ def verify_paypal_response(request):
         # beware: this exception should be reserved for the incoming but not processed webhook events
         logger.info(str(error))
         # return 200 to prevent resending of paypal server of those requests
-        return HttpResponse(status=200)
+        return HttpResponse(status=200, reason=str(error))
     except WebhookMissingDonationIdError as error:
         if error.subscription_id in settings.PAYPAL_WEBHOOK_IGNORABLE_RESOURCES.split(','):
-            logger.info("{}, but subscription id: {} is in list of PAYPAL_WEBHOOK_IGNORABLE_RESOURCES".format(error.message, error.subscription_id))
-            return HttpResponse(status=200)
+            log = "{}, but subscription id: {} is in list of PAYPAL_WEBHOOK_IGNORABLE_RESOURCES".format(error.message, error.subscription_id)
+            logger.info(log)
+            return HttpResponse(status=200, reason=log)
         else:
-            logger.exception("{}, subscription id: {}".format(error.message, error.subscription_id), exc_info=True)
-            return HttpResponse(status=500)
+            log = "{}, subscription id: {}".format(error.message, error.subscription_id)
+            logger.exception(log, exc_info=True)
+            return HttpResponse(status=500, reason=log)
     except ValueError as error:
         _exception(str(error))
         return HttpResponse(status=500)

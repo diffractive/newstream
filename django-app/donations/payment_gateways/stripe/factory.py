@@ -75,7 +75,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                     if 'donation_id' in subscription_obj.metadata:
                         donation_id = subscription_obj.metadata['donation_id']
                     else:
-                        raise WebhookMissingDonationIdError('Missing donation_id in subscription_obj.metadata', subscription_obj.id)
+                        raise WebhookMissingDonationIdError('Missing donation_id in subscription_obj.metadata', str(subscription_obj.id))
 
         # Intercept the payment_intent.succeeded event
         if event['type'] == EVENT_PAYMENT_INTENT_SUCCEEDED:

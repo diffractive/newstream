@@ -13,9 +13,12 @@ from django.utils.timezone import make_aware, now
 from django.conf import settings
 from donations.models import Donation, Subscription, SubscriptionInstance, STATUS_ACTIVE, STATUS_COMPLETE, STATUS_PAYMENT_FAILED
 from site_settings.models import PaymentGateway
-
+from donations.payment_gateways.paypal.constants import *
+from donations.payment_gateways.stripe.constants import *
+from pprint import pformat, pprint
 
 PAYPAL_WEBHOOK_URL = 'http://app.newstream.local:8000/en/donations/verify-paypal-response/'
+STRIPE_WEBHOOK_URL = 'http://app.newstream.local:8000/en/donations/verify-stripe-response/'
 
 User = get_user_model()
 
@@ -196,10 +199,113 @@ class MockStripeResponses(TestCase):
             else:
                 self.assertEqual(messages[0].message, 'Test Error')
 
+    @patch('stripe.Subscription.retrieve')
+    @patch('stripe.Webhook.construct_event')
+    def test_webhook_missing_donation_id(self, constructed_event, mock_subscription):
+        constructed_event.return_value = {
+            "type": EVENT_CHECKOUT_SESSION_COMPLETED,
+            "data": {
+                "object": type('',(object,),{
+                    "mode": "subscription",
+                    "subscription": self.subscription.profile_id
+                })()
+            }
+        }
+        mock_subscription.return_value = type('',(object,),{
+            "id": self.subscription.profile_id,
+            "metadata": {
+                "test_key": "test_value"
+            }
+        })()
+        headers = {
+            "HTTP_STRIPE_SIGNATURE": "test",
+        }
+        # testing EVENT_CHECKOUT_SESSION_COMPLETED event without 'donation_id' in resource body
+        res = self.client.post(STRIPE_WEBHOOK_URL, {}, content_type="application/json", follow=True, **headers)
+        self.assertEqual(res.reason_phrase, "Missing donation_id in subscription_obj.metadata, subscription id: {}".format(self.subscription.profile_id))
+
+        # testing other subscription related events without 'donation_id' in resource metadata
+        # plus subscription id not found in Newstream
+        # First, make up a sub id not found on Newstream
+        mock_sub_id = "I-NOTFOUND"
+        constructed_event.return_value["data"]["object"] = type('',(object,),{
+            "subscription": mock_sub_id,
+        })()
+        mock_subscription.return_value = type('',(object,),{
+            "id": mock_sub_id, 
+            "metadata": {
+                "test_key": "test_value"
+            }
+        })()
+        # Then loop over the five events for this error scenario
+        for evt in [EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID, EVENT_INVOICE_PAYMENT_FAILED, EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED]:
+            constructed_event.return_value["type"] = evt
+            if evt in [EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED]:
+                constructed_event.return_value["data"]["object"] = type('',(object,),{
+                    "id": mock_sub_id,
+                    "metadata": {
+                        "test_key": "test_value"
+                    }
+                })()
+            res = self.client.post(STRIPE_WEBHOOK_URL, {}, content_type="application/json", follow=True, **headers)
+            self.assertEqual(res.reason_phrase, "No matching SubscriptionInstance found, subscription id: {}".format(mock_sub_id))
+
+    @patch('stripe.Subscription.retrieve')
+    @patch('stripe.Webhook.construct_event')
+    def test_webhook_with_ignored_resources(self, constructed_event, mock_subscription):
+        mock_sub_id = "I-IRRELEVANT"
+        constructed_event.return_value = {
+            "type": EVENT_CHECKOUT_SESSION_COMPLETED,
+            "data": {
+                "object": type('',(object,),{
+                    "mode": "subscription",
+                    "subscription": mock_sub_id
+                })()
+            }
+        }
+        mock_subscription.return_value = type('',(object,),{
+            "id": mock_sub_id,
+            "metadata": {
+                "test_key": "test_value"
+            }
+        })()
+        headers = {
+            "HTTP_STRIPE_SIGNATURE": "test",
+        }
+        # testing EVENT_CHECKOUT_SESSION_COMPLETED event without 'donation_id' in resource body
+        res = self.client.post(STRIPE_WEBHOOK_URL, {}, content_type="application/json", follow=True, **headers)
+        self.assertEqual(res.reason_phrase, "Missing donation_id in subscription_obj.metadata, but subscription id: {} is in list of STRIPE_WEBHOOK_IGNORABLE_RESOURCES".format(mock_sub_id))
+
+        # testing other subscription related events without 'donation_id' in resource metadata
+        # plus subscription id not found in Newstream
+        # First, make up a sub id not found on Newstream
+        constructed_event.return_value["data"]["object"] = type('',(object,),{
+            "subscription": mock_sub_id,
+        })()
+        mock_subscription.return_value = type('',(object,),{
+            "id": mock_sub_id, 
+            "metadata": {
+                "test_key": "test_value"
+            }
+        })()
+        # Then loop over the five events for this error scenario
+        for evt in [EVENT_INVOICE_CREATED, EVENT_INVOICE_PAID, EVENT_INVOICE_PAYMENT_FAILED, EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED]:
+            constructed_event.return_value["type"] = evt
+            if evt in [EVENT_CUSTOMER_SUBSCRIPTION_UPDATED, EVENT_CUSTOMER_SUBSCRIPTION_DELETED]:
+                constructed_event.return_value["data"]["object"] = type('',(object,),{
+                    "id": mock_sub_id,
+                    "metadata": {
+                        "test_key": "test_value"
+                    }
+                })()
+            res = self.client.post(STRIPE_WEBHOOK_URL, {}, content_type="application/json", follow=True, **headers)
+            self.assertEqual(res.reason_phrase, "No matching SubscriptionInstance found, but subscription id: {} is in list of STRIPE_WEBHOOK_IGNORABLE_RESOURCES".format(mock_sub_id))
+
+
 @pytest.mark.django_db
 class MockPaypalResponses(TestCase):
     """
-    These tests will mock a stripe response to see how the code handles mocked responses
+    These tests will mock a paypal response to see how the code handles mocked responses
     """
     def setUp(self):
         """
@@ -334,3 +440,86 @@ class MockPaypalResponses(TestCase):
 
         sub = SubscriptionInstance.objects.get(profile_id=self.subscription.profile_id)
         self.assertEqual(sub.recurring_status, STATUS_ACTIVE)
+
+    @patch('donations.payment_gateways.paypal.factory.getSubscriptionDetails')
+    @patch('donations.payment_gateways.paypal.factory.verifyWebhook')
+    def test_webhook_missing_custom_id(self, verify_mock, details_mock):
+        verify_mock.return_value = { "verification_status": "SUCCESS" }
+        details_mock.return_value = {
+            "id": self.subscription.profile_id,
+            "status": "ACTIVE"
+        }
+
+        headers = {
+            "HTTP_Paypal-Transmission-Id": "test",
+            "HTTP_Paypal-Transmission-Time": "test",
+            "HTTP_Paypal-Transmission-Sig": "test",
+            "HTTP_Paypal-Cert-Url": "test",
+            "HTTP_PayPal-Auth-Algo": "test",
+        }
+        # providing the minimum required attributes for mocking the scenarios
+        json_data_1 = {
+            "event_type": EVENT_PAYMENT_SALE_COMPLETED,
+            "resource": {
+                "billing_agreement_id": self.subscription.profile_id,
+            }
+        }
+        json_data_2 = {
+            "event_type": EVENT_BILLING_SUBSCRIPTION_ACTIVATED,
+            "resource": {
+                "id": self.subscription.profile_id,
+            }
+        }
+
+        # testing EVENT_PAYMENT_SALE_COMPLETED event without 'custom_id' in resource body
+        res = self.client.post(PAYPAL_WEBHOOK_URL, json.dumps(json_data_1), content_type="application/json", follow=True, **headers)
+        self.assertEqual(res.reason_phrase, "Missing custom_id(donation_id) in json_data.resource, subscription id: {}".format(self.subscription.profile_id))
+
+        # testing all other subscription related webhook events without 'custom_id'
+        for evt in [EVENT_BILLING_SUBSCRIPTION_ACTIVATED, EVENT_BILLING_SUBSCRIPTION_UPDATED, EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED, EVENT_BILLING_SUBSCRIPTION_CANCELLED, EVENT_BILLING_SUBSCRIPTION_SUSPENDED]:
+            json_data_2["event_type"] = evt
+            res = self.client.post(PAYPAL_WEBHOOK_URL, json.dumps(json_data_2), content_type="application/json", follow=True, **headers)
+            self.assertEqual(res.reason_phrase, "Missing custom_id(donation_id) in json_data.resource, subscription id: {}".format(self.subscription.profile_id))
+
+    @patch('donations.payment_gateways.paypal.factory.getSubscriptionDetails')
+    @patch('donations.payment_gateways.paypal.factory.verifyWebhook')
+    def test_webhook_with_ignored_resources(self, verify_mock, details_mock):
+        mock_sub_id = "I-IRRELEVANT"
+        verify_mock.return_value = { "verification_status": "SUCCESS" }
+        details_mock.return_value = {
+            "id": mock_sub_id,
+            "status": "ACTIVE"
+        }
+
+        headers = {
+            "HTTP_Paypal-Transmission-Id": "test",
+            "HTTP_Paypal-Transmission-Time": "test",
+            "HTTP_Paypal-Transmission-Sig": "test",
+            "HTTP_Paypal-Cert-Url": "test",
+            "HTTP_PayPal-Auth-Algo": "test",
+        }
+        # providing the minimum required attributes for mocking the scenarios
+        json_data_1 = {
+            "event_type": EVENT_PAYMENT_SALE_COMPLETED,
+            "resource": {
+                "billing_agreement_id": mock_sub_id,
+            }
+        }
+        json_data_2 = {
+            "event_type": EVENT_BILLING_SUBSCRIPTION_ACTIVATED,
+            "resource": {
+                "id": mock_sub_id,
+            }
+        }
+
+        # testing EVENT_PAYMENT_SALE_COMPLETED event without 'custom_id' in resource body
+        res = self.client.post(PAYPAL_WEBHOOK_URL, json.dumps(json_data_1), content_type="application/json", follow=True, **headers)
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(res.reason_phrase, "Missing custom_id(donation_id) in json_data.resource, but subscription id: {} is in list of PAYPAL_WEBHOOK_IGNORABLE_RESOURCES".format(mock_sub_id))
+
+        # testing all other subscription related webhook events without 'custom_id'
+        for evt in [EVENT_BILLING_SUBSCRIPTION_ACTIVATED, EVENT_BILLING_SUBSCRIPTION_UPDATED, EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED, EVENT_BILLING_SUBSCRIPTION_CANCELLED, EVENT_BILLING_SUBSCRIPTION_SUSPENDED]:
+            json_data_2["event_type"] = evt
+            res = self.client.post(PAYPAL_WEBHOOK_URL, json.dumps(json_data_2), content_type="application/json", follow=True, **headers)
+            self.assertEqual(res.status_code, 200)
+            self.assertEqual(res.reason_phrase, "Missing custom_id(donation_id) in json_data.resource, but subscription id: {} is in list of PAYPAL_WEBHOOK_IGNORABLE_RESOURCES".format(mock_sub_id))

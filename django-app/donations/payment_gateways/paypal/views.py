@@ -136,7 +136,7 @@ def verify_paypal_response(request):
             raise Exception(_('gatewayManager for paypal not initialized.'))
     except WebhookNotProcessedError as error:
         # beware: this exception should be reserved for the incoming but not processed webhook events
-        _debug(str(error))
+        logger.info(str(error))
         # return 200 to prevent resending of paypal server of those requests
         return HttpResponse(status=200)
     except WebhookMissingDonationIdError as error:

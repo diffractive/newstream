@@ -60,7 +60,10 @@ class Factory_Paypal(PaymentGatewayFactory):
             }
             response = verifyWebhook(request.session, webhook_data)
         if response.get('verification_status') != "SUCCESS":
-            raise ValueError("PayPal Webhook verification failed, resource id: {}".format(json_data['resource']['id']))
+            if json_data['resource']['id'] in settings.PAYPAL_WEBHOOK_IGNORABLE_RESOURCES:
+                raise WebhookNotProcessedError("PayPal Webhook verification failed for resource id: {} but it's in PAYPAL_WEBHOOK_IGNORABLE_RESOURCES".format(json_data['resource']['id']))
+            else:
+                raise ValueError("PayPal Webhook verification failed, resource id: {}".format(json_data['resource']['id']))
 
         if response:
             donation_id = None

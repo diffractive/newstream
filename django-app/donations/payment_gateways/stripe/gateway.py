@@ -154,6 +154,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                 sendFailedPaymentNotifToAdmins(self.donation.subscription)
                 sendFailedPaymentNotifToDonor(self.donation.subscription)
 
+            return HttpResponse(status=200)
+
         # Event: customer.subscription.updated
         if self.event['type'] == EVENT_CUSTOMER_SUBSCRIPTION_UPDATED and hasattr(self, 'subscription_obj'):
             # Subscription active after invoice paid

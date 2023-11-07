@@ -208,15 +208,11 @@ class Gateway_Stripe(PaymentGatewayManager):
                         self.donation.subscription.recurring_status = STATUS_ACTIVE
                     self.donation.subscription.save()
 
-                # price changes events should goes through the if-else block and returns 200 right here
-                return HttpResponse(status=200)
-            elif self.subscription_obj['status'] == 'trialing':
-                # trial period is for us to adjust the new subscription instance
-                # to the same billing date as the old instance, no need to update
-                # the Newstream subscription object status to trialing for now
-                return HttpResponse(status=200)
-            else:
-                return HttpResponse(status=400)
+            # return 200 by default
+            # other scenarios falling through here also include "trialing", "past_due" statuses,
+            # (trial period is for us to adjust the new subscription instance to the same billing date as the old instance, no need to update the Newstream subscription object status to trialing for now)
+            # and any other cases that we don't have to handle
+            return HttpResponse(status=200)
 
         # Event: customer.subscription.deleted
         # self.donation is not initialized here, reason refer to Factory_Stripe.initGatewayByVerification

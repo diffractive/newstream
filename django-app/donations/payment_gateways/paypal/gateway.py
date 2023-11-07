@@ -55,6 +55,8 @@ class Gateway_Paypal(PaymentGatewayManager):
             sendDonationReceiptToDonor(self.donation)
             sendDonationNotifToAdmins(self.donation)
 
+            logger.info("[PayPal Webhook] One-time donation completed for newstream donation {}".format(str(self.donation.id)))
+
             return HttpResponse(status=200)
 
         # Event: EVENT_BILLING_SUBSCRIPTION_ACTIVATED
@@ -78,12 +80,16 @@ class Gateway_Paypal(PaymentGatewayManager):
 
                         # We want to remove the update card flow flag, so we delete the metadata
                         spmeta.delete()
+
+                        logger.info("[PayPal Webhook] Failed recurring donation replaced by subscription {}".format(self.subscription_obj['id']))
                     # Not part of the card update flow so a normal new recurring payment
                     except SubscriptionPaymentMeta.DoesNotExist:
 
                         # send the new recurring notifs to admins and donor as subscription is just active
                         sendNewRecurringNotifToAdmins(self.donation.subscription)
                         sendNewRecurringNotifToDonor(self.donation.subscription)
+
+                        logger.info("[PayPal Webhook] New recurring donation as subscription {}".format(self.subscription_obj['id']))
 
                 return HttpResponse(status=200)
             else:
@@ -98,6 +104,8 @@ class Gateway_Paypal(PaymentGatewayManager):
                 subscription.recurring_amount = Decimal(self.subscription_obj['plan']['billing_cycles'][0]['pricing_scheme']['fixed_price']['value'])
                 subscription.save()
 
+                logger.info("[PayPal Webhook] Event {} for subscription {}".format(self.event_type, self.subscription_obj['id']))
+
                 return HttpResponse(status=200)
             else:
                 raise ValueError("EVENT_BILLING_SUBSCRIPTION_UPDATED but subscription status is %(status)s, subscription id: %(id)s" % {'status': self.subscription_obj['status'], 'id': self.subscription_obj['id']})
@@ -108,8 +116,6 @@ class Gateway_Paypal(PaymentGatewayManager):
                 # check if this is first time subscription payment or a renewal payment
                 donationPMs = DonationPaymentMeta.objects.filter(donation=self.donation, field_key='paypal_first_cycle')
                 renewals = Donation.objects.filter(subscription__profile_id=self.subscription_obj['id'])
-                _debug("Number of donation PMs: "+str(len(donationPMs)))
-                _debug("Number of renewals for subscription_id({}): ".format(self.subscription_obj['id'])+str(len(renewals)))
                 if len(donationPMs) == 1 or len(renewals) >= 2:
                     # this is already a renewal payment
                     # self.donation is the first donation associated with the subscription
@@ -140,10 +146,10 @@ class Gateway_Paypal(PaymentGatewayManager):
                         sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
                         sendReactivatedPaymentNotifToDonor(self.donation.subscription)
 
-                    # email notifications
-                    # disabling renewal emails for the moment
-                    # sendRenewalReceiptToDonor(donation)
-                    # sendRenewalNotifToAdmins(donation)
+                        logger.info("[PayPal Webhook] Failed recurring donation reactivated for subscription {}".format(self.subscription_obj['id']))
+                    else:
+                        logger.info("[PayPal Webhook] Renewal donation completed for subscription {}".format(self.subscription_obj['id']))
+
                 else:
                     # this is a first time subscription payment
                     self.donation.payment_status = STATUS_COMPLETE
@@ -153,6 +159,8 @@ class Gateway_Paypal(PaymentGatewayManager):
                     # save DonationPaymentMeta as proof of first time subscription payment
                     dpmeta = DonationPaymentMeta(donation=self.donation, field_key='paypal_first_cycle', field_value='completed')
                     dpmeta.save()
+
+                    logger.info("[PayPal Webhook] First donation completed for subscription {}".format(self.subscription_obj['id']))
 
                 return HttpResponse(status=200)
             else:
@@ -170,6 +178,8 @@ class Gateway_Paypal(PaymentGatewayManager):
                 # Semd email notifying user and admin of issue
                 sendFailedPaymentNotifToAdmins(subscription)
                 sendFailedPaymentNotifToDonor(subscription)
+                
+                logger.info("[PayPal Webhook] Recurring donation failed for subscription {}".format(self.subscription_obj['id']))
 
             return HttpResponse(status=200)
 
@@ -189,6 +199,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                     # send email notifications here for all other cancellation scenarios
                     sendRecurringCancelledNotifToAdmins(self.donation.subscription)
                     sendRecurringCancelledNotifToDonor(self.donation.subscription)
+                    logger.info("[PayPal Webhook] Recurring donation cancelled due to {} for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj['id']))
                 return HttpResponse(status=200)
             else:
                raise ValueError("EVENT_BILLING_SUBSCRIPTION_CANCELLED but subscription status is %(status)s, subscription id: %(id)s" % {'status': self.subscription_obj['status'], 'id': self.subscription_obj['id']})
@@ -207,6 +218,7 @@ class Gateway_Paypal(PaymentGatewayManager):
 
                     sendRecurringCancelledNotifToAdmins(self.donation.subscription)
                     sendRecurringCancelledNotifToDonor(self.donation.subscription)
+                    logger.info("[PayPal Webhook] Recurring donation cancelled due to {} for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj['id']))
                 
                 return HttpResponse(status=200)
             else:
@@ -232,6 +244,7 @@ class Gateway_Paypal(PaymentGatewayManager):
             messages.add_message(self.request, messages.SUCCESS, _(
                 'Your recurring donation amount via PayPal is updated successfully.'))
 
+            logger.info("[PayPal Rest API] Recurring donation amount updated for subscription {}".format(self.subscription.profile_id))
 
     def cancel_recurring_payment(self, reason=None):
         if not self.subscription:

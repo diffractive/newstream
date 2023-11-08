@@ -1,3 +1,5 @@
+import logging
+logger = logging.getLogger('newstream')
 from decimal import Decimal
 from datetime import datetime, timezone
 from django.shortcuts import render

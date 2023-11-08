@@ -75,7 +75,7 @@ class Gateway_Stripe(PaymentGatewayManager):
             self.donation.transaction_id = self.payment_intent['charges']['data'][0]['id']
             self.donation.save()
 
-            logger.info("[Stripe Webhook] One-time donation's transaction id saved for newstream donation {}".format(str(self.donation.id)))
+            logger.info("[Stripe Webhook] Donation's transaction id saved for newstream donation {}".format(str(self.donation.id)))
 
             return HttpResponse(status=200)
 

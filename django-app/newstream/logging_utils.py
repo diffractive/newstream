@@ -28,7 +28,7 @@ class CustomJsonFormatter(jsonlogger.JsonFormatter):
             log_record['http'] = {
                 'url': request.build_absolute_uri(),
                 'method': request.method,
-                # 'request_id':         string  The ID of the HTTP request.
+                'request_id': request.META.get('request_id')
             }
 
             if request.META.get('SERVER_PROTOCOL'):

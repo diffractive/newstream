@@ -1,4 +1,5 @@
 import logging
+import uuid
 from crum import CurrentRequestUserMiddleware
 
 logger = logging.getLogger("newstream.middleware")
@@ -12,6 +13,7 @@ class RequestLoggerMiddleware:
     def __call__(self, request):
         # Code to be executed for each request before
         # the view (and later middleware) are called.
+        request.META["request_id"] = str(uuid.uuid4())
 
         response = self.get_response(request)
 

@@ -146,6 +146,15 @@ class Gateway_Stripe(PaymentGatewayManager):
             # We don't want to update processing failures or cancelled subscriptions
             if self.donation.subscription.recurring_status in [STATUS_ACTIVE, STATUS_PAYMENT_FAILED]:
 
+                # log down the current subscription period end for adjusting purposes once a new subscription is added.
+                try:
+                    spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='stripe_sub_current_period_end')
+                    spmeta.field_value = str(self.subscription_obj.current_period_end)
+                except SubscriptionPaymentMeta.DoesNotExist:
+                    spmeta = SubscriptionPaymentMeta(
+                        subscription=self.donation.subscription, field_key='stripe_sub_current_period_end', field_value=str(self.subscription_obj.current_period_end))
+                spmeta.save()
+
                 # Update subscription to payment_failed status
                 self.donation.subscription.recurring_status = STATUS_PAYMENT_FAILED
                 self.donation.subscription.save()
@@ -399,10 +408,10 @@ class Gateway_Stripe(PaymentGatewayManager):
 
         failed_sub = SubscriptionInstance.objects.get(id=old_sub_id)
         fail_spmeta = SubscriptionPaymentMeta.objects.filter(
-            subscription=failed_sub, field_key='stripe_subscription_period').order_by("created_at").last()
+            subscription=failed_sub, field_key='stripe_sub_current_period_end').order_by("created_at").last()
 
         # period is written in the format ts-ts, so we want to split the string and get the end period
-        trial_end = fail_spmeta.field_value.split('-')[1]
+        trial_end = fail_spmeta.field_value
 
         try:
             stripe.Subscription.modify(
@@ -410,6 +419,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                 trial_end=trial_end,
                 proration_behavior='none'
             )
+
+            fail_spmeta.delete()
         except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
             _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
             raise RuntimeError("There has been an error connecting with Stripe: {}, subscription id: {}".format(e.user_message, self.donation.subscription.profile_id))

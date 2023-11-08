@@ -262,7 +262,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 # send email notifications here for all other cancellation scenarios
                 sendRecurringCancelledNotifToAdmins(self.donation.subscription)
                 sendRecurringCancelledNotifToDonor(self.donation.subscription)
-                logger.info("[Stripe Webhook] Recurring donation cancelled due to {} for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj.id))
+                logger.info("[Stripe Webhook] Recurring donation cancelled (reason: {}) for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj.id))
 
             return HttpResponse(status=200)
 

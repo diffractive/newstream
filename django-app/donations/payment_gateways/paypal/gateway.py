@@ -201,7 +201,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                     # send email notifications here for all other cancellation scenarios
                     sendRecurringCancelledNotifToAdmins(self.donation.subscription)
                     sendRecurringCancelledNotifToDonor(self.donation.subscription)
-                    logger.info("[PayPal Webhook] Recurring donation cancelled due to {} for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj['id']))
+                    logger.info("[PayPal Webhook] Recurring donation cancelled (reason: {}) for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj['id']))
                 return HttpResponse(status=200)
             else:
                raise ValueError("EVENT_BILLING_SUBSCRIPTION_CANCELLED but subscription status is %(status)s, subscription id: %(id)s" % {'status': self.subscription_obj['status'], 'id': self.subscription_obj['id']})
@@ -220,7 +220,7 @@ class Gateway_Paypal(PaymentGatewayManager):
 
                     sendRecurringCancelledNotifToAdmins(self.donation.subscription)
                     sendRecurringCancelledNotifToDonor(self.donation.subscription)
-                    logger.info("[PayPal Webhook] Recurring donation cancelled due to {} for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj['id']))
+                    logger.info("[PayPal Webhook] Recurring donation cancelled (reason: {}) for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj['id']))
                 
                 return HttpResponse(status=200)
             else:

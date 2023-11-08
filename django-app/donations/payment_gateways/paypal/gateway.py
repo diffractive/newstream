@@ -272,6 +272,7 @@ class Gateway_Paypal(PaymentGatewayManager):
             # email notifications
             sendRecurringResumedNotifToAdmins(self.subscription)
             sendRecurringResumedNotifToDonor(self.subscription)
+            logger.info("[PayPal Rest API] Recurring donation resumed for subscription {}".format(self.subscription.profile_id))
             return {
                 'button-text': str(_('Pause Recurring Donation')),
                 'recurring-status': STATUS_ACTIVE,
@@ -287,6 +288,7 @@ class Gateway_Paypal(PaymentGatewayManager):
             # email notifications
             sendRecurringPausedNotifToAdmins(self.subscription)
             sendRecurringPausedNotifToDonor(self.subscription)
+            logger.info("[PayPal Rest API] Recurring donation paused for subscription {}".format(self.subscription.profile_id))
             return {
                 'button-text': str(_('Resume Recurring Donation')),
                 'recurring-status': STATUS_PAUSED,

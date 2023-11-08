@@ -215,10 +215,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                     # check if pause_collection is marked_uncollectible
                     if self.subscription_obj['pause_collection'] and self.subscription_obj['pause_collection']['behavior'] == 'mark_uncollectible':
                         self.donation.subscription.recurring_status = STATUS_PAUSED
-                        logger.info("[Stripe Webhook] Recurring donation paused for subscription {}".format(self.subscription_obj.id))
                     else:
                         self.donation.subscription.recurring_status = STATUS_ACTIVE
-                        logger.info("[Stripe Webhook] Recurring donation resumed for subscription {}".format(self.subscription_obj.id))
                     self.donation.subscription.save()
             else:
                 logger.info("[Stripe Webhook] Event {} for subscription {}".format(self.event['type'], self.subscription_obj.id))
@@ -394,6 +392,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 # email notifications
                 sendRecurringPausedNotifToAdmins(self.subscription)
                 sendRecurringPausedNotifToDonor(self.subscription)
+                logger.info("[Stripe Rest API] Recurring donation paused for subscription {}".format(self.subscription.profile_id))
                 return {
                     'button-text': str(_('Resume Recurring Donation')),
                     'recurring-status': STATUS_PAUSED,
@@ -406,6 +405,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 # email notifications
                 sendRecurringResumedNotifToAdmins(self.subscription)
                 sendRecurringResumedNotifToDonor(self.subscription)
+                logger.info("[Stripe Rest API] Recurring donation resumed for subscription {}".format(self.subscription.profile_id))
                 return {
                     'button-text': str(_('Pause Recurring Donation')),
                     'recurring-status': STATUS_ACTIVE,

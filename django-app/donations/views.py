@@ -1,6 +1,7 @@
 import json
 import csv
 from pprint import pprint
+from django import forms
 from django.urls import reverse
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
@@ -10,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 
 from newstream.functions import _exception, uuid4_str, get_site_settings_from_default_site
 from site_settings.models import PaymentGateway, GATEWAY_OFFLINE
@@ -91,18 +92,20 @@ def donate(request):
             form = DonationDetailsForm(
                 request=request, blueprint=form_blueprint, label_suffix='')
 
-        # see: https://docs.djangoproject.com/en/3.0/ref/forms/api/#django.forms.Form.field_order
-        if form_blueprint.isAmountSteppedCustom():
-            form.order_fields(
-                ['donation_amount', 'donation_amount_custom', 'donation_frequency', 'payment_gateway', 'email'])
+    except ValidationError as e:
+        # turn decimal exception into a form validation error such that no exception is raised
+        if str(e) == "['“custom” value must be a decimal number.']":
+            form.add_error("donation_amount_custom", forms.ValidationError('Invalid decimal value.'))
         else:
-            form.order_fields(
-                ['donation_amount', 'donation_frequency', 'payment_gateway', 'email'])
-    except Exception as e:
-        # Should rarely happen, but in case some bugs or order id repeats itself
-        _exception(str(e))
-        messages.add_message(request, messages.ERROR, str(e))
-        return redirect('donations:donate')
+            raise e
+
+    # see: https://docs.djangoproject.com/en/3.0/ref/forms/api/#django.forms.Form.field_order
+    if form_blueprint.isAmountSteppedCustom():
+        form.order_fields(
+            ['donation_amount', 'donation_amount_custom', 'donation_frequency', 'payment_gateway', 'email'])
+    else:
+        form.order_fields(
+            ['donation_amount', 'donation_frequency', 'payment_gateway', 'email'])
 
     # get offline gateway id and instructions text
     offline_gateway = PaymentGateway.objects.get(title=GATEWAY_OFFLINE)

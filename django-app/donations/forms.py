@@ -7,7 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.contrib.forms.forms import FormBuilder
 
 from newstream.functions import get_site_settings_from_default_site
-from newstream.forms import CustomDecimalField
+
 from donations.functions import getCurrencyDictAt, displayAmountWithCurrency
 from donations.models import TempDonation, FREQ_DAILY, FREQ_MONTHLY
 User = get_user_model()
@@ -77,7 +77,7 @@ class DonationDetailsForm(forms.Form):
         amount_label = _('Donation amount in ') + html.unescape(currency_set['admin_label'])
         custom_amount_label = _('Custom Donation amount in ') + html.unescape(currency_set['admin_label'])
         if form.isAmountFixed():
-            self.fields["donation_amount"] = CustomDecimalField(
+            self.fields["donation_amount"] = forms.DecimalField(
                 initial=form.fixed_amount, label=amount_label)
             self.fields["donation_amount"].widget.attrs['readonly'] = True
         elif form.isAmountStepped():
@@ -85,7 +85,7 @@ class DonationDetailsForm(forms.Form):
             self.fields["donation_amount"] = forms.ChoiceField(
                 choices=[(x.step, displayAmountWithCurrency(self.site_settings.currency, x.step, True)) for x in amountSteps], label=amount_label)
         elif form.isAmountCustom():
-            self.fields["donation_amount"] = CustomDecimalField(
+            self.fields["donation_amount"] = forms.DecimalField(
                 label=custom_amount_label, decimal_places=currency_set['setting']['number_decimals'])
         elif form.isAmountSteppedCustom():
             amountSteps = form.amount_steps.all()
@@ -97,7 +97,7 @@ class DonationDetailsForm(forms.Form):
             for amountstep in amountSteps:
                 if amountstep.default:
                     self.fields["donation_amount"].initial = amountstep.step
-            self.fields["donation_amount_custom"] = CustomDecimalField(required=False, label=custom_amount_label, decimal_places=currency_set['setting']['number_decimals'])
+            self.fields["donation_amount_custom"] = forms.DecimalField(required=False, label=custom_amount_label, decimal_places=currency_set['setting']['number_decimals'])
 
         # construct donation meta fields from form configuration
         donationmetafields = form.donation_meta_fields.all()

@@ -16,18 +16,6 @@ from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from newstream.functions import get_site_settings_from_default_site
 
 
-class CustomDecimalField(forms.DecimalField):
-    def to_python(self, value):
-        try:
-            # Try to convert the input value to Decimal
-            decimal.Decimal(value)
-            # if nothing happens, do default to_python
-            return super().to_python(value)
-        except decimal.InvalidOperation as e:
-            # If a decimal.InvalidOperation error occurs, raise a ValidationError
-            raise forms.ValidationError('Invalid decimal value.')
-
-
 class PersonalInfoForm(forms.Form):
     email = forms.EmailField(label=_('Primary Email Address'),
                              max_length=255, required=False)

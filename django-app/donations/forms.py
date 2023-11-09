@@ -7,7 +7,6 @@ from django.utils.translation import gettext_lazy as _
 from wagtail.contrib.forms.forms import FormBuilder
 
 from newstream.functions import get_site_settings_from_default_site
-
 from donations.functions import getCurrencyDictAt, displayAmountWithCurrency
 from donations.models import TempDonation, FREQ_DAILY, FREQ_MONTHLY
 User = get_user_model()
@@ -23,8 +22,6 @@ DONATION_DETAILS_FIELDS = [
     'email',
     'name',
 ]
-
-# numeric_validator = RegexValidator(r'^\d+$|^\d+\.\d+$', 'Only numbers, either integer or decimal.')
 
 
 class DonationDetailsForm(forms.Form):

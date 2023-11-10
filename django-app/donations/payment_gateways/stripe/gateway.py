@@ -1,4 +1,6 @@
 import stripe
+import logging
+logger = logging.getLogger('newstream')
 from datetime import datetime, timezone
 from django.conf import settings
 from django.shortcuts import render
@@ -62,6 +64,7 @@ class Gateway_Stripe(PaymentGatewayManager):
             if not self.donation.is_recurring:
                 sendDonationReceiptToDonor(self.donation)
                 sendDonationNotifToAdmins(self.donation)
+                logger.info("[Stripe Webhook] One-time donation completed for newstream donation {}".format(str(self.donation.id)))
 
             return HttpResponse(status=200)
 
@@ -72,18 +75,20 @@ class Gateway_Stripe(PaymentGatewayManager):
             self.donation.transaction_id = self.payment_intent['charges']['data'][0]['id']
             self.donation.save()
 
+            logger.info("[Stripe Webhook] Donation's transaction id saved for newstream donation {}".format(str(self.donation.transaction_id)))
+
             return HttpResponse(status=200)
 
         # Event: invoice.created (for subscriptions, just return 200 here and do nothing - to signify to Stripe that it can proceed and finalize the invoice)
         # https://stripe.com/docs/billing/subscriptions/webhooks#understand
         if self.event['type'] == EVENT_INVOICE_CREATED and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):
+            logger.info("[Stripe Webhook] Invoice created for subscription {}".format(self.subscription_obj.id))
             return HttpResponse(status=200)
 
         # Event: invoice.paid (for subscriptions)
         if self.event['type'] == EVENT_INVOICE_PAID and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):
             # We don't want to save trial invoices as new renewals
             if self.invoice.status == 'paid' and self.invoice.amount_paid > 0:
-                _debug("[stripe recurring] Invoice confirmed paid")
                 # check if subscription has one or more invoices to determine it's a first time or renewal payment
                 # self.subscription_obj here is the stripe subscription object
                 try:
@@ -92,9 +97,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 except (stripe.error.RateLimitError, stripe.error.InvalidRequestError, stripe.error.AuthenticationError, stripe.error.APIConnectionError, stripe.error.StripeError) as e:
                     _exception("Stripe API Error({}): Status({}), Code({}), Param({}), Message({})".format(type(e).__name__, e.http_status, e.code, e.param, e.user_message))
                     raise RuntimeError("There has been an error connecting with Stripe: {}, invoice id: {}".format(e.user_message, self.invoice.id))
-                # _debug("Stripe: Subscription {} has {} invoices.".format(self.subscription_obj.id, len(invoices['data'])))
                 if len(invoices) == 1:
-                    _debug("[stripe recurring] First time subscription")
                     # save charge id as donation.transaction_id
                     self.donation.transaction_id = self.invoice.charge
                     self.donation.payment_status = STATUS_COMPLETE
@@ -104,8 +107,9 @@ class Gateway_Stripe(PaymentGatewayManager):
                     dpmeta = DonationPaymentMeta(
                         donation=self.donation, field_key='stripe_invoice_number', field_value=self.invoice.number)
                     dpmeta.save()
+
+                    logger.info("[Stripe Webhook] First invoice paid for subscription {}".format(self.subscription_obj.id))
                 elif len(invoices) > 1:
-                    _debug("[stripe recurring] About to add renewal donation")
                     # create a new donation record + then send donation receipt to user
                     # self.donation is the first donation made for a subscription
                     donation = Donation(
@@ -127,10 +131,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                         donation=donation, field_key='stripe_invoice_number', field_value=self.invoice.number)
                     dpmeta.save()
 
-                    # email notifications
-                    # disabling renewal emails for the moment
-                    # sendRenewalReceiptToDonor(donation)
-                    # sendRenewalNotifToAdmins(donation)
+                    logger.info("[Stripe Webhook] Recurring invoice paid for subscription {}".format(self.subscription_obj.id))
 
                 # log down the current subscription period span
                 spmeta = SubscriptionPaymentMeta(
@@ -140,7 +141,9 @@ class Gateway_Stripe(PaymentGatewayManager):
                 return HttpResponse(status=200)
             elif self.invoice.status == 'paid' and self.invoice.amount_paid == 0:
                 # just skip trial invoices
+                logger.info("[Stripe Webhook] Trial invoice paid for subscription {}".format(self.subscription_obj.id))
                 return HttpResponse(status=200)
+
         # Event: invoice.payment_failed
         if self.event['type'] == EVENT_INVOICE_PAYMENT_FAILED and hasattr(self, 'subscription_obj') and hasattr(self, 'invoice'):
             # We don't want to update processing failures or cancelled subscriptions
@@ -162,6 +165,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                 # Semd email notifying user and admin of issue
                 sendFailedPaymentNotifToAdmins(self.donation.subscription)
                 sendFailedPaymentNotifToDonor(self.donation.subscription)
+
+                logger.info("[Stripe Webhook] Invoice payment failed for subscription {}".format(self.subscription_obj.id))
 
             return HttpResponse(status=200)
 
@@ -195,11 +200,15 @@ class Gateway_Stripe(PaymentGatewayManager):
 
                         # We want to remove the update card flow flag, so we delete the metadata
                         spmeta.delete()
+
+                        logger.info("[Stripe Webhook] Failed recurring donation replaced by subscription {}".format(self.subscription_obj.id))
                     # Not part of the card update flow so a normal new recurring payment
                     except SubscriptionPaymentMeta.DoesNotExist:
                         # send the new recurring notifs to admins and donor as subscription is just active
                         sendNewRecurringNotifToAdmins(self.donation.subscription)
                         sendNewRecurringNotifToDonor(self.donation.subscription)
+
+                        logger.info("[Stripe Webhook] New recurring donation as subscription {}".format(self.subscription_obj.id))
 
                 elif self.donation.subscription.recurring_status == STATUS_PAYMENT_FAILED:
                     self.donation.subscription.recurring_status = STATUS_ACTIVE
@@ -209,6 +218,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                     sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
                     sendReactivatedPaymentNotifToDonor(self.donation.subscription)
 
+                    logger.info("[Stripe Webhook] Failed recurring donation reactivated for subscription {}".format(self.subscription_obj.id))
+
                 else:
                     # check if pause_collection is marked_uncollectible
                     if self.subscription_obj['pause_collection'] and self.subscription_obj['pause_collection']['behavior'] == 'mark_uncollectible':
@@ -216,6 +227,8 @@ class Gateway_Stripe(PaymentGatewayManager):
                     else:
                         self.donation.subscription.recurring_status = STATUS_ACTIVE
                     self.donation.subscription.save()
+            else:
+                logger.info("[Stripe Webhook] Event {} for subscription {}".format(self.event['type'], self.subscription_obj.id))
 
             # return 200 by default
             # other scenarios falling through here also include "trialing", "past_due" statuses,
@@ -258,6 +271,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 # send email notifications here for all other cancellation scenarios
                 sendRecurringCancelledNotifToAdmins(self.donation.subscription)
                 sendRecurringCancelledNotifToDonor(self.donation.subscription)
+                logger.info("[Stripe Webhook] Recurring donation cancelled (reason: {}) for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj.id))
 
             return HttpResponse(status=200)
 
@@ -314,6 +328,8 @@ class Gateway_Stripe(PaymentGatewayManager):
 
                     messages.add_message(self.request, messages.SUCCESS, _(
                         'Your recurring donation amount at Stripe is updated successfully.'))
+
+                    logger.info("[Stripe Rest API] Recurring donation amount updated for subscription {}".format(self.subscription.profile_id))
                 else:
                     raise RuntimeError('Cannot update stripe subscription. Stripe API returned none. Subscription id: {}'.format(self.subscription.profile_id))
             else:
@@ -337,6 +353,8 @@ class Gateway_Stripe(PaymentGatewayManager):
 
                 messages.add_message(self.request, messages.SUCCESS, _(
                     'Your recurring donation via Stripe is set to bill on today\'s date every month.'))
+
+                logger.info("[Stripe Rest API] Recurring donation rescheduled to today for subscription {}".format(self.subscription.profile_id))
             else:
                 raise RuntimeError('Cannot update stripe subscription. Stripe API returned none. Subscription id: {}'.format(self.subscription.profile_id))
 
@@ -383,6 +401,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 # email notifications
                 sendRecurringPausedNotifToAdmins(self.subscription)
                 sendRecurringPausedNotifToDonor(self.subscription)
+                logger.info("[Stripe Rest API] Recurring donation paused for subscription {}".format(self.subscription.profile_id))
                 return {
                     'button-text': str(_('Resume Recurring Donation')),
                     'recurring-status': STATUS_PAUSED,
@@ -395,6 +414,7 @@ class Gateway_Stripe(PaymentGatewayManager):
                 # email notifications
                 sendRecurringResumedNotifToAdmins(self.subscription)
                 sendRecurringResumedNotifToDonor(self.subscription)
+                logger.info("[Stripe Rest API] Recurring donation resumed for subscription {}".format(self.subscription.profile_id))
                 return {
                     'button-text': str(_('Pause Recurring Donation')),
                     'recurring-status': STATUS_ACTIVE,

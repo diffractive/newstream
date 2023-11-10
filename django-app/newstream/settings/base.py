@@ -260,7 +260,8 @@ LOGGING = {
             'propagate': False,
         },
         'newstream': {
-            'handlers': ['console']
+            'handlers': ['console'],
+            'propagate': False,
         }
     },
 }

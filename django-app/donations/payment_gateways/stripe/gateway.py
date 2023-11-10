@@ -75,7 +75,7 @@ class Gateway_Stripe(PaymentGatewayManager):
             self.donation.transaction_id = self.payment_intent['charges']['data'][0]['id']
             self.donation.save()
 
-            logger.info("[Stripe Webhook] Donation's transaction id saved for newstream donation {}".format(str(self.donation.id)))
+            logger.info("[Stripe Webhook] Donation's transaction id saved for newstream donation {}".format(str(self.donation.transaction_id)))
 
             return HttpResponse(status=200)
 
@@ -319,7 +319,7 @@ class Gateway_Stripe(PaymentGatewayManager):
 
                     messages.add_message(self.request, messages.SUCCESS, _(
                         'Your recurring donation amount at Stripe is updated successfully.'))
-                
+
                     logger.info("[Stripe Rest API] Recurring donation amount updated for subscription {}".format(self.subscription.profile_id))
                 else:
                     raise RuntimeError('Cannot update stripe subscription. Stripe API returned none. Subscription id: {}'.format(self.subscription.profile_id))

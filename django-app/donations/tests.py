@@ -113,6 +113,8 @@ class MockStripeResponses(TestCase):
         # logins user
         self.client.login(**TEST_USER_CREDS)
 
+        settings.STRIPE_WEBHOOK_IGNORABLE_RESOURCES = 'I-IRRELEVANT'
+
 
     @patch('stripe.Subscription.modify')
     def test_pause_subscription_errors(self, modify_mock):
@@ -232,7 +234,7 @@ class MockStripeResponses(TestCase):
             "subscription": mock_sub_id,
         })()
         mock_subscription.return_value = type('',(object,),{
-            "id": mock_sub_id, 
+            "id": mock_sub_id,
             "metadata": {
                 "test_key": "test_value"
             }
@@ -283,7 +285,7 @@ class MockStripeResponses(TestCase):
             "subscription": mock_sub_id,
         })()
         mock_subscription.return_value = type('',(object,),{
-            "id": mock_sub_id, 
+            "id": mock_sub_id,
             "metadata": {
                 "test_key": "test_value"
             }
@@ -374,6 +376,7 @@ class MockPaypalResponses(TestCase):
         self.client.login(**TEST_USER_CREDS)
 
         settings.NEWSTREAM_ADMIN_EMAILS = 'admin@diffractive.io'
+        settings.PAYPAL_WEBHOOK_IGNORABLE_RESOURCES = 'I-IRRELEVANT'
 
     @patch('donations.payment_gateways.paypal.factory.verifyWebhook')
     def test_fail_payment(self, verify_mock):

@@ -116,3 +116,13 @@ class Stripe:
 
         return inv
 
+    def remove_subscription_metadata(self, sub_id):
+        """
+        We want to remove subscription metadata to replicate errors of subscriptions without donation_id in their metadata
+        """
+
+        # Create subscription
+        sub = requests.post(self.api_url + f'subscriptions/{sub_id}', auth=self.auth, json={"metadata": {}})
+
+        return sub
+

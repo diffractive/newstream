@@ -5,7 +5,7 @@ logger = logging.getLogger('newstream')
 from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
-from newstream.classes import WebhookNotProcessedError
+from newstream.classes import WebhookNotProcessedError, WebhookMissingDonationIdError, SubscriptionNotExistError
 from newstream.functions import _debug
 from donations.models import Donation, DonationPaymentMeta, SubscriptionInstance
 from donations.payment_gateways.setting_classes import getStripeSettings
@@ -55,7 +55,7 @@ class Factory_Stripe(PaymentGatewayFactory):
             raise WebhookNotProcessedError(_("Stripe Event not expected for processing at the moment"))
         logger.info("[Stripe Webhook] Incoming Event type: "+event['type'])
         if settings.DEBUG:
-            logger.info(json.dumps(event))
+            logger.info(json.dumps(event, default=vars))
 
         # Intercept the checkout.session.completed event
         if event['type'] == EVENT_CHECKOUT_SESSION_COMPLETED:
@@ -75,7 +75,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                     if 'donation_id' in subscription_obj.metadata:
                         donation_id = subscription_obj.metadata['donation_id']
                     else:
-                        raise ValueError(_('Missing donation_id in subscription_obj.metadata, subscription id: {}'.format(subscription_obj.id)))
+                        raise WebhookMissingDonationIdError('Missing donation_id in subscription_obj.metadata', str(subscription_obj.id))
 
         # Intercept the payment_intent.succeeded event
         if event['type'] == EVENT_PAYMENT_INTENT_SUCCEEDED:
@@ -113,7 +113,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                         if not donation:
                             raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
                     except SubscriptionInstance.DoesNotExist:
-                        raise ValueError(_('No matching SubscriptionInstance found, profile_id: ')+subscription_id)
+                        raise SubscriptionNotExistError('No matching SubscriptionInstance found', subscription_id)
             else:
                 raise ValueError(_('Missing subscription_id'))
 
@@ -143,7 +143,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                         if not donation:
                             raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
                     except SubscriptionInstance.DoesNotExist:
-                        raise ValueError(_('No matching SubscriptionInstance found, profile_id: ')+subscription_id)
+                        raise SubscriptionNotExistError('No matching SubscriptionInstance found', subscription_id)
             else:
                 raise ValueError(_('Missing subscription_id'))
 
@@ -167,7 +167,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                         if not donation:
                             raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
                     except SubscriptionInstance.DoesNotExist:
-                        raise ValueError(_('No matching SubscriptionInstance found, profile_id: ')+subscription_id)
+                        raise SubscriptionNotExistError('No matching SubscriptionInstance found', subscription_id)
 
 
         # The subscription created event is not to be used for subscription model init, so as to prevent race condition with the subscription model init in updated event
@@ -195,7 +195,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                         if not donation:
                             raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
                     except SubscriptionInstance.DoesNotExist:
-                        raise ValueError(_('No matching SubscriptionInstance found, profile_id: ')+subscription_id)
+                        raise SubscriptionNotExistError('No matching SubscriptionInstance found', subscription_id)
 
         # Intercept the subscription deleted event
         # This event links to either Newstream or Givewp created subscriptions
@@ -218,7 +218,7 @@ class Factory_Stripe(PaymentGatewayFactory):
                         if not donation:
                             raise ValueError(_('Missing parent donation queried via SubscriptionInstance, subscription_id: ')+subscription_id)
                     except SubscriptionInstance.DoesNotExist:
-                        raise ValueError(_('No matching SubscriptionInstance found, profile_id: ')+subscription_id)
+                        raise SubscriptionNotExistError('No matching SubscriptionInstance found', subscription_id)
 
         # Finally init and return the Stripe Gateway Manager
         if not donation_id and not can_skip_donation_id:

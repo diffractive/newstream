@@ -1,6 +1,9 @@
 import stripe
+import logging
+logger = logging.getLogger('newstream')
 from datetime import datetime, timedelta
 from django.shortcuts import redirect
+from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
@@ -8,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse
 from django.db import transaction
 
-from newstream.classes import WebhookNotProcessedError
+from newstream.classes import WebhookNotProcessedError, WebhookMissingDonationIdError, SubscriptionNotExistError
 from newstream.functions import uuid4_str, reverse_with_site_url, _exception, _debug, object_to_json
 from donations.models import Donation, DonationPaymentMeta, SubscriptionPaymentMeta, SubscriptionInstance, STATUS_PAYMENT_FAILED, FREQ_DAILY
 from donations.functions import removeSubscriptionWarnings
@@ -185,9 +188,18 @@ def verify_stripe_response(request):
         return gatewayManager.process_webhook_response()
     except WebhookNotProcessedError as error:
         # beware: this exception should be reserved for the incoming but not processed webhook events, or events processed but data not needed further action
-        _debug(str(error))
+        logger.info(str(error))
         # return 200 for attaining a higher rate of successful response rate at Stripe backend
-        return HttpResponse(status=200)
+        return HttpResponse(status=200, reason=str(error))
+    except (WebhookMissingDonationIdError, SubscriptionNotExistError) as error:
+        if error.subscription_id in settings.STRIPE_WEBHOOK_IGNORABLE_RESOURCES.split(','):
+            log = "{}, but subscription id: {} is in list of STRIPE_WEBHOOK_IGNORABLE_RESOURCES".format(error.message, error.subscription_id)
+            logger.info(log)
+            return HttpResponse(status=200, reason=log)
+        else:
+            log = "{}, subscription id: {}".format(error.message, error.subscription_id)
+            logger.exception(log, exc_info=True)
+            return HttpResponse(status=500, reason=log)
     except ValueError as e:
         # Might be invalid payload from initGatewayByVerification
         # or missing donation_id/subscription_id or donation object not found

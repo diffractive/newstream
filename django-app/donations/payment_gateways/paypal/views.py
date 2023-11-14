@@ -1,12 +1,15 @@
 import json
+import logging
+logger = logging.getLogger('newstream')
 from datetime import datetime, timezone
 from django.shortcuts import redirect
+from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.csrf import csrf_exempt
 from paypalhttp import HttpError
 
-from newstream.classes import WebhookNotProcessedError
+from newstream.classes import WebhookNotProcessedError, WebhookMissingDonationIdError
 from newstream.functions import object_to_json, _debug, _exception
 from donations.models import Donation, STATUS_COMPLETE, STATUS_FAILED, STATUS_PAYMENT_FAILED, SubscriptionInstance, SubscriptionPaymentMeta
 from donations.functions import removeSubscriptionWarnings
@@ -133,9 +136,18 @@ def verify_paypal_response(request):
             raise Exception(_('gatewayManager for paypal not initialized.'))
     except WebhookNotProcessedError as error:
         # beware: this exception should be reserved for the incoming but not processed webhook events
-        _debug(str(error))
+        logger.info(str(error))
         # return 200 to prevent resending of paypal server of those requests
-        return HttpResponse(status=200)
+        return HttpResponse(status=200, reason=str(error))
+    except WebhookMissingDonationIdError as error:
+        if error.subscription_id in settings.PAYPAL_WEBHOOK_IGNORABLE_RESOURCES.split(','):
+            log = "{}, but subscription id: {} is in list of PAYPAL_WEBHOOK_IGNORABLE_RESOURCES".format(error.message, error.subscription_id)
+            logger.info(log)
+            return HttpResponse(status=200, reason=log)
+        else:
+            log = "{}, subscription id: {}".format(error.message, error.subscription_id)
+            logger.exception(log, exc_info=True)
+            return HttpResponse(status=500, reason=log)
     except ValueError as error:
         _exception(str(error))
         return HttpResponse(status=500)

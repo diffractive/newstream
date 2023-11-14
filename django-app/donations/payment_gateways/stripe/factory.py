@@ -55,7 +55,7 @@ class Factory_Stripe(PaymentGatewayFactory):
             raise WebhookNotProcessedError(_("Stripe Event not expected for processing at the moment"))
         logger.info("[Stripe Webhook] Incoming Event type: "+event['type'])
         if settings.DEBUG:
-            logger.info(json.dumps(event))
+            logger.info(json.dumps(event, default=vars))
 
         # Intercept the checkout.session.completed event
         if event['type'] == EVENT_CHECKOUT_SESSION_COMPLETED:

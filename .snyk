@@ -45,7 +45,9 @@ ignore:
         created: 2023-10-25T19:27:37.731Z
   SNYK-PYTHON-CRYPTOGRAPHY-6050294:
     - '*':
-        reason: No fix available. We don't seem to be impacted by this.
+        reason: >
+          Fix has been merged to main but a release has not been made yet.
+          We don't seem to be impacted by this.
         expires: 2023-11-25T00:00:00.000Z
         created: 2023-11-20T19:27:37.731Z
 patch:

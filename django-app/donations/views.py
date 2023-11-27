@@ -3,7 +3,7 @@ import csv
 from pprint import pprint
 from django import forms
 from django.urls import reverse
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse, JsonResponse, Http404
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.contrib.auth import get_user_model, login
@@ -551,7 +551,11 @@ def my_recurring_donations(request):
 @login_required
 def my_renewals(request, uuid):
     # deleted=False should be valid whether soft-delete mode is on or off
-    subscription = get_object_or_404(Subscription, uuid=uuid, deleted=False)
+    try:
+        subscription = get_object_or_404(Subscription, uuid=uuid, deleted=False)
+    except ValidationError: # Error for malformed uuids
+        # Raise 404 error so we get the generic 404 page
+        raise Http404("Invalid url")
     try:
         if subscription.user == request.user:
             # find donations under all SubscriptionInstances under the same Subscription

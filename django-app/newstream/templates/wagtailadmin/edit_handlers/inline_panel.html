@@ -1,6 +1,6 @@
 {% load i18n %}
 {% load wagtailadmin_tags common_tags  %}
-<!-- original template source: https://github.com/wagtail/wagtail/blob/v2.13/wagtail/admin/templates/wagtailadmin/edit_handlers/inline_panel.html -->
+<!-- original template source: https://github.com/wagtail/wagtail/blob/v2.13/wagtail/admin/templates/wagtailadmin/panels/inline_panel.html -->
 <!-- customizing this template to display env var value below grouped multiple inputs e.g. Admin emails -->
 {{ self.formset.management_form }}
 
@@ -14,7 +14,7 @@
     {% endif %}
 
     {% for child in self.children %}
-        {% include "wagtailadmin/edit_handlers/inline_panel_child.html" %}
+        {% include "wagtailadmin/panels/inline_panel_child.html" %}
     {% endfor %}
 </ul>
 {% if self.relation_name|get_sys_default_value != None %}
@@ -23,7 +23,7 @@
 
 <script type="text/django-form-template" id="id_{{ self.formset.prefix }}-EMPTY_FORM_TEMPLATE">
 {% escapescript %}
-{% include "wagtailadmin/edit_handlers/inline_panel_child.html" with child=self.empty_child %}
+{% include "wagtailadmin/panels/inline_panel_child.html" with child=self.empty_child %}
 {% endescapescript %}
 </script>
 

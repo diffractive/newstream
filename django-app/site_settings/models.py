@@ -5,8 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
 from i18nfield.fields import I18nCharField
-from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList, RichTextField
-from wagtail.images.edit_handlers import ImageChooserPanel
+from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList
+from wagtail.images.edit_handlers import FieldPanel
 from wagtailmodelchooser.edit_handlers import ModelChooserPanel
 from wagtail.contrib.settings.models import BaseSetting, register_setting
 from wagtail.contrib.forms.models import AbstractFormField
@@ -30,11 +30,11 @@ GATEWAY_CAN_CANCEL_SUBSCRIPTION = 'gateway-can-cancel-subscription'
 
 
 class TopTabbedInterface(TabbedInterface):
-    template = "wagtailadmin/edit_handlers/top_tabbed_interface.html"
+    template = "wagtailadmin/panels/top_tabbed_interface.html"
 
 
 class SubTabbedInterface(TabbedInterface):
-    template = "wagtailadmin/edit_handlers/sub_tabbed_interface.html"
+    template = "wagtailadmin/panels/sub_tabbed_interface.html"
 
 
 class SubObjectList(ObjectList):
@@ -377,8 +377,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
         null=True, help_text=_("The short form of the organisation that will be used as a signature in e-mails"))
 
     appearance_general_panels = [
-        ImageChooserPanel('brand_logo', heading=('Brand Logo')),
-        ImageChooserPanel('site_icon', heading=('Site Icon')),
+        FieldPanel('brand_logo', heading=('Brand Logo')),
+        FieldPanel('site_icon', heading=('Site Icon')),
         FieldPanel('full_org_name', heading=_('Full Organisation Name')),
         FieldPanel('short_org_name', heading=_('Short Organisation Name')),
     ]

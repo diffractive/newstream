@@ -28,6 +28,7 @@ function getCookie(name) {
 }
 
 // Close the popup menus if click elsewhere
+// We convert these query lists to Arrays for the sake of compatibility with older browsers
 window.addEventListener("click", function () {
     //Hide the menus if visible
     for (let ckbox of Array.from(document.getElementsByClassName("dropdown-toggle-checkbox"))) {
@@ -51,6 +52,7 @@ for (let wrapper of Array.from(document.getElementsByClassName("dropdown-toggle-
 }
 
 // Hide the messages after 3 seconds
+// We convert these query lists to Arrays for the sake of compatibility with older browsers
 (() => {
     setTimeout(() => {
         for (let msg of Array.from(document.querySelectorAll('.message:not(.static-notif)'))) {
@@ -108,6 +110,7 @@ function resizeVideoIframe() {
         }
     })(window, document);
 }
+// We convert these query lists to Arrays for the sake of compatibility with older browsers
 function resetWhiteLoadingBtn() {
     for (let btn of Array.from(document.getElementsByClassName('need-white-loading-btn'))) {
         btn.disabled = false;
@@ -158,6 +161,7 @@ function blackLoadingBtnEvent(event) {
     }
 }
 function registerLoadingButtons() {
+    // We convert these query lists to Arrays for the sake of compatibility with older browsers
     for (let btn of Array.from(document.getElementsByClassName('need-white-loading-btn'))) {
         btn.addEventListener('click', whiteLoadingBtnEvent);
     }

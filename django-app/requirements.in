@@ -36,7 +36,7 @@ python-json-logger==2.0.7
 requests==2.31.0
 setdefaultencoding==0.0.0a0
 stripe==2.62.0
-wagtail==4.0.4
+wagtail==4.1.9
 wagtail-2fa==1.4.2
 wagtail-autocomplete==0.11.0
 wagtail-metadata==4.0.3

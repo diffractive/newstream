@@ -7,8 +7,7 @@ from django.conf import settings
 from i18nfield.fields import I18nCharField
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList
 from wagtail.images.edit_handlers import FieldPanel
-from wagtailmodelchooser.edit_handlers import ModelChooserPanel
-from wagtail.contrib.settings.models import BaseSetting, register_setting
+from wagtail.contrib.settings.models import BaseSiteSetting, register_setting
 from wagtail.contrib.forms.models import AbstractFormField
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -91,7 +90,7 @@ class UserMetaField(I18nAbstractFormField):
 
 
 @register_setting
-class SiteSettings(BaseSetting, ClusterableModel):
+class SiteSettings(BaseSiteSetting, ClusterableModel):
     default_from_email = models.EmailField()
     default_from_name = I18nCharField(
         max_length=255,
@@ -188,7 +187,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     donations_general_panels = [
         FieldPanel('sandbox_mode', heading=_('Sandbox Mode')),
         FieldPanel('currency', heading=_('Currency')),
-        ModelChooserPanel('donation_form', heading=_(
+        FieldPanel('donation_form', heading=_(
             'Donation Form to be used')),
         FieldPanel('donation_updates_rate_limiter', heading=_("Frequency Limit on Donors' Subscription Update-Actions(edit/pause/resume)?")),
         FieldPanel('donations_soft_delete_mode', heading=_("Soft Delete Mode(for Donations and Subscriptions only)")),

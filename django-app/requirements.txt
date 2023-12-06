@@ -278,7 +278,7 @@ typing-inspect==0.9.0
     # via libcst
 urllib3==1.26.18
     # via requests
-wagtail==3.0.3
+wagtail==4.0.4
     # via
     #   -r requirements.in
     #   wagtail-2fa
@@ -291,7 +291,7 @@ wagtail-autocomplete==0.11.0
     # via -r requirements.in
 wagtail-metadata==4.0.3
     # via -r requirements.in
-wagtail-modelchooser==2.3.3
+wagtail-modelchooser==4.0.1
     # via -r requirements.in
 webencodings==0.5.1
     # via html5lib

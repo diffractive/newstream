@@ -176,4 +176,4 @@ class TotalStatisticsPanel(Component):
 @hooks.register('construct_homepage_panels')
 def add_statistics_panel(request, panels):
     panels.append(TodayStatisticsPanel(request))
-    # panels.append(TotalStatisticsPanel())
+    panels.append(TotalStatisticsPanel())

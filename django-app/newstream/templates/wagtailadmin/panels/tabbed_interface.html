@@ -9,10 +9,10 @@
                 {# For children tabs, we want to use the classname instead of heading for the id#}
                 {% if "child" in child.classname %}
                     {% with classname=child.classname|cut:"child "%}
-                        {% include 'wagtailadmin/shared/tabs/tab_nav_link.html' with tab_id=classname title=child.heading classes=child.classes|join:" " %}
+                        {% include 'wagtailadmin/shared/tabs/tab_nav_link.html' with tab_id=classname title=child.heading classname=child.classes|join:" " %}
                     {% endwith %}
                 {% else %}
-                    {% include 'wagtailadmin/shared/tabs/tab_nav_link.html' with tab_id=child.heading title=child.heading classes=child.classes|join:" " %}
+                    {% include 'wagtailadmin/shared/tabs/tab_nav_link.html' with tab_id=child.heading title=child.heading classname=child.classes|join:" " %}
                 {% endif %}
             {% endfor %}
         </div>

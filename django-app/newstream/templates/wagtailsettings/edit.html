@@ -12,7 +12,7 @@
                 e.preventDefault();
                 const section1_id = $(e.target).attr('href')
                 const section2 = $(section1_id).find('section').first()
-                $('section').hide()
+                $('section.w-tabs__panel').hide()
                 $(section1_id).removeAttr('hidden')
                 $(section1_id).show()
                 $(section2).removeAttr('hidden')
@@ -25,7 +25,7 @@
                 const section1 = $(e.target).closest('section')
                 const section1_id = $(section1).attr('id')
                 const section2_id = $(e.target).attr('href')
-                $('section').hide()
+                $('section.w-tabs__panel').hide()
                 $(section1).removeAttr('hidden')
                 $(section1).show()
                 $(section2_id).removeAttr('hidden')

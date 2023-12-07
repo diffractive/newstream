@@ -12,7 +12,7 @@
         padding-bottom: 0 !important;
     }
     .footer .actions {
-        width: 190px !important;
+        width: 240px !important;
     }
 </style>
 {{ block.super }}
@@ -28,7 +28,7 @@
 {% block content %}
 
 {% block header %}
-{% include "modeladmin/includes/header_with_breadcrumb.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon %}
+{% include "wagtailadmin/shared/header.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon %}
 {% endblock %}
 
 <div>
@@ -52,7 +52,7 @@
 
         <div class="tab-content">
             <section id="tab-subs-info" role="tabpanel" aria-labelledby="tab-label-subs-info" data-tab="subs-info" hidden>
-                <div class="nice-padding">
+                <div>
                     {% block fields_output %}
                     {% if fields %}
                     <div class="two-column-flex">
@@ -122,7 +122,7 @@
                 </div>
             </section>
             <section id="tab-meta-data" role="tabpanel" aria-labelledby="tab-label-meta-data" data-tab="meta-data" hidden>
-                <div class="nice-padding">
+                <div>
                     {% if metas %}
                     <h2>{% trans 'System Generated Meta Data' %}</h2>
                     <dl>
@@ -137,7 +137,7 @@
                 </div>
             </section>
             <section id="tab-renewals" role="tabpanel" aria-labelledby="tab-label-renewals" data-tab="renewals" hidden>
-                <div class="nice-padding" style="padding-bottom: 60px;">
+                <div style="padding-bottom: 60px;">
                     {% if renewals %}
                     <table class="listing full-width">
                         <thead>
@@ -169,7 +169,7 @@
                 </div>
             </section>
             <section id="tab-actions" role="tabpanel" aria-labelledby="tab-label-actions" data-tab="actions" hidden>
-                <div class="nice-padding" style="padding-bottom: 60px;">
+                <div style="padding-bottom: 60px;">
                     <p>{% trans 'Current subscription status is:' %} <strong>{{ subscription.recurring_status|title }}</strong>.</p>
                     <hr>
                     <h2>{% trans 'Manually set subscription status' %}</h2>
@@ -230,7 +230,7 @@
                 </div>
             </section>
             <section id="tab-action-logs" role="tabpanel" aria-labelledby="tab-label-action-logs" data-tab="action-logs" hidden>
-                <div class="nice-padding">
+                <div>
                     {% if action_logs %}
                     <table class="listing full-width">
                         <thead>

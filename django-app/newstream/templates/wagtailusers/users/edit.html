@@ -1,6 +1,6 @@
 {% extends "wagtailusers/users/edit.html" %}
 
 {% block extra_fields %}
-{% include "wagtailadmin/shared/field_as_li.html" with field=form.opt_in_mailing_list %}
-{% include "wagtailadmin/shared/field_as_li.html" with field=form.language_preference %}
+{% include "wagtailadmin/shared/field.html" with field=form.opt_in_mailing_list %}
+{% include "wagtailadmin/shared/field.html" with field=form.language_preference %}
 {% endblock extra_fields %}

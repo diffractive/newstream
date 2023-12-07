@@ -7,7 +7,7 @@ from django.conf import settings
 from i18nfield.fields import I18nCharField
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList
 from wagtail.images.edit_handlers import FieldPanel
-from wagtail.contrib.settings.models import BaseSetting, register_setting
+from wagtail.contrib.settings.models import BaseSiteSetting, register_setting
 from wagtail.contrib.forms.models import AbstractFormField
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -90,7 +90,7 @@ class UserMetaField(I18nAbstractFormField):
 
 
 @register_setting
-class SiteSettings(BaseSetting, ClusterableModel):
+class SiteSettings(BaseSiteSetting, ClusterableModel):
     default_from_email = models.EmailField()
     default_from_name = I18nCharField(
         max_length=255,

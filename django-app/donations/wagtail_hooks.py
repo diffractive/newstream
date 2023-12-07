@@ -138,7 +138,7 @@ class TodayStatisticsPanel(Component):
         today_donations = Donation.objects.filter(donation_date__gte=utc_dt, payment_status=STATUS_COMPLETE, deleted=False).count()
         today_subscriptions = SubscriptionInstance.objects.filter(subscribe_date__gte=utc_dt, recurring_status=STATUS_ACTIVE, deleted=False).count()
         today_donors = User.objects.filter(date_joined__gte=utc_dt, is_staff=False).count()
-        return mark_safe("<section class=\"summary nice-padding today-stats-panel\"><h1><strong>%(heading)s (%(date)s)</strong></h1><ul class=\"stats\"><li><span>%(completed_donations)i</span>%(completed_donations_subtext)s</li><li><span>%(active_subscriptions)i</span>%(active_subscriptions_subtext)s</li><li><span>%(donors)i</span>%(donors_subtext)s</li></ul></section>" % {
+        return mark_safe("<section class=\"w-summary today-stats-panel\"><h1><strong>%(heading)s (%(date)s)</strong></h1><ul class=\"w-summary__list\"><li><a><span>%(completed_donations)i</span>%(completed_donations_subtext)s</a></li><li><a><span>%(active_subscriptions)i</span>%(active_subscriptions_subtext)s</a></li><li><a><span>%(donors)i</span>%(donors_subtext)s</a></li></ul></section>" % {
             'heading': str(_("Today's Statistics")),
             'date': today,
             'completed_donations': today_donations,
@@ -159,7 +159,7 @@ class TotalStatisticsPanel(Component):
         total_donors = User.objects.filter(is_staff=False).count()
         total_active_subscriptions = SubscriptionInstance.objects.filter(recurring_status=STATUS_ACTIVE, deleted=False).count()
         total_subscriptions = SubscriptionInstance.objects.filter(deleted=False).count()
-        return mark_safe("<section class=\"summary nice-padding total-stats-panel\"><h1><strong>%(heading)s</strong></h1><ul class=\"stats\"><li><span>%(completed_donations)i</span>%(completed_donations_subtext)s</li><li><span>%(donations)i</span>%(donations_subtext)s</li><li><span>%(donors)i</span>%(donors_subtext)s</li><li><span>%(active_subscriptions)i</span>%(active_subscriptions_subtext)s</li><li><span>%(subscriptions)i</span>%(subscriptions_subtext)s</li></ul></section>" % {
+        return mark_safe("<section class=\"w-summary total-stats-panel\"><h1><strong>%(heading)s</strong></h1><ul class=\"w-summary__list\"><li><a><span>%(completed_donations)i</span>%(completed_donations_subtext)s</a></li><li><a><span>%(donations)i</span>%(donations_subtext)s</a></li><li><a><span>%(donors)i</span>%(donors_subtext)s</a></li><li><a><span>%(active_subscriptions)i</span>%(active_subscriptions_subtext)s</a></li><li><a><span>%(subscriptions)i</span>%(subscriptions_subtext)s</a></li></ul></section>" % {
             'heading': str(_("Total Statistics")),
             'completed_donations': total_completed_donations,
             'completed_donations_subtext': str(_("Completed Donations")),

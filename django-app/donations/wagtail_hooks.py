@@ -1,6 +1,6 @@
 from pytz import timezone, utc
 from datetime import datetime, time
-from django.contrib import messages
+from django.contrib import messages, auth
 from django.urls import path, reverse
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -35,7 +35,9 @@ def set_donation_status(request):
             donation.save()
             new_status = donation.payment_status
             # add to the donation actions log
-            addUpdateDonationActionLog(donation, DONATION_ACTION_MANUAL, action_notes='%s -> %s' % (old_status, new_status), user=request.user)
+            # get current user to avoid 'SimpleLazyObject' issue
+            current_user = auth.get_user(request)
+            addUpdateDonationActionLog(donation, DONATION_ACTION_MANUAL, action_notes='%s -> %s' % (old_status, new_status), user=current_user)
             # notify donor of action
             sendDonationStatusChangeToDonor(donation)
 
@@ -62,7 +64,9 @@ def set_subscription_status(request):
             subscription.save()
             new_status = subscription.recurring_status
             # add to the update actions log
-            addUpdateSubsActionLog(subscription, SUBS_ACTION_MANUAL, action_notes='%s -> %s' % (old_status, new_status), user=request.user)
+            # get current user to avoid 'SimpleLazyObject' issue
+            current_user = auth.get_user(request)
+            addUpdateSubsActionLog(subscription, SUBS_ACTION_MANUAL, action_notes='%s -> %s' % (old_status, new_status), user=current_user)
             # notify donor of action
             sendSubscriptionStatusChangeToDonor(subscription)
 
@@ -83,7 +87,9 @@ def toggle_subscription(request):
                 request, subscription=subscription)
             resultSet = gatewayManager.toggle_recurring_payment()
             # add to the update actions log
-            addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_PAUSE if resultSet['recurring-status'] == STATUS_PAUSED else SUBS_ACTION_RESUME, user=request.user)
+            # get current user to avoid 'SimpleLazyObject' issue
+            current_user = auth.get_user(request)
+            addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_PAUSE if resultSet['recurring-status'] == STATUS_PAUSED else SUBS_ACTION_RESUME, user=current_user)
 
             messages.add_message(request, messages.SUCCESS, str(_('Subscription %(id)d status is toggled to %(status)s.') % {'id': subscription_id, 'status': resultSet['recurring-status'].capitalize()}))
             return redirect(reverse('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription_id}))
@@ -103,7 +109,9 @@ def cancel_subscription(request):
                 request, subscription=subscription)
             resultSet = gatewayManager.cancel_recurring_payment(reason=SubscriptionInstance.CancelReason.BY_ADMIN)
             # add to the update actions log
-            addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL, user=request.user)
+            # get current user to avoid 'SimpleLazyObject' issue
+            current_user = auth.get_user(request)
+            addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL, user=current_user)
 
             messages.add_message(request, messages.SUCCESS, str(_('Subscription %(id)d status is cancelled.') % {'id': subscription_id}))
             return redirect(reverse('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription_id}))

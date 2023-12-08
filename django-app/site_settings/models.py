@@ -6,7 +6,6 @@ from django.conf import settings
 
 from i18nfield.fields import I18nCharField
 from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList
-from wagtail.images.edit_handlers import FieldPanel
 from wagtail.contrib.settings.models import BaseSiteSetting, register_setting
 from wagtail.contrib.forms.models import AbstractFormField
 from modelcluster.models import ClusterableModel

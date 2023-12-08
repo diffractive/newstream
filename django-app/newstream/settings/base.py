@@ -85,8 +85,6 @@ DEFAULT_FROM_EMAIL = 'donations@domain.example'
 
 # Custom User Model
 AUTH_USER_MODEL = 'newstream_user.User'
-WAGTAIL_USER_EDIT_FORM = 'newstream_user.forms.NewstreamUserEditForm'
-WAGTAIL_USER_CREATION_FORM = 'newstream_user.forms.NewstreamUserCreationForm'
 WAGTAIL_USER_CUSTOM_FIELDS = ['opt_in_mailing_list', 'language_preference']
 
 
@@ -118,7 +116,7 @@ INSTALLED_APPS = [
     'wagtail.contrib.simple_translation',
     'wagtail.locales',
 
-    'captcha',
+    'django_recaptcha',
     'modelcluster',
     'taggit',
     'wagtailautocomplete',
@@ -297,7 +295,7 @@ WAGTAIL_I18N_ENABLED = True
 
 # django-recaptcha
 # enable no captcha
-SILENCED_SYSTEM_CHECKS = ['captcha.recaptcha_test_key_error']
+SILENCED_SYSTEM_CHECKS = ['django_recaptcha.recaptcha_test_key_error']
 NOCAPTCHA = True
 RECAPTCHA_REQUIRED_SCORE = 0.85
 

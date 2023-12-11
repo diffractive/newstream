@@ -4,7 +4,6 @@
 pip-tools
 certifi==2023.7.22
 chardet==4.0.0
-cryptography==41.0.5
 Django==3.2.23
 django-allauth-2fa==0.8
 django-cogwheels==0.3
@@ -29,7 +28,6 @@ phpbridge==0.0.3
 Pillow==9.4.0
 psycopg2-binary==2.9.9
 pycurl==7.45.2
-PyJWT==2.4.0
 pyOpenSSL==23.2.0
 pytest-django==4.4.0
 python-json-logger==2.0.7
@@ -42,5 +40,3 @@ wagtail-autocomplete==0.11.0
 wagtail-metadata==4.0.3
 wagtail-modelchooser==2.3.3
 whitenoise==6.2.0
-Willow==1.4
-xlrd==2.0.1

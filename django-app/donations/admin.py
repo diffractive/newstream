@@ -1,10 +1,10 @@
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 
-from wagtail.contrib.modeladmin.options import (
+from wagtail_modeladmin.options import (
     ModelAdmin, ModelAdminGroup, modeladmin_register)
-from wagtail.contrib.modeladmin.views import InspectView, DeleteView, CreateView
-from wagtail.contrib.modeladmin.helpers import ButtonHelper
+from wagtail_modeladmin.views import InspectView, DeleteView, CreateView
+from wagtail_modeladmin.helpers import ButtonHelper
 
 from newstream.functions import get_site_settings_from_default_site
 from site_settings.models import GATEWAY_OFFLINE, GATEWAY_PAYPAL_LEGACY
@@ -27,7 +27,7 @@ class SubscriptionCreateView(CreateView):
             created_by=self.request.user
         )
         subscription.save()
-        
+
         form.instance.parent = subscription
         form.instance.created_by = self.request.user
         return super().form_valid(form)
@@ -73,7 +73,7 @@ class DonationInspectView(InspectView):
         Return a list of UserDonationUpdatesLog from self.instance
         """
         return UserDonationUpdatesLog.objects.filter(donation=self.instance).order_by('-created_at')
-    
+
     def get_context_data(self, **kwargs):
         context = {
             'fields': self.get_fields_dict_as_dict(),
@@ -179,7 +179,7 @@ class SubscriptionDeleteView(DeleteView):
     def __init__(self, *args, **kwargs):
         self.site_settings = get_site_settings_from_default_site()
         super().__init__(*args, **kwargs)
-    
+
     def delete_instance(self):
         # loop all child instances, if all others are deleted or this is the only instance to be deleted
         # proceed to set parent to deleted as well
@@ -267,7 +267,7 @@ class DonationAdmin(ModelAdmin):
         # only show records with deleted=False (which should be valid whether soft-delete is on/off)
         qs = super().get_queryset(request)
         return qs.filter(deleted=False)
-    
+
     def donor_column(self, obj):
         return obj.user.email if obj.user else (obj.guest_email if obj.guest_email else '-')
 

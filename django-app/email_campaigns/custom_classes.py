@@ -9,8 +9,8 @@ from django.utils.translation import gettext_lazy as _
 from django.utils import translation
 from django.urls import path
 
-from wagtail.contrib.modeladmin.views import InstanceSpecificView
-from wagtail.contrib.modeladmin.helpers import ButtonHelper, AdminURLHelper
+from wagtail_modeladmin.views import InstanceSpecificView
+from wagtail_modeladmin.helpers import ButtonHelper, AdminURLHelper
 from wagtail.templatetags.wagtailcore_tags import richtext
 
 from newstream.functions import generateIDSecretHash, reverse_with_site_url

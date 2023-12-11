@@ -11,7 +11,7 @@ from django.utils import translation
 
 from wagtail.contrib.modeladmin.views import InstanceSpecificView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper, AdminURLHelper
-from wagtail.core.templatetags.wagtailcore_tags import richtext
+from wagtail.templatetags.wagtailcore_tags import richtext
 
 from newstream.functions import generateIDSecretHash, reverse_with_site_url
 from email_campaigns.models import Campaign

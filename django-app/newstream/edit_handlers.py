@@ -1,4 +1,4 @@
-from wagtail.admin.edit_handlers import EditHandler
+from wagtail.admin.panels import EditHandler
 from django.utils.html import format_html
 
 

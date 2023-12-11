@@ -3,7 +3,7 @@
 from django.db import migrations, models
 import django.db.models.deletion
 import modelcluster.fields
-import wagtail.core.fields
+import wagtail.fields
 
 
 class Migration(migrations.Migration):
@@ -52,7 +52,7 @@ class Migration(migrations.Migration):
                 ('amount_type', models.CharField(choices=[('fixed', 'Fixed Amount'), ('stepped', 'Fixed Steps'), ('custom', 'Custom Amount')], max_length=20)),
                 ('fixed_amount', models.FloatField(blank=True, help_text='Define fixed donation amount if you chose "Fixed Amount" for your Amount Type', null=True)),
                 ('is_active', models.BooleanField(default=False)),
-                ('donation_footer_text', wagtail.core.fields.RichTextField(blank=True)),
+                ('donation_footer_text', wagtail.fields.RichTextField(blank=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
                 ('updated_at', models.DateTimeField(auto_now=True)),
                 ('deleted', models.BooleanField(default=False)),

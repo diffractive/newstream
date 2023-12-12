@@ -19,7 +19,7 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext_lazy as _
 
-from wagtail.core.models import Site
+from wagtail.models import Site
 
 from site_settings.models import SiteSettings
 from newstream_user.models import UserMeta

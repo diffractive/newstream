@@ -2,11 +2,11 @@ import re
 import os
 from django.utils.translation import gettext_lazy as _
 
-from wagtail.core.models import Page
-from wagtail.core import blocks
-from wagtail.core.fields import RichTextField, StreamField
+from wagtail.models import Page
+from wagtail import blocks
+from wagtail.fields import StreamField
 from wagtail.images.blocks import ImageChooserBlock
-from wagtail.admin.edit_handlers import FieldPanel, StreamFieldPanel
+from wagtail.admin.panels import FieldPanel
 from wagtailmetadata.models import MetadataPageMixin
 
 from pages.blocks import FullWidthImageSectionBlock, FullWidthSectionBlock
@@ -18,10 +18,10 @@ class StaticPage(Page):
         ('raw_html', blocks.RawHTMLBlock()),
         ('full_width_image', FullWidthImageSectionBlock()),
         ('full_width_section', FullWidthSectionBlock()),
-    ])
+    ], use_json_field=True)
 
     content_panels = Page.content_panels + [
-        StreamFieldPanel('body', heading=_('Page Body')),
+        FieldPanel('body', heading=_('Page Body')),
     ]
 
     class Meta:
@@ -42,10 +42,10 @@ class HomePage(_MetadataPageMixin, Page):
         ('full_width_image', FullWidthImageSectionBlock()),
         ('full_width_section', FullWidthSectionBlock()),
         ('raw_html', blocks.RawHTMLBlock()),
-    ])
+    ], use_json_field=True)
 
     content_panels = Page.content_panels + [
-        StreamFieldPanel('body', heading=_('Page Body')),
+        FieldPanel('body', heading=_('Page Body')),
     ]
 
     class Meta:

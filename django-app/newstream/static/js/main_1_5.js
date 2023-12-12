@@ -28,21 +28,22 @@ function getCookie(name) {
 }
 
 // Close the popup menus if click elsewhere
+// We convert these query lists to Arrays for the sake of compatibility with older browsers
 window.addEventListener("click", function () {
     //Hide the menus if visible
-    for (let ckbox of document.getElementsByClassName("dropdown-toggle-checkbox")) {
+    for (let ckbox of Array.from(document.getElementsByClassName("dropdown-toggle-checkbox"))) {
         ckbox.checked = false;
     }
 });
-for (let wrapper of document.getElementsByClassName("dropdown-div-wrapper")) {
+for (let wrapper of Array.from(document.getElementsByClassName("dropdown-div-wrapper"))) {
     wrapper.addEventListener("click", function (event) {
         event.stopPropagation();
     });
 }
-for (let wrapper of document.getElementsByClassName("dropdown-toggle-label")) {
+for (let wrapper of Array.from(document.getElementsByClassName("dropdown-toggle-label"))) {
     wrapper.addEventListener("click", function (event) {
         // such that other toggled popup menus can be hidden
-        for (ckbox of document.getElementsByClassName("dropdown-toggle-checkbox")) {
+        for (ckbox of Array.from(document.getElementsByClassName("dropdown-toggle-checkbox"))) {
             if (ckbox.id != this.previousElementSibling.id) {
                 ckbox.checked = false;
             }
@@ -51,19 +52,20 @@ for (let wrapper of document.getElementsByClassName("dropdown-toggle-label")) {
 }
 
 // Hide the messages after 3 seconds
+// We convert these query lists to Arrays for the sake of compatibility with older browsers
 (() => {
     setTimeout(() => {
-        for (let msg of document.querySelectorAll('.message:not(.static-notif)')) {
+        for (let msg of Array.from(document.querySelectorAll('.message:not(.static-notif)'))) {
             msg.classList.add('opacity-0');
         }
     }, 3000);
     setTimeout(() => {
-        for (let msg of document.querySelectorAll('.message:not(.static-notif)')) {
+        for (let msg of Array.from(document.querySelectorAll('.message:not(.static-notif)'))) {
             msg.classList.add('out-of-sight');
         }
     }, 4000); // invisible transition is 1s
     setTimeout(() => {
-        for (let msg of document.querySelectorAll('.message:not(.static-notif)')) {
+        for (let msg of Array.from(document.querySelectorAll('.message:not(.static-notif)'))) {
             msg.classList.add('hidden');
         }
     }, 4000); // invisible transition is 1s
@@ -108,14 +110,15 @@ function resizeVideoIframe() {
         }
     })(window, document);
 }
+// We convert these query lists to Arrays for the sake of compatibility with older browsers
 function resetWhiteLoadingBtn() {
-    for (let btn of document.getElementsByClassName('need-white-loading-btn')) {
+    for (let btn of Array.from(document.getElementsByClassName('need-white-loading-btn'))) {
         btn.disabled = false;
         btn.classList.remove('white-loading-btn');
     }
 }
 function resetBlackLoadingBtn() {
-    for (let btn of document.getElementsByClassName('need-black-loading-btn')) {
+    for (let btn of Array.from(document.getElementsByClassName('need-black-loading-btn'))) {
         btn.disabled = false;
         btn.classList.remove('black-loading-btn');
     }
@@ -158,10 +161,11 @@ function blackLoadingBtnEvent(event) {
     }
 }
 function registerLoadingButtons() {
-    for (let btn of document.getElementsByClassName('need-white-loading-btn')) {
+    // We convert these query lists to Arrays for the sake of compatibility with older browsers
+    for (let btn of Array.from(document.getElementsByClassName('need-white-loading-btn'))) {
         btn.addEventListener('click', whiteLoadingBtnEvent);
     }
-    for (let btn of document.getElementsByClassName('need-black-loading-btn')) {
+    for (let btn of Array.from(document.getElementsByClassName('need-black-loading-btn'))) {
         btn.addEventListener('click', blackLoadingBtnEvent);
     }
 }
@@ -175,3 +179,11 @@ window.addEventListener('load', function () {
 window.addEventListener('resize', function () {
     resizeVideoIframe();
 });
+
+window.addEventListener('load', function () {
+    // Add toggle event listeners:
+    const sidebarEls = document.querySelectorAll(".cover, #nav-toggle, #close-nav-toggle")
+    for (let sidebarEl of Array.from(sidebarEls)) {
+        sidebarEl.addEventListener("click", toggleSidenav)
+    }
+})

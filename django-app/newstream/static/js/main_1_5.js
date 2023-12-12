@@ -179,3 +179,11 @@ window.addEventListener('load', function () {
 window.addEventListener('resize', function () {
     resizeVideoIframe();
 });
+
+window.addEventListener('load', function () {
+    // Add toggle event listeners:
+    const sidebarEls = document.querySelectorAll(".cover, #nav-toggle, #close-nav-toggle")
+    for (let sidebarEl of Array.from(sidebarEls)) {
+        sidebarEl.addEventListener("click", toggleSidenav)
+    }
+})

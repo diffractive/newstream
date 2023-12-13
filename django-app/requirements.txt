@@ -30,7 +30,6 @@ click==8.1.7
     # via pip-tools
 cryptography==41.0.5
     # via
-    #   -r requirements.in
     #   pyjwt
     #   pyopenssl
 defusedxml==0.7.1
@@ -206,9 +205,7 @@ pycparser==2.20
 pycurl==7.45.2
     # via -r requirements.in
 pyjwt[crypto]==2.4.0
-    # via
-    #   -r requirements.in
-    #   django-allauth
+    # via django-allauth
 pyopenssl==23.2.0
     # via
     #   -r requirements.in
@@ -308,8 +305,6 @@ whitenoise==6.2.0
     # via -r requirements.in
 willow[heif]==1.6.3
     # via wagtail
-xlrd==2.0.1
-    # via -r requirements.in
 zipp==3.4.1
     # via importlib-metadata
 

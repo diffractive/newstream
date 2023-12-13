@@ -13,6 +13,7 @@ ENV PYTHONUNBUFFERED 1
 # gcc is required for building pycurl. We should split that as buildDepends (see puckel/docker airflow)
 # mime-support is required for uwsgi to serve static files correctly
 # Explicitly install postgresql version to fix vulnerability, we can remove it once postgresql-client is updated
+# libpcre3 is needed for uwsgi routing support
 RUN set -ex \
     && apt-get update -yqq \
     && apt-get upgrade -yqq \
@@ -24,6 +25,8 @@ RUN set -ex \
         gcc \
         mime-support \
         gettext \
+        libpcre3 \
+        libpcre3-dev \
     && apt-get install -yqq postgresql-15 \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \

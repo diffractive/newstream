@@ -27,7 +27,6 @@ RUN set -ex \
         gettext \
         libpcre3 \
         libpcre3-dev \
-    && apt-get install -yqq postgresql-15 \
     && apt-get autoremove -yqq --purge \
     && apt-get clean \
     && rm -rf \

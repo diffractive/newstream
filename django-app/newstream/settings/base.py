@@ -225,6 +225,8 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+DEFAULT_AUTO_FIELD='django.db.models.AutoField'
+
 # Using secure cookies, see https://docs.djangoproject.com/en/3.0/topics/security/#ssl-https
 SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True

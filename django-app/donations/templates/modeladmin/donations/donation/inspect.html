@@ -12,7 +12,7 @@
         padding-bottom: 0 !important;
     }
     .footer .actions {
-        width: 190px !important;
+        width: 240px !important;
     }
 </style>
 {{ block.super }}
@@ -28,7 +28,7 @@
 {% block content %}
 
 {% block header %}
-{% include "modeladmin/includes/header_with_breadcrumb.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon %}
+{% include "wagtailadmin/shared/header.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon %}
 {% endblock %}
 
 <div>
@@ -51,7 +51,7 @@
 
         <div class="tab-content">
             <section id="tab-donation-info" role="tabpanel" aria-labelledby="tab-label-donation-info" data-tab="donation-info" hidden>
-                <div class="nice-padding">
+                <div>
                     {% block fields_output %}
                     {% if fields %}
                     <div class="two-column-flex">
@@ -139,7 +139,7 @@
                 </div>
             </section>
             <section id="tab-meta-data" role="tabpanel" aria-labelledby="tab-label-meta-data" data-tab="meta-data" hidden>
-                <div class="nice-padding">
+                <div>
                     {% if dmetas %}
                     <h2>{% trans 'Donor Meta Data' %}</h2>
                     <dl>
@@ -167,7 +167,7 @@
                 </div>
             </section>
             <section id="tab-actions" role="tabpanel" aria-labelledby="tab-label-actions" data-tab="actions" hidden>
-                <div class="nice-padding">
+                <div>
                     <h2>{% trans 'Manually set donation status' %}</h2>
                     <p>{% trans 'Current donation status is:' %} <strong>{{ fields.payment_status.value }}</strong>.</p>
                     <form action="{% url 'internal-set-donation-status' %}" method="POST">
@@ -193,7 +193,7 @@
                 </div>
             </section>
             <section id="tab-action-logs" role="tabpanel" aria-labelledby="tab-label-action-logs" data-tab="action-logs" hidden>
-                <div class="nice-padding" style="padding-bottom: 60px;">
+                <div style="padding-bottom: 60px;">
                     {% if action_logs %}
                     <table class="listing full-width">
                         <thead>

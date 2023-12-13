@@ -22,10 +22,13 @@ dd a {
     box-sizing: border-box;
 }
 .backlink-div {
-    background-color: #007d7e;
-    padding-bottom: 8px;
+    display: flex;
+    align-items: center;
+    background-color: var(--w-color-primary);
+    padding: 8px;
 }
 .backlink-p {
+    font-size: 14px;
     margin-bottom: 0;
     margin-left:1.9em;
 }

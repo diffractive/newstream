@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 from django.shortcuts import get_object_or_404
-from django.conf.urls import url
 from django.conf import settings
 from django.core.mail import send_mail
 from django.contrib.auth.decorators import login_required
@@ -8,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.utils.decorators import method_decorator
 from django.utils.translation import gettext_lazy as _
 from django.utils import translation
+from django.urls import path
 
 from wagtail.contrib.modeladmin.views import InstanceSpecificView
 from wagtail.contrib.modeladmin.helpers import ButtonHelper, AdminURLHelper
@@ -50,7 +50,7 @@ class CampaignButtonHelper(ButtonHelper):
 
 class SendCampaignView(InstanceSpecificView):
     """
-    A Class Based View which will generate 
+    A Class Based View which will generate
     """
 
     def __init__(self, model_admin, instance_pk):
@@ -150,7 +150,7 @@ class SendCampaignMAMixin(object):
     def get_admin_urls_for_registration(self):
         urls = super().get_admin_urls_for_registration()
         urls += (
-            url(
+            path(
                 self.url_helper.get_action_url_pattern('send'),
                 self.send_campaign_view,
                 name=self.url_helper.get_action_url_name('send')

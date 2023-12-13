@@ -2,25 +2,32 @@
 <!-- customizing this template to use class instead of heading for tab ids -->
 {% load wagtailadmin_tags i18n %}
 
+{% if self.help_text %}
+    {% help_block status="info" %}{{ self.help_text }}{% endhelp_block %}
+{% endif %}
+
 <div class="w-tabs" data-tabs>
     <div class="w-tabs__wrapper">
         <div role="tablist" class="w-tabs__list">
-            {% for child in self.visible_children %}
-                {# For children tabs, we want to use the classname instead of heading for the id#}
-                {% if "child" in child.classname %}
-                    {% with classname=child.classname|cut:"child "%}
-                        {% include 'wagtailadmin/shared/tabs/tab_nav_link.html' with tab_id=classname title=child.heading classes=child.classes|join:" " %}
-                    {% endwith %}
-                {% else %}
-                    {% include 'wagtailadmin/shared/tabs/tab_nav_link.html' with tab_id=child.heading title=child.heading classes=child.classes|join:" " %}
+            {% for child, identifier in self.visible_children_with_identifiers %}
+                {# If there's at least one child that shows the panel furniture, render the tab navigation #}
+                {% if child.show_panel_furniture %}
+                    {# For children tabs, we want to use the classname instead of heading for the id#}
+                    {% if "child" in child.classname %}
+                        {% with classname=child.classname|cut:"child "%}
+                            {% include 'wagtailadmin/shared/tabs/tab_nav_link.html' with tab_id=classname title=child.heading classname=child.classes|join:" " %}
+                        {% endwith %}
+                    {% else %}
+                        {% include 'wagtailadmin/shared/tabs/tab_nav_link.html' with tab_id=identifier title=child.heading classname=child.classes|join:" " %}
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         </div>
 
         {# Comment Notifications Toggle  #}
         {% if self.form.show_comments_toggle %}
-            <div class="w-relative w-flex w-justify-end w-pl-5 sm:w-px-2" data-comment-notifications hidden>
-                <label class="switch switch--teal-background w-p-0 w-m-0 w-font-normal w-flex w-justify-between w-text-14 w-space-x-2">
+            <div class="w-relative w-flex w-justify-end w-px-5 sm:w-py-1 sm:w-px-2 w-mr-6 sm:w-mr-8 sm:w-mt-12 w-bg-white" data-comment-notifications hidden>
+                <label class="switch w-p-0 w-m-0 w-font-normal w-flex w-justify-between w-text-14 w-space-x-2">
                     {% trans "Comment notifications" %}
                     {{ self.form.comment_notifications }}
                     <span class="switch__toggle"></span>
@@ -30,29 +37,36 @@
     </div>
 
     <div class="tab-content">
-        {% for child in self.visible_children %}
-            {% if "child" in child.classname %}
-                {# For children tabs, we want to use the classname instead of heading for the id#}
-                {% with classname=child.classname|cut:"child "%}
-                <section
-                    id="tab-{{ classname|cautious_slugify }}"
-                    class="w-tabs__panel {{ child.classes|join:" " }}"
-                    role="tabpanel"
-                    aria-labelledby="tab-label-{{ child.heading|cautious_slugify }}"
-                    hidden
-                >
-                {% endwith %}
+        {% for child, identifier in self.visible_children_with_identifiers %}
+            {% if child.show_panel_furniture %}
+                {% if "child" in child.classname %}
+                    {# For children tabs, we want to use the classname instead of heading for the id#}
+                    {% with classname=child.classname|cut:"child "%}
+                    <section
+                        id="tab-{{ classname|cautious_slugify }}"
+                        class="w-tabs__panel {{ child.classes|join:" " }}"
+                        role="tabpanel"
+                        aria-labelledby="tab-label-{{ classname|cautious_slugify }}"
+                        hidden
+                    >
+                        {{ child.render_html }}
+                    </section>
+                    {% endwith %}
+                {% else %}
+                    <section
+                        id="tab-{{ identifier }}"
+                        class="w-tabs__panel {{ child.classes|join:" " }}"
+                        role="tabpanel"
+                        aria-labelledby="tab-label-{{ identifier }}"
+                        hidden
+                    >
+                        {{ child.render_html }}
+                    </section>
+                {% endif %}
             {% else %}
-                <section
-                    id="tab-{{ child.heading|cautious_slugify }}"
-                    class="w-tabs__panel {{ child.classes|join:" " }}"
-                    role="tabpanel"
-                    aria-labelledby="tab-label-{{ child.heading|cautious_slugify }}"
-                    hidden
-                >
+                {# If all of the children in the tab do not show the panel furniture, render them without the tab section #}
+                {{ child.render_html }}
             {% endif %}
-                {{ child.render_as_object }}
-            </section>
         {% endfor %}
     </div>
 </div>

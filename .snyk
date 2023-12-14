@@ -15,4 +15,11 @@ ignore:
           We don't seem to be impacted by this.
         expires: 2023-12-16T00:00:00.000Z
         created: 2023-11-20T19:27:37.731Z
+  SNYK-DEBIAN12-CURL-6100975:
+    - '*':
+        reason: >
+          There is currently no fix available. The exploitation method
+          doesn't seem to apply to us.
+        expires: 2023-12-16T00:00:00.000Z
+        created: 2023-12-14T16:27:37.731Z
 patch:

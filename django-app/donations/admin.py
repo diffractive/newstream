@@ -258,6 +258,7 @@ class DonationAdmin(ModelAdmin):
     inspect_view_enabled = True
     create_view_class = DonationCreateView
     inspect_view_class = DonationInspectView
+    edit_view_class = DonationInspectView
     inspect_view_extra_css = ['css/admin_inspect.css']
     inspect_view_extra_js = ['js/admin_inspect.js']
     delete_view_class = DonationDeleteView
@@ -291,6 +292,7 @@ class SubscriptionAdmin(ModelAdmin):
     inspect_view_enabled = True
     create_view_class = SubscriptionCreateView
     inspect_view_class = SubscriptionInspectView
+    edit_view_class = SubscriptionInspectView
     inspect_view_extra_css = ['css/admin_inspect.css']
     inspect_view_extra_js = ['js/admin_inspect.js']
     delete_view_class = SubscriptionDeleteView

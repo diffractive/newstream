@@ -11,8 +11,9 @@
     .content {
         padding-bottom: 0 !important;
     }
-    .footer .actions {
-        width: 240px !important;
+    .button.button-secondary {
+        background-color: var(--w-color-surface-button-default);
+        color: #ffffff;
     }
 </style>
 {{ block.super }}
@@ -226,16 +227,14 @@
 </div>
 
 {% block footer %}
-{% if buttons %}
-<footer class="footer">
-    <ul>
-        <li class="actions footer__container">
-            {% for button in buttons %}
-            {% include "modeladmin/includes/button.html" %}
-            {% endfor %}
-        </li>
-    </ul>
-</footer>
-{% endif %}
+    {% if buttons %}
+        <footer class="footer">
+            <div class="footer__container">
+                {% for button in buttons %}
+                    {% include "modeladmin/includes/button.html" %}
+                {% endfor %}
+            </div>
+        </footer>
+    {% endif %}
 {% endblock %}
 {% endblock %}

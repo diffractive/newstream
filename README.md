@@ -6,7 +6,7 @@ thanks to funding from the [Google News Initiatitve (GNI)](https://newsinitiativ
 to perform one-off donations, or set up recurring payments to your organisation. The portal allows donors to manage
 their subscrption, view past donations, and update their personal details.
 
-The system runs as a standalone web application, idependent of your main web presence. This avoids compatibility
+The system runs as a standalone web application, independent of your main web presence. This avoids compatibility
 or security issues which may be found with donation plugins. The system is self-contained, and can be installed
 by non-technical users, by following the documentation.
 

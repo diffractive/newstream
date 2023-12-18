@@ -17,9 +17,7 @@ build==0.10.0
 cachetools==4.2.4
     # via google-auth
 certifi==2023.7.22
-    # via
-    #   -r requirements.in
-    #   requests
+    # via requests
 cffi==1.16.0
     # via cryptography
 chardet==4.0.0
@@ -28,7 +26,7 @@ charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via pip-tools
-cryptography==41.0.5
+cryptography==41.0.6
     # via
     #   pyjwt
     #   pyopenssl
@@ -166,14 +164,11 @@ packaging==23.2
 paypal-checkout-serversdk==1.0.1
     # via -r requirements.in
 paypalhttp==1.0.0
-    # via
-    #   -r requirements.in
-    #   paypal-checkout-serversdk
+    # via paypal-checkout-serversdk
 phpbridge==0.0.3
     # via -r requirements.in
-pillow==9.4.0
+pillow==10.1.0
     # via
-    #   -r requirements.in
     #   pillow-heif
     #   wagtail
 pillow-heif==0.14.0
@@ -233,7 +228,6 @@ qrcode==6.1
     #   wagtail-2fa
 requests==2.31.0
     # via
-    #   -r requirements.in
     #   django-allauth
     #   google-api-core
     #   google-cloud-storage

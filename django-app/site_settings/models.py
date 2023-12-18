@@ -5,7 +5,7 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
 from i18nfield.fields import I18nCharField
-from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList
+from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel, PanelGroup, ObjectList
 from wagtail.contrib.settings.models import BaseSiteSetting, register_setting
 from wagtail.contrib.forms.models import AbstractFormField
 from modelcluster.models import ClusterableModel
@@ -25,6 +25,12 @@ GATEWAY_OFFLINE = 'Offline'
 GATEWAY_CAN_EDIT_SUBSCRIPTION = 'gateway-can-edit-subscription'
 GATEWAY_CAN_TOGGLE_SUBSCRIPTION = 'gateway-can-toggle-subscription'
 GATEWAY_CAN_CANCEL_SUBSCRIPTION = 'gateway-can-cancel-subscription'
+
+
+class CustomTabbedInterface(PanelGroup):
+    class BoundPanel(PanelGroup.BoundPanel):
+        template_name = "wagtailadmin/panels/custom_tabbed_interface.html"
+    # template_name = "wagtailadmin/panels/custom_tabbed_interface.html"
 
 
 class PaymentGateway(models.Model):
@@ -390,13 +396,13 @@ class SiteSettings(BaseSiteSetting, ClusterableModel):
 
     # We add "child" to the classnames to help identify that they are the inner tabs as opposed to the top ones
     tabs_config = [
-        TabbedInterface([
+        CustomTabbedInterface([
             ObjectList(email_general_panels, classname='child email-general',
                           heading=_('General')),
             ObjectList(email_admin_panels, classname='child email-admin',
                           heading=_('Admin Emails')),
         ], heading=_("Emails")),
-        TabbedInterface([
+        CustomTabbedInterface([
             ObjectList(signup_general_panels, classname='child social-general',
                           heading=_('General')),
             ObjectList(signup_google_panels, classname='child social-google',
@@ -406,7 +412,7 @@ class SiteSettings(BaseSiteSetting, ClusterableModel):
             ObjectList(signup_twitter_panels, classname='child social-twitter',
                           heading=_('Twitter')),
         ], heading=_("Donor Signup")),
-        TabbedInterface([
+        CustomTabbedInterface([
             ObjectList(donations_general_panels,
                           heading=_('General'), classname='child gateways-general'),
             ObjectList(donations_2c2p_panels,
@@ -420,25 +426,25 @@ class SiteSettings(BaseSiteSetting, ClusterableModel):
             ObjectList(donations_others_panels,
                           heading=_('Others'), classname='child gateways-others'),
         ], heading=_("Donations")),
-        TabbedInterface([
+        CustomTabbedInterface([
             ObjectList(appearance_general_panels,
                           heading=_('General'), classname='child appearance-general'),
             ObjectList(appearance_footer_panels,
                           heading=_('Footer'), classname='child appearance-footer'),
         ], heading=_("Appearance")),
-        TabbedInterface([
+        CustomTabbedInterface([
             ObjectList(others_recaptcha_panels,
                           heading=_('ReCAPTCHA'), classname='child others-recaptcha'),
         ], heading=_("Others")),
     ]
 
     if settings.DEBUG:
-        tabs_config.append(TabbedInterface([
+        tabs_config.append(CustomTabbedInterface([
             ObjectList(debug_panels,
                         heading=_('Donation Settings'), classname='child debug-donation-settings'),
         ], heading=_("Debug")))
 
-    edit_handler = TabbedInterface(tabs_config)
+    edit_handler = CustomTabbedInterface(tabs_config)
 
     @property
     def fields(self):

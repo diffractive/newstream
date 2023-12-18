@@ -185,3 +185,18 @@ class TotalStatisticsPanel(Component):
 def add_statistics_panel(request, panels):
     panels.append(TodayStatisticsPanel(request))
     panels.append(TotalStatisticsPanel())
+
+@hooks.register("insert_global_admin_css", order=100)
+def custom_admin_css():
+    """Add custom css to the admin."""
+    return """
+    <style>
+        /* Dashboard stats styling, ordering them in 3 columns */
+        .w-summary .w-summary__list {
+            justify-content: flex-start;
+        }
+        .w-summary__list li {
+            flex: initial;
+            width: 33%;
+        }
+    </style>"""

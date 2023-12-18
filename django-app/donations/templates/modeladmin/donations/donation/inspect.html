@@ -11,13 +11,16 @@
     .content {
         padding-bottom: 0 !important;
     }
-    .footer .actions {
-        width: 240px !important;
+    .button.button-secondary {
+        background-color: var(--w-color-surface-button-default);
+        color: #ffffff;
+    }
+    .content-container {
+        padding-bottom: 2rem; /* so that content doesn't get blocked by footer buttons */
     }
 </style>
 {{ block.super }}
 {{ view.media.css }}
-<link rel="stylesheet" href="{% versioned_static 'wagtailmodeladmin/css/breadcrumbs_page.css' %}" type="text/css" />
 {% endblock %}
 
 {% block extra_js %}
@@ -28,10 +31,11 @@
 {% block content %}
 
 {% block header %}
+{% include "modeladmin/donations/components/breadcrumb.html"%}
 {% include "wagtailadmin/shared/header.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon %}
 {% endblock %}
 
-<div>
+<div class="content-container">
     {% block content_main %}
     <div class="backlink-div">
         <p class="back backlink-p">
@@ -226,16 +230,14 @@
 </div>
 
 {% block footer %}
-{% if buttons %}
-<footer class="footer">
-    <ul>
-        <li class="actions footer__container">
-            {% for button in buttons %}
-            {% include "modeladmin/includes/button.html" %}
-            {% endfor %}
-        </li>
-    </ul>
-</footer>
-{% endif %}
+    {% if buttons %}
+        <footer class="footer">
+            <div class="footer__container">
+                {% for button in buttons %}
+                    {% include "modeladmin/includes/button.html" %}
+                {% endfor %}
+            </div>
+        </footer>
+    {% endif %}
 {% endblock %}
 {% endblock %}

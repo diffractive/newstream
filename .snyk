@@ -22,7 +22,7 @@ ignore:
           of the attack.
         expires: 2023-12-30T00:00:00.000Z
         created: 2023-12-19T11:27:37.731Z
-  SNYK-DEBIAN12-CURL-6100975:
+  SNYK-DEBIAN12-CURL-6100974:
     - '*':
         reason: >
           There is currently no fix available. The exploitation method

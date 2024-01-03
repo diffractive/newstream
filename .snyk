@@ -20,7 +20,7 @@ ignore:
         reason: >
           No fix available. This seems to be low risk due to the complexity
           of the attack.
-        expires: 2023-12-30T00:00:00.000Z
+        expires: 2024-01-06T00:00:00.000Z
         created: 2023-12-19T11:27:37.731Z
   SNYK-DEBIAN12-CURL-6100974:
     - '*':

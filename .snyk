@@ -6,34 +6,20 @@ ignore:
   SNYK-DEBIAN12-ZLIB-6008963:
     - '*':
         reason: No fix available. We don't seem to be impacted by this.
-        expires: 2023-12-30T00:00:00.000Z
+        expires: 2024-01-06T00:00:00.000Z
         created: 2023-10-25T19:27:37.731Z
   SNYK-PYTHON-CRYPTOGRAPHY-6050294:
     - '*':
         reason: >
           Fix has been merged to main but a release has not been made yet.
           We don't seem to be impacted by this.
-        expires: 2023-12-30T00:00:00.000Z
+        expires: 2024-01-06T00:00:00.000Z
         created: 2023-11-20T19:27:37.731Z
   SNYK-PYTHON-CRYPTOGRAPHY-6126975:
     - '*':
         reason: >
           No fix available. This seems to be low risk due to the complexity
           of the attack.
-        expires: 2023-12-30T00:00:00.000Z
+        expires: 2024-01-06T00:00:00.000Z
         created: 2023-12-19T11:27:37.731Z
-  SNYK-DEBIAN12-CURL-6100974:
-    - '*':
-        reason: >
-          There is currently no fix available. The exploitation method
-          doesn't seem to apply to us.
-        expires: 2023-12-30T00:00:00.000Z
-        created: 2023-12-19T11:27:37.731Z
-  SNYK-DEBIAN12-CURL-6100975:
-    - '*':
-        reason: >
-          There is currently no fix available. The exploitation method
-          doesn't seem to apply to us.
-        expires: 2023-12-30T00:00:00.000Z
-        created: 2023-12-14T16:27:37.731Z
 patch:

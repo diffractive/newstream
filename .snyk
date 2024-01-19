@@ -43,10 +43,9 @@ ignore:
           complexity of the attack.
         expires: 2024-01-20T00:00:00.000Z
         created: 2024-01-19T11:27:37.731Z
-  SNYK-PYTHON-PYOPENSSL-6149520:
+  SNYK-PYTHON-PYOPENSSL-6157250:
     - '*':
-        reason: >
-          No fix available. We don't seem to be impacted by this.
+        reason: No fix available. We don't seem to be impacted by this.
         expires: 2024-01-20T00:00:00.000Z
         created: 2024-01-19T11:27:37.731Z
 patch:

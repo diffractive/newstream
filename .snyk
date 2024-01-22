@@ -5,47 +5,51 @@ version: v1.25.0
 ignore:
   SNYK-DEBIAN12-ZLIB-6008963:
     - '*':
-        reason: No fix available. We don't seem to be impacted by this.
+        reason: >
+          No fix available. File uploads are handled by admins
+          so we're not impacted by this.
         expires: 2024-01-27T00:00:00.000Z
         created: 2023-10-25T19:27:37.731Z
   SNYK-PYTHON-CRYPTOGRAPHY-6050294:
     - '*':
         reason: >
           Fix has been merged to main but a release has not been made yet.
-          We don't seem to be impacted by this.
+          This may cause a DoS attack and we are not worried about DoS attacks.
         expires: 2024-01-27T00:00:00.000Z
         created: 2023-11-20T19:27:37.731Z
   SNYK-PYTHON-CRYPTOGRAPHY-6126975:
     - '*':
         reason: >
           No fix available. This seems to be low risk due to the complexity
-          of the attack.
+          of the attack. Our connections are with trusted sources.
         expires: 2024-01-27T00:00:00.000Z
         created: 2023-12-19T11:27:37.731Z
   SNYK-PYTHON-CRYPTOGRAPHY-6149518:
     - '*':
         reason: >
           Fix has been merged to main but a release has not been made yet.
-          This seems to be low risk due to the complexity of the attack.
+          This affects the MAC implementation on PowerPC CPUs which in turn doesn't affect us.
         expires: 2024-01-27T00:00:00.000Z
         created: 2024-01-19T11:27:37.731Z
   SNYK-PYTHON-CRYPTOGRAPHY-6157248:
     - '*':
         reason: >
           Fix has been merged to main but a release has not been made yet.
-          We don't seem to be impacted by this.
+          This may cause a DoS attack and we are not affected by those.
         expires: 2024-01-27T00:00:00.000Z
         created: 2024-01-19T11:27:37.731Z
   SNYK-PYTHON-PYOPENSSL-6149520:
     - '*':
         reason: >
-          No fix available. This seems to be low risk due to the
-          complexity of the attack.
+          No fix available.
+          This affects the MAC implementation on PowerPC CPUs which in turn doesn't affect us.
         expires: 2024-01-27T00:00:00.000Z
         created: 2024-01-19T11:27:37.731Z
   SNYK-PYTHON-PYOPENSSL-6157250:
     - '*':
-        reason: No fix available. We don't seem to be impacted by this.
+        reason: >
+          No fix available.
+          This may cause a DoS attack and we are not affected by those.
         expires: 2024-01-27T00:00:00.000Z
         created: 2024-01-19T11:27:37.731Z
 patch:

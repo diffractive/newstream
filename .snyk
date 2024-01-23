@@ -6,7 +6,7 @@ ignore:
   SNYK-DEBIAN12-ZLIB-6008963:
     - '*':
         reason: >
-          No fix available. File uploads are handled by admins
+          No fix available. Our application doesn't have file compression routines,
           so we're not impacted by this.
         expires: 2024-01-27T00:00:00.000Z
         created: 2023-10-25T19:27:37.731Z

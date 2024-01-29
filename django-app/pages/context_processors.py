@@ -1,6 +1,6 @@
 from django.core.exceptions import MultipleObjectsReturned
 
-from wagtail.core.models import Page
+from wagtail.models import Page
 
 from newstream.functions import get_site_settings_from_default_site
 

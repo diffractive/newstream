@@ -3,51 +3,53 @@ version: v1.25.0
 # ignores vulnerabilities until expiry date; change duration by modifying expiry date
 
 ignore:
-  SNYK-PYTHON-WAGTAIL-5406453:
-    - '*':
-        reason: >-
-          Upgrading wagtail is a big task and for now can be ignored because only admins
-          have access to the vulnerable functions.
-        expires: 2023-12-06T03:07:02.728Z
-        created: 2023-07-07T03:07:02.735Z
-  SNYK-PYTHON-WAGTAIL-5406455:
-    - '*':
-        reason: >-
-          Upgrading wagtail is a big task and for now can be ignored because only admins
-          have access to the vulnerable functions.
-        expires: 2023-12-06T03:08:49.457Z
-        created: 2023-07-07T03:08:49.469Z
-  SNYK-PYTHON-PILLOW-5918878:
-    - '*':
-        reason: >
-          Can't be upgraded without upgrading wagtail. Also can be ignored because
-          only admins have access to the vulnerable functions
-        expires: 2023-12-06T03:41:02.060Z
-        created: 2023-07-28T03:41:02.078Z
-  SNYK-PYTHON-PILLOW-6043904:
-    - '*':
-        reason: >
-          Can't be upgraded without upgrading wagtail. Also can be ignored because
-          only admins have access to the vulnerable functions
-        expires: 2023-12-06T03:41:02.060Z
-        created: 2023-11-06T04:22:02.078Z
-  SNYK-DEBIAN12-NGHTTP2-5953379:
-    - '*':
-        reason: >
-          Error coming from Debian and libcurl-gnutls-dev and no current fixes exist
-          for this version of Debian. This can be ignored for now as it's only a DOS issue.
-        expires: 2023-12-06T03:41:02.060Z
-        created: 2023-10-12T03:41:02.078Z
   SNYK-DEBIAN12-ZLIB-6008963:
     - '*':
-        reason: No fix available. We don't seem to be impacted by this.
-        expires: 2023-11-25T00:00:00.000Z
+        reason: >
+          No fix available. Our application doesn't have file compression routines,
+          so we're not impacted by this.
+        expires: 2024-01-27T00:00:00.000Z
         created: 2023-10-25T19:27:37.731Z
   SNYK-PYTHON-CRYPTOGRAPHY-6050294:
     - '*':
         reason: >
           Fix has been merged to main but a release has not been made yet.
-          We don't seem to be impacted by this.
-        expires: 2023-11-25T00:00:00.000Z
+          This may cause a DoS attack and we are not worried about DoS attacks.
+        expires: 2024-01-27T00:00:00.000Z
         created: 2023-11-20T19:27:37.731Z
+  SNYK-PYTHON-CRYPTOGRAPHY-6126975:
+    - '*':
+        reason: >
+          No fix available. This seems to be low risk due to the complexity
+          of the attack. Our connections are with trusted sources.
+        expires: 2024-01-27T00:00:00.000Z
+        created: 2023-12-19T11:27:37.731Z
+  SNYK-PYTHON-CRYPTOGRAPHY-6149518:
+    - '*':
+        reason: >
+          Fix has been merged to main but a release has not been made yet.
+          This affects the MAC implementation on PowerPC CPUs which in turn doesn't affect us.
+        expires: 2024-01-27T00:00:00.000Z
+        created: 2024-01-19T11:27:37.731Z
+  SNYK-PYTHON-CRYPTOGRAPHY-6157248:
+    - '*':
+        reason: >
+          Fix has been merged to main but a release has not been made yet.
+          This may cause a DoS attack and we are not affected by those.
+        expires: 2024-01-27T00:00:00.000Z
+        created: 2024-01-19T11:27:37.731Z
+  SNYK-PYTHON-PYOPENSSL-6149520:
+    - '*':
+        reason: >
+          No fix available.
+          This affects the MAC implementation on PowerPC CPUs which in turn doesn't affect us.
+        expires: 2024-01-27T00:00:00.000Z
+        created: 2024-01-19T11:27:37.731Z
+  SNYK-PYTHON-PYOPENSSL-6157250:
+    - '*':
+        reason: >
+          No fix available.
+          This may cause a DoS attack and we are not affected by those.
+        expires: 2024-01-27T00:00:00.000Z
+        created: 2024-01-19T11:27:37.731Z
 patch:

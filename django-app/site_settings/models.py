@@ -5,10 +5,8 @@ from django.utils.translation import gettext_lazy as _
 from django.conf import settings
 
 from i18nfield.fields import I18nCharField
-from wagtail.admin.edit_handlers import FieldPanel, MultiFieldPanel, InlinePanel, TabbedInterface, ObjectList, RichTextField
-from wagtail.images.edit_handlers import ImageChooserPanel
-from wagtailmodelchooser.edit_handlers import ModelChooserPanel
-from wagtail.contrib.settings.models import BaseSetting, register_setting
+from wagtail.admin.panels import FieldPanel, MultiFieldPanel, InlinePanel, PanelGroup, ObjectList
+from wagtail.contrib.settings.models import BaseSiteSetting, register_setting
 from wagtail.contrib.forms.models import AbstractFormField
 from modelcluster.models import ClusterableModel
 from modelcluster.fields import ParentalKey
@@ -29,16 +27,10 @@ GATEWAY_CAN_TOGGLE_SUBSCRIPTION = 'gateway-can-toggle-subscription'
 GATEWAY_CAN_CANCEL_SUBSCRIPTION = 'gateway-can-cancel-subscription'
 
 
-class TopTabbedInterface(TabbedInterface):
-    template = "wagtailadmin/edit_handlers/top_tabbed_interface.html"
-
-
-class SubTabbedInterface(TabbedInterface):
-    template = "wagtailadmin/edit_handlers/sub_tabbed_interface.html"
-
-
-class SubObjectList(ObjectList):
-    pass
+class CustomTabbedInterface(PanelGroup):
+    class BoundPanel(PanelGroup.BoundPanel):
+        template_name = "wagtailadmin/panels/custom_tabbed_interface.html"
+    # template_name = "wagtailadmin/panels/custom_tabbed_interface.html"
 
 
 class PaymentGateway(models.Model):
@@ -103,7 +95,7 @@ class UserMetaField(I18nAbstractFormField):
 
 
 @register_setting
-class SiteSettings(BaseSetting, ClusterableModel):
+class SiteSettings(BaseSiteSetting, ClusterableModel):
     default_from_email = models.EmailField()
     default_from_name = I18nCharField(
         max_length=255,
@@ -200,7 +192,7 @@ class SiteSettings(BaseSetting, ClusterableModel):
     donations_general_panels = [
         FieldPanel('sandbox_mode', heading=_('Sandbox Mode')),
         FieldPanel('currency', heading=_('Currency')),
-        ModelChooserPanel('donation_form', heading=_(
+        FieldPanel('donation_form', heading=_(
             'Donation Form to be used')),
         FieldPanel('donation_updates_rate_limiter', heading=_("Frequency Limit on Donors' Subscription Update-Actions(edit/pause/resume)?")),
         FieldPanel('donations_soft_delete_mode', heading=_("Soft Delete Mode(for Donations and Subscriptions only)")),
@@ -377,8 +369,8 @@ class SiteSettings(BaseSetting, ClusterableModel):
         null=True, help_text=_("The short form of the organisation that will be used as a signature in e-mails"))
 
     appearance_general_panels = [
-        ImageChooserPanel('brand_logo', heading=('Brand Logo')),
-        ImageChooserPanel('site_icon', heading=('Site Icon')),
+        FieldPanel('brand_logo', heading=('Brand Logo')),
+        FieldPanel('site_icon', heading=('Site Icon')),
         FieldPanel('full_org_name', heading=_('Full Organisation Name')),
         FieldPanel('short_org_name', heading=_('Short Organisation Name')),
     ]
@@ -402,56 +394,57 @@ class SiteSettings(BaseSetting, ClusterableModel):
         FieldPanel('allow_daily_subscription', heading=_('Allow Daily Subscriptions')),
     ]
 
+    # We add "child" to the classnames to help identify that they are the inner tabs as opposed to the top ones
     tabs_config = [
-        SubTabbedInterface([
-            SubObjectList(email_general_panels, classname='email-general',
+        CustomTabbedInterface([
+            ObjectList(email_general_panels, classname='child email-general',
                           heading=_('General')),
-            SubObjectList(email_admin_panels, classname='email-admin',
+            ObjectList(email_admin_panels, classname='child email-admin',
                           heading=_('Admin Emails')),
         ], heading=_("Emails")),
-        SubTabbedInterface([
-            SubObjectList(signup_general_panels, classname='social-general',
+        CustomTabbedInterface([
+            ObjectList(signup_general_panels, classname='child social-general',
                           heading=_('General')),
-            SubObjectList(signup_google_panels, classname='social-google',
+            ObjectList(signup_google_panels, classname='child social-google',
                           heading=_('Google')),
-            SubObjectList(signup_facebook_panels, classname='social-facebook',
+            ObjectList(signup_facebook_panels, classname='child social-facebook',
                           heading=_('Facebook')),
-            SubObjectList(signup_twitter_panels, classname='social-twitter',
+            ObjectList(signup_twitter_panels, classname='child social-twitter',
                           heading=_('Twitter')),
         ], heading=_("Donor Signup")),
-        SubTabbedInterface([
-            SubObjectList(donations_general_panels,
-                          heading=_('General'), classname='gateways-general'),
-            SubObjectList(donations_2c2p_panels,
-                          heading=_('2C2P(Credit Card)'), classname='gateways-2c2p'),
-            SubObjectList(donations_paypal_panels,
-                          heading=_('PayPal'), classname='gateways-paypal'),
-            SubObjectList(donations_paypal_legacy_panels,
-                          heading=_('PayPal(Legacy)'), classname='gateways-paypal-legacy'),
-            SubObjectList(donations_stripe_panels,
-                          heading=_('Stripe'), classname='gateways-stripe'),
-            SubObjectList(donations_others_panels,
-                          heading=_('Others'), classname='gateways-others'),
+        CustomTabbedInterface([
+            ObjectList(donations_general_panels,
+                          heading=_('General'), classname='child gateways-general'),
+            ObjectList(donations_2c2p_panels,
+                          heading=_('2C2P(Credit Card)'), classname='child gateways-2c2p'),
+            ObjectList(donations_paypal_panels,
+                          heading=_('PayPal'), classname='child gateways-paypal'),
+            ObjectList(donations_paypal_legacy_panels,
+                          heading=_('PayPal(Legacy)'), classname='child gateways-paypal-legacy'),
+            ObjectList(donations_stripe_panels,
+                          heading=_('Stripe'), classname='child gateways-stripe'),
+            ObjectList(donations_others_panels,
+                          heading=_('Others'), classname='child gateways-others'),
         ], heading=_("Donations")),
-        SubTabbedInterface([
-            SubObjectList(appearance_general_panels,
-                          heading=_('General'), classname='appearance-general'),
-            SubObjectList(appearance_footer_panels,
-                          heading=_('Footer'), classname='appearance-footer'),
+        CustomTabbedInterface([
+            ObjectList(appearance_general_panels,
+                          heading=_('General'), classname='child appearance-general'),
+            ObjectList(appearance_footer_panels,
+                          heading=_('Footer'), classname='child appearance-footer'),
         ], heading=_("Appearance")),
-        SubTabbedInterface([
-            SubObjectList(others_recaptcha_panels,
-                          heading=_('ReCAPTCHA'), classname='others-recaptcha'),
+        CustomTabbedInterface([
+            ObjectList(others_recaptcha_panels,
+                          heading=_('ReCAPTCHA'), classname='child others-recaptcha'),
         ], heading=_("Others")),
     ]
 
     if settings.DEBUG:
-        tabs_config.append(SubTabbedInterface([
-            SubObjectList(debug_panels,
-                        heading=_('Donation Settings'), classname='debug-donation-settings'),
+        tabs_config.append(CustomTabbedInterface([
+            ObjectList(debug_panels,
+                        heading=_('Donation Settings'), classname='child debug-donation-settings'),
         ], heading=_("Debug")))
 
-    edit_handler = TopTabbedInterface(tabs_config)
+    edit_handler = CustomTabbedInterface(tabs_config)
 
     @property
     def fields(self):

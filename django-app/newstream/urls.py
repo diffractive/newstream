@@ -1,17 +1,16 @@
 from django.conf import settings
-from django.conf.urls import include, url
 from django.contrib import admin
 from django.conf.urls.i18n import i18n_patterns
 
 from wagtail.admin import urls as wagtailadmin_urls
-from wagtail.core import urls as wagtail_urls
+from wagtail import urls as wagtail_urls
 from wagtail.documents import urls as wagtaildocs_urls
 
 from search import views as search_views
 
 from wagtailautocomplete.urls.admin import urlpatterns as autocomplete_admin_urls
 
-from django.urls import path
+from django.urls import include, path, re_path
 import newstream.views as user_views
 from . import gcsmedia
 
@@ -22,7 +21,7 @@ urlpatterns = [
     path('admin/', include(wagtailadmin_urls)),
     path('maintenance/', user_views.maintenance, name='maintenance'),
     # Media Server
-    url('gcsmedia/(?P<path>\S+)', gcsmedia.gcsmedia, name='gcsmedia')
+    re_path('^gcsmedia/(?P<path>\S+)', gcsmedia.gcsmedia, name='gcsmedia')
 ]
 
 urlpatterns += i18n_patterns(
@@ -61,5 +60,5 @@ if settings.DEBUG:
                           document_root=settings.MEDIA_ROOT)
 
 urlpatterns += i18n_patterns(
-    url(r'', include(wagtail_urls)),
+    re_path(r'', include(wagtail_urls)),
 )

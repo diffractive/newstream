@@ -1,5 +1,5 @@
 {% load wagtailadmin_tags common_tags i18n %}
-<!-- original template source: https://github.com/wagtail/wagtail/blob/v2.13/wagtail/admin/templates/wagtailadmin/edit_handlers/field_panel_field.html -->
+<!-- original template source: https://github.com/wagtail/wagtail/blob/v2.13/wagtail/admin/templates/wagtailadmin/panels/field_panel_field.html -->
 <!-- customizing this template to move help_text to the side and use the space below the input for displaying env var values -->
 <div class="field {{ field|fieldtype }} {{ field|widgettype }} {{ field_classes }}" {% if include_contentpath|default_if_none:True %}data-contentpath="{{ field.name }}"{% endif %}>
     {% if show_label|default_if_none:True %}{{ field.label_tag }}{% endif %}
@@ -8,7 +8,7 @@
             {% if show_help_text|default_if_none:True and field.help_text %}
             <div class="object-layout_small-part">
                 <div class="object-help help">
-                    {% icon name="help" class_name="default" %}
+                    {% icon name="help" classname="default" %}
                     {{ field.help_text }}
                 </div>
             </div>
@@ -18,7 +18,7 @@
                     {% block form_field %}
                         {{ field|render_with_errors }}
                     {% endblock %}
-        
+
                     {# This span only used on rare occasions by certain types of input #}
                     <span></span>
                 </div>

@@ -1,0 +1,18 @@
+<!-- original file: https://github.com/wagtail/wagtail/blob/v2.16.3/wagtail/contrib/modeladmin/templates/modeladmin/includes/breadcrumb.html -->
+<!-- latest for reference https://github.com/wagtail/wagtail/blob/v5.2.2/wagtail/admin/templates/wagtailadmin/shared/breadcrumbs.html-->
+<!-- This file is here to re-add breadcrumbs to the inspect pages -->
+<!-- we use the original v2 code to see what we once had and then wrapped it with the code from the latest version -->
+{% load i18n wagtailadmin_tags %}
+{% with breadcrumb_link_classes='w-flex w-items-center w-h-full w-text-text-label w-pr-0.5 w-text-14 w-no-underline w-outline-offset-inside hover:w-underline hover:w-text-text-label w-h-full' breadcrumb_item_classes='w-h-full w-flex w-items-center w-overflow-hidden w-transition w-duration-300 w-whitespace-nowrap w-flex-shrink-0' icon_classes='w-w-4 w-h-4 w-ml-3' %}
+    <div class="w-breadcrumbs w-flex w-flex-row w-items-center w-overflow-x-auto w-overflow-y-hidden w-scrollbar-thin w-pl-3">
+        <div class="w-relative w-h-slim-header w-mr-4 w-top-0 w-z-20 w-flex w-items-center w-flex-row w-flex-1 sm:w-flex-none w-transition w-duration-300">
+            <nav class="w-flex w-items-center w-flex-row w-h-full" aria-label="{% trans 'Breadcrumb' %}">
+                <ol class="w-flex w-flex-row w-justify-start w-items-center w-h-full w-pl-0 w-my-0 w-gap-2 sm:w-gap-0 sm:w-space-x-2">
+                    {% trans 'Home' as home %}
+                    <li class="{{ breadcrumb_item_classes }}" data-w-breadcrumbs-target="content"><a href="{% url 'wagtailadmin_home' %}" class="{{ breadcrumb_link_classes }}">{% icon name="home" classname=icon_classes title=home %}{% icon name="arrow-right" classname=icon_classes %}</a></li>
+                    <li class="{{ breadcrumb_item_classes }}"><a href="{{ view.index_url }}" class="{{ breadcrumb_link_classes }}">{{ view.verbose_name_plural|capfirst }}</a></li>
+                </ol>
+            </nav>
+        </div>
+    </div>
+{% endwith %}

@@ -1,6 +1,6 @@
 from pytz import timezone, utc
 from datetime import datetime, time
-from django.contrib import messages
+from django.contrib import messages, auth
 from django.urls import path, reverse
 from django.shortcuts import redirect, get_object_or_404
 from django.utils.translation import gettext_lazy as _
@@ -8,7 +8,9 @@ from django.contrib.auth.decorators import login_required
 from django.utils.safestring import mark_safe
 from django.contrib.auth import get_user_model
 
-from wagtail.core import hooks
+from wagtail.admin.ui.components import Component
+from wagtail import hooks
+
 
 from newstream.functions import _exception, getUserTimezone
 from newstream_user.models import SUBS_ACTION_PAUSE, SUBS_ACTION_RESUME, SUBS_ACTION_CANCEL, SUBS_ACTION_MANUAL, DONATION_ACTION_MANUAL
@@ -33,7 +35,9 @@ def set_donation_status(request):
             donation.save()
             new_status = donation.payment_status
             # add to the donation actions log
-            addUpdateDonationActionLog(donation, DONATION_ACTION_MANUAL, action_notes='%s -> %s' % (old_status, new_status), user=request.user)
+            # get current user to avoid 'SimpleLazyObject' issue
+            current_user = auth.get_user(request)
+            addUpdateDonationActionLog(donation, DONATION_ACTION_MANUAL, action_notes='%s -> %s' % (old_status, new_status), user=current_user)
             # notify donor of action
             sendDonationStatusChangeToDonor(donation)
 
@@ -60,7 +64,9 @@ def set_subscription_status(request):
             subscription.save()
             new_status = subscription.recurring_status
             # add to the update actions log
-            addUpdateSubsActionLog(subscription, SUBS_ACTION_MANUAL, action_notes='%s -> %s' % (old_status, new_status), user=request.user)
+            # get current user to avoid 'SimpleLazyObject' issue
+            current_user = auth.get_user(request)
+            addUpdateSubsActionLog(subscription, SUBS_ACTION_MANUAL, action_notes='%s -> %s' % (old_status, new_status), user=current_user)
             # notify donor of action
             sendSubscriptionStatusChangeToDonor(subscription)
 
@@ -81,7 +87,9 @@ def toggle_subscription(request):
                 request, subscription=subscription)
             resultSet = gatewayManager.toggle_recurring_payment()
             # add to the update actions log
-            addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_PAUSE if resultSet['recurring-status'] == STATUS_PAUSED else SUBS_ACTION_RESUME, user=request.user)
+            # get current user to avoid 'SimpleLazyObject' issue
+            current_user = auth.get_user(request)
+            addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_PAUSE if resultSet['recurring-status'] == STATUS_PAUSED else SUBS_ACTION_RESUME, user=current_user)
 
             messages.add_message(request, messages.SUCCESS, str(_('Subscription %(id)d status is toggled to %(status)s.') % {'id': subscription_id, 'status': resultSet['recurring-status'].capitalize()}))
             return redirect(reverse('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription_id}))
@@ -101,7 +109,9 @@ def cancel_subscription(request):
                 request, subscription=subscription)
             resultSet = gatewayManager.cancel_recurring_payment(reason=SubscriptionInstance.CancelReason.BY_ADMIN)
             # add to the update actions log
-            addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL, user=request.user)
+            # get current user to avoid 'SimpleLazyObject' issue
+            current_user = auth.get_user(request)
+            addUpdateSubsActionLog(gatewayManager.subscription, SUBS_ACTION_CANCEL, user=current_user)
 
             messages.add_message(request, messages.SUCCESS, str(_('Subscription %(id)d status is cancelled.') % {'id': subscription_id}))
             return redirect(reverse('donations_subscriptioninstance_modeladmin_inspect', kwargs={'instance_pk': subscription_id}))
@@ -121,22 +131,22 @@ def extra_urls():
     ]
 
 
-class TodayStatisticsPanel:
+class TodayStatisticsPanel(Component):
     order = 10
 
     def __init__(self, request):
         self.request = request
 
-    def render(self):
+    def render_html(self, parent_context):
         tz = timezone(getUserTimezone(self.request.user))
         dt_now = datetime.now(tz)
         today = dt_now.date()
         midnight = tz.localize(datetime.combine(today, time(0, 0)), is_dst=None)
-        utc_dt = midnight.astimezone(utc) 
+        utc_dt = midnight.astimezone(utc)
         today_donations = Donation.objects.filter(donation_date__gte=utc_dt, payment_status=STATUS_COMPLETE, deleted=False).count()
         today_subscriptions = SubscriptionInstance.objects.filter(subscribe_date__gte=utc_dt, recurring_status=STATUS_ACTIVE, deleted=False).count()
         today_donors = User.objects.filter(date_joined__gte=utc_dt, is_staff=False).count()
-        return mark_safe("<section class=\"summary nice-padding today-stats-panel\"><h1><strong>%(heading)s (%(date)s)</strong></h1><ul class=\"stats\"><li><span>%(completed_donations)i</span>%(completed_donations_subtext)s</li><li><span>%(active_subscriptions)i</span>%(active_subscriptions_subtext)s</li><li><span>%(donors)i</span>%(donors_subtext)s</li></ul></section>" % {
+        return mark_safe("<section class=\"w-summary today-stats-panel\"><h1><strong>%(heading)s (%(date)s)</strong></h1><ul class=\"w-summary__list\"><li><a><span>%(completed_donations)i</span>%(completed_donations_subtext)s</a></li><li><a><span>%(active_subscriptions)i</span>%(active_subscriptions_subtext)s</a></li><li><a><span>%(donors)i</span>%(donors_subtext)s</a></li></ul></section>" % {
             'heading': str(_("Today's Statistics")),
             'date': today,
             'completed_donations': today_donations,
@@ -148,16 +158,16 @@ class TodayStatisticsPanel:
         })
 
 
-class TotalStatisticsPanel:
+class TotalStatisticsPanel(Component):
     order = 20
 
-    def render(self):
+    def render_html(self, parent_context):
         total_completed_donations = Donation.objects.filter(payment_status=STATUS_COMPLETE, deleted=False).count()
         total_donations = Donation.objects.filter(deleted=False).count()
         total_donors = User.objects.filter(is_staff=False).count()
         total_active_subscriptions = SubscriptionInstance.objects.filter(recurring_status=STATUS_ACTIVE, deleted=False).count()
         total_subscriptions = SubscriptionInstance.objects.filter(deleted=False).count()
-        return mark_safe("<section class=\"summary nice-padding total-stats-panel\"><h1><strong>%(heading)s</strong></h1><ul class=\"stats\"><li><span>%(completed_donations)i</span>%(completed_donations_subtext)s</li><li><span>%(donations)i</span>%(donations_subtext)s</li><li><span>%(donors)i</span>%(donors_subtext)s</li><li><span>%(active_subscriptions)i</span>%(active_subscriptions_subtext)s</li><li><span>%(subscriptions)i</span>%(subscriptions_subtext)s</li></ul></section>" % {
+        return mark_safe("<section class=\"w-summary total-stats-panel\"><h1><strong>%(heading)s</strong></h1><ul class=\"w-summary__list\"><li><a><span>%(completed_donations)i</span>%(completed_donations_subtext)s</a></li><li><a><span>%(donations)i</span>%(donations_subtext)s</a></li><li><a><span>%(donors)i</span>%(donors_subtext)s</a></li><li><a><span>%(active_subscriptions)i</span>%(active_subscriptions_subtext)s</a></li><li><a><span>%(subscriptions)i</span>%(subscriptions_subtext)s</a></li></ul></section>" % {
             'heading': str(_("Total Statistics")),
             'completed_donations': total_completed_donations,
             'completed_donations_subtext': str(_("Completed Donations")),
@@ -175,3 +185,18 @@ class TotalStatisticsPanel:
 def add_statistics_panel(request, panels):
     panels.append(TodayStatisticsPanel(request))
     panels.append(TotalStatisticsPanel())
+
+@hooks.register("insert_global_admin_css", order=100)
+def custom_admin_css():
+    """Add custom css to the admin."""
+    return """
+    <style>
+        /* Dashboard stats styling, ordering them in 3 columns */
+        .w-summary .w-summary__list {
+            justify-content: flex-start;
+        }
+        .w-summary__list li {
+            flex: initial;
+            width: 33%;
+        }
+    </style>"""

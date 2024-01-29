@@ -11,13 +11,16 @@
     .content {
         padding-bottom: 0 !important;
     }
-    .footer .actions {
-        width: 190px !important;
+    .button.button-secondary {
+        background-color: var(--w-color-surface-button-default);
+        color: #ffffff;
+    }
+    .content-container {
+        padding-bottom: 2rem; /* so that content doesn't get blocked by footer buttons */
     }
 </style>
 {{ block.super }}
 {{ view.media.css }}
-<link rel="stylesheet" href="{% versioned_static 'wagtailmodeladmin/css/breadcrumbs_page.css' %}" type="text/css" />
 {% endblock %}
 
 {% block extra_js %}
@@ -28,10 +31,11 @@
 {% block content %}
 
 {% block header %}
-{% include "modeladmin/includes/header_with_breadcrumb.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon %}
+{% include "modeladmin/donations/components/breadcrumb.html"%}
+{% include "wagtailadmin/shared/header.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon %}
 {% endblock %}
 
-<div>
+<div class="content-container">
     {% block content_main %}
     <div class="backlink-div">
         <p class="back backlink-p">
@@ -39,209 +43,201 @@
         </p>
     </div>
 
-    <div class="tab-nav merged">
-        <ul data-tab-nav role="tablist" data-current-tab="donation-info">
-            <li role="tab" aria-controls="tab-donation-info">
-                <a href="#tab-donation-info" data-tab="donation-info">{% trans 'Donation Info' %}</a>
-            </li>
-            <li role="tab" aria-controls="tab-meta-data">
-                <a href="#tab-meta-data" data-tab="meta-data">{% trans 'Meta Data' %}</a>
-            </li>
-            <li role="tab" aria-controls="tab-actions">
-                <a href="#tab-actions" data-tab="actions">{% trans 'Actions' %}</a>
-            </li>
-            <li role="tab" aria-controls="tab-action-logs">
-                <a href="#tab-action-logs" data-tab="action-logs">{% trans 'Action Logs' %}</a>
-            </li>
-        </ul>
-    </div>
-
-    <div class="tab-content">
-        <section id="tab-donation-info" role="tabpanel" aria-labelledby="tab-label-donation-info" data-tab="donation-info">
-            <div class="nice-padding">
-                {% block fields_output %}
-                {% if fields %}
-                <div class="two-column-flex">
-                    <div class="column-1-2">
-                        <dt>{{ fields.is_test.label }}</dt>
-                        <dd>{{ fields.is_test.value }}</dd>
-                    </div>
-                    <div class="column-1-2">
-                        <dt>{{ fields.user.label }}</dt>
-                        <dd>{{ fields.user.value }}</dd>
-                    </div>
-                </div>
-                <div class="two-column-flex">
-                    <div class="column-1-2">
-                        <dt>{{ fields.donation_amount.label }}</dt>
-                        <dd>{{ fields.donation_amount.value }}</dd>
-                    </div>
-                    <div class="column-1-2">
-                        <dt>{{ fields.payment_status.label }}</dt>
-                        <dd>{{ fields.payment_status.value }}</dd>
-                    </div>
-                </div>
-                <div class="two-column-flex">
-                    <div class="column-1-2">
-                        <dt>{{ fields.currency.label }}</dt>
-                        <dd>{{ fields.currency.value }}</dd>
-                    </div>
-                    <div class="column-1-2">
-                        <dt>{{ fields.gateway.label }}</dt>
-                        <dd>{{ fields.gateway.value }}</dd>
-                    </div>
-                </div>
-                <div class="two-column-flex">
-                    <div class="column-1-2">
-                        <dt>{{ fields.is_recurring.label }}</dt>
-                        <dd>{{ fields.is_recurring.value }}</dd>
-                    </div>
-                    <div class="column-1-2">
-                        <dt>{% if fields.subscription %}{{fields.subscription.label}}{% else %}{% trans 'Subscription' %}{% endif %}</dt>
-                        <dd>{% if fields.subscription and fields.subscription.value != '-' %}<a href="{{fields.subscription.url}}">{{fields.subscription.value}}</a>{% else %}-{% endif %}</dd>
-                    </div>
-                </div>
-                <div class="two-column-flex">
-                    <div class="column-1-2">
-                        <dt>{{ fields.donation_date.label }}</dt>
-                        <dd>{{ fields.donation_date.value }}</dd>
-                    </div>
-                    <div class="column-1-2">
-                        <dt>{{ fields.transaction_id.label }}</dt>
-                        <dd>{{ fields.transaction_id.value }}</dd>
-                    </div>
-                </div>
-                <div class="two-column-flex">
-                    <div class="column-1-2">
-                        <dt>{{ fields.id.label }}</dt>
-                        <dd>{{ fields.id.value }}</dd>
-                    </div>
-                    <div class="column-1-2">
-                        <dt>{{ fields.form.label }}</dt>
-                        <dd>{{ fields.form.value }}</dd>
-                    </div>
-                </div>
-                <div class="two-column-flex">
-                    <div class="column-1-2">
-                        <dt>{{ fields.guest_email.label }}</dt>
-                        <dd>{{ fields.guest_email.value }}</dd>
-                    </div>
-                    <div class="column-1-2">
-                        <dt>{{ fields.linked_user_deleted.label }}</dt>
-                        <dd>{{ fields.linked_user_deleted.value }}</dd>
-                    </div>
-                </div>
-                <div class="two-column-flex">
-                    <div class="column-1-2">
-                        <dt>{{ fields.created_at.label }}</dt>
-                        <dd>{{ fields.created_at.value }}</dd>
-                    </div>
-                    <div class="column-1-2">
-                        <dt>{{ fields.updated_at.label }}</dt>
-                        <dd>{{ fields.updated_at.value }}</dd>
-                    </div>
-                </div>
-                {% endif %}
-                {% endblock %}
+    <div class="w-tabs" data-tabs>
+        <div class="w-tabs__wrapper">
+            <div role="tablist" class="w-tabs__list">
+                {% include 'wagtailadmin/shared/tabs/tab_nav_link.html' with tab_id="donation-info" title=_("Donation Info") %}
+                {% include 'wagtailadmin/shared/tabs/tab_nav_link.html' with tab_id="meta-data" title=_("Meta Data") %}
+                {% include 'wagtailadmin/shared/tabs/tab_nav_link.html' with tab_id="actions" title=_("Actions") %}
+                {% include 'wagtailadmin/shared/tabs/tab_nav_link.html' with tab_id="action-logs" title=_("Action Logs") %}
             </div>
-        </section>
-        <section id="tab-meta-data" role="tabpanel" aria-labelledby="tab-label-meta-data" data-tab="meta-data">
-            <div class="nice-padding">
-                {% if dmetas %}
-                <h2>{% trans 'Donor Meta Data' %}</h2>
-                <dl>
-                    {% for meta in dmetas %}
-                    <dt>{{ meta.key }}</dt>
-                    <dd>{{ meta.value }}</dd>
-                    {% endfor %}
-                </dl>
-                {% else %}
-                <p>{% trans 'No donor meta data entered/registered.' %}</p>
-                {% endif %}
-                <hr>
-                {% if smetas %}
-                <h2>{% trans 'System Generated Meta Data' %}</h2>
-                <dl>
-                    {% for meta in smetas %}
-                    <dt>{{ meta.key }}</dt>
-                    <dd>{{ meta.value }}</dd>
-                    {% endfor %}
-                </dl>
-                {% else %}
-                <p>{% trans 'No system meta data registered.' %}</p>
-                {% endif %}
+        </div>
 
-            </div>
-        </section>
-        <section id="tab-actions" role="tabpanel" aria-labelledby="tab-label-actions" data-tab="actions">
-            <div class="nice-padding">
-                <h2>{% trans 'Manually set donation status' %}</h2>
-                <p>{% trans 'Current donation status is:' %} <strong>{{ fields.payment_status.value }}</strong>.</p>
-                <form action="{% url 'internal-set-donation-status' %}" method="POST">
-                    {% csrf_token %}
-                    <input type="hidden" name="id" value="{{fields.id.value}}">
-                    <p>Set Donation status as:</p>
-                    <div class="col3" style="padding-left: 0px;">
-                        <div class="dropdown dropdown-button match-width">
-                            <input type="submit" name="status" value="{{ status_complete|title }}" class="button">
-                            <div class="dropdown-toggle icon icon-arrow-down"></div>
-                            <ul>
-                                <li><input type="submit" name="status" value="{{ status_processing|title }}" class="button"></li>
-                                <li><input type="submit" name="status" value="{{ status_refunded|title }}" class="button"></li>
-                                <li><input type="submit" name="status" value="{{ status_revoked|title }}" class="button"></li>
-                                <li><input type="submit" name="status" value="{{ status_failed|title }}" class="button"></li>
-                                <li><input type="submit" name="status" value="{{ status_cancelled|title }}" class="button"></li>
-                            </ul>
+        <div class="tab-content">
+            <section id="tab-donation-info" role="tabpanel" aria-labelledby="tab-label-donation-info" data-tab="donation-info" hidden>
+                <div>
+                    {% block fields_output %}
+                    {% if fields %}
+                    <div class="two-column-flex">
+                        <div class="column-1-2">
+                            <dt>{{ fields.is_test.label }}</dt>
+                            <dd>{{ fields.is_test.value }}</dd>
+                        </div>
+                        <div class="column-1-2">
+                            <dt>{{ fields.user.label }}</dt>
+                            <dd>{{ fields.user.value }}</dd>
                         </div>
                     </div>
-                    <div style="clear: both;"></div>
-                </form>
-                <hr>
-            </div>
-        </section>
-        <section id="tab-action-logs" role="tabpanel" aria-labelledby="tab-label-action-logs" data-tab="action-logs">
-            <div class="nice-padding" style="padding-bottom: 60px;">
-                {% if action_logs %}
-                <table class="listing full-width">
-                    <thead>
-                        <tr>
-                            <th>{% trans 'User' %}</th>
-                            <th>{% trans 'Action type' %}</th>
-                            <th>{% trans 'Action notes' %}</th>
-                            <th>{% trans 'Created at' %}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for log in action_logs %}
-                        <tr>
-                            <td>{{ log.user }}</td>
-                            <td>{{ log.action_type }}</td>
-                            <td>{{ log.action_notes }}</td>
-                            <td>{{ log.created_at }}</td>
-                        </tr>
+                    <div class="two-column-flex">
+                        <div class="column-1-2">
+                            <dt>{{ fields.donation_amount.label }}</dt>
+                            <dd>{{ fields.donation_amount.value }}</dd>
+                        </div>
+                        <div class="column-1-2">
+                            <dt>{{ fields.payment_status.label }}</dt>
+                            <dd>{{ fields.payment_status.value }}</dd>
+                        </div>
+                    </div>
+                    <div class="two-column-flex">
+                        <div class="column-1-2">
+                            <dt>{{ fields.currency.label }}</dt>
+                            <dd>{{ fields.currency.value }}</dd>
+                        </div>
+                        <div class="column-1-2">
+                            <dt>{{ fields.gateway.label }}</dt>
+                            <dd>{{ fields.gateway.value }}</dd>
+                        </div>
+                    </div>
+                    <div class="two-column-flex">
+                        <div class="column-1-2">
+                            <dt>{{ fields.is_recurring.label }}</dt>
+                            <dd>{{ fields.is_recurring.value }}</dd>
+                        </div>
+                        <div class="column-1-2">
+                            <dt>{% if fields.subscription %}{{fields.subscription.label}}{% else %}{% trans 'Subscription' %}{% endif %}</dt>
+                            <dd>{% if fields.subscription and fields.subscription.value != '-' %}<a href="{{fields.subscription.url}}">{{fields.subscription.value}}</a>{% else %}-{% endif %}</dd>
+                        </div>
+                    </div>
+                    <div class="two-column-flex">
+                        <div class="column-1-2">
+                            <dt>{{ fields.donation_date.label }}</dt>
+                            <dd>{{ fields.donation_date.value }}</dd>
+                        </div>
+                        <div class="column-1-2">
+                            <dt>{{ fields.transaction_id.label }}</dt>
+                            <dd>{{ fields.transaction_id.value }}</dd>
+                        </div>
+                    </div>
+                    <div class="two-column-flex">
+                        <div class="column-1-2">
+                            <dt>{{ fields.id.label }}</dt>
+                            <dd>{{ fields.id.value }}</dd>
+                        </div>
+                        <div class="column-1-2">
+                            <dt>{{ fields.form.label }}</dt>
+                            <dd>{{ fields.form.value }}</dd>
+                        </div>
+                    </div>
+                    <div class="two-column-flex">
+                        <div class="column-1-2">
+                            <dt>{{ fields.guest_email.label }}</dt>
+                            <dd>{{ fields.guest_email.value }}</dd>
+                        </div>
+                        <div class="column-1-2">
+                            <dt>{{ fields.linked_user_deleted.label }}</dt>
+                            <dd>{{ fields.linked_user_deleted.value }}</dd>
+                        </div>
+                    </div>
+                    <div class="two-column-flex">
+                        <div class="column-1-2">
+                            <dt>{{ fields.created_at.label }}</dt>
+                            <dd>{{ fields.created_at.value }}</dd>
+                        </div>
+                        <div class="column-1-2">
+                            <dt>{{ fields.updated_at.label }}</dt>
+                            <dd>{{ fields.updated_at.value }}</dd>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% endblock %}
+                </div>
+            </section>
+            <section id="tab-meta-data" role="tabpanel" aria-labelledby="tab-label-meta-data" data-tab="meta-data" hidden>
+                <div>
+                    {% if dmetas %}
+                    <h2>{% trans 'Donor Meta Data' %}</h2>
+                    <dl>
+                        {% for meta in dmetas %}
+                        <dt>{{ meta.key }}</dt>
+                        <dd>{{ meta.value }}</dd>
                         {% endfor %}
-                    </tbody>
-                </table>
-                {% else %}
-                <p>{% trans 'No update-actions are logged.' %}</p>
-                {% endif %}
-            </div>
-        </section>
+                    </dl>
+                    {% else %}
+                    <p>{% trans 'No donor meta data entered/registered.' %}</p>
+                    {% endif %}
+                    <hr>
+                    {% if smetas %}
+                    <h2>{% trans 'System Generated Meta Data' %}</h2>
+                    <dl>
+                        {% for meta in smetas %}
+                        <dt>{{ meta.key }}</dt>
+                        <dd>{{ meta.value }}</dd>
+                        {% endfor %}
+                    </dl>
+                    {% else %}
+                    <p>{% trans 'No system meta data registered.' %}</p>
+                    {% endif %}
+
+                </div>
+            </section>
+            <section id="tab-actions" role="tabpanel" aria-labelledby="tab-label-actions" data-tab="actions" hidden>
+                <div>
+                    <h2>{% trans 'Manually set donation status' %}</h2>
+                    <p>{% trans 'Current donation status is:' %} <strong>{{ fields.payment_status.value }}</strong>.</p>
+                    <form action="{% url 'internal-set-donation-status' %}" method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="id" value="{{fields.id.value}}">
+                        <p>Set Donation status as:</p>
+                        <div class="col3" style="padding-left: 0px;">
+                            <div class="dropdown dropdown-button match-width">
+                                <input type="submit" name="status" value="{{ status_complete|title }}" class="button">
+                                <div class="dropdown-toggle icon icon-arrow-down"></div>
+                                <ul>
+                                    <li><input type="submit" name="status" value="{{ status_processing|title }}" class="button"></li>
+                                    <li><input type="submit" name="status" value="{{ status_refunded|title }}" class="button"></li>
+                                    <li><input type="submit" name="status" value="{{ status_revoked|title }}" class="button"></li>
+                                    <li><input type="submit" name="status" value="{{ status_failed|title }}" class="button"></li>
+                                    <li><input type="submit" name="status" value="{{ status_cancelled|title }}" class="button"></li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div style="clear: both;"></div>
+                    </form>
+                    <hr>
+                </div>
+            </section>
+            <section id="tab-action-logs" role="tabpanel" aria-labelledby="tab-label-action-logs" data-tab="action-logs" hidden>
+                <div style="padding-bottom: 60px;">
+                    {% if action_logs %}
+                    <table class="listing full-width">
+                        <thead>
+                            <tr>
+                                <th>{% trans 'User' %}</th>
+                                <th>{% trans 'Action type' %}</th>
+                                <th>{% trans 'Action notes' %}</th>
+                                <th>{% trans 'Created at' %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for log in action_logs %}
+                            <tr>
+                                <td>{{ log.user }}</td>
+                                <td>{{ log.action_type }}</td>
+                                <td>{{ log.action_notes }}</td>
+                                <td>{{ log.created_at }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p>{% trans 'No update-actions are logged.' %}</p>
+                    {% endif %}
+                </div>
+            </section>
+        </div>
     </div>
     {% endblock %}
 </div>
 
 {% block footer %}
-{% if buttons %}
-<footer class="footer">
-    <ul>
-        <li class="actions footer__container">
-            {% for button in buttons %}
-            {% include "modeladmin/includes/button.html" %}
-            {% endfor %}
-        </li>
-    </ul>
-</footer>
-{% endif %}
+    {% if buttons %}
+        <footer class="footer">
+            <div class="footer__container">
+                {% for button in buttons %}
+                    {% include "modeladmin/includes/button.html" %}
+                {% endfor %}
+            </div>
+        </footer>
+    {% endif %}
 {% endblock %}
 {% endblock %}

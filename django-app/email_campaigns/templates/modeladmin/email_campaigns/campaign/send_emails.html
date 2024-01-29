@@ -6,7 +6,6 @@
 {% block extra_css %}
 {{ block.super }}
 {{ view.media.css }}
-<link rel="stylesheet" href="{% versioned_static 'wagtailmodeladmin/css/breadcrumbs_page.css' %}" type="text/css" />
 {% endblock %}
 
 {% block extra_js %}
@@ -17,7 +16,8 @@
 {% block content %}
 
 {% block header %}
-{% include "modeladmin/includes/header_with_breadcrumb.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon tabbed=True %}
+{% include "modeladmin/donations/components/breadcrumb.html"%}
+{% include "wagtailadmin/shared/header.html" with title=view.get_page_title subtitle=view.get_page_subtitle icon=view.header_icon %}
 {% endblock %}
 
 <div>

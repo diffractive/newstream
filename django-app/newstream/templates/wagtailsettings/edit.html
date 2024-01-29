@@ -1,0 +1,67 @@
+{% extends "wagtailsettings/edit.html" %}
+<!-- original template source: https://github.com/wagtail/wagtail/blob/v3.0.3/wagtail/contrib/settings/templates/wagtailsettings/edit.html -->
+<!-- customizing this template to have nested tabs -->
+{% block extra_js %}
+{{ block.super }}
+{% include "wagtailadmin/pages/_editor_js.html" %}
+<script>
+    window.onload = () => {
+        (($) => {
+            // by default show first tab
+            if ($(".w-tabs__tab").length > 1) {
+                var firstTab = $('a.w-tabs__tab').first()
+                if (firstTab) {
+                    setTimeout(() => firstTab.click(), 10)
+                }
+            }
+
+            // we implement our custom code to replace the default tab highlighting behavior
+            $(document).on("click", ".w-tabs__tab", (e) => {
+                let el = e.currentTarget
+                let parent = $(el).parent()
+
+                // reset highlight state of same level of tabs
+                let allTabs = parent.find("> .w-tabs__tab")
+                allTabs.attr("aria-selected", "false")
+                allTabs.attr("tabindex", "-1")
+
+                // highlight new active tab
+                el.setAttribute("aria-selected", "true")
+                el.removeAttribute("tabindex")
+
+                // open first child tab(if any)
+                let firstChildTab = parent.parent().parent().find(`> .tab-content ${$(el).attr('href')} .w-tabs__tab`).first()
+                if (firstChildTab) {
+                    setTimeout(() => firstChildTab.click(), 10)
+                }
+            })
+
+            // This code makes sure that when an upper tab is pressed the content beneath it doesn't disappear
+            $(document).on('click', '.w-tabs__list a', function (e) {
+                e.preventDefault();
+                const section1_id = $(e.target).attr('href')
+                const section2 = $(section1_id).find('section').first()
+                $('section.w-tabs__panel').hide()
+                $(section1_id).removeAttr('hidden')
+                $(section1_id).show()
+                $(section2).removeAttr('hidden')
+                $(section2).show()
+            });
+
+            // This code makes sure that when a lower tab is pressed, the section which contains the tab remains visible
+            $(document).on('click', '.tab-content .w-tabs__list a', function (e) {
+                e.preventDefault();
+                const section1 = $(e.target).closest('section')
+                const section1_id = $(section1).attr('id')
+                const section2_id = $(e.target).attr('href')
+                $('section.w-tabs__panel').hide()
+                $(section1).removeAttr('hidden')
+                $(section1).show()
+                $(section2_id).removeAttr('hidden')
+                $(section2_id).show()
+            });
+
+        })(window.jQuery)
+    }
+</script>
+{% endblock %}

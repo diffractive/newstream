@@ -1,0 +1,39 @@
+# Using pip-tools for dependency management:
+# 1. list just the direct dependencies of your app.
+# 2. Then run pip-compile (or ./venv/bin/pip-compile if not installed globally) and it will create requirements.txt, with all the dependencies listed and all the versions locked.
+pip-tools
+chardet==4.0.0
+Django==4.1.13
+django-allauth-2fa==0.11.1
+django-cogwheels==0.3
+django-crum==0.7.9
+django-environ==0.4.5
+django-extensions==3.2.3
+django-i18nfield==1.9.1
+django-recaptcha==4.0.0
+django-settings-export==1.2.1
+django-smtp-ssl==1.0
+django-storages[google]==1.12.3
+django-widget-tweaks==1.4.8
+google-cloud-secret-manager==2.4.0
+gunicorn==20.1.0
+importlib-metadata==4.0.1
+jdcal==1.4.1
+mysql-connector-python==8.0.25
+mysqlclient==2.0.3
+paypal-checkout-serversdk==1.0.1
+phpbridge==0.0.3
+psycopg2-binary==2.9.9
+pycurl==7.45.2
+pyOpenSSL==23.2.0
+pytest-django==4.4.0
+python-json-logger==2.0.7
+setdefaultencoding==0.0.0a0
+stripe==2.62.0
+wagtail==5.2.2
+wagtail-2fa==1.6.6
+wagtail-autocomplete==0.11.0
+wagtail-metadata==4.0.3
+wagtail-modeladmin==1.0.0
+wagtail-modelchooser==4.0.1
+whitenoise==6.2.0

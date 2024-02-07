@@ -42,23 +42,27 @@ class Gateway_Paypal(PaymentGatewayManager):
 
 
     def process_webhook_response(self):
+        """ All webhook events here are now safe to be called repeatedly.
+            We don't prevent the code for payment_failed and subscription_updated events to be run if called again
+            because those events in theory could come in several times for the same subscription
+        """
         # Event: EVENT_PAYMENT_CAPTURE_COMPLETED (This alone comes after the onetime donation is captured)
         if self.event_type == EVENT_PAYMENT_CAPTURE_COMPLETED:
-            # update transaction_id
-            self.donation.transaction_id = self.payload['id']
-            self.donation.save()
-            # payment should have been completed after successful capture at the moment of returning to this site
-            # only run below code if somehow payment_status is still not complete(e.g. donor did not return to site)
-            if self.donation.payment_status != STATUS_COMPLETE:
+            if self.donation.transaction_id != self.payload['id']:
+                # update transaction_id
+                self.donation.transaction_id = self.payload['id']
+                # payment should have been completed after successful capture at the moment of donor returning to this site
                 self.donation.payment_status = STATUS_COMPLETE
                 self.donation.save()
 
-            # send email notifs
-            sendDonationReceiptToDonor(self.donation)
-            sendDonationNotifToAdmins(self.donation)
+                # send email notifs
+                sendDonationReceiptToDonor(self.donation)
+                sendDonationNotifToAdmins(self.donation)
 
-            logger.info("[PayPal Webhook] One-time donation completed for newstream donation {}".format(str(self.donation.id)))
-
+                logger.info("[PayPal Webhook] One-time donation completed for newstream donation {}".format(str(self.donation.id)))
+            else:
+                logger.info("[PayPal Webhook] One-time donation {} already saved transaction id {}".format(str(self.donation.id), self.donation.transaction_id))
+            
             return HttpResponse(status=200)
 
         # Event: EVENT_BILLING_SUBSCRIPTION_ACTIVATED
@@ -92,7 +96,11 @@ class Gateway_Paypal(PaymentGatewayManager):
                         sendNewRecurringNotifToDonor(self.donation.subscription)
 
                         logger.info("[PayPal Webhook] New recurring donation as subscription {}".format(self.subscription_obj['id']))
-
+                elif self.donation.subscription.recurring_status == STATUS_ACTIVE:
+                    logger.info("[PayPal Webhook] Recurring donation {} has already been activated".format(self.subscription_obj['id']))
+                else:
+                    logger.info("[PayPal Webhook] Recurring donation {} has invalid status {}".format(self.subscription_obj['id'], self.donation.subscription.recurring_status))
+                
                 return HttpResponse(status=200)
             else:
                 raise ValueError("EVENT_BILLING_SUBSCRIPTION_ACTIVATED but subscription status is %(status)s, subscription id: %(id)s" % {'status': self.subscription_obj['status'], 'id': self.subscription_obj['id']})
@@ -106,7 +114,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                 subscription.recurring_amount = Decimal(self.subscription_obj['plan']['billing_cycles'][0]['pricing_scheme']['fixed_price']['value'])
                 subscription.save()
 
-                logger.info("[PayPal Webhook] Event {} for subscription {}".format(self.event_type, self.subscription_obj['id']))
+                logger.info("[PayPal Webhook] Recurring amount updated for subscription {}".format(self.subscription_obj['id']))
 
                 return HttpResponse(status=200)
             else:
@@ -123,35 +131,40 @@ class Gateway_Paypal(PaymentGatewayManager):
                     # self.donation is the first donation associated with the subscription
                     if not self.donation.subscription:
                         raise ValueError("Missing subscription linkage/object for donation %(id)s, subscription id: %(sub_id)s" % {'id': self.donation.id, 'sub_id': self.subscription_obj['id']})
-                    donation = Donation(
-                        is_test=self.donation.is_test,
-                        subscription=self.donation.subscription,
-                        transaction_id=self.payload['id'],
-                        user=self.donation.user,
-                        form=self.donation.form,
-                        gateway=self.donation.gateway,
-                        is_recurring=True,
-                        donation_amount=Decimal(self.payload['amount']['total']),
-                        currency=self.payload['amount']['currency'],
-                        payment_status=STATUS_COMPLETE,
-                        donation_date=datetime.now(timezone.utc),
-                    )
-                    # save new donation as a record of renewal donation
-                    donation.save()
+                    
+                    renewal_exists = Donation.objects.filter(transaction_id=self.payload['id']).exists()
 
-                    # Update subscription status if it has previously failed
-                    if self.donation.subscription.recurring_status == STATUS_PAYMENT_FAILED:
-                        self.donation.subscription.recurring_status = STATUS_ACTIVE
-                        self.donation.subscription.save()
+                    if not renewal_exists:
+                        donation = Donation(
+                            is_test=self.donation.is_test,
+                            subscription=self.donation.subscription,
+                            transaction_id=self.payload['id'],
+                            user=self.donation.user,
+                            form=self.donation.form,
+                            gateway=self.donation.gateway,
+                            is_recurring=True,
+                            donation_amount=Decimal(self.payload['amount']['total']),
+                            currency=self.payload['amount']['currency'],
+                            payment_status=STATUS_COMPLETE,
+                            donation_date=datetime.now(timezone.utc),
+                        )
+                        # save new donation as a record of renewal donation
+                        donation.save()
 
-                        # send notif emails to admins and donor as a previously failed payment has now succeeded
-                        sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
-                        sendReactivatedPaymentNotifToDonor(self.donation.subscription)
+                        # Update subscription status if it has previously failed
+                        if self.donation.subscription.recurring_status == STATUS_PAYMENT_FAILED:
+                            self.donation.subscription.recurring_status = STATUS_ACTIVE
+                            self.donation.subscription.save()
 
-                        logger.info("[PayPal Webhook] Failed recurring donation reactivated for subscription {}".format(self.subscription_obj['id']))
+                            # send notif emails to admins and donor as a previously failed payment has now succeeded
+                            sendReactivatedPaymentNotifToAdmins(self.donation.subscription)
+                            sendReactivatedPaymentNotifToDonor(self.donation.subscription)
+
+                            logger.info("[PayPal Webhook] Failed recurring donation reactivated for subscription {}".format(self.subscription_obj['id']))
+                        else:
+                            logger.info("[PayPal Webhook] Renewal donation completed for subscription {}".format(self.subscription_obj['id']))
                     else:
-                        logger.info("[PayPal Webhook] Renewal donation completed for subscription {}".format(self.subscription_obj['id']))
-
+                        logger.info("[PayPal Webhook] Renewal donation already created for subscription {}".format(self.subscription_obj['id']))
                 else:
                     # this is a first time subscription payment
                     self.donation.payment_status = STATUS_COMPLETE
@@ -169,6 +182,7 @@ class Gateway_Paypal(PaymentGatewayManager):
                raise ValueError("EVENT_PAYMENT_SALE_COMPLETED but payment state is %(state)s, subscription id: %(id)s" % {'state': self.payload['state'], 'id': self.subscription_obj['id']})
 
         # Event: EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED
+        # This event can happen 3 times before the subscription is suspended by PayPal
         if self.event_type == EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED and hasattr(self, 'subscription_obj'):
             # We don't want to update processing failures or cancelled subscriptions
             if self.subscription_obj['status'] == 'ACTIVE':
@@ -182,26 +196,39 @@ class Gateway_Paypal(PaymentGatewayManager):
                 sendFailedPaymentNotifToDonor(subscription)
                 
                 logger.info("[PayPal Webhook] Recurring donation failed for subscription {}".format(self.subscription_obj['id']))
-
+            
             return HttpResponse(status=200)
 
         # Event: EVENT_BILLING_SUBSCRIPTION_CANCELLED
         if self.event_type == EVENT_BILLING_SUBSCRIPTION_CANCELLED and hasattr(self, 'subscription_obj'):
             if self.subscription_obj['status'] == 'CANCELLED':
-                self.donation.subscription.recurring_status = STATUS_CANCELLED
-                self.donation.subscription.save()
+                spmeta_exists = SubscriptionPaymentMeta.objects.filter(subscription=self.donation.subscription, field_key='paypal_subscription_cancel_webhook').exists()
+                
+                # we don't check "recurring_status != cancelled" because the status
+                # might have already been set to cancelled at this point,
+                # if it is cancelled by the donor via the frontend ui
+                if not spmeta_exists:
+                    self.donation.subscription.recurring_status = STATUS_CANCELLED
+                    self.donation.subscription.save()
 
-                # Dont send an email in update card process
-                try:
-                    # This value only exists for subscriptions that are part of the update card process
-                    spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='awaiting_cancelation')
-                    spmeta.delete()
-                except SubscriptionPaymentMeta.DoesNotExist:
-                    print("No spmeta linked to subscription id '%s' is found" % self.donation.subscription.profile_id)
-                    # send email notifications here for all other cancellation scenarios
-                    sendRecurringCancelledNotifToAdmins(self.donation.subscription)
-                    sendRecurringCancelledNotifToDonor(self.donation.subscription)
-                    logger.info("[PayPal Webhook] Recurring donation cancelled (reason: {}) for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj['id']))
+                    # create a flag to mark that this webhook has been run
+                    spmeta = SubscriptionPaymentMeta(subscription=self.donation.subscription, field_key='paypal_subscription_cancel_webhook', field_value='completed')
+                    spmeta.save()
+
+                    # Dont send an email in update card process
+                    try:
+                        # This value only exists for subscriptions that are part of the update card process
+                        spmeta = SubscriptionPaymentMeta.objects.get(subscription=self.donation.subscription, field_key='awaiting_cancelation')
+                        spmeta.delete()
+                    except SubscriptionPaymentMeta.DoesNotExist:
+                        print("No spmeta linked to subscription id '%s' is found" % self.donation.subscription.profile_id)
+                        # send email notifications here for all other cancellation scenarios
+                        sendRecurringCancelledNotifToAdmins(self.donation.subscription)
+                        sendRecurringCancelledNotifToDonor(self.donation.subscription)
+                        logger.info("[PayPal Webhook] Recurring donation cancelled (reason: {}) for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj['id']))
+                else:
+                    logger.info("[PayPal Webhook] Recurring donation already cancelled (reason: {}) for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj['id']))
+
                 return HttpResponse(status=200)
             else:
                raise ValueError("EVENT_BILLING_SUBSCRIPTION_CANCELLED but subscription status is %(status)s, subscription id: %(id)s" % {'status': self.subscription_obj['status'], 'id': self.subscription_obj['id']})
@@ -212,16 +239,19 @@ class Gateway_Paypal(PaymentGatewayManager):
             if self.subscription_obj['status'] == 'SUSPENDED':
                 plan = getPlanDetails(self.request.session, self.subscription_obj['plan_id'])
                 
-                if int(self.subscription_obj["billing_info"]["failed_payments_count"]) >= int(plan['payment_preferences']['payment_failure_threshold']):
-                    print("Marking PayPal Subscription {sub_id} as cancelled since failed_payments_count({failed_payments_count}) reached payment_failure_threshold of {payment_failure_threshold}".format(sub_id=self.subscription_obj["id"], failed_payments_count=self.subscription_obj["billing_info"]["failed_payments_count"], payment_failure_threshold=plan['payment_preferences']['payment_failure_threshold']))
-                    self.donation.subscription.recurring_status = STATUS_CANCELLED
-                    self.donation.subscription.cancel_reason = SubscriptionInstance.CancelReason.PAYMENTS_FAILED
-                    self.donation.subscription.save()
+                if self.donation.subscription.recurring_status != STATUS_CANCELLED:
+                    if int(self.subscription_obj["billing_info"]["failed_payments_count"]) >= int(plan['payment_preferences']['payment_failure_threshold']):
+                        print("Marking PayPal Subscription {sub_id} as cancelled since failed_payments_count({failed_payments_count}) reached payment_failure_threshold of {payment_failure_threshold}".format(sub_id=self.subscription_obj["id"], failed_payments_count=self.subscription_obj["billing_info"]["failed_payments_count"], payment_failure_threshold=plan['payment_preferences']['payment_failure_threshold']))
+                        self.donation.subscription.recurring_status = STATUS_CANCELLED
+                        self.donation.subscription.cancel_reason = SubscriptionInstance.CancelReason.PAYMENTS_FAILED
+                        self.donation.subscription.save()
 
-                    sendRecurringCancelledNotifToAdmins(self.donation.subscription)
-                    sendRecurringCancelledNotifToDonor(self.donation.subscription)
-                    logger.info("[PayPal Webhook] Recurring donation cancelled (reason: {}) for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj['id']))
-                
+                        sendRecurringCancelledNotifToAdmins(self.donation.subscription)
+                        sendRecurringCancelledNotifToDonor(self.donation.subscription)
+                        logger.info("[PayPal Webhook] Recurring donation cancelled (reason: {}) for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj['id']))
+                else:
+                    logger.info("[PayPal Webhook] Recurring donation already cancelled (reason: {}) for subscription {}".format(self.donation.subscription.cancel_reason, self.subscription_obj['id']))
+
                 return HttpResponse(status=200)
             else:
                raise ValueError("EVENT_BILLING_SUBSCRIPTION_SUSPENDED but subscription status is %(status)s, subscription id: %(id)s" % {'status': self.subscription_obj['status'], 'id': self.subscription_obj['id']})

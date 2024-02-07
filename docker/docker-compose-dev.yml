@@ -59,6 +59,10 @@ services:
     volumes:
       - '../django-app:/app'
 
+  localpaypal:
+    environment:
+      TEST_IDEMPOTENCY: 1
+
   selenium_tests:
     environment:
       STRIPE_API_BASE: 'http://localstripe.newstream.local:8420'

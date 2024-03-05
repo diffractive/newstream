@@ -70,7 +70,7 @@ class Factory_Paypal(PaymentGatewayFactory):
             subscription = None
             subscription_obj = None
             kwargs = {}
-            expected_events = [EVENT_PAYMENT_CAPTURE_COMPLETED, EVENT_BILLING_SUBSCRIPTION_ACTIVATED, EVENT_BILLING_SUBSCRIPTION_UPDATED, EVENT_PAYMENT_SALE_COMPLETED, EVENT_BILLING_SUBSCRIPTION_CANCELLED, EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED, EVENT_BILLING_SUBSCRIPTION_SUSPENDED]
+            expected_events = [EVENT_PAYMENT_CAPTURE_COMPLETED, EVENT_BILLING_SUBSCRIPTION_ACTIVATED, EVENT_BILLING_SUBSCRIPTION_UPDATED, EVENT_PAYMENT_SALE_COMPLETED, EVENT_BILLING_SUBSCRIPTION_CANCELLED, EVENT_BILLING_SUBSCRIPTION_SUSPENDED]
 
             # one-time donation payment captured
             if json_data['event_type'] == EVENT_PAYMENT_CAPTURE_COMPLETED:
@@ -131,6 +131,8 @@ class Factory_Paypal(PaymentGatewayFactory):
             if json_data['event_type'] in expected_events and not donation_id:
                 raise ValueError(_("Missing donation_id after processing events from paypal"))
             if json_data['event_type'] not in expected_events:
+                if json_data['event_type'] == EVENT_BILLING_SUBSCRIPTION_PAYMENT_FAILED:
+                    logger.info('[PayPal Webhook] Event {} for subscription id {}.'.format(json_data['event_type'], subscription_obj['id']))
                 raise WebhookNotProcessedError(_("PayPal Event not expected for processing at the moment"))
             try:
                 donation = Donation.objects.get(pk=donation_id)

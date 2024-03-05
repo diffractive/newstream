@@ -93,7 +93,7 @@ django-treebeard==4.5.1
     # via wagtail
 django-widget-tweaks==1.4.8
     # via -r requirements.in
-djangorestframework==3.12.4
+djangorestframework==3.14.0
     # via wagtail
 draftjs-exporter==2.1.7
     # via wagtail

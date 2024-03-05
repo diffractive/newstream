@@ -198,6 +198,7 @@ def createSubscription(request, plan_id, donation):
             },
             "email_address": donation.user.email
         },
+        "start_time": "2024-03-01T10:00:00Z",
         "application_context": {
             "brand_name": get_site_name(),
             "locale": "en-US",

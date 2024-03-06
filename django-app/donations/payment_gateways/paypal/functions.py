@@ -2,6 +2,9 @@ import json
 import time
 import pycurl
 import certifi
+from datetime import datetime, timezone
+from dateutil.relativedelta import relativedelta
+from dateutil import parser
 from io import BytesIO
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
@@ -219,7 +222,11 @@ def createSubscription(request, plan_id, donation):
 
         sub = SubscriptionInstance.objects.get(id=spmeta.field_value)
         sub_obj = getSubscriptionDetails(request.session, sub.profile_id)
-        subscription_dict['start_time'] = sub_obj['billing_info']['next_billing_time']
+        next_billing_datetime = parser.parse(sub_obj['billing_info']['next_billing_time'])
+        if next_billing_datetime < datetime.now(timezone.utc):
+            subscription_dict['start_time'] = (next_billing_datetime+relativedelta(months=+1)).isoformat()
+        else:
+            subscription_dict['start_time'] = sub_obj['billing_info']['next_billing_time']
         subscription_dict['application_context']['return_url'] = request.build_absolute_uri(reverse('donations:return-from-paypal-card-update'))
         subscription_dict['application_context']['cancel_url'] = request.build_absolute_uri(reverse('donations:cancel-from-paypal-card-update'))
     except SubscriptionPaymentMeta.DoesNotExist:

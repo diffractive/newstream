@@ -26,7 +26,7 @@ charset-normalizer==3.3.2
     # via requests
 click==8.1.7
     # via pip-tools
-cryptography==42.0.2
+cryptography==42.0.4
     # via
     #   pyjwt
     #   pyopenssl
@@ -34,7 +34,7 @@ defusedxml==0.7.1
     # via
     #   python3-openid
     #   willow
-django==4.1.13
+django==4.2.11
     # via
     #   -r requirements.in
     #   django-allauth
@@ -93,7 +93,7 @@ django-treebeard==4.5.1
     # via wagtail
 django-widget-tweaks==1.4.8
     # via -r requirements.in
-djangorestframework==3.12.4
+djangorestframework==3.14.0
     # via wagtail
 draftjs-exporter==2.1.7
     # via wagtail

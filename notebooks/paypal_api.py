@@ -27,3 +27,10 @@ class PayPal:
         """
         # We get subscription to get customer_id
         _ = requests.post(self.api_url + f'/advance-subscription-cycle/{sub_id}', json={"payment_result": payment_result})
+    
+    def simulate_retry_failure(self, sub_id):
+        """
+        Simulate the first retry failure of a failed recurring payment of a subscription
+        """
+        # We get subscription to get customer_id
+        _ = requests.post(self.api_url + f'/simulate-retry-failure/{sub_id}')

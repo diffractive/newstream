@@ -18,8 +18,8 @@ steps:
   - id: "build-django-image"
     name: "gcr.io/kaniko-project/executor:v1.10.0"
     args: [
-        "--destination", "asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:pr-${_PR_NUMBER}",
-        "--destination", "asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:${COMMIT_SHA}",
+        "--destination", "asia-southeast1-docker.pkg.dev/${PROJECT_ID}/docker-images/${_BACKEND_SERVICE_NAME}:pr-${_PR_NUMBER}",
+        "--destination", "asia-southeast1-docker.pkg.dev/${PROJECT_ID}/docker-images/${_BACKEND_SERVICE_NAME}:${COMMIT_SHA}",
         "--cache=true",
         "--cache-ttl=336h0m0s", # 2 weeks (default)
         "--context=django-app",
@@ -31,11 +31,11 @@ steps:
   - id: "build-selenium-image"
     name: "gcr.io/kaniko-project/executor:v1.10.0"
     args: [
-      "--destination", "asia.gcr.io/${PROJECT_ID}/${_SELENIUM_SERVICE_NAME}:pr-${_PR_NUMBER}",
+      "--destination", "asia-southeast1-docker.pkg.dev/${PROJECT_ID}/docker-images/${_SELENIUM_SERVICE_NAME}:pr-${_PR_NUMBER}",
       "--cache=true",
       "--cache-ttl=336h0m0s", # 2 weeks (default)
       "--context=selenium-tests",
-      "--build-arg", "BASE_IMAGE=asia.gcr.io/${PROJECT_ID}/selenium-runner:latest"
+      "--build-arg", "BASE_IMAGE=asia-southeast1-docker.pkg.dev/${PROJECT_ID}/docker-images/selenium-runner:latest"
     ]
     waitFor: ['-']
 
@@ -44,34 +44,34 @@ steps:
   - id: docker-pull-django
     name: 'gcr.io/cloud-builders/docker:20.10.14'
     args: [
-        'pull', 'asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:pr-${_PR_NUMBER}',
+        'pull', 'asia-southeast1-docker.pkg.dev/${PROJECT_ID}/docker-images/${_BACKEND_SERVICE_NAME}:pr-${_PR_NUMBER}',
     ]
     waitFor: [build-django-image]
 
   - id: docker-pull-selenium
     name: 'gcr.io/cloud-builders/docker:20.10.14'
     args: [
-        'pull', 'asia.gcr.io/${PROJECT_ID}/${_SELENIUM_SERVICE_NAME}:pr-${_PR_NUMBER}',
+        'pull', 'asia-southeast1-docker.pkg.dev/${PROJECT_ID}/docker-images/${_SELENIUM_SERVICE_NAME}:pr-${_PR_NUMBER}',
     ]
     waitFor: [build-selenium-image]
 
   - id: docker-pull-localstripe
     name: 'gcr.io/cloud-builders/docker:20.10.14'
     args: [
-        'pull', 'asia.gcr.io/${PROJECT_ID}/${_LOCALSTRIPE_SERVICE_NAME}:latest',
+        'pull', 'asia-southeast1-docker.pkg.dev/${PROJECT_ID}/docker-images/${_LOCALSTRIPE_SERVICE_NAME}:latest',
     ]
     waitFor: ['-']
 
   - id: docker-pull-localpaypal
     name: 'gcr.io/cloud-builders/docker:20.10.14'
     args: [
-        'pull', 'asia.gcr.io/${PROJECT_ID}/${_LOCALPAYPAL_SERVICE_NAME}:latest',
+        'pull', 'asia-southeast1-docker.pkg.dev/${PROJECT_ID}/docker-images/${_LOCALPAYPAL_SERVICE_NAME}:latest',
     ]
     waitFor: ['-']
 
   # Run unit tests
   - id: unit-tests-django
-    name: "asia.gcr.io/${PROJECT_ID}/${_BACKEND_SERVICE_NAME}:pr-${_PR_NUMBER}"
+    name: "asia-southeast1-docker.pkg.dev/${PROJECT_ID}/docker-images/${_BACKEND_SERVICE_NAME}:pr-${_PR_NUMBER}"
     args: ["run_tests"]
     waitFor: [docker-pull-django, docker-pull-selenium, docker-pull-localstripe]
 
@@ -84,7 +84,7 @@ steps:
     env:
       - 'PROJECT_ID=$PROJECT_ID'
       - 'IMAGE_TAG=pr-${_PR_NUMBER}'
-      - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
+      - 'IMAGE_PREFIX=asia-southeast1-docker.pkg.dev/${PROJECT_ID}/docker-images/'
     waitFor: [docker-pull-django, docker-pull-selenium, docker-pull-localstripe, docker-pull-localpaypal]
 
   - id: upload-selenium-output
@@ -114,7 +114,7 @@ steps:
     env:
       - 'PROJECT_ID=$PROJECT_ID'
       - 'IMAGE_TAG=pr-${_PR_NUMBER}'
-      - 'IMAGE_PREFIX=asia.gcr.io/${PROJECT_ID}/'
+      - 'IMAGE_PREFIX=asia-southeast1-docker.pkg.dev/${PROJECT_ID}/docker-images/'
     waitFor: [upload-selenium-output, print-selenium-url]
 
   # Bring down the docker-compose stack

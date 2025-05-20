@@ -21,7 +21,7 @@ steps:
     args:
       - '-c'
       - |
-        snyk test --docker --severity-threshold=medium --policy-path=.snyk asia.gcr.io/${PROJECT_ID}/newstream:${COMMIT_SHA}
+        snyk test --docker --severity-threshold=medium --policy-path=.snyk asia-southeast1-docker.pkg.dev/${PROJECT_ID}/docker-images/newstream:${COMMIT_SHA}
         echo $? > /workspace/exit-backend-image.txt
     waitFor:
       - '-'
